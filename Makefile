@@ -557,7 +557,7 @@ endif
 
 .PHONY: dirs
 dirs: $(BUILD_DIR) $(STAGING_DIR) $(TARGET_DIR) \
-	$(HOST_DIR) $(HOST_DIR)/usr $(HOST_DIR)/lib $(BINARIES_DIR)
+	$(HOST_DIR) $(BINARIES_DIR)
 
 $(BUILD_DIR)/buildroot-config/auto.conf: $(BR2_CONFIG)
 	$(MAKE1) $(EXTRAMAKEARGS) HOSTCC="$(HOSTCC_NOCCACHE)" HOSTCXX="$(HOSTCXX_NOCCACHE)" silentoldconfig
@@ -575,24 +575,6 @@ sdk: world
 	$(TOPDIR)/support/scripts/fix-rpath staging
 	$(INSTALL) -m 755 $(TOPDIR)/support/misc/relocate-sdk.sh $(HOST_DIR)/relocate-sdk.sh
 	echo $(HOST_DIR) > $(HOST_DIR)/share/buildroot/sdk-location
-
-.PHONY: reinstall
-clean-for-reinstall: $(patsubst %,%-clean-for-reinstall,$(PACKAGES))
-	rm -rf $(TARGET_DIR) $(BINARIES_DIR) $(HOST_DIR)
-	find $(BUILD_DIR) -name ".stamp_*_installed" -delete
-
-reinstall: clean-for-reinstall all
-
-# Compatibility symlink in case a post-build script still uses $(HOST_DIR)/usr
-$(HOST_DIR)/usr: $(HOST_DIR)
-	@ln -snf . $@
-
-$(HOST_DIR)/lib: $(HOST_DIR)
-	@mkdir -p $@
-	@case $(HOSTARCH) in \
-		(*64) ln -snf lib $(@D)/lib64;; \
-		(*)   ln -snf lib $(@D)/lib32;; \
-	esac
 
 # Populating the staging with the base directories is handled by the skeleton package
 $(STAGING_DIR):
