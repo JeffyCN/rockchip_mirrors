@@ -587,7 +587,7 @@ sdcard_directory(const char* path) {
             char* copy = copy_sideloaded_package(new_path);
             ensure_path_unmounted(SDCARD_ROOT);
             if (copy) {
-                result = install_package(copy);
+                //result = install_package(copy);
                 free(copy);
             } else {
                 result = INSTALL_ERROR;
@@ -802,7 +802,7 @@ main(int argc, char **argv) {
             }
         }
     } else if (update_package != NULL) {
-        status = install_package(update_package);
+        status = INSTALL_ERROR;//install_package(update_package);
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;
