@@ -139,6 +139,13 @@ static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
 static const int MAX_ARG_LENGTH = 4096;
 static const int MAX_ARGS = 100;
 
+int read_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {              
+    return ENCRYPTED_FS_ERROR;                                              
+} 
+
+int restore_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {
+    return ENCRYPTED_FS_ERROR;
+}
 // open a given path, mounting partitions as necessary
 static FILE*
 fopen_path(const char *path, const char *mode) {
