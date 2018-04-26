@@ -14,7 +14,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <assert.h>
-
+#define INLINE static inline
 /* compute the hash of an item with a specific type */
 typedef unsigned int (*HashCompute)(const void* item);
 
