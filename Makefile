@@ -33,3 +33,6 @@ $(prom): $(obj)
 
 clean:
 	rm -rf $(obj) $(prom)
+
+install:
+	sudo install -D -m 755 recovery -t /usr/bin/
