@@ -32,7 +32,7 @@
 
 #include "bootloader.h"
 #include "common.h"
-#include "cutils/properties.h"
+//#include "cutils/properties.h"
 #include "install.h"
 #include "minui/minui.h"
 #include "minzip/DirUtil.h"
@@ -760,7 +760,7 @@ main(int argc, char **argv) {
     }
     printf("\n");
 
-    property_list(print_property, NULL);
+    //property_list(print_property, NULL);
     printf("\n");
 
     int status = INSTALL_SUCCESS;
