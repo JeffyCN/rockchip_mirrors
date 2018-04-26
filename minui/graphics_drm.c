@@ -39,7 +39,7 @@ struct drm_surface {
     uint32_t handle;
 };
 
-static drm_surface *drm_surfaces[2];
+static struct drm_surface *drm_surfaces[2];
 static int current_buffer;
 
 static drmModeCrtc *main_monitor_crtc;
@@ -127,7 +127,7 @@ static int drm_format_to_bpp(uint32_t format) {
     }
 }
 
-static drm_surface *drm_create_surface(int width, int height) {
+static struct drm_surface *drm_create_surface(int width, int height) {
     struct drm_surface *surface;
     struct drm_mode_create_dumb create_dumb;
     uint32_t format;
