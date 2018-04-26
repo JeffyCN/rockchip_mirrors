@@ -321,7 +321,7 @@ void ui_init(void)
 
     int i;
     for (i = 0; BITMAPS[i].name != NULL; ++i) {
-        int result = res_create_surface(BITMAPS[i].name, BITMAPS[i].surface);
+        int result = res_create_display_surface(BITMAPS[i].name, BITMAPS[i].surface);
         if (result < 0) {
             if (result == -2) {
                 LOGI("Bitmap %s missing header\n", BITMAPS[i].name);
