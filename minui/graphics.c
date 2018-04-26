@@ -43,7 +43,7 @@ typedef struct {
 static GRFont* gr_font = NULL;
 static minui_backend* gr_backend = NULL;
 
-static int overscan_percent = OVERSCAN_PERCENT;
+static int overscan_percent = 0;
 static int overscan_offset_x = 0;
 static int overscan_offset_y = 0;
 
