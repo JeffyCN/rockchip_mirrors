@@ -16,7 +16,7 @@
 
 #ifndef _MINUI_H_
 #define _MINUI_H_
-
+#include <inttypes.h>
 #include <sys/types.h>
 
 #include <stdbool.h>
