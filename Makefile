@@ -1,8 +1,7 @@
-
-ROOTDIR=$(pwd)
-cc = gcc
-prom = recovery
-obj = recovery.o \
+PROJECT_DIR := $(shell pwd)
+CC = gcc
+PROM = recovery
+OBJ = recovery.o \
 default_recovery_ui.o \
 ui.o \
 roots.o \
@@ -22,17 +21,15 @@ minui/graphics.o \
 minui/resources.o \
 minui/graphics_drm.o
 
-lib = -lz -lc -lpthread -lpng -ldrm
-INC = -I./ -I/usr/include/libdrm/
-CFLAG = 
-$(prom): $(obj)
-	$(cc) -o $(prom) $(obj) $(lib)
+CFLAGS ?= -I$(PROJECT_DIR) -I/usr/include/libdrm/ -lz -lc -lpthread -lpng -ldrm
+$(PROM): $(OBJ)
+	$(CC) -o $(PROM) $(OBJ) $(CFLAGS)
 
 %.o: %.c
-	$(cc) -c $< -o $@ $(INC) $(CFLAG)
+	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:
-	rm -rf $(obj) $(prom)
+	rm -rf $(OBJ) $(PROM)
 
 install:
 	sudo install -D -m 755 recovery -t /usr/bin/
