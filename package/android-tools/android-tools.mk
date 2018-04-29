@@ -103,5 +103,5 @@ define ANDROID_TOOLS_INSTALL_TARGET_CMDS
 	$(ANDROID_TOOLS_INSTALL_RSAAUTH_ENV)
 endef
 
-$(eval $(host-generic-package))
 $(eval $(generic-package))
+$(eval $(host-generic-package))

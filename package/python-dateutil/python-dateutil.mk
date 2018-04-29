@@ -12,5 +12,5 @@ PYTHON_DATEUTIL_LICENSE_FILES = LICENSE
 
 HOST_PYTHON_DATEUTIL_DEPENDENCIES = host-python-six
 
-$(eval $(host-python-package))
 $(eval $(python-package))
+$(eval $(host-python-package))

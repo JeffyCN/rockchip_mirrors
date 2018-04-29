@@ -5,5 +5,5 @@ PYTHON_CATKIN_PKG_SETUP_TYPE = setuptools
 
 HOST_PYTHON_CATKIN_PKG_DEPENDENCIES = host-python-pyparsing host-python-dateutil
 
-$(eval $(host-python-package))
 $(eval $(python-package))
+$(eval $(host-python-package))
