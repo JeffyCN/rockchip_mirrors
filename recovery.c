@@ -417,7 +417,7 @@ copy_sideloaded_package(const char* original_path) {
 
 static char**
 prepend_title(const char** headers) {
-    char* title[] = { "Android system recovery <"
+    char* title[] = { "Linux system recovery <"
                           EXPAND(RECOVERY_API_VERSION) "e>",
                       "",
                       NULL };
