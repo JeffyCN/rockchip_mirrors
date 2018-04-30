@@ -138,7 +138,7 @@ static struct drm_surface *drm_create_surface(int width, int height) {
         printf("Can't allocate memory\n");
         return NULL;
     }
-
+#define RECOVERY_RGBX
 #if defined(RECOVERY_ABGR)
     format = DRM_FORMAT_RGBA8888;
 #elif defined(RECOVERY_BGRA)
