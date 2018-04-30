@@ -50,10 +50,10 @@ static const struct option OPTIONS[] = {
   { NULL, 0, NULL, 0 },
 };
 
-static const char *COMMAND_FILE = "/cache/recovery/command";
-static const char *INTENT_FILE = "/cache/recovery/intent";
-static const char *LOG_FILE = "/cache/recovery/log";
-static const char *LAST_LOG_FILE = "/cache/recovery/last_log";
+static const char *COMMAND_FILE = "/data/recovery/command";
+static const char *INTENT_FILE = "/data/recovery/intent";
+static const char *LOG_FILE = "/data/recovery/log";
+static const char *LAST_LOG_FILE = "/data/recovery/last_log";
 static const char *SDCARD_ROOT = "/sdcard";
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
