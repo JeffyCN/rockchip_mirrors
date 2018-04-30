@@ -703,8 +703,8 @@ main(int argc, char **argv) {
     time_t start = time(NULL);
 
     // If these fail, there's not really anywhere to complain...
-    freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
-    freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
+    //freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
+    //freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
     printf("Starting recovery on %s", ctime(&start));
 
     ui_init();
