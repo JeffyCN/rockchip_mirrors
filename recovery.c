@@ -315,8 +315,8 @@ erase_volume(const char *volume) {
     ui_show_indeterminate_progress();
     ui_print("Formatting %s...\n", volume);
 
-    if (strcmp(volume, "/cache") == 0) {
-        // Any part of the log we'd copied to cache is now gone.
+    if (strcmp(volume, "/data") == 0) {
+        // Any part of the log we'd copied to data is now gone.
         // Reset the pointer so we copy from the beginning of the temp
         // log.
         tmplog_offset = 0;
@@ -640,7 +640,7 @@ wipe_data(int confirm) {
     ui_print("\n-- Wiping data...\n");
     device_wipe_data();
     erase_volume("/data");
-    erase_volume("/cache");
+    //erase_volume("/cache");
     ui_print("Data wipe complete.\n");
 }
 
@@ -789,9 +789,11 @@ main(int argc, char **argv) {
             if (erase_volume("/data")) {
                 ui_print("Data wipe failed.\n");
                 status = INSTALL_ERROR;
+#if 0
             } else if (erase_volume("/cache")) {
                 ui_print("Cache wipe failed.\n");
                 status = INSTALL_ERROR;
+#endif
             } else if ((encrypted_fs_data.mode == MODE_ENCRYPTED_FS_ENABLED) &&
                       (restore_encrypted_fs_info(&encrypted_fs_data))) {
                 ui_print("Encrypted FS change aborted.\n");
