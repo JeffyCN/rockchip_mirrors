@@ -26,7 +26,6 @@ char* MENU_HEADERS[] = { "Linux system recovery utility",
 char* MENU_ITEMS[] = { "reboot system now",
                        "apply update from sdcard",
                        "wipe data/factory reset",
-                       "wipe cache partition",
                        NULL };
 
 int device_recovery_start() {
