@@ -30,6 +30,8 @@ static int set_bootloader_message_block(const struct bootloader_message *in, con
 
 int get_bootloader_message(struct bootloader_message *out) {
     Volume* v = volume_for_path("/misc");
+	
+    if(!v) return -1;
     if (strcmp(v->fs_type, "mtd") == 0) {
         return get_bootloader_message_mtd(out, v);
     } else if (strcmp(v->fs_type, "emmc") == 0) {
