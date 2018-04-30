@@ -40,6 +40,9 @@ void load_volume_table() {
     device_volumes[0].fs_type = "ramdisk";
     device_volumes[0].device = NULL;
     device_volumes[0].device2 = NULL;
+    device_volumes[0].option = NULL;
+    device_volumes[0].dump = NULL;
+    device_volumes[0].pass = NULL;
     num_volumes = 1;
 
     FILE* fstab = fopen("/etc/fstab", "r");
@@ -53,26 +56,67 @@ void load_volume_table() {
     while (fgets(buffer, sizeof(buffer)-1, fstab)) {
         for (i = 0; buffer[i] && isspace(buffer[i]); ++i);
         if (buffer[i] == '\0' || buffer[i] == '#') continue;
-
         char* original = strdup(buffer);
+		char *file_system = original;
 
-        char* mount_point = strtok(buffer+i, " \t\n");
-        char* fs_type = strtok(NULL, " \t\n");
-        char* device = strtok(NULL, " \t\n");
-        // lines may optionally have a second device, to use if
-        // mounting the first one fails.
-        char* device2 = strtok(NULL, " \t\n");
+        char* mount_point = strstr(original+i, "\t");
+		if(!mount_point) {
+			free(original);
+			break;
+		}
+		*mount_point = 0;
+		for(mount_point++; *mount_point == '\t' || *mount_point == ' ' || *mount_point == '\n'; mount_point++);
+        char* fs_type = strstr(mount_point, "\t");
+		if(!fs_type) {
+			free(original);
+			break;
+		}
+		*fs_type = 0;
+		
+		for(fs_type++; *fs_type == '\t' || *fs_type == ' ' || *fs_type == '\n'; fs_type++);
+        char* option = strstr(fs_type, "\t");
+		if(!option) {
+			free(original);
+			break;
+		}
+		*option = 0;
+		
+		for(option++; *option == '\t' || *option == ' ' || *option == '\n'; option++);
+        char* dump = strstr(option, "\t");
+		if(!dump) {
+			free(original);
+			break;
+		}
+		*dump = 0;
+		
+		for(dump++; *dump == '\t' || *dump == ' ' || *dump == '\n'; dump++);
+        char* pass = strstr(dump, "\t");
+		if(!pass) {
+			free(original);
+			break;
+		}
+		*pass = 0;
 
-        if (mount_point && fs_type && device) {
+		for(pass++; *pass == '\t' || *pass == ' ' || *pass == '\n'; pass++);
+        char* nextline = strstr(pass, "\n");
+		if(!nextline) {
+			free(original);
+			break;
+		}
+		*nextline = 0;
+		//printf("load_volume_table file_system:%s, mount_point:%s, fs_type:%s, option:%s, dump:%s, pass:%s\n", file_system, mount_point, fs_type, option, dump, pass);
+        if (file_system && mount_point && fs_type && option && dump && pass) {
             while (num_volumes >= alloc) {
                 alloc *= 2;
                 device_volumes = realloc(device_volumes, alloc*sizeof(Volume));
             }
             device_volumes[num_volumes].mount_point = strdup(mount_point);
             device_volumes[num_volumes].fs_type = strdup(fs_type);
-            device_volumes[num_volumes].device = strdup(device);
-            device_volumes[num_volumes].device2 =
-                device2 ? strdup(device2) : NULL;
+            device_volumes[num_volumes].option = option ? strdup(option) : NULL;
+            device_volumes[num_volumes].dump = dump ? strdup(dump) : NULL;
+			device_volumes[num_volumes].pass = pass ? strdup(pass) : NULL;
+			device_volumes[num_volumes].device = strdup(file_system);;
+			device_volumes[num_volumes].device2 = NULL;
             ++num_volumes;
         } else {
             LOGE("skipping malformed recovery.fstab line: %s\n", original);
@@ -86,8 +130,7 @@ void load_volume_table() {
     printf("=========================\n");
     for (i = 0; i < num_volumes; ++i) {
         Volume* v = &device_volumes[i];
-        printf("  %d %s %s %s %s\n", i, v->mount_point, v->fs_type,
-               v->device, v->device2);
+        printf("  %d %s %s %s %s %s %s\n", i, v->device, v->mount_point, v->fs_type, v->option, v->dump, v->pass);
     }
     printf("\n");
 }
