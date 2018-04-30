@@ -67,8 +67,8 @@ int rk_make_ext4fs(const char *filename,long long len, const char *mountpoint)
 {
     int result;
 
-    const char *const mke2fs_argv[] = { "/sbin/mke2fs", "-t", "ext4", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", filename, NULL };
-    const char *const e2fsck_argv[] = { "/sbin/e2fsck", "-fy", filename, NULL };
+    const char *const mke2fs_argv[] = { "mke2fs", "-t", "ext4", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", filename, NULL };
+    const char *const e2fsck_argv[] = { "e2fsck", "-fy", filename, NULL };
     printf("format '%s' to ext4 filesystem\n", filename);
     result = run(mke2fs_argv[0], (char **) mke2fs_argv);
     if(result) {
@@ -96,8 +96,8 @@ int rk_make_ext4fs(const char *filename,long long len, const char *mountpoint)
 int rk_check_and_resizefs(const char *filename) {
     int result;
 
-    const char *const e2fsck_argv[] = { "/sbin/e2fsck", "-fy", filename, NULL };
-    const char *const resizefs_argv[] = { "/sbin/resize2fs", filename, NULL  };
+    const char *const e2fsck_argv[] = { "e2fsck", "-fy", filename, NULL };
+    const char *const resizefs_argv[] = { "resize2fs", filename, NULL  };
 
     result = run(e2fsck_argv[0], (char **) e2fsck_argv);
     if(result) {
@@ -116,8 +116,8 @@ int rk_check_and_resizefs(const char *filename) {
 int rk_check_and_resizefs_f2fs(const char *filename) {
 	int result;
 
-	const char *const e2fsck_argv[] = { "/sbin/fsck_f2fs", filename, NULL };
-	const char *const resizefs_argv[] = { "/sbin/resize.f2fs", filename, NULL  };
+	const char *const e2fsck_argv[] = { "fsck_f2fs", filename, NULL };
+	const char *const resizefs_argv[] = { "resize.f2fs", filename, NULL  };
 	printf("fsck_f2fs check '%s' 11111111111111!\n", filename);
 	result = run(e2fsck_argv[0], (char **) e2fsck_argv);
 	if(result) {
@@ -138,8 +138,8 @@ int rk_make_ext3fs(const char *filename)
 {
     int result;
 
-    const char *const mke2fs_argv[] = { "/sbin/mke2fs", "-t", "ext3", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", filename, NULL };
-    const char *const e2fsck_argv[] = { "/sbin/e2fsck", "-fy", filename, NULL };
+    const char *const mke2fs_argv[] = { "mke2fs", "-t", "ext3", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", filename, NULL };
+    const char *const e2fsck_argv[] = { "e2fsck", "-fy", filename, NULL };
     printf("format '%s' to ext3 filesystem\n", filename);
     result = run(mke2fs_argv[0], (char **) mke2fs_argv);
     if(result) {
@@ -159,10 +159,10 @@ int make_vfat(const char *filename,const char* volumelabel)
 {
     printf("format '%s' to vfat filesystem\n", filename);
     if(volumelabel == NULL){
-         const char *const mke2fs_argv[] = { "/sbin/mkdosfs", filename, NULL };
+         const char *const mke2fs_argv[] = { "mkdosfs", filename, NULL };
          return run(mke2fs_argv[0], (char **) mke2fs_argv);
     }else{
-         const char *const mke2fs_withLabel_argv[] = { "/sbin/mkdosfs", "-L", volumelabel, filename, NULL };
+         const char *const mke2fs_withLabel_argv[] = { "mkdosfs", "-L", volumelabel, filename, NULL };
          return run(mke2fs_withLabel_argv[0], (char **) mke2fs_withLabel_argv);
     }
 }
@@ -171,10 +171,10 @@ int make_ntfs(const char *filename,const char* volumelabel) {
     printf("format '%s' to NTFS filesystem.\n", filename);
 
     if(volumelabel == NULL){
-         const char *const mkntfs_argv[] = { "/system/bin/mkntfs", "-f", filename, NULL };
+         const char *const mkntfs_argv[] = { "mkntfs", "-f", filename, NULL };
          return run(mkntfs_argv[0], (char **) mkntfs_argv);
     }else{
-         const char *const mkntfs_withLabel_argv[] = { "/system/bin/mkntfs", "-f", "-L", volumelabel, filename, NULL };
+         const char *const mkntfs_withLabel_argv[] = { "mkntfs", "-f", "-L", volumelabel, filename, NULL };
          return run(mkntfs_withLabel_argv[0], (char **) mkntfs_withLabel_argv);
     }
 }
