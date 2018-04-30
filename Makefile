@@ -16,6 +16,7 @@ minzip/SysUtil.o \
 minzip/Zip.o \
 mtdutils/mounts.o \
 mtdutils/mtdutils.o \
+mtdutils/rk29.o \
 minui/events.o \
 minui/graphics.o \
 minui/resources.o \
