@@ -67,8 +67,8 @@ int rk_make_ext4fs(const char *filename,long long len, const char *mountpoint)
 {
     int result;
 
-    const char *const mke2fs_argv[] = { "mke2fs", "-t", "ext4", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", filename, NULL };
-    const char *const e2fsck_argv[] = { "e2fsck", "-fy", filename, NULL };
+    const char *const mke2fs_argv[] = { "/usr/sbin/mke2fs", "-t", "ext4", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", "-F", filename, NULL };
+    const char *const e2fsck_argv[] = { "/usr/sbin/e2fsck", "-fy", filename, NULL };
     printf("format '%s' to ext4 filesystem\n", filename);
     result = run(mke2fs_argv[0], (char **) mke2fs_argv);
     if(result) {
