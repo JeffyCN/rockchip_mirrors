@@ -804,7 +804,9 @@ main(int argc, char **argv) {
             }
         }
     } else if (update_package != NULL) {
-        status = INSTALL_ERROR;//install_package(update_package);
+        const char* binary = "/usr/bin/rkupdate";
+        status = do_rk_update(binary, update_package);
+        //status = INSTALL_ERROR;//install_package(update_package);
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;

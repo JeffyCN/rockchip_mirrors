@@ -9,6 +9,7 @@ bootloader.o \
 safe_iop.o \
 strlcpy.o \
 strlcat.o \
+rkupdate.o \
 minzip/DirUtil.o \
 minzip/Hash.o \
 minzip/Inlines.o \
