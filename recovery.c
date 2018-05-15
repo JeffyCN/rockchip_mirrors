@@ -805,7 +805,16 @@ main(int argc, char **argv) {
         }
     } else if (update_package != NULL) {
         const char* binary = "/usr/bin/rkupdate";
-        status = do_rk_update(binary, update_package);
+        int ret = 0;
+        for(int i = 0; i < 3; i++){
+            ret = ensure_path_mounted(update_package);
+            if(ret == 0)
+                break;
+            sleep(1);
+            printf("mounted %s failed.\n", update_package);
+        }
+        if(ret == 0)
+            status = do_rk_update(binary, update_package);
         //status = INSTALL_ERROR;//install_package(update_package);
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
     } else if (wipe_data) {
