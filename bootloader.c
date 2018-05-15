@@ -142,6 +142,8 @@ static int get_bootloader_message_block(struct bootloader_message *out,
         return -1;
     }
     struct bootloader_message temp;
+    fseek(f, BOOTLOADER_MESSAGE_OFFSET_IN_MISC, SEEK_SET);
+
     int count = fread(&temp, sizeof(temp), 1, f);
     if (count != 1) {
         LOGE("Failed reading %s\n(%s)\n", v->device, strerror(errno));
@@ -162,6 +164,7 @@ static int set_bootloader_message_block(const struct bootloader_message *in,
         LOGE("Can't open %s\n(%s)\n", v->device, strerror(errno));
         return -1;
     }
+    fseek(f, BOOTLOADER_MESSAGE_OFFSET_IN_MISC, SEEK_SET);
     int count = fwrite(in, sizeof(*in), 1, f);
     if (count != 1) {
         LOGE("Failed writing %s\n(%s)\n", v->device, strerror(errno));

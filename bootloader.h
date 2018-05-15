@@ -17,6 +17,8 @@
 #ifndef _RECOVERY_BOOTLOADER_H
 #define _RECOVERY_BOOTLOADER_H
 
+static const int BOOTLOADER_MESSAGE_OFFSET_IN_MISC = 16 * 1024;
+
 /* Bootloader Message
  *
  * This structure describes the content of a block in flash
