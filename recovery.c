@@ -44,16 +44,16 @@ static const struct option OPTIONS[] = {
   { "send_intent", required_argument, NULL, 's' },
   { "update_package", required_argument, NULL, 'u' },
   { "wipe_data", no_argument, NULL, 'w' },
-  //{ "wipe_cache", no_argument, NULL, 'c' },
+  { "wipe_all", no_argument, NULL, 'a' },
   { "set_encrypted_filesystems", required_argument, NULL, 'e' },
   { "show_text", no_argument, NULL, 't' },
   { NULL, 0, NULL, 0 },
 };
 
-static const char *COMMAND_FILE = "/data/recovery/command";
-static const char *INTENT_FILE = "/data/recovery/intent";
-static const char *LOG_FILE = "/data/recovery/log";
-static const char *LAST_LOG_FILE = "/data/recovery/last_log";
+static const char *COMMAND_FILE = "/userdata/recovery/command";
+static const char *INTENT_FILE = "/userdata/recovery/intent";
+static const char *LOG_FILE = "/userdata/recovery/log";
+static const char *LAST_LOG_FILE = "/userdata/recovery/last_log";
 static const char *SDCARD_ROOT = "/sdcard";
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
@@ -81,7 +81,7 @@ static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
  * 3. main system reboots into recovery
  * 4. get_args() writes BCB with "boot-recovery" and "--wipe_data"
  *    -- after this, rebooting will restart the erase --
- * 5. erase_volume() reformats /data
+ * 5. erase_volume() reformats /userdata
  * 6. erase_volume() reformats /cache
  * 7. finish_recovery() erases BCB
  *    -- after this, rebooting will restart the main system --
@@ -123,12 +123,12 @@ static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
  * 4. get_args() writes BCB with "boot-recovery" and
  *    "--set_encrypted_filesystems=on|off"
  *    -- after this, rebooting will restart the transition --
- * 5. read_encrypted_fs_info() retrieves encrypted file systems settings from /data
+ * 5. read_encrypted_fs_info() retrieves encrypted file systems settings from /userdata
  *    Settings include: property to specify the Encrypted FS istatus and
  *    FS encryption key if enabled (not yet implemented)
- * 6. erase_volume() reformats /data
+ * 6. erase_volume() reformats /userdata
  * 7. erase_volume() reformats /cache
- * 8. restore_encrypted_fs_info() writes required encrypted file systems settings to /data
+ * 8. restore_encrypted_fs_info() writes required encrypted file systems settings to /userdata
  *    Settings include: property to specify the Encrypted FS status and
  *    FS encryption key if enabled (not yet implemented)
  * 9. finish_recovery() erases BCB
@@ -315,7 +315,7 @@ erase_volume(const char *volume) {
     ui_show_indeterminate_progress();
     ui_print("Formatting %s...\n", volume);
 
-    if (strcmp(volume, "/data") == 0) {
+    if (strcmp(volume, "/userdata") == 0) {
         // Any part of the log we'd copied to data is now gone.
         // Reset the pointer so we copy from the beginning of the temp
         // log.
@@ -639,7 +639,7 @@ wipe_data(int confirm) {
 
     ui_print("\n-- Wiping data...\n");
     device_wipe_data();
-    erase_volume("/data");
+    erase_volume("/userdata");
     //erase_volume("/cache");
     ui_print("Data wipe complete.\n");
 }
@@ -703,8 +703,8 @@ main(int argc, char **argv) {
     time_t start = time(NULL);
 
     // If these fail, there's not really anywhere to complain...
-    freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
-    freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
+    //freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
+    //freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
     printf("Starting recovery on %s", ctime(&start));
 
     ui_init();
@@ -786,7 +786,7 @@ main(int argc, char **argv) {
         }
 
         if (status != INSTALL_ERROR) {
-            if (erase_volume("/data")) {
+            if (erase_volume("/userdata")) {
                 ui_print("Data wipe failed.\n");
                 status = INSTALL_ERROR;
 #if 0
@@ -810,7 +810,7 @@ main(int argc, char **argv) {
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;
-        if (erase_volume("/data")) status = INSTALL_ERROR;
+        if (erase_volume("/userdata")) status = INSTALL_ERROR;
         //if (wipe_cache && erase_volume("/cache")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
 #if 0
