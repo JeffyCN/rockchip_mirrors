@@ -727,7 +727,7 @@ main(int argc, char **argv) {
         case 's': send_intent = optarg; break;
         case 'u': update_package = optarg; break;
         case 'w': wipe_data = 1; break;
-        //case 'c': wipe_cache = 1; break;
+        case 'a': wipe_data = 1; break;
         case 'e': encrypted_fs_mode = optarg; toggle_secure_fs = 1; break;
         case 't': ui_show_text(1); break;
         case '?':
