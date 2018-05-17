@@ -159,10 +159,10 @@ int make_vfat(const char *filename,const char* volumelabel)
 {
     printf("format '%s' to vfat filesystem\n", filename);
     if(volumelabel == NULL){
-         const char *const mke2fs_argv[] = { "mkdosfs", filename, NULL };
+         const char *const mke2fs_argv[] = { "/sbin/mkdosfs", filename, NULL };
          return run(mke2fs_argv[0], (char **) mke2fs_argv);
     }else{
-         const char *const mke2fs_withLabel_argv[] = { "mkdosfs", "-L", volumelabel, filename, NULL };
+         const char *const mke2fs_withLabel_argv[] = { "/sbin/mkdosfs", "-n", volumelabel, filename, NULL };
          return run(mke2fs_withLabel_argv[0], (char **) mke2fs_withLabel_argv);
     }
 }
