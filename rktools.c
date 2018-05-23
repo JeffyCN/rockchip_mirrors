@@ -62,6 +62,8 @@ char *getSerial(){
 static char result_point[4][20]={'\0'}; //0-->emmc, 1-->sdcard, 2-->SDIO, 3-->SDcombo
 int readFile(DIR* dir, char* filename){
     char name[30] = {'\0'};
+	int i;
+	
     strcpy(name, filename);
     strcat(name, "/type");
     int fd = openat(dirfd(dir), name, O_RDONLY);
@@ -71,13 +73,13 @@ int readFile(DIR* dir, char* filename){
     }
     char resultBuf[10] = {'\0'};
     read(fd, resultBuf, sizeof(resultBuf));
-    for(int i = 0; i < strlen(resultBuf); i++){
+    for(i = 0; i < strlen(resultBuf); i++){
         if(resultBuf[i] == '\n'){
             resultBuf[i] = '\0';
             break;
         }
     }
-    for(int i = 0; i < 4; i++){
+    for(i = 0; i < 4; i++){
         if(strcmp(typeName[i], resultBuf) == 0){
             //printf("type is %s.\n", typeName[i]);
             return i;
