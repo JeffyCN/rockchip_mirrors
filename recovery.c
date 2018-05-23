@@ -805,8 +805,8 @@ main(int argc, char **argv) {
         }
     } else if (update_package != NULL) {
         const char* binary = "/usr/bin/rkupdate";
-        int ret = 0;
-        for(int i = 0; i < 3; i++){
+        int i, ret = 0;
+        for(i = 0; i < 3; i++){
             ret = ensure_path_mounted(update_package);
             if(ret == 0)
                 break;
