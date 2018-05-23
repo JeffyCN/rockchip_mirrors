@@ -4,6 +4,7 @@ PROM = recovery
 OBJ = recovery.o \
 default_recovery_ui.o \
 ui.o \
+rktools.o \
 roots.o \
 bootloader.o \
 safe_iop.o \

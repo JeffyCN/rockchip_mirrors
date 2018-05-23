@@ -710,6 +710,7 @@ main(int argc, char **argv) {
     ui_init();
     ui_set_background(BACKGROUND_ICON_INSTALLING);
     load_volume_table();
+    setFlashPoint();
     get_args(&argc, &argv);
 
     int previous_runs = 0;
