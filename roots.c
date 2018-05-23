@@ -202,8 +202,14 @@ int ensure_path_mounted(const char* path) {
 
         LOGE("failed to mount %s (%s)\n", v->mount_point, strerror(errno));
         return -1;
+    } else if (strcmp(v->fs_type, "ext2") == 0) {
+        rk_check_and_resizefs(v->device);
+        result = mount(v->device, v->mount_point, v->fs_type,
+                       MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
+        if(result == 0) return 0;
+        LOGE("failed to mount %s (%s)\n", v->mount_point, strerror(errno));
+        return -1;
     }
-
     LOGE("unknown fs_type \"%s\" for %s\n", v->fs_type, v->mount_point);
     return -1;
 }
