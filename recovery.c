@@ -315,7 +315,7 @@ erase_volume(const char *volume) {
     ui_show_indeterminate_progress();
     ui_print("Formatting %s...\n", volume);
 
-    if (strcmp(volume, "/userdata") == 0) {
+    if (strcmp(volume, "/mnt/userdata") == 0) {
         // Any part of the log we'd copied to data is now gone.
         // Reset the pointer so we copy from the beginning of the temp
         // log.
@@ -639,7 +639,7 @@ wipe_data(int confirm) {
 
     ui_print("\n-- Wiping data...\n");
     device_wipe_data();
-    erase_volume("/userdata");
+    erase_volume("/mnt/userdata");
     //erase_volume("/cache");
     ui_print("Data wipe complete.\n");
 }
@@ -703,8 +703,8 @@ main(int argc, char **argv) {
     time_t start = time(NULL);
 
     // If these fail, there's not really anywhere to complain...
-    //freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
-    //freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
+    freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
+    freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
     printf("Starting recovery on %s", ctime(&start));
 
     ui_init();
@@ -786,7 +786,7 @@ main(int argc, char **argv) {
         }
 
         if (status != INSTALL_ERROR) {
-            if (erase_volume("/userdata")) {
+            if (erase_volume("/mnt/userdata")) {
                 ui_print("Data wipe failed.\n");
                 status = INSTALL_ERROR;
 #if 0
@@ -819,7 +819,7 @@ main(int argc, char **argv) {
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;
-        if (erase_volume("/userdata")) status = INSTALL_ERROR;
+        if (erase_volume("/mnt/userdata")) status = INSTALL_ERROR;
         //if (wipe_cache && erase_volume("/cache")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
 #if 0
