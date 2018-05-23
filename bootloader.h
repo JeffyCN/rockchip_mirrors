@@ -36,11 +36,14 @@ static const int BOOTLOADER_MESSAGE_OFFSET_IN_MISC = 16 * 1024;
  * The recovery field is only written by linux and used
  * for the system to send a message to recovery or the
  * other way around.
+ *
+ * The systemFlag field is used for the system to send a message to recovery.
  */
 struct bootloader_message {
     char command[32];
     char status[32];
-    char recovery[1024];
+    char recovery[768];
+    char systemFlag[256];
 };
 
 /* Read and write the bootloader command from the "misc" partition.

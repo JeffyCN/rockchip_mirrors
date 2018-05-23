@@ -58,6 +58,7 @@ static const char *SDCARD_ROOT = "/sdcard";
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
 
+char systemFlag[256];
 /*
  * The recovery tool communicates with the main system through /cache files.
  *   /cache/recovery/command - INPUT - command line for tool, one arg per line
@@ -298,6 +299,7 @@ finish_recovery(const char *send_intent) {
     // Reset to mormal system boot so recovery won't cycle indefinitely.
     struct bootloader_message boot;
     memset(&boot, 0, sizeof(boot));
+    strlcpy(boot.systemFlag, systemFlag, sizeof(boot.systemFlag));
     set_bootloader_message(&boot);
 
     // Remove the command file, so recovery won't repeat indefinitely.
@@ -721,6 +723,7 @@ main(int argc, char **argv) {
     int toggle_secure_fs = 0;
     encrypted_fs_info encrypted_fs_data;
 
+    strcpy(systemFlag, "false");
     int arg;
     while ((arg = getopt_long(argc, argv, "", OPTIONS, NULL)) != -1) {
         switch (arg) {
@@ -816,6 +819,9 @@ main(int argc, char **argv) {
         }
         if(ret == 0)
             status = do_rk_update(binary, update_package);
+            if(status == INSTALL_SUCCESS){
+                strcpy(systemFlag, update_package);
+            }
         //status = INSTALL_ERROR;//install_package(update_package);
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
     } else if (wipe_data) {
