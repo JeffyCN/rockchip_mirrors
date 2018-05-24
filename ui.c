@@ -320,9 +320,6 @@ static void *input_thread(void *cookie)
 
 void ui_init(void)
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     gr_init();
     ev_init(input_callback, NULL);
 
@@ -354,9 +351,6 @@ void ui_init(void)
 
 void ui_set_background(int icon)
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&gUpdateMutex);
     gCurrentIcon = gBackgroundIcon[icon];
     update_screen_locked();
@@ -365,9 +359,6 @@ void ui_set_background(int icon)
 
 void ui_show_indeterminate_progress()
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&gUpdateMutex);
     if (gProgressBarType != PROGRESSBAR_TYPE_INDETERMINATE) {
         gProgressBarType = PROGRESSBAR_TYPE_INDETERMINATE;
@@ -378,9 +369,6 @@ void ui_show_indeterminate_progress()
 
 void ui_show_progress(float portion, int seconds)
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&gUpdateMutex);
     gProgressBarType = PROGRESSBAR_TYPE_NORMAL;
     gProgressScopeStart += gProgressScopeSize;
@@ -394,9 +382,6 @@ void ui_show_progress(float portion, int seconds)
 
 void ui_set_progress(float fraction)
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&gUpdateMutex);
     if (fraction < 0.0) fraction = 0.0;
     if (fraction > 1.0) fraction = 1.0;
@@ -414,9 +399,6 @@ void ui_set_progress(float fraction)
 
 void ui_reset_progress()
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&gUpdateMutex);
     gProgressBarType = PROGRESSBAR_TYPE_NONE;
     gProgressScopeStart = gProgressScopeSize = 0;
@@ -428,9 +410,6 @@ void ui_reset_progress()
 
 void ui_print(const char *fmt, ...)
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     char buf[256];
     va_list ap;
     va_start(ap, fmt);
@@ -459,9 +438,6 @@ void ui_print(const char *fmt, ...)
 }
 
 void ui_start_menu(char** headers, char** items, int initial_selection) {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     int i;
     pthread_mutex_lock(&gUpdateMutex);
     if (text_rows > 0 && text_cols > 0) {
@@ -485,9 +461,6 @@ void ui_start_menu(char** headers, char** items, int initial_selection) {
 }
 
 int ui_menu_select(int sel) {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     int old_sel;
     pthread_mutex_lock(&gUpdateMutex);
     if (show_menu > 0) {
@@ -503,9 +476,6 @@ int ui_menu_select(int sel) {
 }
 
 void ui_end_menu() {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     int i;
     pthread_mutex_lock(&gUpdateMutex);
     if (show_menu > 0 && text_rows > 0 && text_cols > 0) {
@@ -517,9 +487,6 @@ void ui_end_menu() {
 
 int ui_text_visible()
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&gUpdateMutex);
     int visible = show_text;
     pthread_mutex_unlock(&gUpdateMutex);
@@ -528,9 +495,6 @@ int ui_text_visible()
 
 void ui_show_text(int visible)
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&gUpdateMutex);
     show_text = visible;
     update_screen_locked();
@@ -539,9 +503,6 @@ void ui_show_text(int visible)
 
 int ui_wait_key()
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&key_queue_mutex);
     while (key_queue_len == 0) {
         pthread_cond_wait(&key_queue_cond, &key_queue_mutex);
@@ -555,17 +516,11 @@ int ui_wait_key()
 
 int ui_key_pressed(int key)
 {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     // This is a volatile static array, don't bother locking
     return key_pressed[key];
 }
 
 void ui_clear_key_queue() {
-#ifdef RecoveryNoUi
-    return ;
-#endif
     pthread_mutex_lock(&key_queue_mutex);
     key_queue_len = 0;
     pthread_mutex_unlock(&key_queue_mutex);
