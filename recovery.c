@@ -823,12 +823,12 @@ main(int argc, char **argv) {
             if(status == INSTALL_SUCCESS){
                 strcpy(systemFlag, update_package);
             }
-        //status = INSTALL_ERROR;//install_package(update_package);
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
+	ui_print("update.img Installation done.\n");
+	ui_show_text(0);
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;
         if (erase_volume("/mnt/userdata")) status = INSTALL_ERROR;
-        //if (wipe_cache && erase_volume("/cache")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
     } else if (wipe_all) {
         if (device_wipe_data()) status = INSTALL_ERROR;
