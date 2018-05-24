@@ -720,6 +720,7 @@ main(int argc, char **argv) {
     const char *update_package = NULL;
     const char *encrypted_fs_mode = NULL;
     int wipe_data = 0;
+    int wipe_all = 0;
     int toggle_secure_fs = 0;
     encrypted_fs_info encrypted_fs_data;
 
@@ -731,7 +732,7 @@ main(int argc, char **argv) {
         case 's': send_intent = optarg; break;
         case 'u': update_package = optarg; break;
         case 'w': wipe_data = 1; break;
-        case 'a': wipe_data = 1; break;
+        case 'a': wipe_all = 1; break;
         case 'e': encrypted_fs_mode = optarg; toggle_secure_fs = 1; break;
         case 't': ui_show_text(1); break;
         case '?':
@@ -829,11 +830,12 @@ main(int argc, char **argv) {
         if (erase_volume("/mnt/userdata")) status = INSTALL_ERROR;
         //if (wipe_cache && erase_volume("/cache")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
-#if 0
-    } else if (wipe_cache) {
-        if (wipe_cache && erase_volume("/cache")) status = INSTALL_ERROR;
-        if (status != INSTALL_SUCCESS) ui_print("Cache wipe failed.\n");
-#endif
+    } else if (wipe_all) {
+        if (device_wipe_data()) status = INSTALL_ERROR;
+        if (erase_volume("/mnt/userdata")) status = INSTALL_ERROR;
+        if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
+		ui_print("Data wipe done.\n");
+		ui_show_text(0);
     } else {
         status = INSTALL_ERROR;  // No command specified
     }
