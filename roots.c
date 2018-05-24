@@ -291,6 +291,14 @@ int format_volume(const char* volume) {
         return 0;
     }
 
+    if (strcmp(v->fs_type, "ext2") == 0) {
+        int result = rk_make_ext2fs(v->device, 0, v->mount_point);//make_ext2fs(v->device, NULL, NULL, 0, 0, 0);
+        if (result != 0) {
+            LOGE("format_volume: make_extf2fs failed on %s\n", v->device);
+            return -1;
+        }
+        return 0;
+    }
     if (strcmp(v->fs_type, "vfat") == 0) {
         int result = make_vfat(v->device, 0, v->mount_point);
         if (result != 0) {
