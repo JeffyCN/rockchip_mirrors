@@ -3,7 +3,6 @@ CC = gcc
 PROM = recovery
 OBJ = recovery.o \
 default_recovery_ui.o \
-ui.o \
 rktools.o \
 roots.o \
 bootloader.o \
@@ -23,6 +22,12 @@ minui/events.o \
 minui/graphics.o \
 minui/resources.o \
 minui/graphics_drm.o
+
+ifdef RecoveryNoUi
+OBJ += noui.o
+else
+OBJ += ui.o
+endif
 
 CFLAGS ?= -I$(PROJECT_DIR) -I/usr/include/libdrm/ -lz -lc -lpthread -lpng -ldrm
 $(PROM): $(OBJ)
