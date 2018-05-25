@@ -26,6 +26,7 @@
 #include "mtdutils/mounts.h"
 #include "roots.h"
 #include "common.h"
+#include "rktools.h"
 //#include "make_ext4fs.h"
 
 static int num_volumes = 0;
@@ -72,7 +73,7 @@ void load_volume_table() {
 			break;
 		}
 		*fs_type = 0;
-		
+
 		for(fs_type++; *fs_type == '\t' || *fs_type == ' ' || *fs_type == '\n'; fs_type++);
         char* option = strstr(fs_type, "\t");
 		if(!option) {
@@ -80,7 +81,7 @@ void load_volume_table() {
 			break;
 		}
 		*option = 0;
-		
+
 		for(option++; *option == '\t' || *option == ' ' || *option == '\n'; option++);
         char* dump = strstr(option, "\t");
 		if(!dump) {
@@ -88,7 +89,7 @@ void load_volume_table() {
 			break;
 		}
 		*dump = 0;
-		
+
 		for(dump++; *dump == '\t' || *dump == ' ' || *dump == '\n'; dump++);
         char* pass = strstr(dump, "\t");
 		if(!pass) {
@@ -189,6 +190,18 @@ int ensure_path_mounted(const char* path) {
     } else if (strcmp(v->fs_type, "ext4") == 0 ||
                strcmp(v->fs_type, "vfat") == 0 ||
                strcmp(v->fs_type, "ext2") == 0) {
+        char *blk_device;
+        blk_device = v->device;
+        if(strcmp("/mnt/external_sd", v->mount_point) == 0){
+            blk_device = getenv(SD_POINT_NAME);
+            if(blk_device == NULL){
+                setFlashPoint();
+                blk_device = getenv(SD_POINT_NAME);
+            }
+            result = mount(blk_device, v->mount_point, v->fs_type,
+                            MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
+            if (result == 0) return 0;
+        }
         result = mount(v->device, v->mount_point, v->fs_type,
                        MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
         if (result == 0) return 0;
