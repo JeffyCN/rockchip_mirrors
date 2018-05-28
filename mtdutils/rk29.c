@@ -96,8 +96,8 @@ int rk_make_ext4fs(const char *filename,long long len, const char *mountpoint)
 int rk_check_and_resizefs(const char *filename) {
     int result;
 
-    const char *const e2fsck_argv[] = { "e2fsck", "-fy", filename, NULL };
-    const char *const resizefs_argv[] = { "resize2fs", filename, NULL  };
+    const char *const e2fsck_argv[] = { "/usr/sbin/e2fsck", "-fy", filename, NULL };
+    const char *const resizefs_argv[] = { "/usr/sbin/resize2fs", filename, NULL  };
 
     result = run(e2fsck_argv[0], (char **) e2fsck_argv);
     if(result) {
@@ -118,7 +118,7 @@ int rk_check_and_resizefs_f2fs(const char *filename) {
 
 	const char *const e2fsck_argv[] = { "fsck_f2fs", filename, NULL };
 	const char *const resizefs_argv[] = { "resize.f2fs", filename, NULL  };
-	printf("fsck_f2fs check '%s' 11111111111111!\n", filename);
+
 	result = run(e2fsck_argv[0], (char **) e2fsck_argv);
 	if(result) {
 		printf("fsck_f2fs check '%s' failed!\n", filename);
