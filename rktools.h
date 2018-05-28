@@ -2,8 +2,8 @@
 #define _RKTOOLS_H
 
 #define PATH_LEN 50
-#define usb_path "/mnt/usb_storage/"
-#define sd_path "/mnt/external_sd/"
+#define usb_path "/mnt/udisk/"
+#define sd_path "/mnt/sdcard/"
 
 #define OFF_VALUE 0
 #define ON_VALUE 1

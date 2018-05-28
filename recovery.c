@@ -50,10 +50,10 @@ static const struct option OPTIONS[] = {
   { NULL, 0, NULL, 0 },
 };
 
-static const char *COMMAND_FILE = "/mnt/userdata/recovery/command";
-static const char *INTENT_FILE = "/mnt/userdata/recovery/intent";
-static const char *LOG_FILE = "/mnt/userdata/recovery/log";
-static const char *LAST_LOG_FILE = "/mnt/userdata/recovery/last_log";
+static const char *COMMAND_FILE = "/userdata/recovery/command";
+static const char *INTENT_FILE = "/userdata/recovery/intent";
+static const char *LOG_FILE = "/userdata/recovery/log";
+static const char *LAST_LOG_FILE = "/userdata/recovery/last_log";
 static const char *SDCARD_ROOT = "/sdcard";
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
@@ -317,7 +317,7 @@ erase_volume(const char *volume) {
     ui_show_indeterminate_progress();
     ui_print("Formatting %s...\n", volume);
 
-    if (strcmp(volume, "/mnt/userdata") == 0) {
+    if (strcmp(volume, "/userdata") == 0) {
         // Any part of the log we'd copied to data is now gone.
         // Reset the pointer so we copy from the beginning of the temp
         // log.
@@ -641,7 +641,7 @@ wipe_data(int confirm) {
 
     ui_print("\n-- Wiping data...\n");
     device_wipe_data();
-    erase_volume("/mnt/userdata");
+    erase_volume("/userdata");
     //erase_volume("/cache");
     ui_print("Data wipe complete.\n");
 }
@@ -791,7 +791,7 @@ main(int argc, char **argv) {
         }
 
         if (status != INSTALL_ERROR) {
-            if (erase_volume("/mnt/userdata")) {
+            if (erase_volume("/userdata")) {
                 ui_print("Data wipe failed.\n");
                 status = INSTALL_ERROR;
 #if 0
@@ -828,11 +828,11 @@ main(int argc, char **argv) {
 	ui_show_text(0);
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;
-        if (erase_volume("/mnt/userdata")) status = INSTALL_ERROR;
+        if (erase_volume("/userdata")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
     } else if (wipe_all) {
         if (device_wipe_data()) status = INSTALL_ERROR;
-        if (erase_volume("/mnt/userdata")) status = INSTALL_ERROR;
+        if (erase_volume("/userdata")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
 		ui_print("Data wipe done.\n");
 		ui_show_text(0);
