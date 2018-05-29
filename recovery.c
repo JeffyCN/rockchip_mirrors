@@ -57,7 +57,7 @@ static const char *LAST_LOG_FILE = "/userdata/recovery/last_log";
 static const char *SDCARD_ROOT = "/sdcard";
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
-
+static const char *coldboot_done = "/dev/.coldboot_done";
 char systemFlag[256];
 /*
  * The recovery tool communicates with the main system through /cache files.
@@ -702,6 +702,12 @@ print_property(const char *key, const char *name, void *cookie) {
 
 int
 main(int argc, char **argv) {
+
+    while(access(coldboot_done, F_OK) != 0){
+        printf("coldboot not done, wait...\n");
+        sleep(1);
+    }
+
     time_t start = time(NULL);
 
     // If these fail, there's not really anywhere to complain...
