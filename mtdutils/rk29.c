@@ -159,12 +159,12 @@ int rk_make_ext2fs(const char *filename)
 {
     int result;
 
-    const char *const mke2fs_argv[] = { "mke2fs", "-t", "ext2", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", filename, NULL };
-    const char *const e2fsck_argv[] = { "e2fsck", "-fy", filename, NULL };
-    printf("format '%s' to ext3 filesystem\n", filename);
+    const char *const mke2fs_argv[] = { "/sbin/mke2fs", "-t", "ext2", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", filename, NULL };
+    const char *const e2fsck_argv[] = { "/sbin/e2fsck", "-fy", filename, NULL };
+    printf("format '%s' to ext2 filesystem\n", filename);
     result = run(mke2fs_argv[0], (char **) mke2fs_argv);
     if(result) {
-        printf("format '%s' to ext3 fail!\n", filename);
+        printf("format '%s' to ext2 fail!\n", filename);
         return result;
     }
 
