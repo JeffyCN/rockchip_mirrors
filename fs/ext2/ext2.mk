@@ -9,6 +9,17 @@ ifeq ($(BR2_TARGET_ROOTFS_EXT2)-$(ROOTFS_EXT2_SIZE),y-)
 $(error BR2_TARGET_ROOTFS_EXT2_SIZE cannot be empty)
 endif
 
+# If SIZE is AUTO, which mean shrink the filesystem to the minimum size.
+# Suppose 1G is big enough for buildroot ext filesystem, we then shrink
+# it after rootfs img packed.
+ifeq ($(EXT2_SIZE),AUTO)
+EXT2_SIZE = 1G
+define ROOTFS_EXT2_SHRINK
+	resize2fs -M $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
+	fsck $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
+endef
+endif
+
 ROOTFS_EXT2_MKFS_OPTS = $(call qstrip,$(BR2_TARGET_ROOTFS_EXT2_MKFS_OPTIONS))
 
 # qstrip results in stripping consecutive spaces into a single one. So the
@@ -40,7 +51,7 @@ ifneq ($(BR2_TARGET_ROOTFS_EXT2_GEN),2)
 define ROOTFS_EXT2_SYMLINK
 	ln -sf rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT) $(BINARIES_DIR)/rootfs.ext$(BR2_TARGET_ROOTFS_EXT2_GEN)$(ROOTFS_EXT2_COMPRESS_EXT)
 endef
-ROOTFS_EXT2_POST_GEN_HOOKS += ROOTFS_EXT2_SYMLINK
+ROOTFS_EXT2_POST_GEN_HOOKS += ROOTFS_EXT2_SYMLINK ROOTFS_EXT2_SHRINK
 endif
 
 $(eval $(rootfs))
