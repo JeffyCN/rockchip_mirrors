@@ -22,7 +22,7 @@ OBJ += ui.o\
 	minzip/Hash.o \
 	minzip/Inlines.o \
 	minzip/SysUtil.o \
-	minzip/Zip.o \\
+	minzip/Zip.o \
 	minui/events.o \
 	minui/graphics.o \
 	minui/resources.o \
