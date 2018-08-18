@@ -844,8 +844,8 @@ main(int argc, char **argv) {
         if (erase_volume("/userdata")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
 		ui_print("Data wipe done.\n");
-		Volume* v = volume_for_path("/oem");
-		rk_check_and_resizefs(v->device);
+        if (resize_volume("/oem")) status = INSTALL_ERROR;
+        if (status != INSTALL_SUCCESS) ui_print("resize failed.\n");
 		ui_print("resize oem done.\n");
 		ui_show_text(0);
     } else {

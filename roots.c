@@ -324,3 +324,38 @@ int format_volume(const char* volume) {
     LOGE("format_volume: fs_type \"%s\" unsupported\n", v->fs_type);
     return -1;
 }
+
+int resize_volume(const char* volume) {
+    Volume* v = volume_for_path(volume);
+    if (v == NULL) {
+        LOGE("unknown volume \"%s\"\n", volume);
+        return -1;
+    }
+    if (strcmp(v->fs_type, "ramdisk") == 0) {
+        // you can't format the ramdisk.
+        LOGE("can't format_volume \"%s\"", volume);
+        return -1;
+    }
+    if (strcmp(v->mount_point, volume) != 0) {
+        LOGE("can't give path \"%s\" to format_volume\n", volume);
+        return -1;
+    }
+
+    if (ensure_path_unmounted(volume) != 0) {
+        LOGE("format_volume failed to unmount \"%s\"\n", v->mount_point);
+        return -1;
+    }
+
+    if ((strcmp(v->fs_type, "ext4") == 0) || (strcmp(v->fs_type, "ext2") == 0)){
+        int result = rk_check_and_resizefs(v->device);
+        if (result != 0) {
+            LOGE("resize_volume: resizefs failed on %s\n", v->device);
+            return -1;
+        }
+        return 0;
+    }
+
+    LOGE("format_volume: fs_type \"%s\" unsupported\n", v->fs_type);
+    return -1;
+}
+
