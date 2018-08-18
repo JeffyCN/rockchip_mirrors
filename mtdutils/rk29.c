@@ -67,8 +67,8 @@ int rk_make_ext4fs(const char *filename,long long len, const char *mountpoint)
 {
     int result;
 
-    const char *const mke2fs_argv[] = { "/usr/sbin/mke2fs", "-t", "ext4", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", "-F", filename, NULL };
-    const char *const e2fsck_argv[] = { "/usr/sbin/e2fsck", "-fy", filename, NULL };
+    const char *const mke2fs_argv[] = { "/sbin/mke2fs", "-t", "ext4", "-b", "4096", "-O", "^huge_file", "-m", "0", "-q", "-F", filename, NULL };
+    const char *const e2fsck_argv[] = { "/sbin/e2fsck", "-fy", filename, NULL };
     printf("format '%s' to ext4 filesystem\n", filename);
     result = run(mke2fs_argv[0], (char **) mke2fs_argv);
     if(result) {
@@ -96,8 +96,8 @@ int rk_make_ext4fs(const char *filename,long long len, const char *mountpoint)
 int rk_check_and_resizefs(const char *filename) {
     int result;
 
-    const char *const e2fsck_argv[] = { "/usr/sbin/e2fsck", "-fy", filename, NULL };
-    const char *const resizefs_argv[] = { "/usr/sbin/resize2fs", filename, NULL  };
+    const char *const e2fsck_argv[] = { "/sbin/e2fsck", "-fy", filename, NULL };
+    const char *const resizefs_argv[] = { "/sbin/resize2fs", filename, NULL  };
 
     result = run(e2fsck_argv[0], (char **) e2fsck_argv);
     if(result) {
