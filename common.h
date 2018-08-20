@@ -72,7 +72,7 @@ void ui_show_indeterminate_progress();
 // Hide and reset the progress bar.
 void ui_reset_progress();
 
-#define LOGE(...) ui_print("E:" __VA_ARGS__)
+#define LOGE(...) fprintf(stdout, "E:" __VA_ARGS__)
 #define LOGW(...) fprintf(stdout, "W:" __VA_ARGS__)
 #define LOGI(...) fprintf(stdout, "I:" __VA_ARGS__)
 
@@ -98,11 +98,11 @@ typedef struct {
     const char* device2;      // alternative device to try if fs_type
                               // == "ext4" or "vfat" and mounting
                               // 'device' fails
-                              
+
     const char* option;       // mount parameter
 
     const char* dump;         //
-							
+
     const char* pass;         //
 } Volume;
 

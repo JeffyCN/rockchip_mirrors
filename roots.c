@@ -16,6 +16,7 @@
 
 #include <errno.h>
 #include <stdlib.h>
+#include <string.h>
 #include <sys/mount.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -31,43 +32,83 @@
 
 static int num_volumes = 0;
 static Volume* device_volumes = NULL;
+static char mount_point[256] = {0};
+
+char * get_link_path(const char* linkpath, char * buf, int count)
+{
+	int i;
+	int rslt;
+	char path[256];
+
+	memset(path, 0, sizeof(path));
+	strcpy(path, linkpath);
+	for (i = strlen(linkpath); i > 0; i--) {
+		if (path[i] == '/') {
+			path[i] = '\0';
+			break;
+		}
+	}
+
+	rslt = readlink(path, buf, count - 1);
+	if (rslt < 0 || (rslt >= count - 1)) {
+		printf("No link to path!!! \n");
+		return NULL;
+	}
+
+	if (buf[0] != '/') {
+		char tmp[256];
+		memset(tmp, 0, sizeof(tmp));
+		memcpy(tmp, buf, strlen(buf));
+
+		memset(buf, 0, sizeof(buf));
+		memcpy(buf + 1, tmp,strlen(tmp));
+
+		buf[0] = '/';
+	}
+
+
+	printf("buf = %s \n", buf);
+	return buf;
+}
 
 void load_volume_table() {
-    int alloc = 2;
-    device_volumes = malloc(alloc * sizeof(Volume));
+	int alloc = 2;
+	device_volumes = malloc(alloc * sizeof(Volume));
 
-    // Insert an entry for /tmp, which is the ramdisk and is always mounted.
-    device_volumes[0].mount_point = "/tmp";
-    device_volumes[0].fs_type = "ramdisk";
-    device_volumes[0].device = NULL;
-    device_volumes[0].device2 = NULL;
-    device_volumes[0].option = NULL;
-    device_volumes[0].dump = NULL;
-    device_volumes[0].pass = NULL;
-    num_volumes = 1;
+	// Insert an entry for /tmp, which is the ramdisk and is always mounted.
+	device_volumes[0].mount_point = "/tmp";
+	device_volumes[0].fs_type = "ramdisk";
+	device_volumes[0].device = NULL;
+	device_volumes[0].device2 = NULL;
+	device_volumes[0].option = NULL;
+	device_volumes[0].dump = NULL;
+	device_volumes[0].pass = NULL;
+	num_volumes = 1;
 
-    FILE* fstab = fopen("/etc/fstab", "r");
-    if (fstab == NULL) {
-        LOGE("failed to open /etc/fstab (%d)\n", errno);
-        return;
-    }
+	FILE* fstab = fopen("/etc/fstab", "r");
+	if (fstab == NULL) {
+		LOGE("failed to open /etc/fstab (%d)\n", errno);
+		return;
+	}
 
-    char buffer[1024];
-    int i;
-    while (fgets(buffer, sizeof(buffer)-1, fstab)) {
-        for (i = 0; buffer[i] && isspace(buffer[i]); ++i);
-        if (buffer[i] == '\0' || buffer[i] == '#') continue;
-        char* original = strdup(buffer);
+	char buffer[1024];
+	int i;
+	while (fgets(buffer, sizeof(buffer)-1, fstab)) {
+		printf(">>> buf = %s \n", buffer);
+
+		for (i = 0; buffer[i] && isspace(buffer[i]); ++i);
+		if (buffer[i] == '\0' || buffer[i] == '#') continue;
+		char* original = strdup(buffer);
 		char *file_system = original;
 
-        char* mount_point = strstr(original+i, "\t");
+		char* mount_point = strstr(original+i, "\t");
 		if(!mount_point) {
 			free(original);
 			break;
 		}
 		*mount_point = 0;
 		for(mount_point++; *mount_point == '\t' || *mount_point == ' ' || *mount_point == '\n'; mount_point++);
-        char* fs_type = strstr(mount_point, "\t");
+		char* fs_type = strstr(mount_point, "\t");
 		if(!fs_type) {
 			free(original);
 			break;
@@ -75,7 +116,7 @@ void load_volume_table() {
 		*fs_type = 0;
 
 		for(fs_type++; *fs_type == '\t' || *fs_type == ' ' || *fs_type == '\n'; fs_type++);
-        char* option = strstr(fs_type, "\t");
+		char* option = strstr(fs_type, "\t");
 		if(!option) {
 			free(original);
 			break;
@@ -83,7 +124,7 @@ void load_volume_table() {
 		*option = 0;
 
 		for(option++; *option == '\t' || *option == ' ' || *option == '\n'; option++);
-        char* dump = strstr(option, "\t");
+		char* dump = strstr(option, "\t");
 		if(!dump) {
 			free(original);
 			break;
@@ -91,7 +132,7 @@ void load_volume_table() {
 		*dump = 0;
 
 		for(dump++; *dump == '\t' || *dump == ' ' || *dump == '\n'; dump++);
-        char* pass = strstr(dump, "\t");
+		char* pass = strstr(dump, "\t");
 		if(!pass) {
 			free(original);
 			break;
@@ -99,263 +140,299 @@ void load_volume_table() {
 		*pass = 0;
 
 		for(pass++; *pass == '\t' || *pass == ' ' || *pass == '\n'; pass++);
-        char* nextline = strstr(pass, "\n");
+		char* nextline = strstr(pass, "\n");
 		if(!nextline) {
 			free(original);
 			break;
 		}
 		*nextline = 0;
 		//printf("load_volume_table file_system:%s, mount_point:%s, fs_type:%s, option:%s, dump:%s, pass:%s\n", file_system, mount_point, fs_type, option, dump, pass);
-        if (file_system && mount_point && fs_type && option && dump && pass) {
-            while (num_volumes >= alloc) {
-                alloc *= 2;
-                device_volumes = realloc(device_volumes, alloc*sizeof(Volume));
-            }
-            device_volumes[num_volumes].mount_point = strdup(mount_point);
-            device_volumes[num_volumes].fs_type = strdup(fs_type);
-            device_volumes[num_volumes].option = option ? strdup(option) : NULL;
-            device_volumes[num_volumes].dump = dump ? strdup(dump) : NULL;
+		if (file_system && mount_point && fs_type && option && dump && pass) {
+			while (num_volumes >= alloc) {
+				alloc *= 2;
+				device_volumes = realloc(device_volumes, alloc*sizeof(Volume));
+			}
+			device_volumes[num_volumes].mount_point = strdup(mount_point);
+			device_volumes[num_volumes].fs_type = strdup(fs_type);
+			device_volumes[num_volumes].option = option ? strdup(option) : NULL;
+			device_volumes[num_volumes].dump = dump ? strdup(dump) : NULL;
 			device_volumes[num_volumes].pass = pass ? strdup(pass) : NULL;
 			device_volumes[num_volumes].device = strdup(file_system);;
 			device_volumes[num_volumes].device2 = NULL;
-            ++num_volumes;
-        } else {
-            LOGE("skipping malformed recovery.fstab line: %s\n", original);
-        }
-        free(original);
-    }
+			++num_volumes;
+		} else {
+			LOGE("skipping malformed recovery.fstab line: %s\n", original);
+		}
+		free(original);
+	}
 
-    fclose(fstab);
+	fclose(fstab);
 
-    printf("recovery filesystem table\n");
-    printf("=========================\n");
-    for (i = 0; i < num_volumes; ++i) {
-        Volume* v = &device_volumes[i];
-        printf("  %d %s %s %s %s %s %s\n", i, v->device, v->mount_point, v->fs_type, v->option, v->dump, v->pass);
-    }
-    printf("\n");
+	printf("recovery filesystem table\n");
+	printf("=========================\n");
+	for (i = 0; i < num_volumes; ++i) {
+		Volume* v = &device_volumes[i];
+		printf("  %d %s %s %s %s %s %s\n", i, v->device, v->mount_point, v->fs_type, v->option, v->dump, v->pass);
+	}
+	printf("\n");
 }
 
 Volume* volume_for_path(const char* path) {
-    int i;
-    for (i = 0; i < num_volumes; ++i) {
-        Volume* v = device_volumes+i;
-        int len = strlen(v->mount_point);
-        if (strncmp(path, v->mount_point, len) == 0 &&
-            (path[len] == '\0' || path[len] == '/')) {
-            return v;
-        }
-    }
-    return NULL;
+	int i;
+
+	memset(mount_point, 0, sizeof(mount_point));
+	char* tmp = get_link_path(path, mount_point, 1024);
+
+	if ( tmp != NULL)
+		printf(" ### get mount_ponit = %s ### \n", mount_point);
+
+	for (i = 0; i < num_volumes; ++i) {
+		Volume* v = device_volumes+i;
+		int len = strlen(v->mount_point);
+		if (strncmp(path, v->mount_point, len) == 0 &&
+			(path[len] == '\0' || path[len] == '/')) {
+			printf(" ===path = %s, v-mount_point = %s ===\n",path, v->mount_point);
+			return v;
+		} else {
+			//add by chad.ma for symbol link file. eg. sdcard/ --->mnt/sdcard
+			if (!tmp)
+				continue;
+
+			//printf(" # v->mount_point = %s\n", v->mount_point);
+			if (strncmp(mount_point, v->mount_point, len) == 0 &&
+				path[len] == '\0' || path[len] == '/') {
+				return v;
+			}
+		}
+	}
+	return NULL;
 }
 
 int ensure_path_mounted(const char* path) {
-    Volume* v = volume_for_path(path);
-    if (v == NULL) {
-        LOGE("unknown volume for path [%s]\n", path);
-        return -1;
-    }
-    if (strcmp(v->fs_type, "ramdisk") == 0) {
-        // the ramdisk is always mounted.
-        return 0;
-    }
+	if (access(path, F_OK) == 0)
+		return 0;
 
-    int result;
-    result = scan_mounted_volumes();
-    if (result < 0) {
-        LOGE("failed to scan mounted volumes\n");
-        return -1;
-    }
+	Volume* v = volume_for_path(path);
+	if (v == NULL) {
+		if (mount_point[0] != 0) {
+			int result= scan_mounted_volumes();
+			if (result < 0) {
+				LOGE("failed to scan mounted volumes\n");
+				return -1;
+			}
 
-    const MountedVolume* mv =
-        find_mounted_volume_by_mount_point(v->mount_point);
-    if (mv) {
-        // volume is already mounted
-        return 0;
-    }
+			const MountedVolume* mv =
+				find_mounted_volume_by_mount_point(mount_point);
+			if (mv) {
+				// volume is already mounted
+				LOGI("%s already mounted \n", path);
+				return 0;
+			}
+		}
 
-    mkdir(v->mount_point, 0755);  // in case it doesn't already exist
+		LOGE("unknown volume for path [%s]\n", path);
+		return -1;
+	}
+	if (strcmp(v->fs_type, "ramdisk") == 0) {
+		// the ramdisk is always mounted.
+		return 0;
+	}
 
-    if (strcmp(v->fs_type, "yaffs2") == 0) {
-        // mount an MTD partition as a YAFFS2 filesystem.
-        mtd_scan_partitions();
-        const MtdPartition* partition;
-        partition = mtd_find_partition_by_name(v->device);
-        if (partition == NULL) {
-            LOGE("failed to find \"%s\" partition to mount at \"%s\"\n",
-                 v->device, v->mount_point);
-            return -1;
-        }
-        return mtd_mount_partition(partition, v->mount_point, v->fs_type, 0);
-    } else if (strcmp(v->fs_type, "ext4") == 0 ||
-               strcmp(v->fs_type, "vfat") == 0 ||
-               strcmp(v->fs_type, "ext2") == 0) {
-        char *blk_device;
-        blk_device = v->device;
-        if(strcmp("/mnt/external_sd", v->mount_point) == 0){
-            blk_device = getenv(SD_POINT_NAME);
-            if(blk_device == NULL){
-                setFlashPoint();
-                blk_device = getenv(SD_POINT_NAME);
-            }
-            result = mount(blk_device, v->mount_point, v->fs_type,
-                            MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
-            if (result == 0) return 0;
-        }
-        result = mount(v->device, v->mount_point, v->fs_type,
-                       MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
-        if (result == 0) return 0;
+	int result;
+	result = scan_mounted_volumes();
+	if (result < 0) {
+		LOGE("failed to scan mounted volumes\n");
+		return -1;
+	}
 
-        if (v->device2) {
-            LOGW("failed to mount %s (%s); trying %s\n",
-                 v->device, strerror(errno), v->device2);
-            result = mount(v->device2, v->mount_point, v->fs_type,
-                           MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
-            if (result == 0) return 0;
-        }
+	const MountedVolume* mv =
+		find_mounted_volume_by_mount_point(v->mount_point);
+	if (mv) {
+		// volume is already mounted
+		return 0;
+	}
 
-        LOGE("failed to mount %s (%s)\n", v->mount_point, strerror(errno));
-        return -1;
-    }
+	mkdir(v->mount_point, 0755);  // in case it doesn't already exist
 
-    LOGE("unknown fs_type \"%s\" for %s\n", v->fs_type, v->mount_point);
-    return -1;
+	if (strcmp(v->fs_type, "yaffs2") == 0) {
+		// mount an MTD partition as a YAFFS2 filesystem.
+		mtd_scan_partitions();
+		const MtdPartition* partition;
+		partition = mtd_find_partition_by_name(v->device);
+		if (partition == NULL) {
+			LOGE("failed to find \"%s\" partition to mount at \"%s\"\n",
+				 v->device, v->mount_point);
+			return -1;
+		}
+		return mtd_mount_partition(partition, v->mount_point, v->fs_type, 0);
+	} else if (strcmp(v->fs_type, "ext4") == 0 ||
+			   strcmp(v->fs_type, "vfat") == 0 ||
+			   strcmp(v->fs_type, "ext2") == 0) {
+		char *blk_device;
+		blk_device = (char*)v->device;
+		if(strcmp("/mnt/sdcard", v->mount_point) == 0){
+			blk_device = getenv(SD_POINT_NAME);
+			if(blk_device == NULL){
+				setFlashPoint();
+				blk_device = getenv(SD_POINT_NAME);
+			}
+			result = mount(blk_device, v->mount_point, v->fs_type,
+							MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
+			if (result == 0) return 0;
+		}
+		result = mount(v->device, v->mount_point, v->fs_type,
+					   MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
+		if (result == 0) return 0;
+
+		if (v->device2) {
+			LOGW("failed to mount %s (%s); trying %s\n",
+				 v->device, strerror(errno), v->device2);
+			result = mount(v->device2, v->mount_point, v->fs_type,
+						   MS_NOATIME | MS_NODEV | MS_NODIRATIME, "");
+			if (result == 0) return 0;
+		}
+		LOGE("failed to mount %s (%s)\n", v->mount_point, strerror(errno));
+		return -1;
+	}
+
+	LOGE("unknown fs_type \"%s\" for %s\n", v->fs_type, v->mount_point);
+	return -1;
 }
 
 int ensure_path_unmounted(const char* path) {
-    Volume* v = volume_for_path(path);
-    if (v == NULL) {
-        LOGE("unknown volume for path [%s]\n", path);
-        return -1;
-    }
-    if (strcmp(v->fs_type, "ramdisk") == 0) {
-        // the ramdisk is always mounted; you can't unmount it.
-        return -1;
-    }
+	Volume* v = volume_for_path(path);
+	if (v == NULL) {
+		LOGE("unknown volume for path [%s]\n", path);
+		return -1;
+	}
+	if (strcmp(v->fs_type, "ramdisk") == 0) {
+		// the ramdisk is always mounted; you can't unmount it.
+		return -1;
+	}
 
-    int result;
-    result = scan_mounted_volumes();
-    if (result < 0) {
-        LOGE("failed to scan mounted volumes\n");
-        return -1;
-    }
+	int result;
+	result = scan_mounted_volumes();
+	if (result < 0) {
+		LOGE("failed to scan mounted volumes\n");
+		return -1;
+	}
 
-    const MountedVolume* mv =
-        find_mounted_volume_by_mount_point(v->mount_point);
-    if (mv == NULL) {
-        // volume is already unmounted
-        return 0;
-    }
+	const MountedVolume* mv =
+		find_mounted_volume_by_mount_point(v->mount_point);
+	if (mv == NULL) {
+		// volume is already unmounted
+		return 0;
+	}
 
-    return unmount_mounted_volume(mv);
+	return unmount_mounted_volume(mv);
 }
 
 int format_volume(const char* volume) {
-    Volume* v = volume_for_path(volume);
-    if (v == NULL) {
-        LOGE("unknown volume \"%s\"\n", volume);
-        return -1;
-    }
-    if (strcmp(v->fs_type, "ramdisk") == 0) {
-        // you can't format the ramdisk.
-        LOGE("can't format_volume \"%s\"", volume);
-        return -1;
-    }
-    if (strcmp(v->mount_point, volume) != 0) {
-        LOGE("can't give path \"%s\" to format_volume\n", volume);
-        return -1;
-    }
+	Volume* v = volume_for_path(volume);
+	if (v == NULL) {
+		LOGE("unknown volume \"%s\"\n", volume);
+		return -1;
+	}
+	if (strcmp(v->fs_type, "ramdisk") == 0) {
+		// you can't format the ramdisk.
+		LOGE("can't format_volume \"%s\"", volume);
+		return -1;
+	}
+	if (strcmp(v->mount_point, volume) != 0) {
+		LOGE("can't give path \"%s\" to format_volume\n", volume);
+		return -1;
+	}
 
-    if (ensure_path_unmounted(volume) != 0) {
-        LOGE("format_volume failed to unmount \"%s\"\n", v->mount_point);
-        return -1;
-    }
+	if (ensure_path_unmounted(volume) != 0) {
+		LOGE("format_volume failed to unmount \"%s\"\n", v->mount_point);
+		return -1;
+	}
 
-    if (strcmp(v->fs_type, "yaffs2") == 0 || strcmp(v->fs_type, "mtd") == 0) {
-        mtd_scan_partitions();
-        const MtdPartition* partition = mtd_find_partition_by_name(v->device);
-        if (partition == NULL) {
-            LOGE("format_volume: no MTD partition \"%s\"\n", v->device);
-            return -1;
-        }
+	if (strcmp(v->fs_type, "yaffs2") == 0 || strcmp(v->fs_type, "mtd") == 0) {
+		mtd_scan_partitions();
+		const MtdPartition* partition = mtd_find_partition_by_name(v->device);
+		if (partition == NULL) {
+			LOGE("format_volume: no MTD partition \"%s\"\n", v->device);
+			return -1;
+		}
 
-        MtdWriteContext *write = mtd_write_partition(partition);
-        if (write == NULL) {
-            LOGW("format_volume: can't open MTD \"%s\"\n", v->device);
-            return -1;
-        } else if (mtd_erase_blocks(write, -1) == (off_t) -1) {
-            LOGW("format_volume: can't erase MTD \"%s\"\n", v->device);
-            mtd_write_close(write);
-            return -1;
-        } else if (mtd_write_close(write)) {
-            LOGW("format_volume: can't close MTD \"%s\"\n", v->device);
-            return -1;
-        }
-        return 0;
-    }
+		MtdWriteContext *write = mtd_write_partition(partition);
+		if (write == NULL) {
+			LOGW("format_volume: can't open MTD \"%s\"\n", v->device);
+			return -1;
+		} else if (mtd_erase_blocks(write, -1) == (off_t) -1) {
+			LOGW("format_volume: can't erase MTD \"%s\"\n", v->device);
+			mtd_write_close(write);
+			return -1;
+		} else if (mtd_write_close(write)) {
+			LOGW("format_volume: can't close MTD \"%s\"\n", v->device);
+			return -1;
+		}
+		return 0;
+	}
 
-    if (strcmp(v->fs_type, "ext4") == 0) {
-        //reset_ext4fs_info();
-        int result = rk_make_ext4fs(v->device, 0, v->mount_point);//make_ext4fs(v->device, NULL, NULL, 0, 0, 0);
-        if (result != 0) {
-            LOGE("format_volume: make_extf4fs failed on %s\n", v->device);
-            return -1;
-        }
-        return 0;
-    }
+	if (strcmp(v->fs_type, "ext4") == 0) {
+		//reset_ext4fs_info();
+		int result = rk_make_ext4fs(v->device, 0, v->mount_point);//make_ext4fs(v->device, NULL, NULL, 0, 0, 0);
+		if (result != 0) {
+			LOGE("format_volume: make_extf4fs failed on %s\n", v->device);
+			return -1;
+		}
+		return 0;
+	}
 
-    if (strcmp(v->fs_type, "ext2") == 0) {
-        int result = rk_make_ext2fs(v->device, 0, v->mount_point);//make_ext2fs(v->device, NULL, NULL, 0, 0, 0);
-        if (result != 0) {
-            LOGE("format_volume: make_extf2fs failed on %s\n", v->device);
-            return -1;
-        }
-        return 0;
-    }
-    if (strcmp(v->fs_type, "vfat") == 0) {
-        int result = make_vfat(v->device, 0, v->mount_point);
-        if (result != 0) {
-            LOGE("format_volume: make_vfat failed on %s\n", v->device);
-            return -1;
-        }
-        return 0;
-    }
+	if (strcmp(v->fs_type, "ext2") == 0) {
+		int result = rk_make_ext2fs(v->device, 0, v->mount_point);//make_ext2fs(v->device, NULL, NULL, 0, 0, 0);
+		if (result != 0) {
+			LOGE("format_volume: make_extf2fs failed on %s\n", v->device);
+			return -1;
+		}
+		return 0;
+	}
+	if (strcmp(v->fs_type, "vfat") == 0) {
+		int result = make_vfat(v->device, 0, v->mount_point);
+		if (result != 0) {
+			LOGE("format_volume: make_vfat failed on %s\n", v->device);
+			return -1;
+		}
+		return 0;
+	}
 
-    LOGE("format_volume: fs_type \"%s\" unsupported\n", v->fs_type);
-    return -1;
+	LOGE("format_volume: fs_type \"%s\" unsupported\n", v->fs_type);
+	return -1;
 }
 
 int resize_volume(const char* volume) {
-    Volume* v = volume_for_path(volume);
-    if (v == NULL) {
-        LOGE("unknown volume \"%s\"\n", volume);
-        return -1;
-    }
-    if (strcmp(v->fs_type, "ramdisk") == 0) {
-        // you can't format the ramdisk.
-        LOGE("can't format_volume \"%s\"", volume);
-        return -1;
-    }
-    if (strcmp(v->mount_point, volume) != 0) {
-        LOGE("can't give path \"%s\" to format_volume\n", volume);
-        return -1;
-    }
+	Volume* v = volume_for_path(volume);
+	if (v == NULL) {
+		LOGE("unknown volume \"%s\"\n", volume);
+		return -1;
+	}
+	if (strcmp(v->fs_type, "ramdisk") == 0) {
+		// you can't format the ramdisk.
+		LOGE("can't format_volume \"%s\"", volume);
+		return -1;
+	}
+	if (strcmp(v->mount_point, volume) != 0) {
+		LOGE("can't give path \"%s\" to format_volume\n", volume);
+		return -1;
+	}
 
-    if (ensure_path_unmounted(volume) != 0) {
-        LOGE("format_volume failed to unmount \"%s\"\n", v->mount_point);
-        return -1;
-    }
+	if (ensure_path_unmounted(volume) != 0) {
+		LOGE("format_volume failed to unmount \"%s\"\n", v->mount_point);
+		return -1;
+	}
 
-    if ((strcmp(v->fs_type, "ext4") == 0) || (strcmp(v->fs_type, "ext2") == 0)){
-        int result = rk_check_and_resizefs(v->device);
-        if (result != 0) {
-            LOGE("resize_volume: resizefs failed on %s\n", v->device);
-            return -1;
-        }
-        return 0;
-    }
+	if ((strcmp(v->fs_type, "ext4") == 0) || (strcmp(v->fs_type, "ext2") == 0)){
+		int result = rk_check_and_resizefs(v->device);
+		if (result != 0) {
+			LOGE("resize_volume: resizefs failed on %s\n", v->device);
+			return -1;
+		}
+		return 0;
+	}
 
-    LOGE("format_volume: fs_type \"%s\" unsupported\n", v->fs_type);
-    return -1;
+	LOGE("format_volume: fs_type \"%s\" unsupported\n", v->fs_type);
+	return -1;
 }
 

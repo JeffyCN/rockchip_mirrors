@@ -140,9 +140,9 @@ char systemFlag[256];
 static const int MAX_ARG_LENGTH = 4096;
 static const int MAX_ARGS = 100;
 
-int read_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {              
-    return ENCRYPTED_FS_ERROR;                                              
-} 
+int read_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {
+    return ENCRYPTED_FS_ERROR;
+}
 
 int restore_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {
     return ENCRYPTED_FS_ERROR;
@@ -723,7 +723,6 @@ main(int argc, char **argv) {
     load_volume_table();
     setFlashPoint();
     get_args(&argc, &argv);
-
     int previous_runs = 0;
     const char *send_intent = NULL;
     const char *update_package = NULL;
@@ -820,7 +819,7 @@ main(int argc, char **argv) {
     } else if (update_package != NULL) {
         const char* binary = "/usr/bin/rkupdate";
         int i, ret = 0;
-        for(i = 0; i < 3; i++){
+        for(i = 0; i < 5; i++){
             ret = ensure_path_mounted(update_package);
             if(ret == 0)
                 break;
