@@ -200,7 +200,7 @@ Volume* volume_for_path(const char* path) {
 
 			//printf(" # v->mount_point = %s\n", v->mount_point);
 			if (strncmp(mount_point, v->mount_point, len) == 0 &&
-				path[len] == '\0' || path[len] == '/') {
+				(path[len] == '\0' || path[len] == '/')) {
 				return v;
 			}
 		}
