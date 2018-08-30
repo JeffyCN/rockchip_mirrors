@@ -94,8 +94,6 @@ void load_volume_table() {
 	char buffer[1024];
 	int i;
 	while (fgets(buffer, sizeof(buffer)-1, fstab)) {
-		printf(">>> buf = %s \n", buffer);
-
 		for (i = 0; buffer[i] && isspace(buffer[i]); ++i);
 		if (buffer[i] == '\0' || buffer[i] == '#') continue;
 		char* original = strdup(buffer);

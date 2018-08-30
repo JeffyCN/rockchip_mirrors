@@ -817,6 +817,12 @@ main(int argc, char **argv) {
             }
         }
     } else if (update_package != NULL) {
+        if (ensure_path_unmounted("/oem") != 0)
+            LOGE("\n === umount oem fail === \n");
+
+        if (ensure_path_unmounted("/userdata") != 0)
+            LOGE("\n === umount userdata fail === \n");
+
         const char* binary = "/usr/bin/rkupdate";
         int i, ret = 0;
         for(i = 0; i < 5; i++){
@@ -830,6 +836,10 @@ main(int argc, char **argv) {
             status = do_rk_update(binary, update_package);
             if(status == INSTALL_SUCCESS){
                 strcpy(systemFlag, update_package);
+
+            if(strncmp(update_package,"/userdata", 9) != 0)
+                if (resize_volume("/userdata"))
+                    LOGE("\n ---resize_volume userdata error ---\n");
             }
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
 	ui_print("update.img Installation done.\n");
