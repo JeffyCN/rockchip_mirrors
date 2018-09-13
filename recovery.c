@@ -39,6 +39,7 @@
 #include "roots.h"
 #include "recovery_ui.h"
 #include "encryptedfs_provisioning.h"
+#include "rktools.h"
 
 static const struct option OPTIONS[] = {
   { "send_intent", required_argument, NULL, 's' },
@@ -139,6 +140,9 @@ char systemFlag[256];
 
 static const int MAX_ARG_LENGTH = 4096;
 static const int MAX_ARGS = 100;
+extern size_t strlcpy(char *dst, const char *src, size_t dsize);
+extern size_t strlcat(char *dst, const char *src, size_t dsize);
+
 
 int read_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {
     return ENCRYPTED_FS_ERROR;
@@ -429,12 +433,12 @@ prepend_title(const char** headers) {
     int count = 0;
     char** p;
     for (p = title; *p; ++p, ++count);
-    for (p = headers; *p; ++p, ++count);
+    for (p = (char** )headers; *p; ++p, ++count);
 
     char** new_headers = malloc((count+1) * sizeof(char*));
     char** h = new_headers;
     for (p = title; *p; ++p, ++h) *h = *p;
-    for (p = headers; *p; ++p, ++h) *h = *p;
+    for (p = (char** )headers; *p; ++p, ++h) *h = *p;
     *h = NULL;
 
     return new_headers;
@@ -817,6 +821,16 @@ main(int argc, char **argv) {
             }
         }
     } else if (update_package != NULL) {
+        int fd = -1;
+        char* resutl_file = "/userdata/update_rst.txt";
+        char text[128] ;
+        memset(text, 0, sizeof(text));
+
+        fd = open(resutl_file, O_CREAT | O_WRONLY | O_TRUNC);
+        if (fd < 0) {
+            LOGE("open /userdata/update_rst.txt fail, errno = %d\n", errno);
+        }
+
         if (ensure_path_unmounted("/oem") != 0)
             LOGE("\n === umount oem fail === \n");
 
@@ -832,18 +846,36 @@ main(int argc, char **argv) {
             sleep(1);
             printf("mounted %s failed.\n", update_package);
         }
-        if(ret == 0)
+        if(ret == 0) {
             status = do_rk_update(binary, update_package);
             if(status == INSTALL_SUCCESS){
                 strcpy(systemFlag, update_package);
 
-            if(strncmp(update_package,"/userdata", 9) != 0)
-                if (resize_volume("/userdata"))
-                    LOGE("\n ---resize_volume userdata error ---\n");
+                if(strncmp(update_package,"/userdata", 9) != 0) {
+                    if (resize_volume("/userdata"))
+                        LOGE("\n ---resize_volume userdata error ---\n");
+                } else {
+                    //update success, delete userdata/update.img and write result to file.
+                    if(access(update_package, F_OK) == 0)
+                        remove(update_package);
+                }
+                strlcpy(text, "update images success!", 127);
+	        } else {
+                strlcpy(text, "update images failed!", 127);
             }
+        } else {
+            strlcpy(text, "update images failed!", 127);
+        }
+
+        int w_len = write(fd, text, strlen(text));
+        if (w_len <= 0) {
+            LOGE("Write %s fail, errno = %d\n", resutl_file, errno);
+        }
+        close(fd);
+
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
-	ui_print("update.img Installation done.\n");
-	ui_show_text(0);
+        ui_print("update.img Installation done.\n");
+        ui_show_text(0);
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;
         if (erase_volume("/userdata")) status = INSTALL_ERROR;
