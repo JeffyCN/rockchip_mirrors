@@ -885,8 +885,11 @@ main(int argc, char **argv) {
         if (erase_volume("/userdata")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
 		ui_print("Data wipe done.\n");
-        if (resize_volume("/oem")) status = INSTALL_ERROR;
-        if (status != INSTALL_SUCCESS) ui_print("resize failed.\n");
+        if (access("/dev/block/by-name/oem", F_OK) == 0) {
+            if (resize_volume("/oem")) status = INSTALL_ERROR;
+            if (status != INSTALL_SUCCESS) ui_print("resize failed.\n");
+        }
+
 		ui_print("resize oem done.\n");
 		ui_show_text(0);
     } else {
