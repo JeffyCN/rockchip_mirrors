@@ -40,6 +40,7 @@
 #include "recovery_ui.h"
 #include "encryptedfs_provisioning.h"
 #include "rktools.h"
+#include "sdboot.h"
 
 static const struct option OPTIONS[] = {
   { "send_intent", required_argument, NULL, 's' },
@@ -60,6 +61,8 @@ static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
 static const char *coldboot_done = "/dev/.coldboot_done";
 char systemFlag[256];
+bool bSDBootUpdate = false;
+
 /*
  * The recovery tool communicates with the main system through /cache files.
  *   /cache/recovery/command - INPUT - command line for tool, one arg per line
@@ -704,8 +707,11 @@ print_property(const char *key, const char *name, void *cookie) {
     printf("%s=%s\n", key, name);
 }
 
+
 int
 main(int argc, char **argv) {
+    bool bSDBoot    = false;
+    const char *sdupdate_package = NULL;
 
     while(access(coldboot_done, F_OK) != 0){
         printf("coldboot not done, wait...\n");
@@ -718,7 +724,7 @@ main(int argc, char **argv) {
         freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
         freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
     } else {
-	printf("start debug recovery...\n");
+	    printf("start debug recovery...\n");
     }
     printf("Starting recovery on %s\n", ctime(&start));
 
@@ -726,7 +732,24 @@ main(int argc, char **argv) {
     ui_set_background(BACKGROUND_ICON_INSTALLING);
     load_volume_table();
     setFlashPoint();
-    get_args(&argc, &argv);
+
+    bSDBoot = is_boot_from_SD();
+    if(!bSDBoot) {
+        get_args(&argc, &argv);
+    } else {
+        if (is_sdcard_update()) {
+            char imageFile[64] = {0};
+            strlcpy(imageFile, EX_SDCARD_ROOT, sizeof(imageFile));
+            strlcat(imageFile, "/sdupdate.img", sizeof(imageFile));
+            if (access(imageFile, F_OK) == 0) {
+                sdupdate_package = strdup(imageFile);
+                bSDBootUpdate = true;
+                ui_show_text(1);
+                printf("sdupdate_package = %s \n",sdupdate_package);
+            }
+        }
+    }
+
     int previous_runs = 0;
     const char *send_intent = NULL;
     const char *update_package = NULL;
@@ -847,6 +870,7 @@ main(int argc, char **argv) {
             printf("mounted %s failed.\n", update_package);
         }
         if(ret == 0) {
+            printf(">>>rkflash will update from %s\n", update_package);
             status = do_rk_update(binary, update_package);
             if(status == INSTALL_SUCCESS){
                 strcpy(systemFlag, update_package);
@@ -876,6 +900,17 @@ main(int argc, char **argv) {
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
         ui_print("update.img Installation done.\n");
         ui_show_text(0);
+    }else if (sdupdate_package != NULL) {
+        // update image from sdcard
+        const char* binary = "/usr/bin/rkupdate";
+        printf(">>>sdboot update will update from %s\n", sdupdate_package);
+        status = do_rk_update(binary, sdupdate_package);
+        if(status == INSTALL_SUCCESS){
+            printf("update.img Installation success.\n");
+            ui_print("update.img Installation success.\n");
+            ui_show_text(0);
+        }
+
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;
         if (erase_volume("/userdata")) status = INSTALL_ERROR;
@@ -899,6 +934,28 @@ main(int argc, char **argv) {
     if (status != INSTALL_SUCCESS) ui_set_background(BACKGROUND_ICON_ERROR);
     if (status != INSTALL_SUCCESS || ui_text_visible()) {
         prompt_and_wait();
+    }
+
+    if (sdupdate_package != NULL && bSDBootUpdate) {
+        if (status == INSTALL_SUCCESS){
+            int timeout = 60;
+            char imageFile[64] = {0};
+            strlcpy(imageFile, EX_SDCARD_ROOT, sizeof(imageFile));
+            strlcat(imageFile, "/sdupdate.img", sizeof(imageFile));
+
+            printf("Please remove SD CARD!!!, wait for reboot.\n");
+            ui_print("Please remove SD CARD!!!, wait for reboot.");
+
+            while (timeout--) {
+                sleep(1);
+                if (access(imageFile, F_OK) == 0) {
+                    ui_print("Please remove SD CARD!!!, wait for reboot");
+                } else {
+                    break;
+                }
+            }
+            //ui_show_text(0);
+        }
     }
 
     // Otherwise, get ready to boot the main system...

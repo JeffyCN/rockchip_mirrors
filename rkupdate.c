@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <unistd.h>
 #include <ctype.h>
 #include <errno.h>
@@ -11,18 +12,21 @@
 #include "common.h"
 #include "install.h"
 
+extern bool bSDBootUpdate;
 int do_rk_update(const char *binary, const char *path){
     printf("start with main.\n");
     int pipefd[2];
     pipe(pipefd);
 
-    char** args = malloc(sizeof(char*) * 5);
-    args[0] = binary;
+    char** args = malloc(sizeof(char*) * 6);
+    args[0] = (char* )binary;
     args[1] = "Version 1.0";
-    args[2] = malloc(10);
+    args[2] = (char*)malloc(10);
     sprintf(args[2], "%d", pipefd[1]);
     args[3] = (char*)path;
-    args[4] = NULL;
+    args[4] = (char*)malloc(8);
+    sprintf(args[4], "%d", (int)bSDBootUpdate);
+    args[5] = NULL;
 
     pid_t pid = fork();
     if(pid == 0){

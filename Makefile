@@ -10,6 +10,7 @@ OBJ = recovery.o \
 	strlcpy.o \
 	strlcat.o \
 	rkupdate.o \
+	sdboot.o \
 	mtdutils/mounts.o \
 	mtdutils/mtdutils.o \
 	mtdutils/rk29.o \
