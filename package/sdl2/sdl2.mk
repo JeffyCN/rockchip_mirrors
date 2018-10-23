@@ -127,4 +127,11 @@ else
 SDL2_CONF_OPTS += -DSDL_KMSDRM=OFF
 endif
 
+ifeq ($(BR2_PACKAGE_SDL2_WAYLAND),y)
+SDL2_DEPENDENCIES += wayland libxkbcommon
+SDL2_CONF_OPTS += -DSDL_WAYLAND=ON
+else
+SDL2_CONF_OPTS += -DSDL_WAYLAND=OFF
+endif
+
 $(eval $(cmake-package))
