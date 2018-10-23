@@ -58,6 +58,13 @@ config BR2_PACKAGE_SDL2_OPENGLES
 comment "OpenGL ES support needs an OpenGL ES provider"
 	depends on !BR2_PACKAGE_HAS_LIBGLES
 
+config BR2_PACKAGE_SDL2_WAYLAND
+	bool "Wayland video driver"
+	depends on BR2_PACKAGE_WAYLAND
+
+comment "Wayland video driver needs wayland"
+	depends on !BR2_PACKAGE_WAYLAND
+
 endif
 
 comment "sdl2 needs a toolchain w/ dynamic library"
