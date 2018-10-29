@@ -15,8 +15,8 @@ endif
 ifeq ($(EXT2_SIZE),AUTO)
 EXT2_SIZE = 1G
 define ROOTFS_EXT2_SHRINK
-	resize2fs -M $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
-	fsck $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
+	$(HOST_DIR)/sbin/resize2fs -M $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
+	$(HOST_DIR)/sbin/fsck $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
 endef
 endif
 
