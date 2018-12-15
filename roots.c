@@ -189,7 +189,7 @@ Volume* volume_for_path(const char* path) {
 		int len = strlen(v->mount_point);
 		if (strncmp(path, v->mount_point, len) == 0 &&
 			(path[len] == '\0' || path[len] == '/')) {
-			printf(" ===path = %s, v-mount_point = %s ===\n",path, v->mount_point);
+			//printf(" ===path = %s, v-mount_point = %s ===\n",path, v->mount_point);
 			return v;
 		} else {
 			//add by chad.ma for symbol link file. eg. sdcard/ --->mnt/sdcard
