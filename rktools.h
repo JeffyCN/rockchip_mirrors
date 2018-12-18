@@ -1,5 +1,6 @@
 #ifndef _RKTOOLS_H
 #define _RKTOOLS_H
+#include "common.h"
 
 #define PATH_LEN 50
 #define usb_path "/mnt/udisk/"
