@@ -193,10 +193,10 @@ int make_ntfs(const char *filename,const char* volumelabel) {
     printf("format '%s' to NTFS filesystem.\n", filename);
 
     if(volumelabel == NULL){
-         const char *const mkntfs_argv[] = { "mkntfs", "-f", filename, NULL };
+         const char *const mkntfs_argv[] = { "mkntfs", "-F", "C", "Q", filename, NULL };
          return run(mkntfs_argv[0], (char **) mkntfs_argv);
     }else{
-         const char *const mkntfs_withLabel_argv[] = { "mkntfs", "-f", "-L", volumelabel, filename, NULL };
+         const char *const mkntfs_withLabel_argv[] = { "mkntfs", "-F", "C", "Q", "-L", volumelabel, filename, NULL };
          return run(mkntfs_withLabel_argv[0], (char **) mkntfs_withLabel_argv);
     }
 }
