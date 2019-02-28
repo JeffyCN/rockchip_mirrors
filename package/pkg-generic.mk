@@ -388,6 +388,13 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 	$(Q)if test -n "$($(PKG)_CONFIG_SCRIPTS)" ; then \
 		$(RM) -f $(addprefix $(TARGET_DIR)/usr/bin/,$($(PKG)_CONFIG_SCRIPTS)) ; \
 	fi
+
+	$(Q)cd $(TARGET_DIR); find . \( -type f -o -type l \) \
+		-cnewer $(@D)/.stamp_installed | \
+		tee $(@D)/.files-list-target.txt | \
+		$(TAR) --no-recursion --ignore-failed-read \
+			-cf $(@D)/$($(PKG)_BASENAME).tar -T -; true;
+
 	@$(call step_end,install-target)
 	$(Q)touch $@
 
