@@ -236,4 +236,14 @@ define GLIBC_INSTALL_TARGET_CMDS
 	)
 endef
 
+ifeq ($(BR2_PACKAGE_GLIBC_GEN_LD_CACHE),y)
+GLIBC_DEPENDENCIES += host-qemu
+
+define GLIBC_GEN_LD_CACHE
+	mkdir -p $(TARGET_DIR)/etc $(TARGET_DIR)/tmp
+	$(QEMU_USER) $(GLIBC_DIR)/build/elf/ldconfig -r $(TARGET_DIR) || true
+endef
+GLIBC_TARGET_FINALIZE_HOOKS += GLIBC_GEN_LD_CACHE
+endif
+
 $(eval $(autotools-package))
