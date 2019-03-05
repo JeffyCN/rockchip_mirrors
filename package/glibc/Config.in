@@ -10,10 +10,20 @@ config BR2_PACKAGE_GLIBC
 	help
 	  https://www.gnu.org/software/libc/
 
+if BR2_PACKAGE_GLIBC
+
+config BR2_PACKAGE_GLIBC_GEN_LD_CACHE
+	bool "glibc gen ld.so.cache"
+	default y
+	select BR2_PACKAGE_HOST_QEMU
+	select BR2_PACKAGE_HOST_QEMU_LINUX_USER_MODE
+
 config BR2_PACKAGE_GLIBC_UTILS
 	bool "Install glibc utilities"
 	help
 	  Enabling this option will compile and install the getconf,
 	  ldconfig, ldd and locale glibc utilities for the target.
+
+endif # BR2_PACKAGE_GLIBC
 
 endif # BR2_TOOLCHAIN_BUILDROOT_GLIBC
