@@ -7,4 +7,4 @@ then
 	audiofile=/usr/share/sounds/alsa/Noise.wav
 fi
 
-gst-launch-1.0 filesrc location=$audiofile ! wavparse ! audioconvert ! autoaudiosink
+gst-launch-1.0 filesrc location="$audiofile" ! wavparse ! audioconvert ! autoaudiosink
