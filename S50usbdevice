@@ -66,7 +66,11 @@ configfs_init()
 	echo 0x2207 > /sys/kernel/config/usb_gadget/rockchip/idVendor
 	echo $PID > /sys/kernel/config/usb_gadget/rockchip/idProduct
 	mkdir /sys/kernel/config/usb_gadget/rockchip/strings/0x409   -m 0770
-	echo "0123456789ABCDEF" > /sys/kernel/config/usb_gadget/rockchip/strings/0x409/serialnumber
+	SERIAL=`cat /proc/cpuinfo | grep Serial | awk '{print $3}'`
+	if [ -z $SERIAL ];then
+		SERIAL=0123456789ABCDEF
+	fi
+	echo $SERIAL > /sys/kernel/config/usb_gadget/rockchip/strings/0x409/serialnumber
 	echo "rockchip"  > /sys/kernel/config/usb_gadget/rockchip/strings/0x409/manufacturer
 	echo "rk3xxx"  > /sys/kernel/config/usb_gadget/rockchip/strings/0x409/product
 	mkdir /sys/kernel/config/usb_gadget/rockchip/configs/b.1  -m 0770
