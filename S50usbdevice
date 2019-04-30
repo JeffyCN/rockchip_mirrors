@@ -6,6 +6,7 @@
 UMS_EN=off
 ADB_EN=off
 MTP_EN=off
+NTB_EN=off
 
 make_config_string()
 {
@@ -34,9 +35,12 @@ parameter_init()
 				UMS_EN=on
 				make_config_string ums
 				;;
+			usb_ntb_en)
+				NTB_EN=on
+				make_config_string ntb
+				;;
 		esac
 	done < $DIR/.usb_config
-
 
 	case "$CONFIG_STRING" in
 		ums)
@@ -96,6 +100,11 @@ function_init()
 		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/mtp.gs0
 		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/mtp.gs0 /sys/kernel/config/usb_gadget/rockchip/configs/b.1/mtp.gs0
 	fi
+
+	if [ $NTB_EN = on ];then
+		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/ffs.ntb
+		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/ffs.ntb /sys/kernel/config/usb_gadget/rockchip/configs/b.1/ffs.ntb
+	fi
 }
 
 case "$1" in
@@ -128,6 +137,11 @@ start)
 		else
 			sleep 1 && mtp-server&
 		fi
+	fi
+
+	if [ $NTB_EN = on ];then
+		mkdir -p /dev/usb-ffs/ntb
+		mount -o uid=2000,gid=2000 -t functionfs ntb /dev/usb-ffs/ntb
 	fi
 
 	UDC=`ls /sys/class/udc/| awk '{print $1}'`
