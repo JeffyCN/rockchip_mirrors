@@ -346,9 +346,17 @@ int format_volume(const char* volume) {
 		return -1;
 	}
 
-	if (strcmp(v->fs_type, "yaffs2") == 0 || strcmp(v->fs_type, "mtd") == 0) {
+	if (strcmp(v->fs_type, "yaffs2") == 0 || strcmp(v->fs_type, "mtd") == 0 || strcmp(v->fs_type, "ubifs") == 0 ) {
 		mtd_scan_partitions();
-		const MtdPartition* partition = mtd_find_partition_by_name(v->device);
+		char filepath[20];
+		if(strstr(v->device, "userdata") != NULL){
+			strcpy(filepath, "userdata");
+			LOGW("change v->device from %s to %s.\n", v->device, filepath);
+		}else{
+			strcpy(filepath, v->device);
+		}
+
+		const MtdPartition* partition = mtd_find_partition_by_name(filepath);
 		if (partition == NULL) {
 			LOGE("format_volume: no MTD partition \"%s\"\n", v->device);
 			return -1;

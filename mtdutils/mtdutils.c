@@ -239,7 +239,8 @@ mtd_partition_info(const MtdPartition *partition,
         size_t *total_size, size_t *erase_size, size_t *write_size)
 {
     char mtddevname[32];
-    sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
+	//sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
+    sprintf(mtddevname, "/dev/mtd%d", partition->device_index);
     int fd = open(mtddevname, O_RDONLY);
     if (fd < 0) return -1;
 
@@ -266,7 +267,8 @@ MtdReadContext *mtd_read_partition(const MtdPartition *partition)
     }
 
     char mtddevname[32];
-    sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
+	sprintf(mtddevname, "/dev/mtd%d", partition->device_index);
+    //sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
     ctx->fd = open(mtddevname, O_RDONLY);
     if (ctx->fd < 0) {
         free(ctx);
@@ -382,7 +384,8 @@ MtdWriteContext *mtd_write_partition(const MtdPartition *partition)
     }
 
     char mtddevname[32];
-    sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
+	sprintf(mtddevname, "/dev/mtd%d", partition->device_index);
+    //sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
     ctx->fd = open(mtddevname, O_RDWR);
     if (ctx->fd < 0) {
         free(ctx->buffer);

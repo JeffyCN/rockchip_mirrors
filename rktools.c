@@ -159,3 +159,15 @@ void setFlashPoint(){
     printf("sd_point is %s\n", getenv(SD_POINT_NAME));
     printf("sd_point_2 is %s\n", getenv(SD_POINT_NAME_2));
 }
+
+#define MTD_PATH "/proc/mtd"
+//判断是MTD还是block 设备
+int isMtdDevice() {
+    if ( !access(MTD_PATH, F_OK) ) {
+        printf("Current device is MTD");
+        return 0;
+    } else {
+        printf("Current device is not MTD");
+        return -1;
+    }
+}

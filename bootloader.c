@@ -34,7 +34,8 @@ int get_bootloader_message(struct bootloader_message *out) {
     Volume* v = volume_for_path("/misc");
 
     if(!v) return -1;
-    if (strcmp(v->fs_type, "mtd") == 0) {
+    //if (strcmp(v->fs_type, "mtd") == 0) {
+    if (isMtdDevice() == 0) {
         return get_bootloader_message_mtd(out, v);
     } else if (strcmp(v->fs_type, "emmc") == 0) {
         return get_bootloader_message_block(out, v);
@@ -45,7 +46,8 @@ int get_bootloader_message(struct bootloader_message *out) {
 
 int set_bootloader_message(const struct bootloader_message *in) {
     Volume* v = volume_for_path("/misc");
-    if (strcmp(v->fs_type, "mtd") == 0) {
+    //if (strcmp(v->fs_type, "mtd") == 0) {
+    if (isMtdDevice() == 0) {
         return set_bootloader_message_mtd(in, v);
     } else if (strcmp(v->fs_type, "emmc") == 0) {
         return set_bootloader_message_block(in, v);
@@ -58,55 +60,60 @@ int set_bootloader_message(const struct bootloader_message *in) {
 // for misc partitions on MTD
 // ------------------------------
 
-static const int MISC_PAGES = 3;         // number of pages to save
-static const int MISC_COMMAND_PAGE = 1;  // bootloader command is this page
+static const int MISC_PAGES = 10;         // number of pages to save
+static const int MISC_COMMAND_PAGE = 8;  // bootloader command is this page
 
+#define MISC_NAME "misc"
 static int get_bootloader_message_mtd(struct bootloader_message *out,
                                       const Volume* v) {
     size_t write_size;
     mtd_scan_partitions();
-    const MtdPartition *part = mtd_find_partition_by_name(v->device);
+    const MtdPartition *part = mtd_find_partition_by_name(MISC_NAME);
     if (part == NULL || mtd_partition_info(part, NULL, NULL, &write_size)) {
-        LOGE("Can't find %s\n", v->device);
+        LOGE("Can't find %s\n", MISC_NAME);
         return -1;
     }
 
     MtdReadContext *read = mtd_read_partition(part);
     if (read == NULL) {
-        LOGE("Can't open %s\n(%s)\n", v->device, strerror(errno));
+        LOGE("Can't open %s\n(%s)\n", MISC_NAME, strerror(errno));
         return -1;
     }
 
     const ssize_t size = write_size * MISC_PAGES;
     char data[size];
     ssize_t r = mtd_read_data(read, data, size);
-    if (r != size) LOGE("Can't read %s\n(%s)\n", v->device, strerror(errno));
+    if (r != size) LOGE("Can't read %s\n(%s)\n", MISC_NAME, strerror(errno));
     mtd_read_close(read);
     if (r != size) return -1;
 
     memcpy(out, &data[write_size * MISC_COMMAND_PAGE], sizeof(*out));
+	printf("out->command = %s.\n", out->command);
+	printf("out->status = %s.\n", out->status);
+	printf("out->recovery = %s.\n", out->recovery);
+	printf("out->systemFlag = %s.\n", out->systemFlag);
     return 0;
 }
 static int set_bootloader_message_mtd(const struct bootloader_message *in,
                                       const Volume* v) {
     size_t write_size;
     mtd_scan_partitions();
-    const MtdPartition *part = mtd_find_partition_by_name(v->device);
+    const MtdPartition *part = mtd_find_partition_by_name(MISC_NAME);
     if (part == NULL || mtd_partition_info(part, NULL, NULL, &write_size)) {
-        LOGE("Can't find %s\n", v->device);
+        LOGE("Can't find %s\n", MISC_NAME);
         return -1;
     }
 
     MtdReadContext *read = mtd_read_partition(part);
     if (read == NULL) {
-        LOGE("Can't open %s\n(%s)\n", v->device, strerror(errno));
+        LOGE("Can't open %s\n(%s)\n", MISC_NAME, strerror(errno));
         return -1;
     }
 
     ssize_t size = write_size * MISC_PAGES;
     char data[size];
     ssize_t r = mtd_read_data(read, data, size);
-    if (r != size) LOGE("Can't read %s\n(%s)\n", v->device, strerror(errno));
+    if (r != size) LOGE("Can't read %s\n(%s)\n", MISC_NAME, strerror(errno));
     mtd_read_close(read);
     if (r != size) return -1;
 
@@ -114,16 +121,16 @@ static int set_bootloader_message_mtd(const struct bootloader_message *in,
 
     MtdWriteContext *write = mtd_write_partition(part);
     if (write == NULL) {
-        LOGE("Can't open %s\n(%s)\n", v->device, strerror(errno));
+        LOGE("Can't open %s\n(%s)\n", MISC_NAME, strerror(errno));
         return -1;
     }
     if (mtd_write_data(write, data, size) != size) {
-        LOGE("Can't write %s\n(%s)\n", v->device, strerror(errno));
+        LOGE("Can't write %s\n(%s)\n", MISC_NAME, strerror(errno));
         mtd_write_close(write);
         return -1;
     }
     if (mtd_write_close(write)) {
-        LOGE("Can't finish %s\n(%s)\n", v->device, strerror(errno));
+        LOGE("Can't finish %s\n(%s)\n", MISC_NAME, strerror(errno));
         return -1;
     }
 
