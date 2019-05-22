@@ -60,7 +60,7 @@ static const char *SDCARD_ROOT = "/sdcard";
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
 static const char *coldboot_done = "/dev/.coldboot_done";
-char systemFlag[256];
+char systemFlag[252];
 bool bSDBootUpdate = false;
 
 /*
@@ -849,7 +849,7 @@ main(int argc, char **argv) {
         char text[128] ;
         memset(text, 0, sizeof(text));
 
-        fd = open(resutl_file, O_CREAT | O_WRONLY | O_TRUNC);
+        fd = open(resutl_file, O_CREAT | O_WRONLY | O_TRUNC, 0777);
         if (fd < 0) {
             LOGE("open /userdata/update_rst.txt fail, errno = %d\n", errno);
         }
@@ -871,7 +871,13 @@ main(int argc, char **argv) {
         }
         if(ret == 0) {
             printf(">>>rkflash will update from %s\n", update_package);
+            #ifdef USE_RKUPDATE
             status = do_rk_update(binary, update_package);
+            #endif
+            #ifdef USE_UPDATEENGINE
+            const char* updateEnginebin = "/usr/bin/updateEngine";
+            status = do_rk_updateEngine(updateEnginebin, update_package);
+            #endif
             if(status == INSTALL_SUCCESS){
                 strcpy(systemFlag, update_package);
 
@@ -902,9 +908,17 @@ main(int argc, char **argv) {
         ui_show_text(0);
     }else if (sdupdate_package != NULL) {
         // update image from sdcard
+        #ifdef USE_RKUPDATE
         const char* binary = "/usr/bin/rkupdate";
         printf(">>>sdboot update will update from %s\n", sdupdate_package);
         status = do_rk_update(binary, sdupdate_package);
+        #endif
+
+        #ifdef USE_UPDATEENGINE
+        const char* updateEnginebin = "/usr/bin/updateEngine";
+        status = do_rk_updateEngine(updateEnginebin, update_package);
+        #endif
+
         if(status == INSTALL_SUCCESS){
             printf("update.img Installation success.\n");
             ui_print("update.img Installation success.\n");
