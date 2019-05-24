@@ -10,10 +10,10 @@ $(error BR2_TARGET_ROOTFS_EXT2_SIZE cannot be empty)
 endif
 
 # If SIZE is AUTO, which mean shrink the filesystem to the minimum size.
-# Suppose 1G is big enough for buildroot ext filesystem, we then shrink
+# Suppose 2G is big enough for buildroot ext filesystem, we then shrink
 # it after rootfs img packed.
 ifeq ($(EXT2_SIZE),AUTO)
-EXT2_SIZE = 1G
+EXT2_SIZE = 2G
 define ROOTFS_EXT2_SHRINK
 	$(HOST_DIR)/sbin/resize2fs -M $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
 	$(HOST_DIR)/sbin/e2fsck -fy $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
