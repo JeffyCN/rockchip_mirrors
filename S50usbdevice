@@ -7,6 +7,7 @@ UMS_EN=off
 ADB_EN=off
 MTP_EN=off
 NTB_EN=off
+ACM_EN=off
 
 make_config_string()
 {
@@ -39,6 +40,10 @@ parameter_init()
 				NTB_EN=on
 				make_config_string ntb
 				;;
+			usb_acm_en)
+				ACM_EN=on
+				make_config_string acm
+				;;
 		esac
 	done < $DIR/.usb_config
 
@@ -57,6 +62,9 @@ parameter_init()
 			;;
 		ums_adb | adb_ums)
 			PID=0x0018
+			;;
+		acm)
+			PID=0x1005
 			;;
 		*)
 			PID=0x0019
@@ -104,6 +112,11 @@ function_init()
 	if [ $NTB_EN = on ];then
 		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/ffs.ntb
 		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/ffs.ntb /sys/kernel/config/usb_gadget/rockchip/configs/b.1/ffs.ntb
+	fi
+
+	if [ $ACM_EN = on ];then
+		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/acm.gs6
+		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/acm.gs6 /sys/kernel/config/usb_gadget/rockchip/configs/b.1/acm.gs6
 	fi
 }
 
