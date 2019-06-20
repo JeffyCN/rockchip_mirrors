@@ -17,6 +17,8 @@ EXT2_SIZE = 2G
 define ROOTFS_EXT2_SHRINK
 	$(HOST_DIR)/sbin/resize2fs -M $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
 	$(HOST_DIR)/sbin/e2fsck -fy $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
+	$(HOST_DIR)/sbin/tune2fs -m $(BR2_TARGET_ROOTFS_EXT2_RESBLKS) $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
+	$(HOST_DIR)/sbin/resize2fs -M $(BINARIES_DIR)/rootfs.ext2$(ROOTFS_EXT2_COMPRESS_EXT)
 endef
 endif
 
