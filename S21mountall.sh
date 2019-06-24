@@ -19,6 +19,50 @@ check_tool()
 	return 1
 }
 
+prepare_ubifs()
+{
+	# Only support ubifs for mtd device
+	[ -f /proc/mtd ] || { echo "Not a mtd device!" && return 1; }
+
+	# Use /dev/ubi$PART_NO for ubifs device
+	[ -n "$PART_NO" ] || { echo "No valid part number!" && return 1; }
+
+	# Prepare ubifs device
+	ubiattach /dev/ubi_ctrl -p $DEV -d $PART_NO
+	grep -w $PART_NAME /sys/class/ubi/ubi${PART_NO}_0/name &>/dev/null && \
+		return 0
+
+	echo "No valid ubifs volume, formatting..."
+
+	format_ubifs
+}
+
+mount_ubifs()
+{
+	echo "Mounting ubifs /dev/ubi${PART_NO}_0 on $2 ${3:+with$3}"
+
+	# Mount /dev/ubi${PART_NO}_0 instead of $DEV
+	mount -t ubifs /dev/ubi${PART_NO}_0 $2 $3
+}
+
+format_ubifs()
+{
+	# Detach first
+	ubidetach -p $DEV
+
+	# Format device
+	check_tool ubiformat BR2_PACKAGE_MTD_UBIFORMAT || return 1
+	ubiformat -yq $DEV || return 1
+
+	# Attach ubifs device
+	check_tool ubiattach BR2_PACKAGE_MTD_UBIATTACH || return 1
+	ubiattach /dev/ubi_ctrl -p $DEV -d $PART_NO || return 1
+
+	# Create ubifs volume
+	check_tool ubimkvol BR2_PACKAGE_MTD_UBIMKVOL || return 1
+	ubimkvol /dev/ubi$PART_NO -N $PART_NAME -m
+}
+
 remount_part()
 {
 	mountpoint -q $MOUNT_POINT || return
@@ -50,6 +94,9 @@ format_part()
 			# Enable compression
 			check_tool mkntfs BR2_PACKAGE_NTFS_3G_NTFSPROGS && \
 			mkntfs -FCQ -L $PART_NAME $DEV
+			;;
+		ubifs)
+			format_ubifs
 			;;
 		*)
 			echo Unsupported file system $FSTYPE for $DEV
@@ -204,6 +251,11 @@ prepare_part()
 			FSGROUP=ntfs
 			FSCK_CONFIG=BR2_PACKAGE_NTFS_3G_NTFSPROGS
 			;;
+		ubifs)
+			FSGROUP=ubifs
+			# No fsck for ubifs
+			unset FSCK_CONFIG
+			;;
 		*)
 			echo "Unsupported file system $FSTYPE for $DEV"
 			return 1
@@ -232,6 +284,14 @@ prepare_part()
 			check_tool ntfslabel BR2_PACKAGE_NTFS_3G_NTFSPROGS || return 1
 			LABEL=$(ntfslabel $DEV)
 			;;
+		ubifs)
+			MOUNT="mount_ubifs"
+			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
+
+			# TODO: Support resize?
+			prepare_ubifs &&
+				LABEL=$PART_NAME
+			;;
 		*)
 			echo Unsupported file system $FSTYPE for $DEV
 			return 1
@@ -256,7 +316,7 @@ prepare_part()
 
 check_part()
 {
-	[ "$SKIP_FSCK" -o "$PASS" -eq 0 ] && return
+	[ "$SKIP_FSCK" -o "$PASS" -eq 0 -o -z "$FSCK_CONFIG" ] && return
 	echo "Checking $DEV($FSTYPE)"
 
 	check_tool fsck.$FSGROUP $FSCK_CONFIG || return
