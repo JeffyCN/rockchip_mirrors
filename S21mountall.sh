@@ -113,6 +113,7 @@ resize_vfat()
 	# Somehow fatresize only works for 256M+ fat
 	[ $SIZE -gt $((256 * 1024 * 1024)) ] && return 1
 
+	MAX_SIZE=$(( $(cat ${SYS_PATH}/size) * 512))
 	MIN_SIZE=$(($MAX_SIZE - 16 * 1024 * 1024))
 	[ $MIN_SIZE -lt $SIZE ] && return 0 # Large enough!
 	while [ $MAX_SIZE -gt $MIN_SIZE ];do
@@ -153,12 +154,16 @@ resize_part()
 done_oem_command()
 {
 	echo "OEM: Done with $cmd"
+
+	TEMP=$(mktemp)
 	COUNT=$(echo $cmd|wc -c)
 	OFFSETS=$(strings -t d $MISC_DEV | grep -w "$cmd" | awk '{ print $1 }')
 
+	dd if=$MISC_DEV of=$TEMP bs=4096
 	for offset in $OFFSETS; do
-		dd if=/dev/zero of=$MISC_DEV bs=1 count=$COUNT seek=$offset 2>/dev/null
+		dd if=/dev/zero of=$TEMP bs=1 count=$COUNT seek=$offset conv=notrunc 2>/dev/null
 	done
+	dd of=$MISC_DEV if=$TEMP bs=4096
 }
 
 handle_oem_command()
@@ -287,15 +292,19 @@ do_part()
 	fi
 
 	DEV=$(realpath $DEV 2>/dev/null)
+	PART_NO=$(echo $DEV|grep -oE "[0-9]*$")
 
 	# Unknown device
-	[ -b "$DEV" ] || return
+	[ -b "$DEV" -o -c "$DEV" ] || return
 
 	echo "Handling $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
 
-	SYS_PATH=/sys/class/block/${DEV##*/}
-	MAX_SIZE=$(( $(cat ${SYS_PATH}/size) * 512))
-	PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
+	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
+	if [ -f "$SYS_PATH/name" ]; then
+		PART_NAME=$(cat $SYS_PATH/name)
+	else
+		PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
+	fi
 
 	# Handle OEM commands for current partition
 	handle_oem_command
