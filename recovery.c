@@ -784,6 +784,21 @@ main(int argc, char **argv) {
     }
     printf("\n");
 
+#if 0   //add for test fopen /userdata/* function.
+    FILE *hfile;
+    char* filename = "/userdata/test.txt";
+    char buffer[1024];
+    hfile = fopen(filename, "rb");
+    if (!hfile)
+    {
+        printf("fopen <%s> fail\n", filename);
+        return;
+    }
+
+    fread(buffer,1,sizeof(buffer),hfile);
+    printf("%s \n", buffer);
+#endif
+
     if (update_package) {
         // For backwards compatibility on the cache partition only, if
         // we're given an old 'root' path "CACHE:foo", change it to
