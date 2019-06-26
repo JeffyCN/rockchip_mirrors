@@ -238,29 +238,6 @@ convert_mount_opts()
 
 prepare_part()
 {
-	case $FSTYPE in
-		ext[234])
-			FSGROUP=ext2
-			FSCK_CONFIG=BR2_PACKAGE_E2FSPROGS_FSCK
-			;;
-		msdos|fat|vfat)
-			FSGROUP=vfat
-			FSCK_CONFIG=BR2_PACKAGE_DOSFSTOOLS_FSCK_FAT
-			;;
-		ntfs)
-			FSGROUP=ntfs
-			FSCK_CONFIG=BR2_PACKAGE_NTFS_3G_NTFSPROGS
-			;;
-		ubifs)
-			FSGROUP=ubifs
-			# No fsck for ubifs
-			unset FSCK_CONFIG
-			;;
-		*)
-			echo "Unsupported file system $FSTYPE for $DEV"
-			return 1
-	esac
-
 	case $FSGROUP in
 		ext2)
 			MOUNT="busybox mount"
@@ -366,10 +343,33 @@ do_part()
 		PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
 	fi
 
+	case $FSTYPE in
+		ext[234])
+			FSGROUP=ext2
+			FSCK_CONFIG=BR2_PACKAGE_E2FSPROGS_FSCK
+			;;
+		msdos|fat|vfat)
+			FSGROUP=vfat
+			FSCK_CONFIG=BR2_PACKAGE_DOSFSTOOLS_FSCK_FAT
+			;;
+		ntfs)
+			FSGROUP=ntfs
+			FSCK_CONFIG=BR2_PACKAGE_NTFS_3G_NTFSPROGS
+			;;
+		ubifs)
+			FSGROUP=ubifs
+			# No fsck for ubifs
+			unset FSCK_CONFIG
+			;;
+		*)
+			echo "Unsupported file system $FSTYPE for $DEV"
+			return
+	esac
+
 	# Handle OEM commands for current partition
 	handle_oem_command
 
-	# Check fs types and setup check/mount tools
+	# Setup check/mount tools and do some prepare
 	prepare_part || return
 
 	# Resize partition if needed
