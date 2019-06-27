@@ -3,7 +3,7 @@
 # Uncomment below to see more logs
 # set -x
 
-MISC_DEV=/dev/block/by-name/misc
+MISC_DEV=$(realpath /dev/block/by-name/misc)
 
 BUSYBOX_MOUNT_OPTS="loop (a|)sync (no|)atime (no|)diratime (no|)relatime (no|)dev (no|)exec (no|)suid (r|)shared (r|)slave (r|)private (un|)bindable (r|)bind move remount ro"
 NTFS_3G_MOUNT_OPTS="ro uid=[0-9]* gid=[0-9]* umask=[0-9]* fmask=[0-9]* dmask=[0-9]*"
@@ -198,19 +198,42 @@ resize_part()
 	[ ! "$IS_ROOTDEV" ] && format_resize
 }
 
+erase_oem_command()
+{
+	CMD=$1
+	FILE=$2
+
+	echo "OEM: Erasing $CMD in $FILE"
+
+	COUNT=$(echo $CMD|wc -c)
+	OFFSETS=$(strings -t d $FILE | grep -w "$CMD" | awk '{ print $1 }')
+
+	for offset in $OFFSETS; do
+		dd if=/dev/zero of=$FILE bs=1 count=$COUNT seek=$offset conv=notrunc 2>/dev/null
+	done
+}
+
 done_oem_command()
 {
-	echo "OEM: Done with $cmd"
+	CMD=$1
 
-	TEMP=$(mktemp)
-	COUNT=$(echo $cmd|wc -c)
-	OFFSETS=$(strings -t d $MISC_DEV | grep -w "$cmd" | awk '{ print $1 }')
+	echo "OEM: Done with $CMD"
 
-	dd if=$MISC_DEV of=$TEMP bs=4096
-	for offset in $OFFSETS; do
-		dd if=/dev/zero of=$TEMP bs=1 count=$COUNT seek=$offset conv=notrunc 2>/dev/null
-	done
-	dd of=$MISC_DEV if=$TEMP bs=4096
+	if [ -b "$MISC_DEV" ]; then
+		erase_oem_command $CMD $MISC_DEV
+	else
+		echo "OEM: Erase $CMD from mtd device"
+
+		check_tool nanddump BR2_PACKAGE_MTD_NANDDUMP || return
+		check_tool nandwrite BR2_PACKAGE_MTD_NANDWRITE || return
+		check_tool flash_erase BR2_PACKAGE_MTD_FLASH_ERASE || return
+
+		TEMP=$(mktemp)
+		nanddump $MISC_DEV -f $TEMP
+		erase_oem_command $CMD $TEMP
+		flash_erase $MISC_DEV 0 0
+		nandwrite $MISC_DEV $TEMP
+	fi
 }
 
 handle_oem_command()
@@ -402,7 +425,7 @@ do_part()
 prepare_mountall()
 {
 	OEM_CMD=$(strings $MISC_DEV | grep "^cmd_" | xargs)
-	[ "$OEM_CMD" ] && echo "Note: Fount OEM commands - $OEM_CMD"
+	[ "$OEM_CMD" ] && echo "Note: Found OEM commands - $OEM_CMD"
 
 	AUTO_MKFS="/.auto_mkfs"
 	if [ -f $AUTO_MKFS ];then
