@@ -424,7 +424,7 @@ do_part()
 
 prepare_mountall()
 {
-	OEM_CMD=$(strings $MISC_DEV | grep "^cmd_" | xargs)
+	OEM_CMD=$(strings "$MISC_DEV" | grep "^cmd_" | xargs)
 	[ "$OEM_CMD" ] && echo "Note: Found OEM commands - $OEM_CMD"
 
 	AUTO_MKFS="/.auto_mkfs"
