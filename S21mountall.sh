@@ -446,9 +446,9 @@ prepare_mountall()
 
 mountall()
 {
-	# Recovery's rootfs is ramfs
-	if mountpoint -d /|grep -wq 0:1; then
-		echo "Only mount basic file systems for recovery"
+	# No need to go further when rootfs is ramfs
+	if mountpoint -d /|grep -q "^0:"; then
+		echo "Only mount basic file systems for ramfs"
 		return
 	fi
 
