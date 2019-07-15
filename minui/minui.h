@@ -35,6 +35,13 @@ typedef struct {
 
 typedef GRSurface* gr_surface;
 
+typedef enum GRRotation_e {
+  ROTATION_NONE = 0,
+  ROTATION_RIGHT = 1,
+  ROTATION_DOWN = 2,
+  ROTATION_LEFT = 3,
+}GRRotation;
+
 int gr_init(void);
 void gr_exit(void);
 
@@ -55,6 +62,9 @@ void gr_font_size(int *x, int *y);
 void gr_blit(gr_surface source, int sx, int sy, int w, int h, int dx, int dy);
 unsigned int gr_get_width(gr_surface surface);
 unsigned int gr_get_height(gr_surface surface);
+// Set rotation, flips gr_fb_width/height if 90 degree rotation difference
+void gr_rotate(GRRotation rotation);
+
 
 // input event structure, include <linux/input.h> for the definition.
 // see http://www.mjmwired.net/kernel/Documentation/input/ for info.
