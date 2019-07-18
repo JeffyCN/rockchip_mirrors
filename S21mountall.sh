@@ -395,11 +395,11 @@ do_part()
 	# Setup check/mount tools and do some prepare
 	prepare_part || return
 
-	# Resize partition if needed
-	resize_part
-
 	# Check and repair
 	check_part
+
+	# Resize partition if needed
+	resize_part
 
 	# Restore ro/rw
 	remount_part $MOUNTED_RO_RW
