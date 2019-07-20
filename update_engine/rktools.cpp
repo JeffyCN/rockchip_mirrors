@@ -80,12 +80,34 @@ bool getLocalVersion(char *version, int maxLength) {
 
 //判断是MTD还是block 设备
 bool isMtdDevice() {
-    if ( !access(MTD_PATH, F_OK) ) {
-        return true;
-    } else {
-        LOGI("Current device is not MTD");
+    char param[2048];
+    int fd, ret;
+    char *s = NULL;
+    fd = open("/proc/cmdline", O_RDONLY);
+    ret = read(fd, (char*)param, 2048);
+    s = strstr(param,"storagemedia");
+    if(s == NULL){
+        LOGI("no found storagemedia in cmdline, default is not MTD.\n");
         return false;
+    }else{
+        s = strstr(s, "=");
+        if (s == NULL) {
+            LOGI("no found storagemedia in cmdline, default is not MTD.\n");
+            return false;
+        }
+
+        s++;
+        while (*s == ' ') {
+            s++;
+        }
+
+        if (strncmp(s, "mtd", 3) == 0 ) {
+            printf("Now is MTD.\n");
+            return true;
+        }
     }
+    LOGI("Current device is not MTD");
+    return false;
 }
 
 /**

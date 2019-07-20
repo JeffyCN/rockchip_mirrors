@@ -163,11 +163,32 @@ void setFlashPoint(){
 #define MTD_PATH "/proc/mtd"
 //判断是MTD还是block 设备
 int isMtdDevice() {
-    if ( !access(MTD_PATH, F_OK) ) {
-        printf("Current device is MTD");
-        return 0;
-    } else {
-        printf("Current device is not MTD");
+    char param[2048];
+    int fd, ret;
+    char *s = NULL;
+    fd = open("/proc/cmdline", O_RDONLY);
+    ret = read(fd, (char*)param, 2048);
+    s = strstr(param,"storagemedia");
+    if(s == NULL){
+        printf("no found storagemedia in cmdline, default is not MTD.\n");
         return -1;
+    }else{
+        s = strstr(s, "=");
+        if (s == NULL) {
+            printf("no found storagemedia in cmdline, default is not MTD.\n");
+            return -1;
+        }
+
+        s++;
+        while (*s == ' ') {
+            s++;
+        }
+
+        if (strncmp(s, "mtd", 3) == 0 ) {
+            printf("Now is MTD.\n");
+            return 0;
+        }
     }
+    printf("devices is not MTD.\n");
+    return -1;
 }
