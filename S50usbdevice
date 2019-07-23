@@ -9,6 +9,16 @@ MTP_EN=off
 NTB_EN=off
 ACM_EN=off
 
+USB_ATTRIBUTE=0x409
+USB_GROUP=rockchip
+USB_SKELETON=b.1
+
+CONFIGFS_DIR=/sys/kernel/config
+USB_CONFIGFS_DIR=${CONFIGFS_DIR}/usb_gadget/${USB_GROUP}
+USB_STRINGS_DIR=${USB_CONFIGFS_DIR}/strings/${USB_ATTRIBUTE}
+USB_FUNCTIONS_DIR=${USB_CONFIGFS_DIR}/functions
+USB_CONFIGS_DIR=${USB_CONFIGFS_DIR}/configs/${USB_SKELETON}
+
 make_config_string()
 {
 	tmp=$CONFIG_STRING
@@ -73,50 +83,50 @@ parameter_init()
 
 configfs_init()
 {
-	mount -t configfs none /sys/kernel/config
-	mkdir /sys/kernel/config/usb_gadget/rockchip  -m 0770
-	echo 0x2207 > /sys/kernel/config/usb_gadget/rockchip/idVendor
-	echo $PID > /sys/kernel/config/usb_gadget/rockchip/idProduct
-	mkdir /sys/kernel/config/usb_gadget/rockchip/strings/0x409   -m 0770
+	mount -t configfs none ${CONFIGFS_DIR}
+	mkdir ${USB_CONFIGFS_DIR} -m 0770
+	echo 0x2207 > ${USB_CONFIGFS_DIR}/idVendor
+	echo $PID > ${USB_CONFIGFS_DIR}/idProduct
+	mkdir ${USB_STRINGS_DIR}   -m 0770
 	SERIAL=`cat /proc/cpuinfo | grep Serial | awk '{print $3}'`
 	if [ -z $SERIAL ];then
 		SERIAL=0123456789ABCDEF
 	fi
-	echo $SERIAL > /sys/kernel/config/usb_gadget/rockchip/strings/0x409/serialnumber
-	echo "rockchip"  > /sys/kernel/config/usb_gadget/rockchip/strings/0x409/manufacturer
-	echo "rk3xxx"  > /sys/kernel/config/usb_gadget/rockchip/strings/0x409/product
-	mkdir /sys/kernel/config/usb_gadget/rockchip/configs/b.1  -m 0770
-	mkdir /sys/kernel/config/usb_gadget/rockchip/configs/b.1/strings/0x409  -m 0770
-	echo 500 > /sys/kernel/config/usb_gadget/rockchip/configs/b.1/MaxPower
-	echo \"$CONFIG_STRING\" > /sys/kernel/config/usb_gadget/rockchip/configs/b.1/strings/0x409/configuration
+	echo $SERIAL > ${USB_STRINGS_DIR}/serialnumber
+	echo "rockchip"  > ${USB_STRINGS_DIR}/manufacturer
+	echo "rk3xxx"  > ${USB_STRINGS_DIR}/product
+	mkdir ${USB_CONFIGS_DIR}  -m 0770
+	mkdir ${USB_CONFIGS_DIR}/strings/${USB_ATTRIBUTE}  -m 0770
+	echo 500 > ${USB_CONFIGS_DIR}/MaxPower
+	echo ${CONFIG_STRING} > ${USB_CONFIGS_DIR}/strings/${USB_ATTRIBUTE}/configuration
 }
 
 function_init()
 {
 	if [ $UMS_EN = on ];then
-		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/mass_storage.0
-		echo /dev/disk/by-partlabel/userdata > /sys/kernel/config/usb_gadget/rockchip/functions/mass_storage.0/lun.0/file
-		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/mass_storage.0 /sys/kernel/config/usb_gadget/rockchip/configs/b.1/mass_storage.0
+		mkdir ${USB_FUNCTIONS_DIR}/mass_storage.0
+		echo /dev/disk/by-partlabel/userdata > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/file
+		ln -s ${USB_FUNCTIONS_DIR}/mass_storage.0 ${USB_CONFIGS_DIR}/mass_storage.0
 	fi
 
 	if [ $ADB_EN = on ];then
-		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/ffs.adb
-		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/ffs.adb /sys/kernel/config/usb_gadget/rockchip/configs/b.1/ffs.adb
+		mkdir ${USB_FUNCTIONS_DIR}/ffs.adb
+		ln -s ${USB_FUNCTIONS_DIR}/ffs.adb ${USB_CONFIGS_DIR}/ffs.adb
 	fi
 
 	if [ $MTP_EN = on ];then
-		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/mtp.gs0
-		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/mtp.gs0 /sys/kernel/config/usb_gadget/rockchip/configs/b.1/mtp.gs0
+		mkdir ${USB_FUNCTIONS_DIR}/mtp.gs0
+		ln -s ${USB_FUNCTIONS_DIR}/mtp.gs0 ${USB_CONFIGS_DIR}/mtp.gs0
 	fi
 
 	if [ $NTB_EN = on ];then
-		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/ffs.ntb
-		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/ffs.ntb /sys/kernel/config/usb_gadget/rockchip/configs/b.1/ffs.ntb
+		mkdir ${USB_FUNCTIONS_DIR}/ffs.ntb
+		ln -s ${USB_FUNCTIONS_DIR}/ffs.ntb ${USB_CONFIGS_DIR}/ffs.ntb
 	fi
 
 	if [ $ACM_EN = on ];then
-		mkdir /sys/kernel/config/usb_gadget/rockchip/functions/acm.gs6
-		ln -s /sys/kernel/config/usb_gadget/rockchip/functions/acm.gs6 /sys/kernel/config/usb_gadget/rockchip/configs/b.1/acm.gs6
+		mkdir ${USB_FUNCTIONS_DIR}/acm.gs6
+		ln -s ${USB_FUNCTIONS_DIR}/acm.gs6 ${USB_CONFIGS_DIR}/acm.gs6
 	fi
 }
 
@@ -158,10 +168,10 @@ start)
 	fi
 
 	UDC=`ls /sys/class/udc/| awk '{print $1}'`
-	echo $UDC > /sys/kernel/config/usb_gadget/rockchip/UDC
+	echo $UDC > ${USB_CONFIGFS_DIR}/UDC
 	;;
 stop)
-	echo "none" > /sys/kernel/config/usb_gadget/rockchip/UDC
+	echo "none" > ${USB_CONFIGFS_DIR}/UDC
 	;;
 restart|reload)
 	;;
