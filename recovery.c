@@ -967,29 +967,27 @@ main(int argc, char **argv) {
 
     if (sdupdate_package != NULL && bSDBootUpdate) {
         if (status == INSTALL_SUCCESS){
-            int timeout = 60;
             char imageFile[64] = {0};
             strlcpy(imageFile, EX_SDCARD_ROOT, sizeof(imageFile));
             strlcat(imageFile, "/sdupdate.img", sizeof(imageFile));
 
-            printf("Please remove SD CARD!!!, wait for reboot.\n");
+            /* Updating is finished here, we must print this message
+             * in console, it shows user a specific message that
+             * updating is completely, remove SD CARD and reboot */
+            fflush(stdout);
+            freopen("/dev/console", "w", stdout);
+            printf("\nPlease remove SD CARD!!!, wait for reboot.\n");
             ui_print("Please remove SD CARD!!!, wait for reboot.");
 
-            while (timeout--) {
-                sleep(1);
-                if (access(imageFile, F_OK) == 0) {
-                    ui_print("Please remove SD CARD!!!, wait for reboot");
-                } else {
-                    break;
-                }
-            }
-            //ui_show_text(0);
+            while (access(imageFile, F_OK) == 0) { sleep(1); }
         }
     }
 
     // Otherwise, get ready to boot the main system...
     finish_recovery(send_intent);
     ui_print("Rebooting...\n");
+    printf("Reboot...\n");
+    fflush(stdout);
     sync();
     reboot(RB_AUTOBOOT);
     return EXIT_SUCCESS;
