@@ -173,8 +173,8 @@ function_init()
 		if [ "$UMS_BLOCK_SIZE" != "0" -a ! -e ${UMS_BLOCK} ]; then
 			dd if=/dev/zero of=${UMS_BLOCK} bs=1M count=${UMS_BLOCK_SIZE}
 			mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}
+			test $? && echo "Warning: failed to mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}"
 		fi
-		echo ${UMS_BLOCK} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/file
 		ln -s ${USB_FUNCTIONS_DIR}/mass_storage.0 ${USB_CONFIGS_DIR}/mass_storage.0
 		mkdir /mnt/ums -p
 		mount ${UMS_BLOCK} /mnt/ums

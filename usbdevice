@@ -52,8 +52,6 @@ if [ "$state"x != "CONFIGURED"x  ] ; then
 
 	if [ $UMS_EN = on ]; then
 		find_ums_config
-		VAR=`cat ${PATH_TO_UMS_FILE}`
-		test -z ${VAR} && echo ${UMS_BLOCK} > ${PATH_TO_UMS_FILE}
 		if [ $UMS_AUTO_MOUNT = on ]; then
 			mount $UMS_BLOCK /mnt/ums
 		fi
@@ -73,5 +71,7 @@ else
 		if [ $UMS_AUTO_MOUNT = on ]; then
 			umount -f /mnt/ums
 		fi
+		VAR=`cat ${PATH_TO_UMS_FILE}`
+		test -z ${VAR} && echo ${UMS_BLOCK} > ${PATH_TO_UMS_FILE}
 	fi
 fi
