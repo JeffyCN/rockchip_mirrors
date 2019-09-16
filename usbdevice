@@ -1,25 +1,77 @@
 #! /bin/sh
 
+UMS_EN=off
+MTP_EN=off
+UMS_AUTO_MOUNT=off
+UMS_BLOCK=/dev/block/by-name/userdata
+PATH_TO_UMS_FILE=/sys/kernel/config/usb_gadget/rockchip/configs/b.1/mass_storage.0/lun.0/file
+PATH_TO_USB_CONFIG=/etc/init.d/.usb_config
+PATH_TO_UDC=/sys/kernel/config/usb_gadget/rockchip/UDC
+
+find_ums_config()
+{
+	while read line
+	do
+		NAME=`echo $line | awk -F "=" '{print $1}'`
+		VAR=`echo $line | awk -F "=" '{print $2}'`
+
+		if [ "$NAME" == "ums_block" ]; then
+			UMS_BLOCK=${VAR}
+		fi
+
+		if [ "$NAME" == "ums_auto_mount" ]; then
+			UMS_AUTO_MOUNT=${VAR}
+		fi
+	done < ${PATH_TO_USB_CONFIG}
+}
+
+find_spec_function()
+{
+	functions=`cat /sys/kernel/config/usb_gadget/rockchip/configs/b.1/strings/0x409/configuration`
+
+	functions=${functions}_over
+	tmp=`echo $functions | awk -F "_" '{print $1}'`
+
+	until [ "${tmp}" == "over" ]; do
+		test "$tmp" == "mtp" && MTP_EN=on
+		test "$tmp" == "ums" && UMS_EN=on
+		functions=${functions#*_}
+		tmp=`echo $functions | awk -F "_" '{print $1}'`
+	done
+}
+
 sleep 1
 dev_path=/sys$1
 state=`cat ${dev_path}/state`
-if [ "$state"x != "config"x  ] ; then
-UDC=`ls /sys/class/udc/| awk '{print $1}'`
-echo $UDC > /sys/kernel/config/usb_gadget/rockchip/UDC
-functions=`cat /sys/kernel/config/usb_gadget/rockchip/configs/b.1/strings/0x409/configuration`
 
-# if no "_" string to "cut" command, it will set the full string to output.
-# add "_" to string functions avoiding no "_" case
-i=2
-functions=_${functions}
+find_spec_function
+if [ "$state"x != "CONFIGURED"x  ] ; then
 
-tmp=`echo $functions | cut -d _ -f $i`
-until [ -z "$tmp" ]; do
-	if [ "$tmp" == "mtp" ]; then
-		mtp-server&
-		break
+	# No UDC means gadget functions are unbind
+	udc_state=`cat ${PATH_TO_UDC}`
+
+	if [ $UMS_EN = on ]; then
+		find_ums_config
+		VAR=`cat ${PATH_TO_UMS_FILE}`
+		test -z ${VAR} && echo ${UMS_BLOCK} > ${PATH_TO_UMS_FILE}
+		if [ $UMS_AUTO_MOUNT = on ]; then
+			mount $UMS_BLOCK /mnt/ums
+		fi
 	fi
-	i=`expr $i + 1`
-	tmp=`echo $functions | cut -d _ -f $i`
-done
+
+	if [ -z ${udc_state} ]; then
+		if [ $MTP_EN = on ]; then
+			mtp-server &
+		fi
+
+		UDC=`ls /sys/class/udc/| awk '{print $1}'`
+		echo $UDC > $PATH_TO_UDC
+	fi
+else
+	if [ $UMS_EN = on ]; then
+		find_ums_config
+		if [ $UMS_AUTO_MOUNT = on ]; then
+			umount -f /mnt/ums
+		fi
+	fi
 fi

@@ -22,6 +22,11 @@ USB_STRINGS_DIR=${USB_CONFIGFS_DIR}/strings/${USB_ATTRIBUTE}
 USB_FUNCTIONS_DIR=${USB_CONFIGFS_DIR}/functions
 USB_CONFIGS_DIR=${USB_CONFIGFS_DIR}/configs/${USB_SKELETON}
 
+UMS_BLOCK=/userdata/ums_shared.img
+UMS_BLOCK_SIZE=0	#unit M
+UMS_BLOCK_TYPE=fat
+UMS_RO=0
+
 make_config_string()
 {
 	tmp=$CONFIG_STRING
@@ -30,6 +35,36 @@ make_config_string()
 	else
 		CONFIG_STRING=$1
 	fi
+}
+
+parse_parameter()
+{
+	# find name and var
+	NAME=`echo $1 | awk -F "=" '{print $1}'`
+	VAR=`echo $1 | awk -F "=" '{print $2}'`
+
+	case "$NAME" in
+		ums_block)
+			UMS_BLOCK=${VAR}
+			;;
+		ums_block_size)
+			if [ ! "$VAR" -gt 0 ] 2>/dev/null ;then
+				echo "$VAR is not a number"
+				exit 1
+			fi
+			UMS_BLOCK_SIZE=${VAR}
+			;;
+		ums_block_type)
+			UMS_BLOCK_TYPE=${VAR}
+			;;
+		ums_ro)
+			if [ "$VAR" != "off" ]; then
+				echo "Set UMS read-only"
+				UMS_RO=1
+			fi
+				UMS_RO=0
+			;;
+	esac
 }
 
 parameter_init()
@@ -68,6 +103,9 @@ parameter_init()
 			usb_uvc_en)
 				UVC_EN=on
 				make_config_string uvc
+				;;
+			*)
+				parse_parameter ${line}
 				;;
 		esac
 	done < $DIR/.usb_config
@@ -131,8 +169,15 @@ function_init()
 
 	if [ $UMS_EN = on ];then
 		mkdir ${USB_FUNCTIONS_DIR}/mass_storage.0
-		echo /dev/disk/by-partlabel/userdata > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/file
+		echo ${UMS_RO} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/ro
+		if [ "$UMS_BLOCK_SIZE" != "0" -a ! -e ${UMS_BLOCK} ]; then
+			dd if=/dev/zero of=${UMS_BLOCK} bs=1M count=${UMS_BLOCK_SIZE}
+			mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}
+		fi
+		echo ${UMS_BLOCK} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/file
 		ln -s ${USB_FUNCTIONS_DIR}/mass_storage.0 ${USB_CONFIGS_DIR}/mass_storage.0
+		mkdir /mnt/ums -p
+		mount ${UMS_BLOCK} /mnt/ums
 	fi
 
 	if [ $ADB_EN = on ];then
@@ -208,7 +253,6 @@ start)
 		mount -o uid=2000,gid=2000 -t functionfs adb /dev/usb-ffs/adb
 		export service_adb_tcp_port=5555
 		adbd&
-		sleep 1
 	fi
 
 	if [ $MTP_EN = on ];then
@@ -226,9 +270,9 @@ start)
 
 	if [ $UVC_EN = on ];then
 		uvc_app ${UVC_DISPLAY_W} ${UVC_DISPLAY_H} &
-		sleep 1
 	fi
 
+	sleep 1
 	UDC=`ls /sys/class/udc/| awk '{print $1}'`
 	echo $UDC > ${USB_CONFIGFS_DIR}/UDC
 	;;
