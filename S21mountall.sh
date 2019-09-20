@@ -446,10 +446,13 @@ prepare_mountall()
 
 mountall()
 {
-	# No need to go further when rootfs is ramfs
 	if mountpoint -d /|grep -q "^0:"; then
-		echo "Only mount basic file systems for ramfs"
-		return
+		# Anon rootfs
+		if ! mount|grep -q " on / type ubifs "; then
+			# Not ubifs, could be ramfs
+			echo "Not a normal boot, only mount basic file systems"
+			return
+		fi
 	fi
 
 	echo "Will now mount all partitions in /etc/fstab"
