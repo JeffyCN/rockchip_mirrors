@@ -57,10 +57,11 @@ if [ "$state"x != "CONFIGURED"x  ] ; then
 		fi
 	fi
 
+	if [ $MTP_EN = on ]; then
+		mtp-server &
+	fi
+
 	if [ -z ${udc_state} ]; then
-		if [ $MTP_EN = on ]; then
-			mtp-server &
-		fi
 
 		UDC=`ls /sys/class/udc/| awk '{print $1}'`
 		echo $UDC > $PATH_TO_UDC
