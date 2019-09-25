@@ -154,6 +154,18 @@ configfs_init()
 	echo ${CONFIG_STRING} > ${USB_CONFIGS_DIR}/strings/${USB_ATTRIBUTE}/configuration
 }
 
+configure_uvc_resolution()
+{
+	mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H
+	echo $UVC_DISPLAY_W > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/wWidth
+	echo $UVC_DISPLAY_H > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/wHeight
+	echo 666666 > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwDefaultFrameInterval
+	echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*80)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwMinBitRate
+	echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*160)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwMaxBitRate
+	echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*2)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwMaxVideoFrameBufferSize
+	echo -e "666666\n1000000\n2000000" > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwFrameInterval
+}
+
 function_init()
 {
 	# UAC must be first setup when multi function composite.
@@ -201,8 +213,6 @@ function_init()
 	fi
 
 	if [ $UVC_EN = on ];then
-		UVC_DISPLAY_W=640
-		UVC_DISPLAY_H=480
 		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6
 
 		cat ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming_maxpacket
@@ -212,14 +222,21 @@ function_init()
 		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/control/class/ss/h
 
 		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m
-		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/480p
-		echo $UVC_DISPLAY_W > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/480p/wWidth
-		echo $UVC_DISPLAY_H > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/480p/wHeight
-		echo 666666 > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/480p/dwDefaultFrameInterval
-		echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*80)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/480p/dwMinBitRate
-		echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*160)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/480p/dwMaxBitRate
-		echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*2)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/480p/dwMaxVideoFrameBufferSize
-		echo -e "666666\n1000000\n2000000" > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/480p/dwFrameInterval
+		UVC_DISPLAY_W=640
+		UVC_DISPLAY_H=480
+		configure_uvc_resolution
+
+		UVC_DISPLAY_W=1280
+		UVC_DISPLAY_H=720
+		configure_uvc_resolution
+
+		UVC_DISPLAY_W=1920
+		UVC_DISPLAY_H=1080
+		configure_uvc_resolution
+
+		UVC_DISPLAY_W=2560
+		UVC_DISPLAY_H=1440
+		configure_uvc_resolution
 
 		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h
 		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/uncompressed/u ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h/u
@@ -269,7 +286,9 @@ start)
 	fi
 
 	if [ $UVC_EN = on ];then
-		uvc_app ${UVC_DISPLAY_W} ${UVC_DISPLAY_H} &
+	    #Add uvc application here #
+	:
+
 	fi
 
 	sleep 1
