@@ -209,7 +209,7 @@ static void string_to_uuid(char* strUUid, char *uuid)
     char value;
     memset(uuid, 0, 16);
     for (i =0; i < 256; i++) {
-        if (strUUid == '\0') {
+        if (strUUid[i] == '\0') {
             break;
         }
         value = 0;
