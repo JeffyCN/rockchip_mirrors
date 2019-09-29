@@ -216,6 +216,7 @@ function_init()
 		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6
 
 		cat ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming_maxpacket
+		echo 1 > /sys/kernel/config/usb_gadget/rockchip/functions/uvc.gs6/streaming_bulk
 
 		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h
 		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/control/class/fs/h
