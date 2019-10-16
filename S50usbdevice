@@ -11,6 +11,7 @@ ACM_EN=off
 UAC1_EN=off
 UAC2_EN=off
 UVC_EN=off
+RNDIS_EN=off
 
 USB_ATTRIBUTE=0x409
 USB_GROUP=rockchip
@@ -103,6 +104,10 @@ parameter_init()
 			usb_uvc_en)
 				UVC_EN=on
 				make_config_string uvc
+				;;
+			usb_rndis_en)
+				RNDIS_EN=on
+				make_config_string rndis
 				;;
 			*)
 				parse_parameter ${line}
@@ -210,6 +215,11 @@ function_init()
 	if [ $ACM_EN = on ];then
 		mkdir ${USB_FUNCTIONS_DIR}/acm.gs6
 		ln -s ${USB_FUNCTIONS_DIR}/acm.gs6 ${USB_CONFIGS_DIR}/acm.gs6
+	fi
+
+	if [ $RNDIS_EN = on ];then
+		mkdir ${USB_FUNCTIONS_DIR}/rndis.gs0
+		ln -s ${USB_FUNCTIONS_DIR}/rndis.gs0 ${USB_CONFIGS_DIR}/rndis.gs0
 	fi
 
 	if [ $UVC_EN = on ];then
