@@ -187,6 +187,13 @@ int isMtdDevice() {
         if (strncmp(s, "mtd", 3) == 0 ) {
             printf("Now is MTD.\n");
             return 0;
+        } else if (strncmp(s, "sd", 2) == 0) {
+            printf("Now is SD.\n");
+            if ( !access(MTD_PATH, F_OK) ) {
+                LOGI("Now is MTD.\n");
+                return 0;
+            }
+
         }
     }
     printf("devices is not MTD.\n");

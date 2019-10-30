@@ -16,10 +16,13 @@
 #include "log.h"
 #include "rktools.h"
 #include "download.h"
+extern "C" {
+    #include "../mtdutils/mtdutils.h"
+}
+
 
 #define LOCAL_VERSION_PATH "/etc/version"
 #define DOWNLOAD_VERSION_PATH "/tmp/version"
-
 
 bool getVersionFromfile(const char * filepath,char *version, int maxLength) {
     if (version == NULL || filepath == NULL) {
@@ -102,8 +105,14 @@ bool isMtdDevice() {
         }
 
         if (strncmp(s, "mtd", 3) == 0 ) {
-            printf("Now is MTD.\n");
+            LOGI("Now is MTD.\n");
             return true;
+        } else if (strncmp(s, "sd", 2) == 0) {
+            LOGI("Now is SD.\n");
+            if ( !access(MTD_PATH, F_OK) ) {
+                LOGI("Now is MTD.\n");
+                return true;
+            }
         }
     }
     LOGI("Current device is not MTD");
@@ -153,17 +162,32 @@ void getFlashPoint(char *path) {
  */
 int getFlashSize(char *path, long long* flash_size, long long* block_num) {
 
-    int fd_dest = open(path, O_RDWR);
-    if (fd_dest < 0) {
-        LOGE("Can't open %s\n", path);
-        return -2;
+    if (isMtdDevice()) {
+        size_t total_size;
+        size_t erase_size;
+        mtd_scan_partitions();
+        const MtdPartition *part = mtd_find_partition_by_name("rk-nand");
+        if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
+            LOGE("Can't find %s\n", "rk-nand");
+            return -1;
+        }
+        total_size = total_size - (erase_size * 4);
+        *flash_size = total_size / 1024; //Kib
+        *block_num = *flash_size * 2;
+    } else {
+        int fd_dest = open(path, O_RDWR);
+        if (fd_dest < 0) {
+            LOGE("Can't open %s\n", path);
+            return -2;
+        }
+        if ((*flash_size = lseek64(fd_dest, 0, SEEK_END)) == -1) {
+            LOGE("getFlashInfo lseek64 failed.\n");
+            return -2;
+        }
+        lseek64(fd_dest, 0, SEEK_SET);
+        *flash_size = *flash_size / (1024);    //Kib
+        *block_num = *flash_size * 2;
+        close(fd_dest);
     }
-    if ((*flash_size = lseek64(fd_dest, 0, SEEK_END)) == -1) {
-        LOGE("getFlashInfo lseek64 failed.\n");
-        return -2;
-    }
-    lseek64(fd_dest, 0, SEEK_SET);
-    *flash_size = *flash_size / (1024);    //Kib
-    *block_num = *flash_size * 2;
     return 0;
 }

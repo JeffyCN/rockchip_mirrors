@@ -110,7 +110,12 @@ bool RK_ota_set_partition(int partition) {
                     sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
                 }
             } else {
-                strcpy(update_cmd[i].dest_path, update_cmd[i].name);
+                if (is_sdboot) {
+                    sprintf(update_cmd[i].dest_path, "%s", "/mnt/sdcard/sdupdate.bin");
+                    LOGI("update_cmd[%i].des_path = %s.\n", i, update_cmd[i].dest_path);
+                } else {
+                    strcpy(update_cmd[i].dest_path, update_cmd[i].name);
+                }
             }
         }
         partition = (partition << 1);
@@ -160,12 +165,16 @@ void RK_ota_start(RK_upgrade_callback cb) {
                     continue;
                 }
                 // 下载固件到分区
+                printf("update_cmd.flash_offset = %lld.\n", update_cmd[i].flash_offset);
                 if (update_cmd[i].cmd(_url, (void*)(&update_cmd[i])) != 0) {
                     LOGE("update %s error.\n", update_cmd[i].dest_path);
                     cb(NULL, RK_UPGRADE_ERR);
                     return ;
                 }
-
+                if (is_sdboot) {
+                    LOGI("not check in sdboot.\n");
+                    continue;
+                }
                 // parameter 和loader 先不校验
                 if (strcmp(update_cmd[i].name, "parameter") == 0 || strcmp(update_cmd[i].name, "bootloader") == 0) {
                     LOGI("not check parameter and loader.\n");

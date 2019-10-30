@@ -31,7 +31,7 @@ static void mtd_read() {
 }
 
 static int mtd_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path) {
-    LOGI("mtd_write %s.\n", dest_path);
+    LOGI("mtd_write %s, flash_offset = %lld.\n", dest_path, flash_offset);
     int fd_src = open(src_path, O_RDONLY);
     if (fd_src < 0) {
         LOGE("error opening %s.\n", src_path);
@@ -64,7 +64,6 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
         LOGE("error writing %s.\n", dest_path);
         return -1;
     }
-
     char data_buf[MTD_SIZE];
     memset(data_buf, 0, MTD_SIZE);
 
@@ -189,16 +188,17 @@ static int block_write(char *src_path, long long offset, long long size, long lo
     return 0;
 }
 
-
+extern bool is_sdboot;
 int flash_normal(char *src_path, void *pupdate_cmd) {
     LOGI("%s:%d start.\n", __func__, __LINE__);
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
 
-    if (!isMtdDevice()) {
+    if (is_sdboot || !isMtdDevice()) {
         //block
         block_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
     } else {
         //mtd
+        printf("pcmd->flash_offset = %lld.\n", pcmd->flash_offset);
         mtd_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
     }
 }
@@ -531,6 +531,7 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
         return -2;
     }
 
+    LOGI("%s, flash_size = %lld, block_num = %lld.\n", __func__, flash_size, block_num);
     // 2. 读取parameter 数据
     unsigned char data_buf[m_uiParamFileSize];
     memset(data_buf, 0, m_uiParamFileSize);
@@ -577,10 +578,12 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
         LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
         return -2;
     }
-    lseek64(fd_dest, (block_num - 33) * SECTOR_SIZE, SEEK_SET);
-    if (write(fd_dest, backup_gpt, 33*SECTOR_SIZE) != 33*SECTOR_SIZE) {
-        LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
-        return -2;
+    if (!is_sdboot) {
+        lseek64(fd_dest, (block_num - 33) * SECTOR_SIZE, SEEK_SET);
+            if (write(fd_dest, backup_gpt, 33*SECTOR_SIZE) != 33*SECTOR_SIZE) {
+                LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
+                return -2;
+            }
     }
     close(fd_dest);
     sync();

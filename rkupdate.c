@@ -71,7 +71,7 @@ static int start_main (const char *binary, char *args[], int* pipefd) {
 int do_rk_updateEngine(const char *binary, const char *path) {
     printf("start with main.\n");
     char *update="--update";
-    char *update_sdboot='--update=sdboot';
+    char *update_sdboot="--update=sdboot";
     int pipefd[2];
     pipe(pipefd);
 

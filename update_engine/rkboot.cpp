@@ -310,7 +310,10 @@ static int WriteIDBlock(PBYTE lpIDBlock, DWORD dwSectorNum, char *dest_path)
 
     for(int i = 0; i <= 4; i++)
     {
-        lseek64(fd_dest, (64 + i * 1024)*SECTOR_SIZE, SEEK_SET);
+        //debug for 3308
+        //256 为128k 的起始位置
+        //每256k 备份一份
+        lseek64(fd_dest, (256 + i * 512)*SECTOR_SIZE, SEEK_SET);
         if (write(fd_dest, lpIDBlock, dwSectorNum*SECTOR_SIZE) != dwSectorNum * SECTOR_SIZE) {
             LOGE("WriteIDBlock error.\n");
             return -1;
