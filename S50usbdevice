@@ -1,6 +1,7 @@
 #!/bin/sh
 #
 # setup configfs for adbd, usb mass storage and MTP....
+# For kernel v4.4 usb configfs
 #
 
 UMS_EN=off
@@ -23,10 +24,57 @@ USB_STRINGS_DIR=${USB_CONFIGFS_DIR}/strings/${USB_ATTRIBUTE}
 USB_FUNCTIONS_DIR=${USB_CONFIGFS_DIR}/functions
 USB_CONFIGS_DIR=${USB_CONFIGFS_DIR}/configs/${USB_SKELETON}
 
+# For VBUS_ALWAYS_ON usb otg is not support ums
+# Since the block to ums is always occupated by USB due to no disconneted state
 UMS_BLOCK=/userdata/ums_shared.img
 UMS_BLOCK_SIZE=0	#unit M
 UMS_BLOCK_TYPE=fat
+UMS_BLOCK_AUTO_MOUNT=off
 UMS_RO=0
+
+function_init()
+{
+	mkdir ${USB_FUNCTIONS_DIR}/uac1.gs0
+	mkdir ${USB_FUNCTIONS_DIR}/uac2.gs0
+	mkdir ${USB_FUNCTIONS_DIR}/ffs.adb
+	mkdir ${USB_FUNCTIONS_DIR}/ffs.ntb
+	mkdir ${USB_FUNCTIONS_DIR}/mtp.gs0
+	mkdir ${USB_FUNCTIONS_DIR}/rndis.gs0
+	#write /config/usb_gadget/g1/functions/rndis.gs0/wceis 1
+	mkdir ${USB_FUNCTIONS_DIR}/acm.gs6
+	mkdir ${USB_FUNCTIONS_DIR}/mass_storage.0
+	mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6
+}
+
+configfs_init()
+{
+	echo "Debug: configfs_init"
+	mkdir /dev/usb-ffs -m 0770
+
+	mount -t configfs none ${CONFIGFS_DIR}
+	mkdir ${USB_CONFIGFS_DIR} -m 0770
+	echo 0x2207 > ${USB_CONFIGFS_DIR}/idVendor
+	echo 0x0310 > ${USB_CONFIGFS_DIR}/bcdDevice
+	echo 0x0200 > ${USB_CONFIGFS_DIR}/bcdUSB
+	mkdir ${USB_STRINGS_DIR}   -m 0770
+	SERIAL=`cat /proc/cpuinfo | grep Serial | awk '{print $3}'`
+	if [ -z $SERIAL ];then
+		SERIAL=0123456789ABCDEF
+	fi
+	echo $SERIAL > ${USB_STRINGS_DIR}/serialnumber
+	echo "rockchip"  > ${USB_STRINGS_DIR}/manufacturer
+	echo "rk3xxx"  > ${USB_STRINGS_DIR}/product
+
+	function_init
+
+	mkdir ${USB_CONFIGS_DIR}  -m 0770
+	mkdir ${USB_CONFIGS_DIR}/strings/${USB_ATTRIBUTE}  -m 0770
+
+	echo 0x1 > ${USB_CONFIGFS_DIR}/os_desc/b_vendor_code
+	echo "MSFT100" > ${USB_CONFIGFS_DIR}/os_desc/qw_sign
+	echo 500 > ${USB_CONFIGS_DIR}/MaxPower
+	ln -s ${USB_CONFIGS_DIR} ${USB_CONFIGFS_DIR}/os_desc/b.1
+}
 
 make_config_string()
 {
@@ -57,6 +105,9 @@ parse_parameter()
 			;;
 		ums_block_type)
 			UMS_BLOCK_TYPE=${VAR}
+			;;
+		ums_block_auto_mount)
+			UMS_BLOCK_AUTO_MOUNT=${VAR}
 			;;
 		ums_ro)
 			if [ "$VAR" != "off" ]; then
@@ -113,7 +164,7 @@ parameter_init()
 				parse_parameter ${line}
 				;;
 		esac
-	done < $DIR/.usb_config
+	done < $USB_CONFIG_FILE
 
 	case "$CONFIG_STRING" in
 		ums)
@@ -139,28 +190,35 @@ parameter_init()
 	esac
 }
 
-configfs_init()
+use_os_desc()
 {
-	mount -t configfs none ${CONFIGFS_DIR}
-	mkdir ${USB_CONFIGFS_DIR} -m 0770
-	echo 0x2207 > ${USB_CONFIGFS_DIR}/idVendor
-	echo $PID > ${USB_CONFIGFS_DIR}/idProduct
-	mkdir ${USB_STRINGS_DIR}   -m 0770
-	SERIAL=`cat /proc/cpuinfo | grep Serial | awk '{print $3}'`
-	if [ -z $SERIAL ];then
-		SERIAL=0123456789ABCDEF
+	if [ $MTP_EN = on ];then
+		echo "MTP" > ${USB_FUNCTIONS_DIR}/mtp.gs0/os_desc/interface.MTP/compatible_id
+		echo 1 > ${USB_CONFIGFS_DIR}/os_desc/use
 	fi
-	echo $SERIAL > ${USB_STRINGS_DIR}/serialnumber
-	echo "rockchip"  > ${USB_STRINGS_DIR}/manufacturer
-	echo "rk3xxx"  > ${USB_STRINGS_DIR}/product
-	mkdir ${USB_CONFIGS_DIR}  -m 0770
-	mkdir ${USB_CONFIGS_DIR}/strings/${USB_ATTRIBUTE}  -m 0770
-	echo 500 > ${USB_CONFIGS_DIR}/MaxPower
-	echo ${CONFIG_STRING} > ${USB_CONFIGS_DIR}/strings/${USB_ATTRIBUTE}/configuration
+}
+
+pre_run_binary()
+{
+	if [ $ADB_EN = on ];then
+		mkdir /dev/usb-ffs/adb -m 0770
+		mount -o uid=2000,gid=2000 -t functionfs adb /dev/usb-ffs/adb
+		start-stop-daemon --start --quiet --background --exec /usr/bin/adbd
+	fi
+
+	if [ $NTB_EN = on ];then
+		mkdir /dev/usb-ffs/ntb -m 0770
+		mount -o uid=2000,gid=2000 -t functionfs ntb /dev/usb-ffs/ntb
+		# Not start app here
+	fi
+
+	# Add uvc app here with start-stop-daemon
 }
 
 configure_uvc_resolution()
 {
+	UVC_DISPLAY_W = $1
+	UVC_DISPLAY_H = $2
 	mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H
 	echo $UVC_DISPLAY_W > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/wWidth
 	echo $UVC_DISPLAY_H > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/wHeight
@@ -171,83 +229,52 @@ configure_uvc_resolution()
 	echo -e "666666\n1000000\n2000000" > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwFrameInterval
 }
 
-function_init()
+syslink_function()
 {
-	# UAC must be first setup when multi function composite.
-	if [ $UAC1_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/uac1.gs0
-		ln -s ${USB_FUNCTIONS_DIR}/uac1.gs0 ${USB_CONFIGS_DIR}/uac1.gs0
-	fi
+	ln -s ${USB_FUNCTIONS_DIR}/$1 ${USB_CONFIGS_DIR}/f${USB_FUNCTIONS_CNT}
+	let USB_FUNCTIONS_CNT=USB_FUNCTIONS_CNT+1
+}
 
-	if [ $UAC2_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/uac2.gs0
-		ln -s ${USB_FUNCTIONS_DIR}/uac2.gs0 ${USB_CONFIGS_DIR}/uac2.gs0
-	fi
+bind_functions()
+{
+	USB_FUNCTIONS_CNT=1
+	test $MTP_EN = on && syslink_function mtp.gs0
+	test $NTB_EN = on && syslink_function ffs.ntb
+	test $ADB_EN = on && syslink_function ffs.adb
+	test $ACM_EN = on && syslink_function acm.gs6
+	test $UAC1_EN = on && syslink_function uac1.gs0
+	test $UAC2_EN = on && syslink_function uac2.gs0
+	test $RNDIS_EN = on && syslink_function rndis.gs0
 
 	if [ $UMS_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/mass_storage.0
 		echo ${UMS_RO} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/ro
 		if [ "$UMS_BLOCK_SIZE" != "0" -a ! -e ${UMS_BLOCK} ]; then
 			dd if=/dev/zero of=${UMS_BLOCK} bs=1M count=${UMS_BLOCK_SIZE}
 			mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}
 			test $? && echo "Warning: failed to mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}"
 		fi
-		ln -s ${USB_FUNCTIONS_DIR}/mass_storage.0 ${USB_CONFIGS_DIR}/mass_storage.0
 		mkdir /mnt/ums -p
-		mount ${UMS_BLOCK} /mnt/ums
-	fi
-
-	if [ $ADB_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/ffs.adb
-		ln -s ${USB_FUNCTIONS_DIR}/ffs.adb ${USB_CONFIGS_DIR}/ffs.adb
-	fi
-
-	if [ $MTP_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/mtp.gs0
-		ln -s ${USB_FUNCTIONS_DIR}/mtp.gs0 ${USB_CONFIGS_DIR}/mtp.gs0
-	fi
-
-	if [ $NTB_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/ffs.ntb
-		ln -s ${USB_FUNCTIONS_DIR}/ffs.ntb ${USB_CONFIGS_DIR}/ffs.ntb
-	fi
-
-	if [ $ACM_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/acm.gs6
-		ln -s ${USB_FUNCTIONS_DIR}/acm.gs6 ${USB_CONFIGS_DIR}/acm.gs6
-	fi
-
-	if [ $RNDIS_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/rndis.gs0
-		ln -s ${USB_FUNCTIONS_DIR}/rndis.gs0 ${USB_CONFIGS_DIR}/rndis.gs0
+		if [ $UMS_BLOCK_AUTO_MOUNT = on ];then
+			mount ${UMS_BLOCK} /mnt/ums
+		else
+			echo ${UMS_BLOCK} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/file
+		fi
+		syslink_function mass_storage.0
 	fi
 
 	if [ $UVC_EN = on ];then
-		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6
-
 		cat ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming_maxpacket
-		echo 1 > /sys/kernel/config/usb_gadget/rockchip/functions/uvc.gs6/streaming_bulk
+		echo 1 > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming_bulk
 
 		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h
 		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/control/class/fs/h
 		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/control/class/ss/h
 
 		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m
-		UVC_DISPLAY_W=640
-		UVC_DISPLAY_H=480
-		configure_uvc_resolution
-
-		UVC_DISPLAY_W=1280
-		UVC_DISPLAY_H=720
-		configure_uvc_resolution
-
-		UVC_DISPLAY_W=1920
-		UVC_DISPLAY_H=1080
-		configure_uvc_resolution
-
-		UVC_DISPLAY_W=2560
-		UVC_DISPLAY_H=1440
-		configure_uvc_resolution
+		configure_uvc_resolution 640 480
+		configure_uvc_resolution 1280 720
+		configure_uvc_resolution 1920 1080
+		configure_uvc_resolution 2560 1440
 
 		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h
 		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/uncompressed/u ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h/u
@@ -256,8 +283,30 @@ function_init()
 		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/class/hs/h
 		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/class/ss/h
 
-		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6 ${USB_CONFIGS_DIR}/uvc.gs6
+		syslink_function uvc.gs6
 	fi
+	echo ${CONFIG_STRING} > ${USB_CONFIGS_DIR}/strings/${USB_ATTRIBUTE}/configuration
+}
+
+run_binary()
+{
+	if [ $MTP_EN = on ];then
+		start-stop-daemon --start --quiet --background --exec /usr/bin/mtp-server
+	fi
+}
+
+program_kill()
+{
+	P_PID=`ps | grep $1 | grep -v grep | awk '{print $1}'`
+	test -z ${P_PID} || kill -9 ${P_PID}
+}
+
+usb_device_stop()
+{
+	echo "none" > ${USB_CONFIGFS_DIR}/UDC
+	program_kill adbd
+	program_kill mtp-server
+	ls ${USB_CONFIGS_DIR} | grep f[0-9] | xargs -I {} rm ${USB_CONFIGS_DIR}/{}
 }
 
 case "$1" in
@@ -268,48 +317,39 @@ start)
 		exit 0
 	fi
 
+	if [ -e /tmp/.usb_config ]; then
+		USB_CONFIG_FILE=/tmp/.usb_config
+	else
+		USB_CONFIG_FILE=$DIR/.usb_config
+		cp $DIR/.usb_config /tmp/.usb_config
+	fi
+
 	parameter_init
 	if [ -z $CONFIG_STRING ]; then
 		echo "$0: no function be selected"
 		exit 0
 	fi
-	configfs_init
-	function_init
-
-	if [ $ADB_EN = on ];then
-		mkdir -p /dev/usb-ffs/adb
-		mount -o uid=2000,gid=2000 -t functionfs adb /dev/usb-ffs/adb
-		export service_adb_tcp_port=5555
-		adbd&
-	fi
-
-	if [ $MTP_EN = on ];then
-		if [ $ADB_EN = on ]; then
-			mtp-server&
-		else
-			sleep 1 && mtp-server&
-		fi
-	fi
-
-	if [ $NTB_EN = on ];then
-		mkdir -p /dev/usb-ffs/ntb
-		mount -o uid=2000,gid=2000 -t functionfs ntb /dev/usb-ffs/ntb
-	fi
-
-	if [ $UVC_EN = on ];then
-	    #Add uvc application here #
-	:
-
-	fi
-
+	test -d ${USB_CONFIGFS_DIR} || configfs_init
+	use_os_desc
+	echo $PID > ${USB_CONFIGFS_DIR}/idProduct
+	bind_functions
+	pre_run_binary
 	sleep 1
 	UDC=`ls /sys/class/udc/| awk '{print $1}'`
 	echo $UDC > ${USB_CONFIGFS_DIR}/UDC
+	run_binary
 	;;
 stop)
-	echo "none" > ${USB_CONFIGFS_DIR}/UDC
+	usb_device_stop
 	;;
 restart|reload)
+	# Do restart usb by udev
+	echo "USB_FORCE_CHANGED" >> /tmp/.usb_config
+	usb_device_stop
+	sleep 1
+	$0 start
+	# Don't forget to clear "USB_FORCE_CHANGED"
+	sed -i "/USB_FORCE_CHANGED/d" /tmp/.usb_config
 	;;
 *)
 	echo "Usage: $0 {start|stop|restart}"

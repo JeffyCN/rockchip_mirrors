@@ -4,8 +4,8 @@ UMS_EN=off
 MTP_EN=off
 UMS_AUTO_MOUNT=off
 UMS_BLOCK=/dev/block/by-name/userdata
-PATH_TO_UMS_FILE=/sys/kernel/config/usb_gadget/rockchip/configs/b.1/mass_storage.0/lun.0/file
-PATH_TO_USB_CONFIG=/etc/init.d/.usb_config
+PATH_TO_UMS_FILE=/sys/kernel/config/usb_gadget/rockchip/functions/mass_storage.0/lun.0/file
+PATH_TO_USB_CONFIG=/tmp/.usb_config
 PATH_TO_UDC=/sys/kernel/config/usb_gadget/rockchip/UDC
 
 find_ums_config()
@@ -19,7 +19,7 @@ find_ums_config()
 			UMS_BLOCK=${VAR}
 		fi
 
-		if [ "$NAME" == "ums_auto_mount" ]; then
+		if [ "$NAME" == "ums_block_auto_mount" ]; then
 			UMS_AUTO_MOUNT=${VAR}
 		fi
 	done < ${PATH_TO_USB_CONFIG}
@@ -46,25 +46,12 @@ state=`cat ${dev_path}/state`
 
 find_spec_function
 if [ "$state"x != "CONFIGURED"x  ] ; then
-
 	# No UDC means gadget functions are unbind
 	udc_state=`cat ${PATH_TO_UDC}`
 
-	if [ $UMS_EN = on ]; then
-		find_ums_config
-		if [ $UMS_AUTO_MOUNT = on ]; then
-			mount $UMS_BLOCK /mnt/ums
-		fi
-	fi
-
-	if [ $MTP_EN = on ]; then
-		mtp-server &
-	fi
-
 	if [ -z ${udc_state} ]; then
-
-		UDC=`ls /sys/class/udc/| awk '{print $1}'`
-		echo $UDC > $PATH_TO_UDC
+		cat ${PATH_TO_USB_CONFIG} | grep USB_FORCE_CHANGED || \
+			/etc/init.d/S50usbdevice restart
 	fi
 else
 	if [ $UMS_EN = on ]; then
