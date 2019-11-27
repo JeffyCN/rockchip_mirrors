@@ -49,7 +49,7 @@ function_init()
 configfs_init()
 {
 	echo "Debug: configfs_init"
-	mkdir /dev/usb-ffs -m 0770
+	mkdir /dev/usb-ffs
 
 	mount -t configfs none ${CONFIGFS_DIR}
 	mkdir ${USB_CONFIGFS_DIR} -m 0770
