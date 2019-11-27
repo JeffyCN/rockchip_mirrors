@@ -73,8 +73,24 @@ bool RK_ota_set_partition(int partition) {
                 for (int j = 0; j < rkimage_hdr.item_count; j++) {
                     if (strcmp(rkimage_hdr.item[j].name, update_cmd[i].name) == 0) {
                         LOGI("found rkimage_hdr.item[%d].name = %s.\n", j, update_cmd[i].name);
-                        update_cmd[i].size = rkimage_hdr.item[j].size;
-                        update_cmd[i].offset = rkimage_hdr.item[j].offset;
+                        if (rkimage_hdr.item[j].file[50]=='H') {
+                            update_cmd[i].offset = *((DWORD *)(&rkimage_hdr.item[j].file[51]));
+                            update_cmd[i].offset <<= 32;
+                            update_cmd[i].offset += rkimage_hdr.item[j].offset;
+                            LOGI("offset more than 4G, after adjusting is %lld.\n", update_cmd[i].offset);
+                        } else {
+                            update_cmd[i].offset = rkimage_hdr.item[j].offset;
+                        }
+
+                        if (rkimage_hdr.item[j].file[55]=='H') {
+                            update_cmd[i].size = *((DWORD *)(&rkimage_hdr.item[j].file[56]));
+                            update_cmd[i].size <<= 32;
+                            update_cmd[i].size += rkimage_hdr.item[j].size;
+                            LOGI("size more than 4G, after adjusting is %lld.\n", update_cmd[i].size);
+                        } else {
+                            update_cmd[i].size = rkimage_hdr.item[j].size;
+                        }
+
                         if (is_sdboot) {
                             update_cmd[i].flash_offset = rkimage_hdr.item[j].flash_offset * SECTOR_SIZE;
                         }
