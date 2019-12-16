@@ -29,10 +29,10 @@ find_spec_function()
 {
 	functions=`cat /sys/kernel/config/usb_gadget/rockchip/configs/b.1/strings/0x409/configuration`
 
-	functions=${functions}_over
+	functions=${functions}_over_
 	tmp=`echo $functions | awk -F "_" '{print $1}'`
 
-	until [ "${tmp}" == "over" ]; do
+	while [ "${tmp}" != "over" ]; do
 		test "$tmp" == "mtp" && MTP_EN=on
 		test "$tmp" == "ums" && UMS_EN=on
 		functions=${functions#*_}
