@@ -217,8 +217,8 @@ pre_run_binary()
 
 configure_uvc_resolution()
 {
-	UVC_DISPLAY_W = $1
-	UVC_DISPLAY_H = $2
+	UVC_DISPLAY_W=$1
+	UVC_DISPLAY_H=$2
 	mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H
 	echo $UVC_DISPLAY_W > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/wWidth
 	echo $UVC_DISPLAY_H > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/wHeight
