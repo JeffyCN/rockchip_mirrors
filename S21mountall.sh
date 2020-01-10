@@ -98,6 +98,11 @@ format_part()
 		ubifs)
 			format_ubifs
 			;;
+		squashfs)
+			# check_tool mksquashfs BR2_PACKAGE_SQUASHFS && \
+			# mksquashfs $DEV
+			echo "It's pointness to format a squashfs partition..."
+			;;
 		*)
 			echo Unsupported file system $FSTYPE for $DEV
 			false
@@ -292,6 +297,12 @@ prepare_part()
 			prepare_ubifs &&
 				LABEL=$PART_NAME
 			;;
+		squashfs)
+			MOUNT="busybox mount"
+			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
+
+			LABEL=$PART_NAME
+			;;
 		*)
 			echo Unsupported file system $FSTYPE for $DEV
 			return 1
@@ -382,6 +393,11 @@ do_part()
 		ubifs)
 			FSGROUP=ubifs
 			# No fsck for ubifs
+			unset FSCK_CONFIG
+			;;
+		squashfs)
+			FSGROUP=squashfs
+			# No fsck for squashfs
 			unset FSCK_CONFIG
 			;;
 		*)
