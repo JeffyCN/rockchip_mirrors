@@ -103,6 +103,9 @@ format_part()
 			# mksquashfs $DEV
 			echo "It's pointness to format a squashfs partition..."
 			;;
+		auto)
+			echo "Unable to format a auto partition..."
+			;;
 		*)
 			echo Unsupported file system $FSTYPE for $DEV
 			false
@@ -297,7 +300,7 @@ prepare_part()
 			prepare_ubifs &&
 				LABEL=$PART_NAME
 			;;
-		squashfs)
+		squashfs|auto)
 			MOUNT="busybox mount"
 			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
 
@@ -398,6 +401,11 @@ do_part()
 		squashfs)
 			FSGROUP=squashfs
 			# No fsck for squashfs
+			unset FSCK_CONFIG
+			;;
+		auto)
+			FSGROUP=auto
+			# Running fsck on a random fs is dangerous
 			unset FSCK_CONFIG
 			;;
 		*)
