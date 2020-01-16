@@ -238,29 +238,9 @@ syslink_function()
 bind_functions()
 {
 	USB_FUNCTIONS_CNT=1
-	test $MTP_EN = on && syslink_function mtp.gs0
-	test $NTB_EN = on && syslink_function ffs.ntb
-	test $ADB_EN = on && syslink_function ffs.adb
-	test $ACM_EN = on && syslink_function acm.gs6
+
 	test $UAC1_EN = on && syslink_function uac1.gs0
 	test $UAC2_EN = on && syslink_function uac2.gs0
-	test $RNDIS_EN = on && syslink_function rndis.gs0
-
-	if [ $UMS_EN = on ];then
-		echo ${UMS_RO} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/ro
-		if [ "$UMS_BLOCK_SIZE" != "0" -a ! -e ${UMS_BLOCK} ]; then
-			dd if=/dev/zero of=${UMS_BLOCK} bs=1M count=${UMS_BLOCK_SIZE}
-			mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}
-			test $? && echo "Warning: failed to mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}"
-		fi
-		mkdir /mnt/ums -p
-		if [ $UMS_BLOCK_AUTO_MOUNT = on ];then
-			mount ${UMS_BLOCK} /mnt/ums
-		else
-			echo ${UMS_BLOCK} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/file
-		fi
-		syslink_function mass_storage.0
-	fi
 
 	if [ $UVC_EN = on ];then
 		cat ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming_maxpacket
@@ -285,6 +265,29 @@ bind_functions()
 
 		syslink_function uvc.gs6
 	fi
+
+	test $MTP_EN = on && syslink_function mtp.gs0
+	test $NTB_EN = on && syslink_function ffs.ntb
+	test $ADB_EN = on && syslink_function ffs.adb
+	test $ACM_EN = on && syslink_function acm.gs6
+	test $RNDIS_EN = on && syslink_function rndis.gs0
+
+	if [ $UMS_EN = on ];then
+		echo ${UMS_RO} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/ro
+		if [ "$UMS_BLOCK_SIZE" != "0" -a ! -e ${UMS_BLOCK} ]; then
+			dd if=/dev/zero of=${UMS_BLOCK} bs=1M count=${UMS_BLOCK_SIZE}
+			mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}
+			test $? && echo "Warning: failed to mkfs.${UMS_BLOCK_TYPE} ${UMS_BLOCK}"
+		fi
+		mkdir /mnt/ums -p
+		if [ $UMS_BLOCK_AUTO_MOUNT = on ];then
+			mount ${UMS_BLOCK} /mnt/ums
+		else
+			echo ${UMS_BLOCK} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/file
+		fi
+		syslink_function mass_storage.0
+	fi
+
 	echo ${CONFIG_STRING} > ${USB_CONFIGS_DIR}/strings/${USB_ATTRIBUTE}/configuration
 }
 
