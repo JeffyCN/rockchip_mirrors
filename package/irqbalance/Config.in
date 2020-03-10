@@ -17,3 +17,13 @@ config BR2_PACKAGE_IRQBALANCE
 comment "irqbalance needs a toolchain w/ wchar, threads"
 	depends on BR2_USE_MMU
 	depends on !BR2_USE_WCHAR || !BR2_TOOLCHAIN_HAS_THREADS
+
+if BR2_PACKAGE_IRQBALANCE
+
+config BR2_PACKAGE_IRQBALANCE_FORCE_CORE
+	bool "use core balance level"
+	default y
+	help
+	  Force using core balance level for all irqs.
+
+endif

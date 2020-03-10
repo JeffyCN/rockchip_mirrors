@@ -4,7 +4,7 @@ After=syslog.target
 
 [Service]
 RuntimeDirectory=irqbalance
-ExecStart=/usr/sbin/irqbalance --foreground
+ExecStart=/usr/sbin/irqbalance --foreground --policyscript=/etc/irqbalance.d
 
 [Install]
 WantedBy=multi-user.target

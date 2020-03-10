@@ -41,6 +41,16 @@ else
 IRQBALANCE_CONF_OPTS += --without-systemd
 endif
 
+IRQBALANCE_PRE_CONFIGURE_HOOKS += IRQBALANCE_PRECONFIGURE
+
+ifeq ($(BR2_PACKAGE_IRQBALANCE_FORCE_CORE),y)
+define IRQBALANCE_INSTALL_FORCE_CORE
+	$(INSTALL) -D -m 755 package/irqbalance/force_core.sh \
+		$(TARGET_DIR)/etc/irqbalance.d/force_core.sh
+endef
+IRQBALANCE_POST_INSTALL_TARGET_HOOKS += IRQBALANCE_INSTALL_FORCE_CORE
+endif
+
 define IRQBALANCE_INSTALL_INIT_SYSV
 	$(INSTALL) -D -m 755 package/irqbalance/S13irqbalance \
 		$(TARGET_DIR)/etc/init.d/S13irqbalance
