@@ -78,8 +78,8 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
         }
     }
 
-    int src_remain, dest_remain;
-    int read_count, write_count;
+    long long src_remain, dest_remain;
+    long long read_count, write_count;
     int src_step, dest_step;
     dest_remain = src_remain = size;
     dest_step = src_step = MTD_SIZE;
@@ -122,11 +122,11 @@ static void block_read() {
 static int block_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path) {
     LOGI("block_write  %s.\n", dest_path);
     int fd_dest = 0, fd_src = 0;
-    int src_offset = 0, dest_offset = 0;
-    int src_remain, dest_remain;
+    long long src_offset = 0, dest_offset = 0;
+    long long src_remain, dest_remain;
     int src_step, dest_step;
-    int src_file_offset = 0;
-    int read_count, write_count;
+    long long src_file_offset = 0;
+    long long read_count, write_count;
     char data_buf[BLOCK_WRITE_LEN] = {0};
 
     fd_src = open(src_path, O_RDONLY);
