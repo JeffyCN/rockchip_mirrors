@@ -142,7 +142,6 @@ static int block_write(char *src_path, long long offset, long long size, long lo
         LOGE("lseek64 failed (%s:%d).\n", __func__, __LINE__);
         return -2;
     }
-
     src_file_offset = src_offset;
     dest_offset = flash_offset;
 
@@ -151,12 +150,10 @@ static int block_write(char *src_path, long long offset, long long size, long lo
         LOGE("Can't open %s\n", dest_path);
         return -2;
     }
-
     if ( lseek64(fd_dest, dest_offset, SEEK_SET) == -1 ) {
         LOGE("lseek64 failed(%s): (%s:%d).\n", strerror(errno), __func__, __LINE__);
         return -2;
     }
-
     while (src_remain > 0 && dest_remain > 0) {
         memset(data_buf, 0, BLOCK_WRITE_LEN);
         read_count = src_remain>src_step?src_step:src_remain;
@@ -170,9 +167,9 @@ static int block_write(char *src_path, long long offset, long long size, long lo
 
         src_remain -= read_count;
         src_file_offset += read_count;
-        write_count = (src_remain == 0)?dest_remain:dest_step;
+        write_count = dest_remain>dest_step?dest_step:dest_remain;
 
-        if (write(fd_dest, data_buf, dest_step) != dest_step) {
+        if (write(fd_dest, data_buf, write_count) != write_count) {
             close(fd_dest);
             close(fd_src);
             LOGE("Write failed(%s):(%s:%d)\n", strerror(errno), __func__, __LINE__);
@@ -184,7 +181,6 @@ static int block_write(char *src_path, long long offset, long long size, long lo
     fsync(fd_dest);
     close(fd_dest);
     close(fd_src);
-
     return 0;
 }
 
@@ -192,15 +188,16 @@ extern bool is_sdboot;
 int flash_normal(char *src_path, void *pupdate_cmd) {
     LOGI("%s:%d start.\n", __func__, __LINE__);
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
-
+    int ret;
     if (is_sdboot || !isMtdDevice()) {
         //block
-        block_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
+        ret = block_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
     } else {
         //mtd
         printf("pcmd->flash_offset = %lld.\n", pcmd->flash_offset);
-        mtd_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
+        ret = mtd_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
     }
+    return ret;
 }
 
 static void string_to_uuid(char* strUUid, char *uuid)
