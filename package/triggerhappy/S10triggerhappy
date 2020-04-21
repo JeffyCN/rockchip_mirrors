@@ -2,7 +2,7 @@
 
 NAME=thd
 PIDFILE=/var/run/$NAME.pid
-DAEMON_ARGS="--daemon --triggers /etc/triggerhappy/triggers.d --socket /var/run/thd.socket --pidfile $PIDFILE --user nobody /dev/input/event*"
+DAEMON_ARGS="--daemon --triggers /etc/triggerhappy/triggers.d --socket /var/run/thd.socket --pidfile $PIDFILE /dev/input/event*"
 
 [ -r /etc/default/triggerhappy ] && . /etc/default/triggerhappy
 
