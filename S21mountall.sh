@@ -470,15 +470,6 @@ prepare_mountall()
 
 mountall()
 {
-	if mountpoint -d /|grep -q "^0:"; then
-		# Anon rootfs
-		if ! mount|grep -q " on / type ubifs "; then
-			# Not ubifs, could be ramfs
-			echo "Not a normal boot, only mount basic file systems"
-			return
-		fi
-	fi
-
 	echo "Will now mount all partitions in /etc/fstab"
 
 	# Set environments for mountall
