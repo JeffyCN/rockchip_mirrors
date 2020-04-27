@@ -997,10 +997,10 @@ main(int argc, char **argv) {
 
     if (sdupdate_package != NULL && bSDBootUpdate) {
         if (status == INSTALL_SUCCESS){
-            char imageFile[64] = {0};
-            strlcpy(imageFile, EX_SDCARD_ROOT, sizeof(imageFile));
-            strlcat(imageFile, "/sdupdate.img", sizeof(imageFile));
+            char *SDDdevice =
+                     strdup(get_mounted_device_from_path(EX_SDCARD_ROOT));
 
+            ensure_ex_path_unmounted(EX_SDCARD_ROOT);
             /* Updating is finished here, we must print this message
              * in console, it shows user a specific message that
              * updating is completely, remove SD CARD and reboot */
@@ -1009,7 +1009,8 @@ main(int argc, char **argv) {
             printf("\nPlease remove SD CARD!!!, wait for reboot.\n");
             ui_print("Please remove SD CARD!!!, wait for reboot.");
 
-            while (access(imageFile, F_OK) == 0) { sleep(1); }
+            while (access(SDDdevice, F_OK) == 0) { sleep(1); }
+            free(SDDdevice);
         }
     }
 

@@ -33,6 +33,16 @@ int ensure_path_mounted(const char* path);
 // success (volume is unmounted);
 int ensure_path_unmounted(const char* path);
 
+// Make sure that the volume 'path' is on is mounted. Returns 0 on
+// success (volume is unmounted);
+// It works for volume that not in fstab
+int ensure_ex_path_unmounted(const char* path);
+
+// device name get from /proc/mount, if device was umount, device
+// would turn back NULL.
+// Return NULL if device is not mounted or path is not existent.
+const char* get_mounted_device_from_path(const char* path);
+
 // Reformat the given volume (must be the mount point only, eg
 // "/cache"), no paths permitted.  Attempts to unmount the volume if
 // it is mounted.

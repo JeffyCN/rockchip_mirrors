@@ -71,6 +71,25 @@ char * get_link_path(const char* linkpath, char * buf, int count)
 	return buf;
 }
 
+const char* get_mounted_device_from_path(const char* path)
+{
+	const MountedVolume *volume;
+
+	int result= scan_mounted_volumes();
+	if (result < 0) {
+		LOGE("failed to scan mounted volumes\n");
+		return NULL;
+	}
+
+	volume = find_mounted_volume_by_mount_point(path);
+	if (!volume) {
+		LOGE("failed to get volume from %s\n", path);
+		return NULL;
+	}
+
+	return volume->device;
+}
+
 void load_volume_table() {
 	int alloc = 2;
 	device_volumes = malloc(alloc * sizeof(Volume));
@@ -295,6 +314,25 @@ int ensure_path_mounted(const char* path) {
 
 	LOGE("unknown fs_type \"%s\" for %s\n", v->fs_type, v->mount_point);
 	return -1;
+}
+
+int ensure_ex_path_unmounted(const char* path) {
+	int result;
+
+	result = scan_mounted_volumes();
+	if (result < 0) {
+		LOGE("unknown volume for path [%s]\n", path);
+		return -1;
+	}
+
+	const MountedVolume* mv =
+		find_mounted_volume_by_mount_point(path);
+	if (mv == NULL) {
+		printf("path: %s is already unmounted or not existed\n");
+		return 0;
+	}
+
+	return unmount_mounted_volume(mv);
 }
 
 int ensure_path_unmounted(const char* path) {
