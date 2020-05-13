@@ -282,7 +282,7 @@ bind_functions()
 
 	if [ $UVC_EN = on ];then
 		#echo 3072 > ${UVC_DIR}/streaming_maxpacket
-		echo 1 > ${UVC_DIR}/streaming_bulk
+		#echo 1 > ${UVC_DIR}/streaming_bulk
 
 		mkdir ${UVC_CONTROL_DIR}/header/h
 		ln -s ${UVC_CONTROL_DIR}/header/h ${UVC_CONTROL_DIR}/class/fs/h
