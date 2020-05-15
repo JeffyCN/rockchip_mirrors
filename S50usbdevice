@@ -32,6 +32,13 @@ UMS_BLOCK_TYPE=fat
 UMS_BLOCK_AUTO_MOUNT=off
 UMS_RO=0
 
+UVC_DIR=${USB_FUNCTIONS_DIR}/uvc.gs6/
+UVC_STREAMING_DIR=${UVC_DIR}/streaming/
+UVC_CONTROL_DIR=${UVC_DIR}/control/
+UVC_U_DIR=${UVC_STREAMING_DIR}/uncompressed/u/
+UVC_M_DIR=${UVC_STREAMING_DIR}/mjpeg/m/
+UVC_F_DIR=${UVC_STREAMING_DIR}/framebased/f/
+
 function_init()
 {
 	mkdir ${USB_FUNCTIONS_DIR}/uac1.gs0
@@ -215,18 +222,49 @@ pre_run_binary()
 	# Add uvc app here with start-stop-daemon
 }
 
-configure_uvc_resolution()
+configure_uvc_resolution_yuyv()
 {
-	UVC_DISPLAY_W=$1
-	UVC_DISPLAY_H=$2
-	mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H
-	echo $UVC_DISPLAY_W > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/wWidth
-	echo $UVC_DISPLAY_H > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/wHeight
-	echo 666666 > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwDefaultFrameInterval
-	echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*80)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwMinBitRate
-	echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*160)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwMaxBitRate
-	echo $((UVC_DISPLAY_W*UVC_DISPLAY_H*2)) > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwMaxVideoFrameBufferSize
-	echo -e "666666\n1000000\n2000000" > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m/$UVC_DISPLAY_H/dwFrameInterval
+	W=$1
+	H=$2
+	DIR=${UVC_U_DIR}/${H}p/
+	mkdir ${DIR}
+	echo $W > ${DIR}/wWidth
+	echo $H > ${DIR}/wHeight
+	echo 333333 > ${DIR}/dwDefaultFrameInterval
+	echo $((W*H*20)) > ${DIR}/dwMinBitRate
+	echo $((W*H*20)) > ${DIR}/dwMaxBitRate
+	echo $((W*H*2)) > ${DIR}/dwMaxVideoFrameBufferSize
+	echo -e "333333\n666666\n1000000\n2000000" > ${DIR}/dwFrameInterval
+}
+
+configure_uvc_resolution_mjpeg()
+{
+	W=$1
+	H=$2
+	DIR=${UVC_M_DIR}/${H}p/
+	mkdir ${DIR}
+	echo $W > ${DIR}/wWidth
+	echo $H > ${DIR}/wHeight
+	echo 333333 > ${DIR}/dwDefaultFrameInterval
+	echo $((W*H*20)) > ${DIR}/dwMinBitRate
+	echo $((W*H*20)) > ${DIR}/dwMaxBitRate
+	echo $((W*H*2)) > ${DIR}/dwMaxVideoFrameBufferSize
+	echo -e "333333\n666666\n1000000\n2000000" > ${DIR}/dwFrameInterval
+}
+
+configure_uvc_resolution_h264()
+{
+	W=$1
+	H=$2
+	DIR=${UVC_F_DIR}/${H}p/
+	mkdir ${DIR}
+	echo $W > ${DIR}/wWidth
+	echo $H > ${DIR}/wHeight
+	echo 333333 > ${DIR}/dwDefaultFrameInterval
+	echo $((W*H*10)) > ${DIR}/dwMinBitRate
+	echo $((W*H*10)) > ${DIR}/dwMaxBitRate
+	#echo $((W*H*2)) > ${DIR}/dwMaxVideoFrameBufferSize
+	echo -e "333333\n666666\n1000000\n2000000" > ${DIR}/dwFrameInterval
 }
 
 syslink_function()
@@ -243,25 +281,39 @@ bind_functions()
 	test $UAC2_EN = on && syslink_function uac2.gs0
 
 	if [ $UVC_EN = on ];then
-		cat ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming_maxpacket
-		echo 1 > ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming_bulk
+		#echo 3072 > ${UVC_DIR}/streaming_maxpacket
+		echo 1 > ${UVC_DIR}/streaming_bulk
 
-		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h
-		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/control/class/fs/h
-		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/control/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/control/class/ss/h
+		mkdir ${UVC_CONTROL_DIR}/header/h
+		ln -s ${UVC_CONTROL_DIR}/header/h ${UVC_CONTROL_DIR}/class/fs/h
+		ln -s ${UVC_CONTROL_DIR}/header/h ${UVC_CONTROL_DIR}/class/ss/h
 
-		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m
-		configure_uvc_resolution 640 480
-		configure_uvc_resolution 1280 720
-		configure_uvc_resolution 1920 1080
-		configure_uvc_resolution 2560 1440
+		##YUYV support config
+		mkdir ${UVC_U_DIR}
+		configure_uvc_resolution_yuyv 640 480
+		configure_uvc_resolution_yuyv 1280 720
 
-		mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h
-		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/uncompressed/u ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h/u
-		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/mjpeg/m ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h/m
-		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/class/fs/h
-		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/class/hs/h
-		ln -s ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/header/h ${USB_FUNCTIONS_DIR}/uvc.gs6/streaming/class/ss/h
+		##mjpeg support config
+		mkdir ${UVC_M_DIR}
+		configure_uvc_resolution_mjpeg 640 480
+		configure_uvc_resolution_mjpeg 1280 720
+		configure_uvc_resolution_mjpeg 1920 1080
+		configure_uvc_resolution_mjpeg 2560 1440
+		configure_uvc_resolution_mjpeg 2592 1944
+
+		## h.264 support config
+		mkdir ${UVC_F_DIR}
+		configure_uvc_resolution_h264 640 480
+		configure_uvc_resolution_h264 1280 720
+		configure_uvc_resolution_h264 1920 1080
+
+		mkdir ${UVC_STREAMING_DIR}/header/h
+		ln -s ${UVC_U_DIR} ${UVC_STREAMING_DIR}/header/h/u
+		ln -s ${UVC_M_DIR} ${UVC_STREAMING_DIR}/header/h/m
+		ln -s ${UVC_F_DIR} ${UVC_STREAMING_DIR}/header/h/f
+		ln -s ${UVC_STREAMING_DIR}/header/h ${UVC_STREAMING_DIR}/class/fs/h
+		ln -s ${UVC_STREAMING_DIR}/header/h ${UVC_STREAMING_DIR}/class/hs/h
+		ln -s ${UVC_STREAMING_DIR}/header/h ${UVC_STREAMING_DIR}/class/ss/h
 
 		syslink_function uvc.gs6
 	fi
