@@ -189,9 +189,10 @@ bool getImageVersion(const char *filepath, char *version, int maxLength) {
     close(fd);
     UINT btMajor = ((rkimage_head.dwVersion) & 0XFF000000) >> 24;
     UINT btMinor = ((rkimage_head.dwVersion) & 0x00FF0000) >> 16;
+    UINT usSmall = ((rkimage_head.dwVersion) & 0x0000FFFF);
 
     //转换成字符串
-    sprintf(version, "%d.%d", btMajor, btMinor);
+    sprintf(version, "%d.%d.%d", btMajor, btMinor, usSmall);
 
     return true;
 }
