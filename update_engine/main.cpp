@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
         }
 
         if (version_url != NULL) {
-            if (RK_ota_check_version(version_url) ){
+            if (!RK_ota_check_version(version_url) ){
                 LOGE("you shouldn't update the device.\n");
                 return -1;
             }

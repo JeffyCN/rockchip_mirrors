@@ -243,6 +243,7 @@ bool RK_ota_check_version(char *url) {
         }
     }
 
+    LOGI("check version new:%s  old:%s", target_version, source_version);
     if (strcmp(target_version, source_version) > 0) {
         return true;
     }
