@@ -40,14 +40,21 @@ find_spec_function()
 	done
 }
 
-sleep 1
 dev_path=/sys$1
-state=`cat ${dev_path}/state`
+state=$2
 
 find_spec_function
 if [ "$state"x != "CONFIGURED"x  ] ; then
 	# No UDC means gadget functions are unbind
 	udc_state=`cat ${PATH_TO_UDC}`
+
+	if [ $MTP_EN = on ]; then
+		pgrep mtp-server
+		echo "mtp-server runing:" $?
+		if ! pgrep -f mtp-server; then
+			start-stop-daemon --start --quiet --background --exec /usr/bin/mtp-server
+		fi
+	fi
 
 	if [ -z ${udc_state} ]; then
 		cat ${PATH_TO_USB_CONFIG} | grep USB_FORCE_CHANGED || \
