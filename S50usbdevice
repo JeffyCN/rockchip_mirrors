@@ -3,6 +3,8 @@
 # setup configfs for adbd, usb mass storage and MTP....
 # For kernel v4.4 usb configfs
 #
+# Load default env variables from profiles
+. /etc/profile
 
 UMS_EN=off
 ADB_EN=off
