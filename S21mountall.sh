@@ -314,6 +314,10 @@ prepare_part()
 
 	if [ $? -ne 0 ]; then
 		echo "Wrong fs type($FSTYPE) for $DEV"
+		if [ "$AUTO_MKFS" ]; then
+			echo "Auto formatting $DEV to $FSTYPE"
+			format_part && prepare_part && return
+		fi
 		return 1
 	fi
 
@@ -371,14 +375,15 @@ do_part()
 	# Unknown device
 	[ -b "$DEV" -o -c "$DEV" ] || return
 
-	echo "Handling $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
-
 	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
 	if [ -f "$SYS_PATH/name" ]; then
 		PART_NAME=$(cat $SYS_PATH/name)
 	else
 		PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
 	fi
+	PART_NAME=${PART_NAME:-${DEV##*/}}
+
+	echo "Handling $PART_NAME: $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
 
 	case $FSTYPE in
 		ext[234])
