@@ -1,6 +1,5 @@
 config BR2_PACKAGE_AT_SPI2_ATK
 	bool "at-spi2-atk"
-	depends on BR2_PACKAGE_XORG7 # at-spi2-core
 	depends on BR2_TOOLCHAIN_HAS_THREADS # glib2
 	depends on BR2_USE_MMU # glib2
 	depends on BR2_USE_WCHAR # glib2
@@ -16,7 +15,3 @@ config BR2_PACKAGE_AT_SPI2_ATK
 comment "at-spi2-atk needs a toolchain w/ wchar, threads"
 	depends on BR2_USE_MMU
 	depends on !BR2_USE_WCHAR || !BR2_TOOLCHAIN_HAS_THREADS
-
-comment "at-spi2-atk depends on X.org"
-	depends on BR2_USE_MMU
-	depends on !BR2_PACKAGE_XORG7
