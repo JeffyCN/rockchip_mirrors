@@ -5,6 +5,9 @@ include $(shell pwd)/../../distro/output/.config
 
 CURDIR := $(shell pwd)
 
+target:
+	echo "buiding rkscript"
+
 install:
 	mkdir -p $(DESTDIR)/oem $(DESTDIR)/userdata $(DESTDIR)/mnt/sdcard $(DESTDIR)/etc/init.d $(DESTDIR)/lib/udev/rules.d $(DESTDIR)/usr/bin $(DESTDIR)/usr/sbin
 	install -m 0755 -D $(CURDIR)/S50usbdevice $(DESTDIR)/etc/init.d/
