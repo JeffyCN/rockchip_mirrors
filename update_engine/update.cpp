@@ -126,10 +126,22 @@ bool RK_ota_set_partition(int partition) {
                     sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
                 }
             } else {
+                int slot = getCurrentSlot();
+                LOGI("slot ======= %d.\n", slot);
                 if (is_sdboot) {
                     sprintf(update_cmd[i].dest_path, "%s", "/mnt/sdcard/sdupdate.bin");
                     LOGI("update_cmd[%i].des_path = %s.\n", i, update_cmd[i].dest_path);
+                } else if ((slot == 0 || slot == 1) && update_cmd[i].is_ab) {
+                    //双分区
+                    if(strcmp(update_cmd[i].name, "rootfs") == 0){
+                        sprintf(update_cmd[i].dest_path, "%s_%c", "system", slot == 0?'b':'a');
+			LOGI("update_cmd[%d].dest_path is %s.\n", i,update_cmd[i].dest_path);
+                    } else {
+                        sprintf(update_cmd[i].dest_path, "%s_%c", update_cmd[i].name, slot == 0?'b':'a');
+			LOGI("update_cmd[%d].dest_path is %s.\n",i,update_cmd[i].dest_path);
+                    }
                 } else {
+                    //非双分区
                     strcpy(update_cmd[i].dest_path, update_cmd[i].name);
                 }
             }

@@ -66,9 +66,8 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
     }
     char data_buf[MTD_SIZE];
     memset(data_buf, 0, MTD_SIZE);
-
     //ubi: erase before writing.
-    if (strcmp(dest_path, "rootfs") == 0 || strcmp(dest_path, "oem") == 0) {
+    if (strcmp(dest_path, "system_a") == 0 || strcmp(dest_path, "oem_a") == 0 || strcmp(dest_path, "system_b") == 0 || strcmp(dest_path, "oem_b") == 0) {
         LOGI("ubi: erase before writing.\n");
         if (mtd_erase_blocks(out, -1) == (off_t) -1 ) {
             LOGE("format_volume: can't erase MTD \"%s\"\n", dest_path);

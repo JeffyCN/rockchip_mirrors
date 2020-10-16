@@ -15,6 +15,7 @@
  */
 
 #include "../bootloader.h"
+#include "stdlib.h"
 
 extern "C" {
     #include "../mtdutils/mtdutils.h"
@@ -307,6 +308,25 @@ int set_bootloader_message(const struct bootloader_message *in){
     return writeMisc((char*)in, BOOTLOADER_MESSAGE_OFFSET_IN_MISC, sizeof(struct bootloader_message));
 }
 
+int avb_safe_memcmp(const void* s1, const void* s2, size_t n) {
+  const unsigned char* us1 = (const unsigned char *)s1;
+  const unsigned char* us2 = (const unsigned char *)s2;
+  int result = 0;
+
+  if (0 == n) {
+    return 0;
+  }
+
+  /*
+   * Code snippet without data-dependent branch due to Nate Lawson
+   * (nate@root.org) of Root Labs.
+   */
+  while (n--) {
+    result |= *us1++ ^ *us2++;
+  }
+
+  return result != 0;
+}
 /**
 * 设置当前分区为可启动分区
 */
@@ -320,6 +340,14 @@ int setSlotSucceed() {
         return -1;
     }
 
+    for (size_t i = 0; i < 4; i++)
+    {
+        printf("info.mafic is %x\n",info.magic[i]);
+    }
+    if (avb_safe_memcmp(info.magic, AVB_AB_MAGIC, AVB_AB_MAGIC_LEN) != 0) {
+        printf("Magic is incorrect.\n");
+        return false;
+    }
     #ifdef SUCCESSFUL_BOOT
     info.slots[now_slot].tries_remaining = 0;
     info.slots[now_slot].successful_boot = 1;
