@@ -35,12 +35,12 @@ OBJ += ui.o\
 	minui/graphics_drm.o
 endif
 
-CFLAGS ?= -I$(PROJECT_DIR) -I/usr/include/libdrm/ -lc
+CFLAGS += -I$(PROJECT_DIR) -I/usr/include -I/usr/include/libdrm/ -lc -DUSE_UPDATEENGINE=ON
 
 ifdef RecoveryNoUi
 CFLAGS += -lpthread
 else
-CFLAGS += -lz -lpng -ldrm
+CFLAGS += -lz -lpng -ldrm -lpthread -lcurl -lcrypto
 endif
 
 UPDATE_ENGINE_OBJ = mtdutils/mounts.o \
@@ -74,4 +74,8 @@ clean:
 	rm -rf $(OBJ) $(PROM) $(UPDATE_ENGINE_OBJ) $(UPDATE_ENGINE)
 
 install:
-	sudo install -D -m 755 recovery -t /usr/bin/
+	mkdir -p $(DESTDIR)/res/images $(DESTDIR)/usr/bin
+	install -D -m 755 $(PROJECT_DIR)/recovery $(DESTDIR)/usr/bin/
+	install -D -m 755 $(PROJECT_DIR)/updateEngine $(DESTDIR)/usr/bin/
+	cp $(PROJECT_DIR)/res/images/* $(DESTDIR)/res/images/
+
