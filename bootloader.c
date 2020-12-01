@@ -60,8 +60,10 @@ int set_bootloader_message(const struct bootloader_message *in) {
 // for misc partitions on MTD
 // ------------------------------
 
-static const int MISC_PAGES = 10;         // number of pages to save
-static const int MISC_COMMAND_PAGE = 8;  // bootloader command is this page
+// The Bootloader message is at 16K(0x4000) offset, we gonna to read/write 20KB
+
+#define MISC_SIZE ((16 + 4) << 10)
+#define CMD_OFFSET (16 << 10)
 
 #define MISC_NAME "misc"
 static int get_bootloader_message_mtd(struct bootloader_message *out,
@@ -80,18 +82,20 @@ static int get_bootloader_message_mtd(struct bootloader_message *out,
         return -1;
     }
 
-    const ssize_t size = write_size * MISC_PAGES;
-    char data[size];
+    char data[MISC_SIZE];
+    //to be align with write_size
+    const ssize_t size = (MISC_SIZE / write_size) * write_size;
     ssize_t r = mtd_read_data(read, data, size);
     if (r != size) LOGE("Can't read %s\n(%s)\n", MISC_NAME, strerror(errno));
     mtd_read_close(read);
     if (r != size) return -1;
 
-    memcpy(out, &data[write_size * MISC_COMMAND_PAGE], sizeof(*out));
+    memcpy(out, &data[CMD_OFFSET], sizeof(*out));
 	printf("out->command = %s.\n", out->command);
 	printf("out->status = %s.\n", out->status);
 	printf("out->recovery = %s.\n", out->recovery);
 	printf("out->systemFlag = %s.\n", out->systemFlag);
+
     return 0;
 }
 static int set_bootloader_message_mtd(const struct bootloader_message *in,
@@ -110,14 +114,15 @@ static int set_bootloader_message_mtd(const struct bootloader_message *in,
         return -1;
     }
 
-    ssize_t size = write_size * MISC_PAGES;
-    char data[size];
+    char data[MISC_SIZE];
+    //to be align with write_size
+    const ssize_t size = (MISC_SIZE / write_size) * write_size;
     ssize_t r = mtd_read_data(read, data, size);
     if (r != size) LOGE("Can't read %s\n(%s)\n", MISC_NAME, strerror(errno));
     mtd_read_close(read);
     if (r != size) return -1;
 
-    memcpy(&data[write_size * MISC_COMMAND_PAGE], in, sizeof(*in));
+    memcpy(&data[CMD_OFFSET], in, sizeof(*in));
 
     MtdWriteContext *write = mtd_write_partition(part);
     if (write == NULL) {
