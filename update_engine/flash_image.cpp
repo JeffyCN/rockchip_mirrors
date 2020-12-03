@@ -26,12 +26,72 @@
 extern "C" {
     #include "../mtdutils/mtdutils.h"
 }
+#define UBI_HEAD_MAGIC "UBI#"
+
+static bool is_ubi(char *src_path, long long offset)
+{
+    char magic[5] = {0};
+    bool ret;
+
+    int fd_src = open(src_path, O_RDONLY);
+    if (fd_src < 0) {
+        LOGE("error opening %s.\n", src_path);
+        return 0;
+    }
+    if ( lseek64(fd_src, offset, SEEK_SET) == -1) {
+        close(fd_src);
+        LOGE("lseek64 failed (%s:%d).\n", __func__, __LINE__);
+        return 0;
+    }
+    read(fd_src, magic, 4);
+    LOGI("image magic is %s\n", magic);
+    if(strcmp(magic, UBI_HEAD_MAGIC) == 0)
+        ret = 1;
+    else
+        ret = 0;
+    close(fd_src);
+
+    return ret;
+}
+
 static void mtd_read() {
 
 }
 
 static int mtd_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path) {
     LOGI("mtd_write %s, flash_offset = %lld.\n", dest_path, flash_offset);
+
+    if (mtd_scan_partitions() <= 0) {
+        LOGE("error scanning partitions.\n");
+        return -1;
+    }
+
+    const MtdPartition *partition = mtd_find_partition_by_name(dest_path);
+    if (partition == NULL) {
+        LOGE("can't find %s partition.\n", dest_path);
+        return -1;
+    }
+
+    MtdWriteContext *out = mtd_write_partition(partition);
+    if (out == NULL) {
+        LOGE("error writing %s.\n", dest_path);
+        return -1;
+    }
+    char data_buf[MTD_SIZE];
+    memset(data_buf, 0, MTD_SIZE);
+    //ubi: erase before writing.
+    if (is_ubi(src_path, offset)) {
+        LOGI("ubi: erase before writing.\n");
+        if (mtd_erase_blocks(out, -1) == (off_t) -1 ) {
+            LOGE("format_volume: can't erase MTD \"%s\"\n", dest_path);
+            mtd_write_close(out);
+            return -1;
+        }
+    }
+
+    long long src_remain, dest_remain;
+    long long read_count, write_count;
+    int src_step, dest_step;
     int fd_src = open(src_path, O_RDONLY);
     if (fd_src < 0) {
         LOGE("error opening %s.\n", src_path);
@@ -43,43 +103,6 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
         LOGE("lseek64 failed (%s:%d).\n", __func__, __LINE__);
         return -2;
     }
-
-
-    if (mtd_scan_partitions() <= 0) {
-        close(fd_src);
-        LOGE("error scanning partitions.\n");
-        return -1;
-    }
-
-    const MtdPartition *partition = mtd_find_partition_by_name(dest_path);
-    if (partition == NULL) {
-        close(fd_src);
-        LOGE("can't find %s partition.\n", dest_path);
-        return -1;
-    }
-
-    MtdWriteContext *out = mtd_write_partition(partition);
-    if (out == NULL) {
-        close(fd_src);
-        LOGE("error writing %s.\n", dest_path);
-        return -1;
-    }
-    char data_buf[MTD_SIZE];
-    memset(data_buf, 0, MTD_SIZE);
-    //ubi: erase before writing.
-    if (strcmp(dest_path, "system_a") == 0 || strcmp(dest_path, "oem_a") == 0 || strcmp(dest_path, "system_b") == 0 || strcmp(dest_path, "oem_b") == 0) {
-        LOGI("ubi: erase before writing.\n");
-        if (mtd_erase_blocks(out, -1) == (off_t) -1 ) {
-            LOGE("format_volume: can't erase MTD \"%s\"\n", dest_path);
-            close(fd_src);
-            mtd_write_close(out);
-            return -1;
-        }
-    }
-
-    long long src_remain, dest_remain;
-    long long read_count, write_count;
-    int src_step, dest_step;
     dest_remain = src_remain = size;
     dest_step = src_step = MTD_SIZE;
 
@@ -92,7 +115,6 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
             LOGE("Read failed(%s):(%s:%d)\n", strerror(errno), __func__, __LINE__);
             return -2;
         }
-
         src_remain -= read_count;
         write_count = (src_remain == 0)?dest_remain:dest_step;
 
