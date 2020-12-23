@@ -180,7 +180,8 @@ int main(int argc, char *argv[]) {
 
     if (is_reboot && (m_status == RK_UPGRADE_FINISHED)) {
         sync();
-        reboot(RB_AUTOBOOT);
+        //reboot(RB_AUTOBOOT);
+        system(" echo b > /proc/sysrq-trigger ");
     }
 
     return m_status;
