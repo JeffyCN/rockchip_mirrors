@@ -15,6 +15,7 @@ UAC1_EN=off
 UAC2_EN=off
 UVC_EN=off
 RNDIS_EN=off
+HID_EN=off
 
 USB_ATTRIBUTE=0x409
 USB_GROUP=rockchip
@@ -53,6 +54,7 @@ function_init()
 	mkdir ${USB_FUNCTIONS_DIR}/acm.gs6
 	mkdir ${USB_FUNCTIONS_DIR}/mass_storage.0
 	mkdir ${USB_FUNCTIONS_DIR}/uvc.gs6
+	mkdir ${USB_FUNCTIONS_DIR}/hid.usb0
 }
 
 configfs_init()
@@ -168,6 +170,10 @@ parameter_init()
 			usb_rndis_en)
 				RNDIS_EN=on
 				make_config_string rndis
+				;;
+			usb_hid_en)
+				HID_EN=on
+				make_config_string hid
 				;;
 			*)
 				parse_parameter ${line}
@@ -325,6 +331,14 @@ bind_functions()
 	test $ADB_EN = on && syslink_function ffs.adb
 	test $ACM_EN = on && syslink_function acm.gs6
 	test $RNDIS_EN = on && syslink_function rndis.gs0
+
+	if [ $HID_EN = on ]; then
+		echo 1 > /sys/kernel/config/usb_gadget/rockchip/functions/hid.usb0/protocol
+		echo 1 > /sys/kernel/config/usb_gadget/rockchip/functions/hid.usb0/subclass
+		echo 8 > /sys/kernel/config/usb_gadget/rockchip/functions/hid.usb0/report_length
+		echo -ne \\x05\\x01\\x09\\x06\\xa1\\x01\\x05\\x07\\x19\\xe0\\x29\\xe7\\x15\\x00\\x25\\x01\\x75\\x01\\x95\\x08\\x81\\x02\\x95\\x01\\x75\\x08\\x81\\x03\\x95\\x05\\x75\\x01\\x05\\x08\\x19\\x01\\x29\\x05\\x91\\x02\\x95\\x01\\x75\\x03\\x91\\x03\\x95\\x06\\x75\\x08\\x15\\x00\\x25\\x65\\x05\\x07\\x19\\x00\\x29\\x65\\x81\\x00\\xc0 > /sys/kernel/config/usb_gadget/rockchip/functions/hid.usb0/report_desc
+		syslink_function hid.usb0
+	fi
 
 	if [ $UMS_EN = on ];then
 		echo ${UMS_RO} > ${USB_FUNCTIONS_DIR}/mass_storage.0/lun.0/ro
