@@ -42,10 +42,19 @@ UVC_U_DIR=${UVC_STREAMING_DIR}/uncompressed/u/
 UVC_M_DIR=${UVC_STREAMING_DIR}/mjpeg/m/
 UVC_F_DIR=${UVC_STREAMING_DIR}/framebased/f/
 
+test_write()
+{
+	test -e $2 && echo $1 > $2
+}
+
 function_init()
 {
 	mkdir ${USB_FUNCTIONS_DIR}/uac1.gs0
+	test_write 1 ${USB_FUNCTIONS_DIR}/uac1.gs0/c_feature_unit
+	test_write 1 ${USB_FUNCTIONS_DIR}/uac1.gs0/p_feature_unit
 	mkdir ${USB_FUNCTIONS_DIR}/uac2.gs0
+	test_write 1 ${USB_FUNCTIONS_DIR}/uac2.gs0/c_feature_unit
+	test_write 1 ${USB_FUNCTIONS_DIR}/uac2.gs0/p_feature_unit
 	mkdir ${USB_FUNCTIONS_DIR}/ffs.adb
 	mkdir ${USB_FUNCTIONS_DIR}/ffs.ntb
 	mkdir ${USB_FUNCTIONS_DIR}/mtp.gs0
