@@ -348,12 +348,24 @@ int setSlotSucceed() {
         printf("Magic is incorrect.\n");
         return false;
     }
+    if (info.slots[now_slot].priority != AVB_AB_MAX_PRIORITY) {
+        /* Something could be wrong, correct it because this slot is bootable */
+        printf("Warning: current slot priorty is %d != %d, Correct it!\n",
+               info.slots[now_slot].priority, AVB_AB_MAX_PRIORITY);
+        info.slots[now_slot].priority = AVB_AB_MAX_PRIORITY;
+    }
     #ifdef SUCCESSFUL_BOOT
     info.slots[now_slot].tries_remaining = 0;
     info.slots[now_slot].successful_boot = 1;
     #endif
     #ifdef RETRY_BOOT
     info.slots[now_slot].tries_remaining = AVB_AB_MAX_TRIES_REMAINING;
+    /* Clear suc boot flag anyway. Because it's chance that an older slot
+     * used succ mode without this patch applied, while the other one
+     * (new OTA slot) uses tries mode. We need to make sure not to confuse
+     * u-boot, otherwise this slot will be unbootable.
+     */
+    info.slots[now_slot].successful_boot = 0;
     #endif
     info.last_boot = now_slot;
 
@@ -382,9 +394,8 @@ int setSlotActivity() {
     info.slots[now_slot].priority = AVB_AB_MAX_PRIORITY - 1;
     info.slots[1 - now_slot].priority = AVB_AB_MAX_PRIORITY;
     info.slots[1 - now_slot].tries_remaining = AVB_AB_MAX_TRIES_REMAINING;
-    #ifdef SUCCESSFUL_BOOT
+    /* When switch to another slot, assume it is not suc boot, try it out! */
     info.slots[1 - now_slot].successful_boot = 0;
-    #endif
 
     AvbABData_update_crc(&info);
 
