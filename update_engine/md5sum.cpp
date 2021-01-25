@@ -10,6 +10,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+ #include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
@@ -19,72 +20,73 @@ extern "C" {
     #include "../mtdutils/mtdutils.h"
 }
 
+#define	TMP_MD5SUM_NAME "/tmp/.tmp_md5sum"
+
 bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long offset, long long checkSize) {
-    MD5_CTX ctx;
+
+    char nanddump_cmd[256] = {0};
+    unsigned char buf[33] = {0};
     unsigned char md5sum[16];
-    int len = 0;
-    size_t write_size;
 
-    mtd_scan_partitions();
+    LOGI( "[%s:%d] offset [%lld] checksize [%lld] \n", __func__, __LINE__, offset, checkSize );
 
-    const MtdPartition *part = mtd_find_partition_by_name(dest_path);
-    if (part == NULL || mtd_partition_info(part, NULL, NULL, &write_size)) {
-        LOGE("Can't find %s\n", dest_path);
+    memset(nanddump_cmd, 0, sizeof(nanddump_cmd)/sizeof(nanddump_cmd[0]));
+    sprintf(nanddump_cmd, "nanddump --bb=skipbad -l %lld -s %lld %s | md5sum > %s",
+            checkSize, offset, dest_path, TMP_MD5SUM_NAME);
+    system(nanddump_cmd);
+
+    int dest_fd = open(TMP_MD5SUM_NAME, O_RDONLY );
+    if(dest_fd == NULL){
+        LOGE("open file failed %s", TMP_MD5SUM_NAME);
         return -1;
     }
 
-    char buffer[write_size];
-
-    MtdReadContext *read = mtd_read_partition(part);
-    if (read == NULL) {
-        LOGE("Can't open %s\n(%s)\n", dest_path, strerror(errno));
-        return -1;
+    if (read(dest_fd, buf, 32) == -1) {
+        close(dest_fd);
+        LOGE("(%s:%d) read error: %s.\n", __func__, __LINE__, strerror(errno));
+        return -2;
     }
-
-
-    MD5_Init(&ctx);
-
-    size_t readSize = 0;
-    int step = write_size;
-    while(checkSize > 0){
-        readSize = checkSize > step ? step: checkSize;
-        if(mtd_read_data(read, buffer, readSize) != readSize){
-            LOGE("fread error.\n");
-            return false;
-        }
-        checkSize = checkSize - readSize;
-        MD5_Update(&ctx, buffer, readSize);
-        memset(buffer, 0, sizeof(buffer));
-    }
-    MD5_Final(md5sum, &ctx);
-    mtd_read_close(read);
 
     printf("\n");
+    buf[32] = '\0';
+    printf("read new md5: [%s]\n", buf);
+
+    unsigned char md5sum_tmp[32];
+    for ( int ii=0; ii<32; ii+=2) {
+        sscanf((char *)(buf + ii), "%02hhx", &md5sum_tmp[ii]);
+    }
+
+    for ( int ii=0, j=0; ii<32; ii+=2 ) {
+        // printf ( "%d = %02x\n", ii, md5sum_tmp[ii] );
+        md5sum[j] = md5sum_tmp[ii];
+        j++;
+    }
+
     printf("new md5:");
     for(int i = 0; i < 16; i++){
         printf("%02x", md5sum[i]);
     }
+    printf("\n");
     //change
     if(out_md5sum != NULL){
         memset(out_md5sum, 0, 16);
         memcpy(out_md5sum, md5sum, 16);
     }
 
-    LOGI("MD5Check is ok of %s", dest_path);
-    return true;
+    close(dest_fd);
+    LOGI("MD5Check is ok of %s\n", dest_path);
+    return 0;
 }
 
 bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offset, long long checkSize){
     MD5_CTX ctx;
     unsigned char md5sum[16];
     char buffer[512];
-    int len = 0;
 
     FILE *fp = fopen(dest_path, "rb");
-
     if(fp == NULL){
         LOGE("open file failed %s", dest_path);
-        return false;
+        return -1;
     }
 
     fseek(fp, offset, SEEK_SET);
@@ -111,13 +113,14 @@ bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offse
     for(int i = 0; i < 16; i++){
         printf("%02x", md5sum[i]);
     }
+    printf("\n");
     //change
     if(out_md5sum != NULL){
         memset(out_md5sum, 0, 16);
         memcpy(out_md5sum, md5sum, 16);
     }
-    LOGI("MD5Check is ok of %s", dest_path);
-    return true;
+    LOGI("MD5Check is ok of %s\n", dest_path);
+    return 0;
 }
 
 bool comparefile(const char *dest_path, const char *source_path, long long dest_offset, long long source_offset, long long checkSize){

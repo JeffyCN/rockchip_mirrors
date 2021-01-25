@@ -27,4 +27,5 @@ typedef struct
 int flash_bootloader(char *dest_path, void *pupdate_cmd);
 int flash_parameter(char *dest_path, void *pupdate_cmd);
 int flash_normal(char *dest_path, void *pupdate_cmd);
+int flash_register_partition_data(PSTRUCT_PARAM_ITEM p_param_item, long long *p_gpt_backup_offset);
 #endif

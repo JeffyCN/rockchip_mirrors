@@ -51,7 +51,7 @@ char * get_link_path(const char* linkpath, char * buf, int count)
 
 	rslt = readlink(path, buf, count - 1);
 	if (rslt < 0 || (rslt >= count - 1)) {
-		printf("No link to path!!! \n");
+		printf("No link to path [%s]!!! \n", path);
 		return NULL;
 	}
 

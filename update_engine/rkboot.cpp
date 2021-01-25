@@ -15,12 +15,17 @@
 #include "log.h"
 #include "rktools.h"
 #include "crc.h"
+extern "C" {
+    #include "../mtdutils/mtdutils.h"
+}
 
 USHORT m_usFlashDataSec;
 USHORT m_usFlashBootSec;
 DWORD  m_dwLoaderSize;
 DWORD  m_dwLoaderDataSize;
 UINT uiSecNumPerIDB;
+UINT uiFlashPageSize;
+UINT uiFlashBlockSize;
 USHORT usPhyBlokcPerIDB;
 bool m_bRc4Disable;
 DWORD m_idBlockOffset[IDB_BLOCKS];
@@ -178,7 +183,7 @@ static void MakeSector1(PBYTE pSector)
     pSec1->usReadWriteTimes = 1;
 
     pSec1->uiFlashSize = m_FlashSize*1024;
-    LOGI("m_FlashSize * 1024 = %ld.\n", m_FlashSize*1024);
+    LOGI("m_FlashSize * 1024 = %lld.\n", m_FlashSize*1024);
     //pSec1->usBlockSize = m_flashInfo.usBlockSize*2;
     //pSec1->bPageSize = m_flashInfo.uiPageSize*2;
     //pSec1->bECCBits = m_flashInfo.bECCBits;
@@ -274,7 +279,7 @@ static int MakeIDBlockData(PBYTE lpIDBlock, PBYTE loaderCodeBuffer, PBYTE loader
 
 static void calcIDBCount() {
     uiSecNumPerIDB = 4 + m_usFlashDataSec + m_usFlashBootSec;
-    usPhyBlokcPerIDB = CALC_UNIT(uiSecNumPerIDB, 0);
+    usPhyBlokcPerIDB = CALC_UNIT(uiSecNumPerIDB, (uiFlashBlockSize/uiFlashPageSize) * 4);
     LOGI("usPhyBlokcPerIDB = %d.\n", usPhyBlokcPerIDB);
 }
 
@@ -301,8 +306,9 @@ static int reserveIDBlock() {
 
 static int WriteIDBlock(PBYTE lpIDBlock, DWORD dwSectorNum, char *dest_path)
 {
-    //int fd_dest = open("/tmp/loader2.txt", O_RDWR|O_SYNC, 0);
-    int fd_dest = open(dest_path, O_RDWR|O_SYNC, 0);
+    LOGE("WriteIDBlock start %s \n", dest_path);
+    // int fd_dest = open("/tmp/loader2.txt", O_RDWR|O_SYNC, 0);
+    int fd_dest = open(dest_path, O_CREAT|O_RDWR|O_SYNC|O_TRUNC, 0);
     if (fd_dest < 0) {
         LOGE("WriteIDBlock open %s failed. %s\n", dest_path, strerror(errno));
         return -2;
@@ -313,13 +319,15 @@ static int WriteIDBlock(PBYTE lpIDBlock, DWORD dwSectorNum, char *dest_path)
         //debug for 3308
         //256 为128k 的起始位置
         //每256k 备份一份
-        lseek64(fd_dest, (256 + i * 512)*SECTOR_SIZE, SEEK_SET);
+        lseek64(fd_dest, (i * 512)*SECTOR_SIZE, SEEK_SET);
         if (write(fd_dest, lpIDBlock, dwSectorNum*SECTOR_SIZE) != dwSectorNum * SECTOR_SIZE) {
-            LOGE("WriteIDBlock error.\n");
+			close(fd_dest);
+            LOGE("[%s:%d] error (%s).\n", __func__, __LINE__, strerror(errno));
             return -1;
         }
     }
     sync();
+	close(fd_dest);
     return 0;
 }
 
@@ -327,6 +335,10 @@ bool download_loader(PBYTE data_buf, int size, char *dest_path) {
     generate_gf();
     gen_poly();
 
+    if (getFlashInfo(NULL, &uiFlashBlockSize, &uiFlashPageSize) != 0) {
+        LOGE("%s-%d: get mtd info error\n", __func__, __LINE__);
+        return false;
+    }
     // 1. 获取头部信息,和文件内容
     pBootHead = (PSTRUCT_RKBOOT_HEAD)(data_buf);
 
@@ -361,6 +373,7 @@ bool download_loader(PBYTE data_buf, int size, char *dest_path) {
         LOGE("getFlashSize error.\n");
         return false;
     }
+	LOGI("[%s:%d] m_FlashSize [%lld]\n", __func__, __LINE__, m_FlashSize);
 
     // 5. download IDBlock
     PBYTE pIDBData=NULL;
@@ -369,10 +382,12 @@ bool download_loader(PBYTE data_buf, int size, char *dest_path) {
         return false;
     memset(pIDBData, 0, uiSecNumPerIDB*SECTOR_SIZE);
     if (MakeIDBlockData(pIDBData, loaderCodeBuffer, loaderDataBuffer) !=0 ) {
+		LOGE("[%s:%d] MakeIDBlockData failed.\n", __func__, __LINE__);
         return false;
     }
 
     if (WriteIDBlock(pIDBData, uiSecNumPerIDB, dest_path) != 0) {
+		LOGE("[%s:%d] WriteIDBlock failed.\n", __func__, __LINE__);
         return false;
     }
     free(pIDBData);

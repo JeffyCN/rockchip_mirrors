@@ -74,5 +74,6 @@ typedef enum
 #define RKDEVICE_MAC_LEN 6
 #define SPARE_SIZE 16
 
+#define GPT_BACKUP_FILE_NAME "gpt_backup.img"
 
 #endif

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
+#include <libgen.h>
 #include <limits.h>
 #include "flash_image.h"
 #include "update.h"
@@ -27,6 +28,23 @@ extern "C" {
     #include "../mtdutils/mtdutils.h"
 }
 #define UBI_HEAD_MAGIC "UBI#"
+
+static PSTRUCT_PARAM_ITEM gp_param_item = NULL;
+static long long *gp_backup_gpt_offset = NULL;
+
+// get greastest common divisor (gcd)
+static int get_gcd ( long long x, long long y )
+{
+    while (x != y)//用大数减去小数并将结果保存起来
+    {
+        if (x > y) {
+            x -= y;
+        } else if(x < y) {
+            y -= x;
+        }
+    }
+    return x;
+}
 
 static bool is_ubi(char *src_path, long long offset)
 {
@@ -59,80 +77,33 @@ static void mtd_read() {
 }
 
 static int mtd_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path) {
-    LOGI("mtd_write %s, flash_offset = %lld.\n", dest_path, flash_offset);
+    LOGI("mtd_write %s, offset = %#llx size = %#llx flash_offset = %lld.\n", dest_path, offset, size, flash_offset);
 
-    if (mtd_scan_partitions() <= 0) {
-        LOGE("error scanning partitions.\n");
+    struct stat sb;
+    char mtd_write_erase_cmd[256] = {0};
+    stat(dest_path, &sb);
+    long long dd_bs = 1;
+    long long dd_skip = offset;
+    long long dd_count = size;
+
+    if ((sb.st_mode & S_IFMT) == S_IFCHR) {
+        memset(mtd_write_erase_cmd, 0, sizeof(mtd_write_erase_cmd)/sizeof(mtd_write_erase_cmd[0]));
+        sprintf(mtd_write_erase_cmd, "flash_erase %s 0 0", dest_path);
+        system(mtd_write_erase_cmd);
+
+        dd_bs = get_gcd(offset, size);
+        dd_skip = offset / dd_bs;
+        dd_count = size / dd_bs;
+        // dd if=/mnt/sdcard/sdupdate.img bs=4 skip=2727533 count=3646464 | nandwrite -p /dev/block/by-name/recovery
+        memset(mtd_write_erase_cmd, 0, sizeof(mtd_write_erase_cmd)/sizeof(mtd_write_erase_cmd[0]));
+        sprintf(mtd_write_erase_cmd, "dd if=%s bs=%lld skip=%lld count=%lld | nandwrite -p %s",
+                src_path, dd_bs, dd_skip, dd_count, dest_path );
+        system(mtd_write_erase_cmd);
+    } else {
+        LOGE("flash_erase: can't erase MTD \"%s\"\n", dest_path);
         return -1;
     }
 
-    const MtdPartition *partition = mtd_find_partition_by_name(dest_path);
-    if (partition == NULL) {
-        LOGE("can't find %s partition.\n", dest_path);
-        return -1;
-    }
-
-    MtdWriteContext *out = mtd_write_partition(partition);
-    if (out == NULL) {
-        LOGE("error writing %s.\n", dest_path);
-        return -1;
-    }
-    char data_buf[MTD_SIZE];
-    memset(data_buf, 0, MTD_SIZE);
-    //ubi: erase before writing.
-    if (is_ubi(src_path, offset)) {
-        LOGI("ubi: erase before writing.\n");
-        if (mtd_erase_blocks(out, -1) == (off_t) -1 ) {
-            LOGE("format_volume: can't erase MTD \"%s\"\n", dest_path);
-            mtd_write_close(out);
-            return -1;
-        }
-    }
-
-    long long src_remain, dest_remain;
-    long long read_count, write_count;
-    int src_step, dest_step;
-    int fd_src = open(src_path, O_RDONLY);
-    if (fd_src < 0) {
-        LOGE("error opening %s.\n", src_path);
-        return -2;
-    }
-
-    if ( lseek64(fd_src, offset, SEEK_SET) == -1) {
-        close(fd_src);
-        LOGE("lseek64 failed (%s:%d).\n", __func__, __LINE__);
-        return -2;
-    }
-    dest_remain = src_remain = size;
-    dest_step = src_step = MTD_SIZE;
-
-    while (src_remain > 0 && dest_remain > 0) {
-        memset(data_buf, 0, MTD_SIZE);
-        read_count = src_remain>src_step?src_step:src_remain;
-
-        if (read(fd_src, data_buf, read_count) != read_count) {
-            close(fd_src);
-            LOGE("Read failed(%s):(%s:%d)\n", strerror(errno), __func__, __LINE__);
-            return -2;
-        }
-        src_remain -= read_count;
-        write_count = (src_remain == 0)?dest_remain:dest_step;
-
-        if (mtd_write_data(out, data_buf, read_count) != dest_step) {
-            close(fd_src);
-            LOGE("Write failed(%s):(%s:%d)\n", strerror(errno), __func__, __LINE__);
-            return -2;
-
-        }
-        dest_remain -= write_count;
-    }
-
-    if (mtd_write_close(out)) {
-        LOGE("error closing %s", dest_path);
-        close(fd_src);
-        return -1;
-    }
-    close(fd_src);
     return 0;
 }
 
@@ -141,7 +112,7 @@ static void block_read() {
 }
 
 static int block_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path) {
-    LOGI("block_write  %s.\n", dest_path);
+    LOGI("block_write src %s dest %s.\n", src_path, dest_path);
     int fd_dest = 0, fd_src = 0;
     long long src_offset = 0, dest_offset = 0;
     long long src_remain, dest_remain;
@@ -160,19 +131,26 @@ static int block_write(char *src_path, long long offset, long long size, long lo
     dest_step = src_step = BLOCK_WRITE_LEN;
 
     if (lseek64(fd_src, src_offset, SEEK_SET) == -1) {
+        close(fd_src);
         LOGE("lseek64 failed (%s:%d).\n", __func__, __LINE__);
         return -2;
     }
     src_file_offset = src_offset;
-    dest_offset = flash_offset;
+    // dest_offset = flash_offset;
+    // This step is going to write (src_path: sdupdate.img) to the file which is partition data (e.g. uboot)
+    // So dest_offset is 0.
+    dest_offset = 0;
 
-    fd_dest = open(dest_path, O_RDWR | O_CREAT, 0644);
+    fd_dest = open(dest_path, O_RDWR | O_CREAT | O_TRUNC, 0644);
     if (fd_dest < 0) {
+        close(fd_src);
         LOGE("Can't open %s\n", dest_path);
         return -2;
     }
     if ( lseek64(fd_dest, dest_offset, SEEK_SET) == -1 ) {
-        LOGE("lseek64 failed(%s): (%s:%d).\n", strerror(errno), __func__, __LINE__);
+        LOGE("(%s:%d) lseek64 failed(%s).\n", __func__, __LINE__, strerror(errno));
+        close(fd_src);
+        close(fd_dest);
         return -2;
     }
     while (src_remain > 0 && dest_remain > 0) {
@@ -193,7 +171,7 @@ static int block_write(char *src_path, long long offset, long long size, long lo
         if (write(fd_dest, data_buf, write_count) != write_count) {
             close(fd_dest);
             close(fd_src);
-            LOGE("Write failed(%s):(%s:%d)\n", strerror(errno), __func__, __LINE__);
+            LOGE("(%s:%d) write failed(%s).\n", __func__, __LINE__, strerror(errno));
             return -2;
         }
         dest_remain -= write_count;
@@ -209,7 +187,7 @@ extern bool is_sdboot;
 int flash_normal(char *src_path, void *pupdate_cmd) {
     LOGI("%s:%d start.\n", __func__, __LINE__);
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
-    int ret;
+    int ret = 0;
     if (is_sdboot || !isMtdDevice()) {
         //block
         ret = block_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
@@ -531,8 +509,21 @@ static void prepare_gpt_backup(u8 *master, u8 *backup)
     gptBackupHead->header_crc32 = cpu_to_le32(calc_crc32);
 }
 
+int flash_register_partition_data(PSTRUCT_PARAM_ITEM p_param_item, long long *p_gpt_backup_offset)
+{
+    if (p_param_item) {
+        gp_param_item = p_param_item;
+    }
+
+    if (p_gpt_backup_offset) {
+        gp_backup_gpt_offset = p_gpt_backup_offset;
+    }
+
+    return 0;
+}
+
 int flash_parameter(char *src_path, void *pupdate_cmd) {
-    LOGI("flash_parameter start.\n");
+    LOGI("flash_parameter start src_path [%s].\n", src_path);
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
 
     unsigned int m_uiParamFileSize = pcmd->size;
@@ -541,16 +532,7 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
         m_uiParamFileSize = (m_uiParamFileSize/SECTOR_SIZE + 1) * SECTOR_SIZE;
     }
 
-    // 1. 获得flash 的大小，和块数
-    long long flash_size;
-    long long block_num;
-    if (getFlashSize(pcmd->dest_path, &flash_size, &block_num) != 0) {
-        LOGE("getFlashSize error.\n");
-        return -2;
-    }
-
-    LOGI("%s, flash_size = %lld, block_num = %lld.\n", __func__, flash_size, block_num);
-    // 2. 读取parameter 数据
+    // 1. 读取parameter 数据
     unsigned char data_buf[m_uiParamFileSize];
     memset(data_buf, 0, m_uiParamFileSize);
     int fd_src = open(src_path, O_RDONLY);
@@ -569,11 +551,24 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
     }
     close(fd_src);
 
-    // 3. 获取分区大小和uuid
+    // 2. 获取分区大小和uuid
     STRUCT_PARAM_ITEM param_item[20] = {0};
     STRUCT_CONFIG_ITEM config_item[10] = {0};
     getParamFromString((char *)data_buf + 8, param_item);
     getUuidFromString((char *)data_buf + 8, config_item);
+
+    if (gp_param_item) {
+        memcpy(gp_param_item, param_item, sizeof(param_item) );
+    }
+
+    // 3. 获得flash 的大小，和块数
+    long long block_num;
+    if (getFlashSize(NULL, NULL, &block_num) != 0) {
+        LOGE("getFlashSize error.\n");
+        return -2;
+    }
+
+    LOGI("%s, block_num = %lld.\n", __func__, block_num);
 
     // 4. 创建gpt 表
     unsigned char write_buf[SECTOR_SIZE * 67];
@@ -585,8 +580,12 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
     memcpy(backup_gpt + 32 * SECTOR_SIZE, write_buf + SECTOR_SIZE, SECTOR_SIZE);
     prepare_gpt_backup(write_buf, backup_gpt);
 
-    //5. 头部和尾部分别写入GPT表
-    int fd_dest = open(pcmd->dest_path, O_RDWR);
+    if (gp_backup_gpt_offset) {
+		*gp_backup_gpt_offset = (block_num - 33) * SECTOR_SIZE;
+    }
+
+    //5. 写入主GPT表
+    int fd_dest = open(pcmd->dest_path, O_CREAT|O_RDWR| O_TRUNC, 0644);
     if (fd_dest < 0) {
         LOGE("Can't open %s, %s\n", pcmd->dest_path, strerror(errno));
         return -2;
@@ -594,15 +593,32 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
     lseek64(fd_dest, 0, SEEK_SET);
     if (write(fd_dest, write_buf, 34*SECTOR_SIZE) != 34*SECTOR_SIZE) {
         LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
+        close(fd_dest);
         return -2;
     }
-    if (!is_sdboot) {
-        lseek64(fd_dest, (block_num - 33) * SECTOR_SIZE, SEEK_SET);
-            if (write(fd_dest, backup_gpt, 33*SECTOR_SIZE) != 33*SECTOR_SIZE) {
-                LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
-                return -2;
-            }
+    //6. 尾部写入GPT表到文件
+	/*
+     * char gpt_backup_dest_path[100] = {0};
+	 * memset(gpt_backup_dest_path, 0, sizeof(gpt_backup_dest_path)/sizeof(gpt_backup_dest_path[0]));
+	 * memcpy(gpt_backup_dest_path, pcmd->dest_path, strlen(pcmd->dest_path));
+	 * dirname(gpt_backup_dest_path);
+	 * sprintf(gpt_backup_dest_path, "%s/%s", gpt_backup_dest_path, GPT_BACKUP_FILE_NAME);
+	 */
+	
+#if 0
+    int fd_backup = open(gpt_backup_dest_path, O_CREAT|O_RDWR| O_TRUNC, 0644);
+    if (fd_backup < 0) {
+        LOGE("Can't open %s, %s\n", gpt_backup_dest_path, strerror(errno));
+        return -2;
     }
+
+	if (write(fd_backup, backup_gpt, 33*SECTOR_SIZE) != 33*SECTOR_SIZE) {
+		LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
+		close(fd_backup);
+		return -2;
+	}
+    close(fd_backup);
+#endif
     close(fd_dest);
     sync();
     return 0;
@@ -610,8 +626,20 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
 
 
 int flash_bootloader(char *src_path, void *pupdate_cmd) {
-    LOGI("flash_bootloader start.\n");
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
+
+    if (isMtdDevice()) {
+        // bootrom read IDBlock from the offset which is equal to block size for Nand Flash
+        unsigned int block_size = 0;
+        if (getFlashInfo(NULL, &block_size, NULL) != 0) {
+            LOGE("%s-%d: get mtd info error\n", __func__, __LINE__);
+            return false;
+        }
+        pcmd->flash_offset = block_size;
+    } else {
+        // bootrom read IDBlock from the offset (32KB + 512KB * n <n=0,1,2,3...>) for eMMC
+        pcmd->flash_offset = 32*1024;
+    }
 
     // 1. 读取bootloader
     unsigned char data_buf[pcmd->size];
@@ -622,7 +650,7 @@ int flash_bootloader(char *src_path, void *pupdate_cmd) {
         return -2;
     }
     if (lseek64(fd_src, pcmd->offset, SEEK_SET) == -1) {
-        LOGE("lseek64 failed (%s:%d) : %s.\n", __func__, __LINE__, strerror(errno));
+        LOGE("(%s:%d) lseek64 failed: %s.\n", __func__, __LINE__, strerror(errno));
         close(fd_src);
         return -2;
     }

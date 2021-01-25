@@ -15,7 +15,9 @@
 #include "update.h"
 #include "../bootloader.h"
 #include "defineHeader.h"
+#include "rktools.h"
 
+extern bool is_sdboot;
 RK_Upgrade_Status_t m_status = RK_UPGRADE_ERR;
 
 void handle_upgrade_callback(void *user_data, RK_Upgrade_Status_t status){
@@ -24,68 +26,114 @@ void handle_upgrade_callback(void *user_data, RK_Upgrade_Status_t status){
         setSlotActivity();
     }
     m_status = status;
-    LOGI("rk m_status = %d.\n", m_status);
+    LOGI("rk m_status = %d.\n", m_status);
 }
 
 static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
     int partition;
+    char *savepath = NULL;
+    int slot = -1;
     if (url == NULL) {
         //如果没有传入URL，则可以去查找是否有存在
         LOGE("MiscUpdate URL must be set.\n");
         return -1;
     }
     if (update_partition == NULL) {
-        //没有传入要升级的分区，默认升级，u-boot，trust，boot，recovery，boot，rootfs，oem
-        partition = 0x3F00;
+        //没有传入要升级的分区，默认升级
+        //u-boot，trust，boot，recovery，boot，rootfs，oem, uboot_a, uboot_b, boot_a, boot_b, system_a, system_b
+        partition = 0x3FFC00;
     } else {
         partition = strtol(update_partition+2, NULL, 16);
     }
 
-    if ((partition & 0x0400)) {
-        LOGI("update recovery in normal system.\n");
-        partition = partition & 0xFBFF;
-        RK_ota_set_url(url, save_path);
-        LOGI("url = %s.\n", url);
-        if (!RK_ota_set_partition(0x0400)) {
-            LOGE("ota file is error.\n");
-            return -1;
-        }
-        RK_ota_start(handle_upgrade_callback);
-        if (m_status != RK_UPGRADE_FINISHED) {
-            return -1;
-        }
+    if (save_path == NULL) {
+        savepath = url;
+    } else {
+        savepath = save_path;
     }
 
-    //写MISC
-    struct bootloader_message msg;
-    memset(&msg, 0, sizeof(msg));
-    char recovery_str[] = "recovery\n--update_package=";
-    strcpy(msg.command, "boot-recovery");
-    strcpy(msg.recovery, recovery_str);
-    if (strcmp(save_path, DEFAULT_DOWNLOAD_PATH) != 0) {
-        memcpy(msg.recovery + strlen(recovery_str), save_path, ((strlen(save_path) > sizeof(msg.recovery))?sizeof(msg.recovery) : strlen(save_path)));
-    } else {
-        memcpy(msg.recovery + strlen(recovery_str), url, ((strlen(url) > sizeof(msg.recovery))?sizeof(msg.recovery) : strlen(url)));
+    RK_ota_set_url(url, savepath);
+    LOGI("url = %s.\n", url);
+    slot = getCurrentSlot();
+    LOGI("[%s:%d] save path: %s\n", __func__, __LINE__, savepath);
+    // If it's recovery mode, upgrade recovery in normal system.
+    if (slot == -1 && !is_sdboot){
+        if (partition & 0x040000) {
+            LOGI("update recovery in normal system.\n");
+            partition = partition & 0xFBFFFF;
+
+            // upgrade recoery in normal system
+            if (!RK_ota_set_partition(0x040000)) {
+                LOGE("ota file is error.\n");
+                return -1;
+            }
+            RK_ota_start(handle_upgrade_callback);
+            if (m_status != RK_UPGRADE_FINISHED) {
+                return -1;
+            }
+
+            //写MISC
+            struct bootloader_message msg;
+            memset(&msg, 0, sizeof(msg));
+            char recovery_str[] = "recovery\n--update_package=";
+            strcpy(msg.command, "boot-recovery");
+            sprintf(msg.recovery, "%s%s", recovery_str, savepath);
+            msg.recovery[strlen(msg.recovery) + 1] = '\n';
+            memcpy(msg.needupdate, &partition, 6);
+            set_bootloader_message(&msg);
+            return 0;
+        }
+    } else if (slot == 0) {
+        LOGI("In A system, now upgrade B system.\n");
+        partition = partition & 0x15500;
+    } else if (slot == 1) {
+        LOGI("In B system, now upgrade A system.\n");
+        partition = partition & 0x1a900;
     }
-    msg.recovery[strlen(msg.recovery) + 1] = '\n';
-    memcpy(msg.needupdate, &partition, 4);
-    set_bootloader_message(&msg);
+
+    if (!RK_ota_set_partition(partition)) {
+        LOGE("ota file is error.\n");
+        return -1;
+    }
+    RK_ota_start(handle_upgrade_callback);
+    if (m_status != RK_UPGRADE_FINISHED) {
+        return -1;
+    }
+
     return 0;
 }
 
 void display() {
-    LOGI("--misc=now           Linux A/B mode: Setting the current partition to bootable.\n");
-    LOGI("--misc=other         Linux A/B mode: Setting another partition to bootable.\n");
-    LOGI("--misc=update        Recovery mode: Setting the partition to be upgraded.\n");
-    LOGI("--misc=wipe_userdata Format data partition.\n");
-    LOGI("--update             Upgrade mode.\n");
-    LOGI("--partition=0xFF00   Set the partition to be upgraded.\n");
-    LOGI("                     0xFF00: 1111 1111 0000 0000.\n");
-    LOGI("                     11111111: loader parameter uboot trust boot recovery rootfs oem.\n");
-    LOGI("--reboot             Restart the machine at the end of the program.\n");
-    LOGI("--version_url=url    The path to the file of version.\n");
-    LOGI("--image_url=url      Path to upgrade firmware.\n");
-    LOGI("--savepath=url       save the update.img to url.\n");
+    LOGI("--misc=now             Linux A/B mode: Setting the current partition to bootable.\n");
+    LOGI("--misc=other           Linux A/B mode: Setting another partition to bootable.\n");
+    LOGI("--misc=update          Recovery mode: Setting the partition to be upgraded.\n");
+    LOGI("--misc=wipe_userdata   Format data partition.\n");
+    LOGI("--update               Upgrade mode.\n");
+    LOGI("--partition=0xFFFE00   Set the partition to be upgraded.(NOTICE: OTA not support upgrade loader and parameter)\n");
+    LOGI("                       0x3FFE00: 0011 1111 1111 1100 0000 0000.\n");
+    LOGI("                                 uboot trust boot recovery rootfs oem\n");
+    LOGI("                                 uboot_a uboot_b boot_a boot_b system_a system_b.\n");
+    LOGI("                       000000000000000000000000: reserved\n");
+    LOGI("                       100000000000000000000000: Upgrade loader\n");
+    LOGI("                       010000000000000000000000: Upgrade parameter\n");
+    LOGI("                       001000000000000000000000: Upgrade uboot\n");
+    LOGI("                       000100000000000000000000: Upgrade trust\n");
+    LOGI("                       000010000000000000000000: Upgrade boot\n");
+    LOGI("                       000001000000000000000000: Upgrade recovery\n");
+    LOGI("                       000000100000000000000000: Upgrade rootfs\n");
+    LOGI("                       000000010000000000000000: Upgrade oem\n");
+    LOGI("                       000000001000000000000000: Upgrade uboot_a\n");
+    LOGI("                       000000000100000000000000: Upgrade uboot_b\n");
+    LOGI("                       000000000010000000000000: Upgrade boot_a\n");
+    LOGI("                       000000000001000000000000: Upgrade boot_b\n");
+    LOGI("                       000000000000100000000000: Upgrade system_a\n");
+    LOGI("                       000000000000010000000000: Upgrade system_b\n");
+    LOGI("                       000000000000001000000000: Upgrade misc\n");
+    LOGI("                       000000000000000100000000: Upgrade userdata\n");
+    LOGI("--reboot               Restart the machine at the end of the program.\n");
+    LOGI("--version_url=url      The path to the file of version.\n");
+    LOGI("--image_url=url        Path to upgrade firmware.\n");
+    LOGI("--savepath=url         save the update.img to url.\n");
 
 }
 
@@ -103,7 +151,6 @@ static const struct option engine_options[] = {
   { NULL, 0, NULL, 0 },
 };
 
-extern bool is_sdboot;
 int main(int argc, char *argv[]) {
     LOGI("*** update_engine: Version V1.0.1 ***.\n");
     int arg;
@@ -134,8 +181,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
+
     if ( is_update ) {
-        int res = 0x3F00; //默认升级的分区
+        int res = 0x3FFC00; //默认升级的分区
         if (partition != NULL) {
             res = strtol(partition+2, NULL, 16);
         }

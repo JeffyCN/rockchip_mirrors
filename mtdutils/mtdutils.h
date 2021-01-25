@@ -53,4 +53,5 @@ off_t mtd_erase_blocks(MtdWriteContext *, int blocks);  /* 0 ok, -1 for all */
 off_t mtd_find_write_start(MtdWriteContext *ctx, off_t pos);
 int mtd_write_close(MtdWriteContext *);
 
+int mtd_get_flash_info(size_t *total_size, size_t *block_size, size_t *page_size);
 #endif  // MTDUTILS_H_

@@ -88,6 +88,7 @@ bool isMtdDevice() {
     char *s = NULL;
     fd = open("/proc/cmdline", O_RDONLY);
     ret = read(fd, (char*)param, 2048);
+    close(fd);
     s = strstr(param,"storagemedia");
     if(s == NULL){
         LOGI("no found storagemedia in cmdline, default is not MTD.\n");
@@ -110,6 +111,15 @@ bool isMtdDevice() {
         } else if (strncmp(s, "sd", 2) == 0) {
             LOGI("Now is SD.\n");
             if ( !access(MTD_PATH, F_OK) ) {
+                fd = open(MTD_PATH, O_RDONLY);
+                ret = read(fd, (char*)param, 2048);
+                close(fd);
+
+                s = strstr(param,"mtd");
+                if(s == NULL){
+                    LOGI("no found mtd.\n");
+                    return false;
+                }
                 LOGI("Now is MTD.\n");
                 return true;
             }
@@ -131,11 +141,13 @@ int getCurrentSlot(){
     int fd = open("/proc/cmdline", O_RDONLY);
     read(fd, (char*)cmdline, CMDLINE_LENGTH);
     close(fd);
-    char *slot = strstr(cmdline, "androidboot.slot_suffix");
+    char *slot = strstr(cmdline, "android_slotsufix");
+    if(slot == NULL) slot = strstr(cmdline, "androidboot.slot_suffix");
     if(slot != NULL){
         slot = strstr(slot, "=");
         if(slot != NULL && *(++slot) == '_'){
             slot += 1;
+            LOGI("Current Mode is '%c' system.\n", (*slot == 'a')? 'A':'B');
             if((*slot) == 'a'){
                 return 0;
             }else if((*slot) == 'b'){
@@ -149,9 +161,13 @@ int getCurrentSlot(){
 
 void getFlashPoint(char *path) {
     char *emmc_point = getenv(EMMC_POINT_NAME);
+        LOGI("test Current device is emmc : %s.\n", emmc_point);
     if ( !access(emmc_point, F_OK) ) {
         LOGI("Current device is emmc : %s.\n", emmc_point);
         strcpy(path, emmc_point);
+    } else if (strncmp("emmc", getenv("storagemedia"), 4) == 0) {
+        LOGI("Current device is emmc : /dev/mmcblk0.\n");
+        strcpy(path, "/dev/mmcblk0");
     } else {
         LOGI("Current device is nand : %s.\n", NAND_DRIVER_DEV_LBA);
         strcpy(path, NAND_DRIVER_DEV_LBA);
@@ -162,32 +178,64 @@ void getFlashPoint(char *path) {
  */
 int getFlashSize(char *path, long long* flash_size, long long* block_num) {
 
+    LOGI("[%s:%d]\n", __func__, __LINE__);
+
+    size_t total_size;
     if (isMtdDevice()) {
-        size_t total_size;
         size_t erase_size;
         mtd_scan_partitions();
         const MtdPartition *part = mtd_find_partition_by_name("rk-nand");
+        if ( part == NULL ) {
+            part = mtd_find_partition_by_name("spi-nand0");
+        }
         if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
-            LOGE("Can't find %s\n", "rk-nand");
+            LOGE("Can't find rk-nand or spi-nand0\n");
             return -1;
         }
         total_size = total_size - (erase_size * 4);
-        *flash_size = total_size / 1024; //Kib
-        *block_num = *flash_size * 2;
     } else {
-        int fd_dest = open(path, O_RDWR);
+        char flash_name[20];
+        getFlashPoint(flash_name);
+        int fd_dest = open(flash_name, O_RDWR|O_LARGEFILE);
         if (fd_dest < 0) {
-            LOGE("Can't open %s\n", path);
+            LOGE("Can't open %s\n", flash_name);
             return -2;
         }
-        if ((*flash_size = lseek64(fd_dest, 0, SEEK_END)) == -1) {
+        if ((total_size = lseek64(fd_dest, 0, SEEK_END)) == -1) {
             LOGE("getFlashInfo lseek64 failed.\n");
+            close(fd_dest);
             return -2;
         }
         lseek64(fd_dest, 0, SEEK_SET);
-        *flash_size = *flash_size / (1024);    //Kib
-        *block_num = *flash_size * 2;
         close(fd_dest);
     }
+
+    if ( flash_size ) {
+        *flash_size = total_size / 1024; //Kib
+    }
+    if ( block_num ) {
+        *block_num = (total_size / 1024) * 2;
+    }
+    // LOGI("[%s:%d] flash size [%lld] block num [%lld]\n", __func__, __LINE__, *flash_size, *block_num);
     return 0;
+}
+
+int getFlashInfo (size_t *total_size, size_t *block_size, size_t *page_size)
+{
+    if (isMtdDevice()) {
+        if (mtd_get_flash_info(total_size, block_size, page_size) != 0) {
+            LOGE("%s-%d: get mtd info error\n", __func__, __LINE__);
+            return -1;
+        }
+        return 0;
+    } else {
+        LOGI("[%s:%d]\n", __func__, __LINE__);
+        if (total_size) {
+            LOGE("%s-%d: get flash total size error. NOT support now.\n", __func__, __LINE__);
+            return -1;
+        }
+        if (block_size) *block_size = 512*1024;
+        if (page_size) *page_size = 2*1024;
+        return 0;
+    }
 }

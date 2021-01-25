@@ -931,10 +931,11 @@ main(int argc, char **argv) {
         #endif
 
         #ifdef USE_UPDATEENGINE
-        if (access("/mnt/sdcard/sdupdate.bin", F_OK)) {
-            int tmp_fd = creat("/mnt/sdcard/sdupdate.bin", 0777);
+#define	CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
+        if (access(CMD4RECOVERY_FILENAME, F_OK)) {
+            int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
             if (tmp_fd < 0) {
-                printf("creat /mnt/sdcard/sdupdate.bin error.\n");
+                printf("creat % error.\n", CMD4RECOVERY_FILENAME);
                 status = INSTALL_ERROR;
             } else {
                 close(tmp_fd);
@@ -944,22 +945,23 @@ main(int argc, char **argv) {
         }
 
         if(isMtdDevice() == 0){
-            printf("start flash_cp to /dev/mtd0.\n");
+            printf("start flash write to /dev/mtd0.\n");
             size_t total_size;
             size_t erase_size;
             mtd_scan_partitions();
             const MtdPartition *part = mtd_find_partition_by_name("rk-nand");
+            if ( part == NULL ) {
+                part = mtd_find_partition_by_name("spi-nand0");
+            }
             if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
-                printf("Error: Can't find %s.\n", "rk-nand");
+                printf("Error: Can't find rk-nand or spi-nand0.\n");
             }else{
-                char cmd_erase[1024] = {0};
-                sprintf(cmd_erase, "flash_erase /dev/mtd0 0x0 %ld", total_size/erase_size);
-                char *cmd_cp = "flashcp /mnt/sdcard/sdupdate.bin /dev/mtd0";
-                system(cmd_erase);
-                system(cmd_cp);
+                system("flash_erase /dev/mtd0 0x0 0");
+                system("sh "CMD4RECOVERY_FILENAME);
             }
         }else{
-            printf("dd sdupdate.bin to emmc partition.\n");
+            printf("Start to dd data to emmc partition.\n");
+            system("sh "CMD4RECOVERY_FILENAME);
         }
 
         #endif

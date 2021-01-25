@@ -131,6 +131,7 @@ int analyticImage(const char *filepath, PRKIMAGE_HDR phdr) {
         lseek64(fd, -32, SEEK_END);
         if ( read(fd, m_md5, 32) != 32) {
             LOGE("lseek failed.\n");
+            close(fd);
             return -2;
         }
     }
@@ -138,6 +139,7 @@ int analyticImage(const char *filepath, PRKIMAGE_HDR phdr) {
     //3. image 地址信息读取
     if (lseek64(fd, rkimage_head.dwFWOffset, SEEK_SET) == -1) {
         LOGE("lseek failed.\n");
+        close(fd);
         return -2;
     }
 
@@ -150,6 +152,7 @@ int analyticImage(const char *filepath, PRKIMAGE_HDR phdr) {
     if (phdr->tag != RKIMAGE_TAG) {
         LOGE("tag: %x\n", phdr->tag);
         LOGE("Invalid image\n");
+        close(fd);
         return -3;
     }
 

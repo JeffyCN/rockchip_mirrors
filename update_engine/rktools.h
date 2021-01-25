@@ -11,7 +11,7 @@
 #define MTD_PATH "/proc/mtd"
 #define CMDLINE_LENGTH 2048
 #define EMMC_POINT_NAME "emmc_point_name"
-#define NAND_DRIVER_DEV_LBA "/dev/rkflash0"
+#define NAND_DRIVER_DEV_LBA "/dev/mtd0"
 
 
 
@@ -23,6 +23,7 @@ bool getRemoteVersion(char *url, char *version, int maxLength);
 void getFlashPoint(char *path);
 //获取flash 的大小，M为单位，和flash 的块数
 int getFlashSize(char *path, long long* flash_size, long long* block_num);
+int getFlashInfo (size_t *total_size, size_t *block_size, size_t *page_size);
 
 
 //itoa(number,string,10);//按十进制转换
