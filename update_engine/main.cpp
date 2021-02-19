@@ -109,8 +109,8 @@ void display() {
     LOGI("--misc=update          Recovery mode: Setting the partition to be upgraded.\n");
     LOGI("--misc=wipe_userdata   Format data partition.\n");
     LOGI("--update               Upgrade mode.\n");
-    LOGI("--partition=0xFFFE00   Set the partition to be upgraded.(NOTICE: OTA not support upgrade loader and parameter)\n");
-    LOGI("                       0x3FFE00: 0011 1111 1111 1100 0000 0000.\n");
+    LOGI("--partition=0x3FFC00   Set the partition to be upgraded.(NOTICE: OTA not support upgrade loader and parameter)\n");
+    LOGI("                       0x3FFC00: 0011 1111 1111 1100 0000 0000.\n");
     LOGI("                                 uboot trust boot recovery rootfs oem\n");
     LOGI("                                 uboot_a uboot_b boot_a boot_b system_a system_b.\n");
     LOGI("                       000000000000000000000000: reserved\n");
