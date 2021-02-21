@@ -630,7 +630,7 @@ int flash_bootloader(char *src_path, void *pupdate_cmd) {
 
     if (isMtdDevice()) {
         // bootrom read IDBlock from the offset which is equal to block size for Nand Flash
-        unsigned int block_size = 0;
+        size_t block_size = 0;
         if (getFlashInfo(NULL, &block_size, NULL) != 0) {
             LOGE("%s-%d: get mtd info error\n", __func__, __LINE__);
             return false;
