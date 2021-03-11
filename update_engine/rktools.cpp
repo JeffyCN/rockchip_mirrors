@@ -180,9 +180,10 @@ int getFlashSize(char *path, long long* flash_size, long long* block_num) {
 
     LOGI("[%s:%d]\n", __func__, __LINE__);
 
-    size_t total_size;
+    off64_t total_size_64 = 0;
     if (isMtdDevice()) {
         size_t erase_size;
+        size_t total_size;
         mtd_scan_partitions();
         const MtdPartition *part = mtd_find_partition_by_name("rk-nand");
         if ( part == NULL ) {
@@ -193,6 +194,7 @@ int getFlashSize(char *path, long long* flash_size, long long* block_num) {
             return -1;
         }
         total_size = total_size - (erase_size * 4);
+        total_size_64 = total_size;
     } else {
         char flash_name[20];
         getFlashPoint(flash_name);
@@ -201,7 +203,7 @@ int getFlashSize(char *path, long long* flash_size, long long* block_num) {
             LOGE("Can't open %s\n", flash_name);
             return -2;
         }
-        if ((total_size = lseek64(fd_dest, 0, SEEK_END)) == -1) {
+        if ((total_size_64 = lseek64(fd_dest, 0, SEEK_END)) == -1) {
             LOGE("getFlashInfo lseek64 failed.\n");
             close(fd_dest);
             return -2;
@@ -209,14 +211,15 @@ int getFlashSize(char *path, long long* flash_size, long long* block_num) {
         lseek64(fd_dest, 0, SEEK_SET);
         close(fd_dest);
     }
-
     if ( flash_size ) {
-        *flash_size = total_size / 1024; //Kib
+        *flash_size = total_size_64 / 1024; //Kib
+        LOGI("[%s:%d] flash size [%lld] \n", __func__, __LINE__, *flash_size);
     }
     if ( block_num ) {
-        *block_num = (total_size / 1024) * 2;
+        *block_num = (total_size_64 / 1024) * 2;
+        LOGI("[%s:%d]  block num [%lld]\n", __func__, __LINE__, *block_num);
     }
-    // LOGI("[%s:%d] flash size [%lld] block num [%lld]\n", __func__, __LINE__, *flash_size, *block_num);
+
     return 0;
 }
 
