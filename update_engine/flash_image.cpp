@@ -561,6 +561,11 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
         memcpy(gp_param_item, param_item, sizeof(param_item) );
     }
 
+    LOGI("%s-%d: List partitions:\n", __func__, __LINE__);
+    for (int j = 0; j < sizeof(param_item)/sizeof(param_item[0]); j++) {
+        LOGI("    param_item[%d].name [%s]\n", j, param_item[j].name);
+    }
+
     // 3. 获得flash 的大小，和块数
     long long block_num;
     if (getFlashSize(NULL, NULL, &block_num) != 0) {

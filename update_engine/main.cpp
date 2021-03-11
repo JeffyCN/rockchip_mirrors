@@ -85,10 +85,10 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
         }
     } else if (slot == 0) {
         LOGI("In A system, now upgrade B system.\n");
-        partition = partition & 0x15500;
+        partition = partition & 0x5400;
     } else if (slot == 1) {
         LOGI("In B system, now upgrade A system.\n");
-        partition = partition & 0x1a900;
+        partition = partition & 0xa800;
     }
 
     if (!RK_ota_set_partition(partition)) {
@@ -107,6 +107,7 @@ void display() {
     LOGI("--misc=now             Linux A/B mode: Setting the current partition to bootable.\n");
     LOGI("--misc=other           Linux A/B mode: Setting another partition to bootable.\n");
     LOGI("--misc=update          Recovery mode: Setting the partition to be upgraded.\n");
+    LOGI("--misc=display         Display misc info.\n");
     LOGI("--misc=wipe_userdata   Format data partition.\n");
     LOGI("--update               Upgrade mode.\n");
     LOGI("--partition=0x3FFC00   Set the partition to be upgraded.(NOTICE: OTA not support upgrade loader and parameter)\n");
@@ -152,7 +153,7 @@ static const struct option engine_options[] = {
 };
 
 int main(int argc, char *argv[]) {
-    LOGI("*** update_engine: Version V1.1.0 ***.\n");
+    LOGI("*** update_engine: Version V1.1.1 ***.\n");
     int arg;
     char *image_url = NULL;
     char *version_url = NULL;
@@ -181,26 +182,33 @@ int main(int argc, char *argv[]) {
         }
     }
 
-
-    if ( is_update ) {
-        int res = 0x3FFC00; //默认升级的分区
-        if (partition != NULL) {
-            res = strtol(partition+2, NULL, 16);
-        }
-        RK_ota_set_url(image_url, save_path);
-        if ( !RK_ota_set_partition(res) ){
-            LOGE("ota file is error.\n");
-            return -1;
-        }
-
-        if (version_url != NULL) {
-            if (!RK_ota_check_version(version_url) ){
-                LOGE("you shouldn't update the device.\n");
+    if (is_update) {
+        if (is_sdboot) {
+            int res = 0x3FFC00; //默认升级的分区
+            LOGI("%s-%d: is sdboot update.\n", __func__, __LINE__);
+            if (partition != NULL) {
+                res = strtol(partition+2, NULL, 16);
+            }
+            RK_ota_set_url(image_url, save_path);
+            if ( !RK_ota_set_partition(res) ){
+                LOGE("ota file is error.\n");
                 return -1;
             }
-        }
 
-        RK_ota_start(handle_upgrade_callback);
+            if (version_url != NULL) {
+                if (!RK_ota_check_version(version_url) ){
+                    LOGE("you shouldn't update the device.\n");
+                    return -1;
+                }
+            }
+
+            RK_ota_start(handle_upgrade_callback);
+        } else {
+            LOGI("%s-%d: is ota update\n", __func__, __LINE__);
+            if (MiscUpdate(image_url, partition, save_path) == 0) {
+                m_status = RK_UPGRADE_FINISHED;
+            }
+        }
     }else if (misc_func != NULL) {
         if (strcmp(misc_func, "now") == 0) {
             if (setSlotSucceed() ==0) {
