@@ -221,4 +221,8 @@ endif
 endif
 endif
 
+ifeq ($(BR2_PACKAGE_RKMEDIA_SOCKET),y)
+RKMEDIA_CONF_OPTS += -DRKMEDIA_SOCKET=ON
+endif
+
 $(eval $(cmake-package))

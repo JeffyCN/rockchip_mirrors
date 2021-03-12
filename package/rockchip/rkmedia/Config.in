@@ -229,4 +229,10 @@ config BR2_PACKAGE_RKMEDIA_MINI
     help
       mini version only support vi/vo/rga
 
+config BR2_PACKAGE_RKMEDIA_SOCKET
+    bool "socket"
+    default n
+    help
+      use socket for multi process control
+
 endif # BR2_PACKAGE_RKMEDIA
