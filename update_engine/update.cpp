@@ -96,6 +96,7 @@ bool RK_ota_set_partition(int partition) {
             LOGE("analyticImage error.\n");
             return false;
         }
+
         for (int i = 0; i < num; i++) {
             if ( update_cmd[i].need_update || is_sdboot) {
                 update_cmd[i].need_update = false;
@@ -121,7 +122,7 @@ bool RK_ota_set_partition(int partition) {
                         }
 
                         if (is_sdboot) {
-                            update_cmd[i].flash_offset = rkimage_hdr.item[j].flash_offset * SECTOR_SIZE;
+                            update_cmd[i].flash_offset = (long long)rkimage_hdr.item[j].flash_offset * SECTOR_SIZE;
                         }
                         update_cmd[i].need_update = true;
                         continue ;

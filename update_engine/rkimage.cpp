@@ -156,6 +156,13 @@ int analyticImage(const char *filepath, PRKIMAGE_HDR phdr) {
         return -3;
     }
 
+    if ((phdr->manufacturer[56]==0x55)&&(phdr->manufacturer[57]==0x66))
+    {
+        USHORT *pItemRemain;
+        pItemRemain = (USHORT *)(&phdr->manufacturer[58]);
+        phdr->item_count += *pItemRemain;
+    }
+
     if (rkimage_head.dwFWOffset) {
         adjustFileOffset(phdr, rkimage_head.dwFWOffset, rkimage_head.dwBootOffset, rkimage_head.dwBootSize);
     }
