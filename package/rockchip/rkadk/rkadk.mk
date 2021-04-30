@@ -14,4 +14,10 @@ RKADK_CONF_OPTS += -DRKMEDIA_HEADER_DIR=$(TOPDIR)/../external/rkmedia/include/rk
 
 RKADK_CONF_OPTS += -DCMAKE_INSTALL_STAGING=$(STAGING_DIR)
 
+define RKADK_CP_DEF_SETTING_FILE
+	cp -rfp $(@D)/rkadk_defsetting.ini $(TARGET_DIR)/etc/ | true
+endef
+
+RKADK_POST_INSTALL_TARGET_HOOKS += RKADK_CP_DEF_SETTING_FILE
+
 $(eval $(cmake-package))
