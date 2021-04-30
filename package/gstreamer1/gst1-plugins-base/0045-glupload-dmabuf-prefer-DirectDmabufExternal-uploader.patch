@@ -1,0 +1,44 @@
+From 413a89204e93d79a54a764da4ad9e191f5c38385 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Wed, 18 Mar 2020 10:12:31 +0800
+Subject: [PATCH 45/45] glupload: dmabuf: prefer DirectDmabufExternal uploader
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ configure.ac                  | 5 +++--
+ gst-libs/gst/gl/gstglupload.c | 2 +-
+ 2 files changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 7804f3b..08966a3 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -311,8 +311,9 @@ PKG_CHECK_MODULES(G_UDEV, gudev-1.0 , [
+ AG_GST_GL_CHECKS
+ 
+ dnl check for rockchip RGA
+-PKG_CHECK_MODULES(RGA, [librga], [enable_rga=yes], [enable_rga=no])
+-AM_CONDITIONAL(HAVE_RGA, test "x$enable_rga" = xyes)
++PKG_CHECK_MODULES(RGA, [librga],
++                  AC_DEFINE(HAVE_RGA, 1, [Have rockchip RGA])],
++                  AC_MSG_NOTICE([Without rockchip RGA]))
+ AC_SUBST(RGA_CFLAGS)
+ AC_SUBST(RGA_LIBS)
+ 
+diff --git a/gst-libs/gst/gl/gstglupload.c b/gst-libs/gst/gl/gstglupload.c
+index 6ee1195..8bdd0fc 100644
+--- a/gst-libs/gst/gl/gstglupload.c
++++ b/gst-libs/gst/gl/gstglupload.c
+@@ -1715,8 +1715,8 @@ static const UploadMethod _directviv_upload = {
+ 
+ static const UploadMethod *upload_methods[] = { &_gl_memory_upload,
+ #if GST_GL_HAVE_DMABUF
+-  &_direct_dma_buf_upload,
+   &_direct_dma_buf_external_upload,
++  &_direct_dma_buf_upload,
+   &_dma_buf_upload,
+ #endif
+ #if GST_GL_HAVE_VIV_DIRECTVIV
+-- 
+2.20.1
+

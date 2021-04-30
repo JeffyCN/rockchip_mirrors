@@ -1,0 +1,34 @@
+#include "rk3399_arm64.config"
+#include "base.config"
+#include "base_extra.config"
+#include "gpu.config"
+#include "display.config"
+#include "video_mpp.config"
+#include "video_gst.config"
+#include "video_gst_rtsp.config"
+#include "audio.config"
+#include "audio_gst.config"
+#include "camera.config"
+#include "camera_gst.config"
+#include "test.config"
+#include "debug.config"
+#include "benchmark.config"
+#include "wifi.config"
+#include "network.config"
+#include "bt.config"
+#include "qt.config"
+#include "qt_app.config"
+#include "ntfs.config"
+BR2_TARGET_GENERIC_GETTY_PORT="ttyFIQ0"
+BR2_TARGET_GENERIC_GETTY_BAUDRATE_1500000=y
+BR2_ROOTFS_OVERLAY="board/rockchip/rk3399/fs-overlay-64/"
+BR2_TARGET_GENERIC_HOSTNAME="rk3399"
+BR2_TARGET_GENERIC_ISSUE="Welcome to RK3399 Buildroot"
+BR2_PACKAGE_RKWIFIBT_AP6255=y
+BR2_PACKAGE_RKWIFIBT_BTUART="ttyS0"
+BR2_GCC_VERSION_9_X=y
+BR2_KERNEL_HEADERS_4_19=y
+# TEMP modify to fix Server Kernel Version low than 4.19
+# BR2_PACKAGE_GLIBC_GEN_LD_CACHE is not set
+BR2_PACKAGE_HOST_QEMU=y
+
