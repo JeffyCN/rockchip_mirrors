@@ -1,4 +1,4 @@
-From 96bdda80e6131d9c7dd2ab732bfb5ddba1dd4d34 Mon Sep 17 00:00:00 2001
+From 02ff9b72d11a9719e605a770e56c430f815645a0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 31 Oct 2019 18:45:19 +0800
 Subject: [PATCH 43/45] video-converter: Support rockchip RGA 2D accel
@@ -7,22 +7,23 @@ Disabled by default, set env GST_VIDEO_CONVERT_USE_RGA=1 to enable.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- configure.ac                         |   6 +
+ configure.ac                         |   7 +
  gst-libs/gst/video/Makefile.am       |   2 +-
  gst-libs/gst/video/video-converter.c | 183 +++++++++++++++++++++++++++
- 3 files changed, 190 insertions(+), 1 deletion(-)
+ 3 files changed, 191 insertions(+), 1 deletion(-)
 
 diff --git a/configure.ac b/configure.ac
-index 1287583..7804f3b 100644
+index 1287583..08966a3 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -310,6 +310,12 @@ PKG_CHECK_MODULES(G_UDEV, gudev-1.0 , [
+@@ -310,6 +310,13 @@ PKG_CHECK_MODULES(G_UDEV, gudev-1.0 , [
  
  AG_GST_GL_CHECKS
  
 +dnl check for rockchip RGA
-+PKG_CHECK_MODULES(RGA, [librga], [enable_rga=yes], [enable_rga=no])
-+AM_CONDITIONAL(HAVE_RGA, test "x$enable_rga" = xyes)
++PKG_CHECK_MODULES(RGA, [librga],
++                  AC_DEFINE(HAVE_RGA, 1, [Have rockchip RGA])],
++                  AC_MSG_NOTICE([Without rockchip RGA]))
 +AC_SUBST(RGA_CFLAGS)
 +AC_SUBST(RGA_LIBS)
 +
