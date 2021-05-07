@@ -8,7 +8,7 @@ if BR2_PACKAGE_UVC_APP
 config BR2_PACKAGE_UVC_APP_MINILOGGER
 	bool "enable uvc_app miniloger print"
 	select BR2_PACKAGE_MINILOGGER
-	default y
+	default n
 	help
 	  Enable uvc_app miniloger print.
 endif
