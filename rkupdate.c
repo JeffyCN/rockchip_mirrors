@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <ctype.h>
@@ -45,11 +46,12 @@ static int start_main (const char *binary, char *args[], int* pipefd) {
         } else if (strcmp(command, "set_progress") == 0) {
             char* fraction_s = strtok(NULL, " \n");
             float fraction = strtof(fraction_s, NULL);
+
             ui_set_progress(fraction);
         } else if (strcmp(command, "ui_print") == 0) {
             char* str = strtok(NULL, "\n");
             if (str) {
-                printf("ui_print = %s.\n", str);
+                printf(" >>>>>> %s <<<<<<\n", str);
                 ui_print("%s", str);
             } else {
                 ui_print("\n");

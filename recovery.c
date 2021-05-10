@@ -50,6 +50,7 @@ static const struct option OPTIONS[] = {
   { "wipe_all", no_argument, NULL, 'a' },
   { "set_encrypted_filesystems", required_argument, NULL, 'e' },
   { "show_text", no_argument, NULL, 't' },
+  { "factory_pcba_test", no_argument, NULL, 'f' },
   { NULL, 0, NULL, 0 },
 };
 
@@ -298,6 +299,8 @@ finish_recovery(const char *send_intent) {
             check_and_fclose(fp, INTENT_FILE);
         }
     }
+
+    printf("finish_recovery Enter.....\n");
 
     // Copy logs to cache so the system can find out what happened.
     copy_log_file(LOG_FILE, true);
@@ -725,7 +728,10 @@ main(int argc, char **argv) {
         freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
         freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
     } else {
-	    printf("start debug recovery...\n");
+        printf("\n\n");
+        printf("*********************************************************\n");
+        printf("            ROCKCHIP recovery system                     \n");
+        printf("*********************************************************\n");
     }
     printf("Starting recovery on %s\n", ctime(&start));
 
@@ -757,6 +763,7 @@ main(int argc, char **argv) {
     const char *encrypted_fs_mode = NULL;
     int wipe_data = 0;
     int wipe_all = 0;
+    int pcba_test = 0;  //chad.ma add for pcba test
     int toggle_secure_fs = 0;
     encrypted_fs_info encrypted_fs_data;
 
@@ -771,6 +778,7 @@ main(int argc, char **argv) {
         case 'a': wipe_all = 1; break;
         case 'e': encrypted_fs_mode = optarg; toggle_secure_fs = 1; break;
         case 't': ui_show_text(1); break;
+        case 'f': pcba_test = 1; break;  //chad.ma add for pcba test
         case '?':
             LOGE("Invalid command argument\n");
             continue;
@@ -906,7 +914,7 @@ main(int argc, char **argv) {
                         remove(update_package);
                 }
                 strlcpy(text, "update images success!", 127);
-	        } else {
+            } else {
                 strlcpy(text, "update images failed!", 127);
             }
         } else {
@@ -980,15 +988,23 @@ main(int argc, char **argv) {
         if (device_wipe_data()) status = INSTALL_ERROR;
         if (erase_volume("/userdata")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
-		ui_print("Data wipe done.\n");
+        ui_print("Data wipe done.\n");
         if (access("/dev/block/by-name/oem", F_OK) == 0) {
             if (resize_volume("/oem")) status = INSTALL_ERROR;
             if (status != INSTALL_SUCCESS) ui_print("resize failed.\n");
         }
 
-		ui_print("resize oem done.\n");
-		ui_show_text(0);
-    } else {
+        ui_print("resize oem done.\n");
+        ui_show_text(0);
+    }
+    else if (pcba_test)
+    {
+         //pcba test todo...
+         printf("------------------ pcba test start -------------\n");
+         exit(EXIT_SUCCESS); //exit recovery bin directly, not start pcba here, in rkLanuch.sh
+         return 0;
+    }
+    else {
         status = INSTALL_ERROR;  // No command specified
     }
 
