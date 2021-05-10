@@ -130,7 +130,7 @@ scan_mounted_volumes()
             v->filesystem = strdup(filesystem);
             v->flags = strdup(flags);
         } else {
-printf("matches was %d on <<%.40s>>\n", matches, bufp);
+            printf("matches was %d on <<%.40s>>\n", matches, bufp);
         }
 
         /* Eat the line.
