@@ -82,6 +82,8 @@ bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offse
     MD5_CTX ctx;
     unsigned char md5sum[16];
     char buffer[512];
+    int len = 0;
+    int ret;
 
     FILE *fp = fopen(dest_path, "rb");
     if(fp == NULL){
@@ -89,7 +91,12 @@ bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offse
         return -1;
     }
 
-    fseek(fp, offset, SEEK_SET);
+    ret = fseeko64(fp, offset, SEEK_SET);
+    if (ret < 0)
+    {
+        LOGE("%s:%d fseeko64 fail", __func__, __LINE__);
+        return false;
+    }
 
     MD5_Init(&ctx);
 

@@ -435,7 +435,7 @@ void miscDisplay() {
     LOGI("version_major = %d.\n", info_ab.version_major);
     LOGI("version_minor = %d.\n", info_ab.version_minor);
     for (int i = 0; i < 2; i++) {
-        LOGI("slot.[%d]->priority = %d.\n", i, info_ab.slots[i].priority);
+        LOGI("slot.[%d]->priority = %d.\n",        i, info_ab.slots[i].priority);
         LOGI("slot.[%d]->successful_boot = %d.\n", i, info_ab.slots[i].successful_boot);
         LOGI("slot.[%d]->tries_remaining = %d.\n", i, info_ab.slots[i].tries_remaining);
     }
@@ -461,5 +461,3 @@ void miscDisplay() {
     LOGI("bootloader.needupdate = %x.\n", *((int *)boot.needupdate));
     LOGI("bootloader.systemFlag = %s.\n", boot.systemFlag);
 }
-
-

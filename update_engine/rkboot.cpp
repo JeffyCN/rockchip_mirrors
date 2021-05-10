@@ -279,7 +279,7 @@ static int MakeIDBlockData(PBYTE lpIDBlock, PBYTE loaderCodeBuffer, PBYTE loader
 
 static void calcIDBCount() {
     uiSecNumPerIDB = 4 + m_usFlashDataSec + m_usFlashBootSec;
-    usPhyBlokcPerIDB = CALC_UNIT(uiSecNumPerIDB, (uiFlashBlockSize/uiFlashPageSize) * 4);
+    usPhyBlokcPerIDB = ((uiSecNumPerIDB > 0)?((uiSecNumPerIDB - 1) / 8 + 1):(uiSecNumPerIDB));
     LOGI("usPhyBlokcPerIDB = %d.\n", usPhyBlokcPerIDB);
 }
 

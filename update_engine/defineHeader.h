@@ -13,9 +13,8 @@
 #define MTD_SIZE 2048
 #define SECTOR_SIZE 512
 
-#define CALC_UNIT(a, b)        ((a>0)?((a-1)/b+1):(a))
-#define BYTE2SECTOR(x)        (CALC_UNIT(x, SECTOR_SIZE))
-#define PAGEALIGN(x)        (CALC_UNIT(x, 4))
+#define BYTE2SECTOR(x)         ((x>0)?((x-1)/SECTOR_SIZE + 1):(x))
+#define PAGEALIGN(x)           ((x>0)?((x-1) / 4 + 1):(x))
 
 typedef unsigned char BYTE;
 typedef BYTE *PBYTE;
