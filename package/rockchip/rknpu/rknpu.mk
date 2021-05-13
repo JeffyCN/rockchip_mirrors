@@ -9,6 +9,12 @@ RKNPU_SITE = $(TOPDIR)/../external/rknpu
 NPU_TEST_FILE = $(@D)/test
 RKNPU_INSTALL_STAGING = YES
 
+ifeq ($(BR2_arm),y)
+NPU_PLATFORM_ARCH = linux-armhf
+else
+NPU_PLATFORM_ARCH = linux-aarch64
+endif
+
 ifeq ($(BR2_PACKAGE_RKNPU_PCIE),y)
 NPU_KO_FILE = galcore_rk3399pro-npu-pcie.ko
 else ifeq ($(BR2_PACKAGE_RK3399PRO_NPU),y)
@@ -27,8 +33,9 @@ endif
 
 ifeq ($(BR2_PACKAGE_RK356X),y)
 NPU_KO_FILE = rknpu.ko
-NPU_KO_PATH = rknnrt/lib/linux-aarch64/driver
-NPU_RKNN_API_LIB64 = rknnrt/lib/linux-aarch64/librknnrt.so
+NPU_KO_PATH = rknnrt/lib/$(NPU_PLATFORM_ARCH)/driver
+NPU_RKNN_API_LIB64 = rknnrt/lib/$(NPU_PLATFORM_ARCH)/librknnrt.so
+NPU_RKNN_API_LIB = rknnrt/lib/$(NPU_PLATFORM_ARCH)/librknnrt.so
 NPU_TARGET_NAME = rknpu.ko
 NPU_COMMON_PATH = rknnrt/common
 else
@@ -38,12 +45,6 @@ NPU_RKNN_API_LIB = rknn/rknn_api/librknn_api/lib/librknn_api.so
 NPU_TARGET_NAME = galcore.ko
 NPU_NN = y
 NPU_COMMON_PATH = drivers/common
-endif
-
-ifeq ($(BR2_arm),y)
-NPU_PLATFORM_ARCH = linux-armhf
-else
-NPU_PLATFORM_ARCH = linux-aarch64
 endif
 
 ifeq ($(BR2_PACKAGE_RV1126_RV1109),y)
