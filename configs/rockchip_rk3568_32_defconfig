@@ -3,6 +3,8 @@
 #include "base.config"
 #include "base_extra.config"
 #include "benchmark.config"
+#include "camera.config"
+#include "camera_gst.config"
 #include "debug.config"
 #include "debug2.config"
 #include "display.config"
@@ -16,4 +18,5 @@
 #include "video_gst_rtsp.config"
 #include "rk356x_arm.config"
 #include "test.config"
-
+BR2_PACKAGE_RKNPU=y
+BR2_PACKAGE_RKNPU_USE_RKNN_API=y
