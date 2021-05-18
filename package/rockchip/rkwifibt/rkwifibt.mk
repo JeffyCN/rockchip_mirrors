@@ -18,11 +18,11 @@ FIRMWARE_DIR = system
 
 ifeq ($(call qstrip,$(BR2_ARCH)),aarch64)
 RKWIFIBT_ARCH=arm64
-KERNEL_ARCH = arm64
 else ifeq ($(call qstrip,$(BR2_ARCH)),arm)
 RKWIFIBT_ARCH=arm
-KERNEL_ARCH = arm
 endif
+
+BT_DRIVER_ARCH = $(shell grep -o "arm[^ ]*" $(TOPDIR)/../kernel/.config)
 
 ifeq (y,$(BR2_TOOLCHAIN_EXTERNAL_HEADERS_4_19))
 FIRMWARE_DIR = vendor
@@ -37,10 +37,6 @@ endif
 
 ifeq (y,$(BR2_PACKAGE_RKWIFIBT_AMPAKALL))
 SXLOAD_WIFI = "S36load_ampakall_wifi_modules"
-endif
-
-ifeq (y,$(BR2_PACKAGE_RK356X))
-KERNEL_ARCH = arm64
 endif
 
 define RKWIFIBT_INSTALL_COMMON
@@ -121,7 +117,7 @@ define RKWIFIBT_BUILD_CMDS
     $(TARGET_CC) -o $(@D)/src/rk_wifi_init $(@D)/src/rk_wifi_init.c
     $(MAKE) -C $(@D)/realtek/rtk_hciattach/ CC=$(TARGET_CC)
     $(MAKE) -C $(@D)/src/CY_WL_API/ CC=$(TARGET_CC)
-    $(TARGET_CONFIGURE_OPTS) $(MAKE) -C $(TOPDIR)/../kernel/ M=$(@D)/realtek/bluetooth_uart_driver ARCH=$(KERNEL_ARCH)
+    $(TARGET_CONFIGURE_OPTS) $(MAKE) -C $(TOPDIR)/../kernel/ M=$(@D)/realtek/bluetooth_uart_driver ARCH=$(BT_DRIVER_ARCH)
 endef
 
 ifneq ($(BR2_PACKAGE_THUNDERBOOT), y)
