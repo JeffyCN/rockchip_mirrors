@@ -89,6 +89,8 @@ static pthread_cond_t key_queue_cond = PTHREAD_COND_INITIALIZER;
 static int key_queue[256], key_queue_len = 0;
 static volatile char key_pressed[KEY_MAX + 1];
 
+extern GRSurface* gr_draw;
+
 // Clear the screen and draw the currently selected background icon (if any).
 // Should only be called with gUpdateMutex locked.
 static void draw_background_locked(gr_surface icon)
@@ -325,7 +327,7 @@ void ui_init(void)
     if (ret)
         return;
 
-    ev_init(input_callback, NULL);
+    ev_init((ev_callback)input_callback, NULL);
 
     text_col = text_row = 0;
     text_rows = gr_fb_height() / CHAR_HEIGHT;
@@ -545,7 +547,7 @@ void ui_show_text(int visible)
 int ui_wait_key()
 {
     if (!gr_draw)
-        return;
+        return 0;
 
     pthread_mutex_lock(&key_queue_mutex);
     while (key_queue_len == 0) {
