@@ -18,14 +18,8 @@ ifeq ($(call qstrip,$(BR2_PACKAGE_RKWIFIBT_VENDOR)), REALTEK)
 	LIBDEVICEIOSO = bluez/libDeviceIo.so
 	DEVICEIO_RELEASE_DEPENDENCIES += readline bluez5_utils libglib2 bluez-alsa
 else ifeq ($(call qstrip,$(BR2_PACKAGE_RKWIFIBT_VENDOR)), BROADCOM)
-	DEVICEIO_RELEASE_BROADCOM_BSA = $(TOPDIR)/../external/broadcom_bsa/3rdparty/embedded/bsa_examples/linux
-	DEVICEIO_RELEASE_CONF_OPTS += -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -I$(DEVICEIO_RELEASE_BROADCOM_BSA)/libbsa/include -I$(DEVICEIO_RELEASE_BROADCOM_BSA)/app_common/include" \
-                -DCMAKE_CXX_FLAGS="${CMAKE_C_FLAGS} -I$(DEVICEIO_RELEASE_BROADCOM_BSA)/libbsa/include -I$(DEVICEIO_RELEASE_BROADCOM_BSA)/app_common/include"
 	LIBDEVICEIOSO = broadcom/libDeviceIo.so
 else ifeq ($(call qstrip,$(BR2_PACKAGE_RKWIFIBT_VENDOR)), CYPRESS)
-	DEVICEIO_RELEASE_CYPRESS_BSA = $(TOPDIR)/../external/bluetooth_bsa/3rdparty/embedded/bsa_examples/linux
-	DEVICEIO_RELEASE_CONF_OPTS += -DCMAKE_C_FLAGS="${CMAKE_C_FLAGS} -I$(DEVICEIO_RELEASE_CYPRESS_BSA)/libbsa/include -I$(DEVICEIO_RELEASE_CYPRESS_BSA)/app_common/include" \
-                -DCMAKE_CXX_FLAGS="${CMAKE_C_FLAGS} -I$(DEVICEIO_RELEASE_CYPRESS_BSA)/libbsa/include -I$(DEVICEIO_RELEASE_CYPRESS_BSA)/app_common/include"
 	LIBDEVICEIOSO = cypress/libDeviceIo.so
 else
 	LIBDEVICEIOSO = fake/libDeviceIo.so
