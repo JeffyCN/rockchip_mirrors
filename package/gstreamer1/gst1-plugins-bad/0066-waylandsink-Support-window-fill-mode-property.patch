@@ -1,4 +1,4 @@
-From 24f086499906347c1e576c18e0abd86cd2a0600a Mon Sep 17 00:00:00 2001
+From 2897d203d02235e5575db0b9be4954d8a9a7aeab Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 07:08:06 +0800
 Subject: [PATCH 66/68] waylandsink: Support window fill-mode property
@@ -145,7 +145,7 @@ index 966830d..0e8e2ac 100644
    gchar *display_name;
  
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index bb032b6..bbd7123 100644
+index bb032b6..e960dea 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -462,12 +462,36 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
@@ -170,11 +170,11 @@ index bb032b6..bbd7123 100644
 +
 +      if (src_ratio < dst_ratio) {
 +        int h = src.w / dst_ratio;
-+        src.y = (src.h - dst.h) / 2;
++        src.y = (src.h - h) / 2;
 +        src.h = h;
 +      } else if (src_ratio > dst_ratio) {
 +        int w = src.h * dst_ratio;
-+        src.x = (src.w - dst.w) / 2;
++        src.x = (src.w - w) / 2;
 +        src.w = w;
 +      }
 +
