@@ -1,4 +1,4 @@
-. /etc/profile
+source /etc/profile.d/RkEnv.sh
 
 case "$1" in
 	start)
