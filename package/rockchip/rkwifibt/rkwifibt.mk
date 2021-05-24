@@ -23,6 +23,11 @@ RKWIFIBT_ARCH=arm
 endif
 
 BT_DRIVER_ARCH = $(shell grep -o "arm[^ ]*" $(TOPDIR)/../kernel/.config)
+ifeq ($(call qstrip,$(BT_DRIVER_ARCH)),arm64)
+BT_DRIVER_ARCH = arm64
+else
+BT_DRIVER_ARCH = arm
+endif
 
 ifeq (y,$(BR2_TOOLCHAIN_EXTERNAL_HEADERS_4_19))
 FIRMWARE_DIR = vendor
