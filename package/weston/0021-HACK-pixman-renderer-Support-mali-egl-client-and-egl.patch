@@ -1,4 +1,4 @@
-From 0170c7e210b17c37ede4b50ec3bc2a97b70ec194 Mon Sep 17 00:00:00 2001
+From 29cd9c3a42d809c239fd9c7c58c7e32abac1f451 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:53:52 +0800
 Subject: [PATCH 21/47] HACK: pixman-renderer: Support mali egl client and egl
@@ -36,7 +36,7 @@ index 08d23ec..42d8f38 100644
  
  lib_weston = shared_library(
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 7be7b4c..0ea21f3 100644
+index 7be7b4c..edcac88 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -44,6 +44,19 @@
@@ -237,21 +237,21 @@ index 7be7b4c..0ea21f3 100644
 +		goto err_destroy_gbm;
 +	}
 +
++	if (!eglInitialize(pr->egl_display, NULL, NULL)) {
++		weston_log("Failed to initialize egl\n");
++		goto err_terminate_display;
++	}
++
 +	extensions =
 +		(const char *) eglQueryString(pr->egl_display, EGL_EXTENSIONS);
 +	if (!extensions) {
 +		weston_log("Retrieving EGL extension string failed.\n");
-+		goto err_destroy_gbm;
++		goto err_terminate_display;
 +	}
 +
 +	if (!weston_check_egl_extension(extensions,
 +					"EGL_WL_bind_wayland_display")) {
 +		weston_log("Wayland extension not supported.\n");
-+		goto err_destroy_gbm;
-+	}
-+
-+	if (!eglInitialize(pr->egl_display, NULL, NULL)) {
-+		weston_log("Failed to initialize egl\n");
 +		goto err_terminate_display;
 +	}
 +
