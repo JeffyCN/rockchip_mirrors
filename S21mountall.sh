@@ -19,48 +19,85 @@ check_tool()
 	return 1
 }
 
-prepare_ubifs()
+prepare_ubi()
 {
-	# Only support ubifs for mtd device
-	[ -f /proc/mtd ] || { echo "Not a mtd device!" && return 1; }
+	# Only support ubi for mtd device
+	if echo $DEV | grep -vq /dev/mtd; then
+		echo "$DEV is not a mtd device!"
+		return 1
+	fi
 
-	# Use /dev/ubi$PART_NO for ubifs device
-	[ -n "$PART_NO" ] || { echo "No valid part number!" && return 1; }
+	[ "$PART_NO" ] || { echo "No valid part number!" && return 1; }
 
-	# Prepare ubifs device
-	ubiattach /dev/ubi_ctrl -p $DEV -d $PART_NO
-	grep -w $PART_NAME /sys/class/ubi/ubi${PART_NO}_0/name &>/dev/null && \
-		return 0
+	if [ "$FSGROUP" == ubifs ]; then
+		DEV=/dev/ubi${PART_NO}_0
+	else
+		DEV=/dev/ubiblock${PART_NO}_0
+	fi
 
-	echo "No valid ubifs volume, formatting..."
+	MTDDEV=/dev/mtd${PART_NO}
 
-	format_ubifs
-}
+	echo "Preparing $DEV from $MTDDEV"
 
-mount_ubifs()
-{
-	echo "Mounting ubifs /dev/ubi${PART_NO}_0 on $2 ${3:+with$3}"
+	# Remove ubi block device
+	if echo $DEV | grep -q ubiblock; then
+		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
+		ubiblock -r /dev/ubi${PART_NO}_0 &>/dev/null
+	fi
 
-	# Mount /dev/ubi${PART_NO}_0 instead of $DEV
-	mount -t ubifs /dev/ubi${PART_NO}_0 $2 $3
+	# Detach ubi device
+	check_tool ubidetach BR2_PACKAGE_MTD_UBIDETACH || return 1
+	ubidetach -p $MTDDEV &>/dev/null
+
+	# Attach ubi device
+	check_tool ubiattach BR2_PACKAGE_MTD_UBIATTACH || return 1
+	ubiattach /dev/ubi_ctrl -m $PART_NO -d $PART_NO || return 1
+
+	# Check for valid volume
+	if [ ! -e /dev/ubi${PART_NO}_0 ]; then
+		echo "No valid ubi volume"
+		return 1
+	fi
+
+	# Create ubi block device
+	if echo $DEV | grep -q ubiblock; then
+		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
+		ubiblock -c /dev/ubi${PART_NO}_0 || return 1
+	fi
+
+	return 0
 }
 
 format_ubifs()
 {
-	# Detach first
-	ubidetach -p $DEV
+	echo "Formatting $MTDDEV for $DEV"
+
+	# Remove ubi block device
+	if echo $DEV | grep -q ubiblock; then
+		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
+		ubiblock -r /dev/ubi${PART_NO}_0 &>/dev/null
+	fi
+
+	# Detach ubi device
+	check_tool ubidetach BR2_PACKAGE_MTD_UBIDETACH || return 1
+	ubidetach -p $MTDDEV &>/dev/null
 
 	# Format device
 	check_tool ubiformat BR2_PACKAGE_MTD_UBIFORMAT || return 1
-	ubiformat -yq $DEV || return 1
+	ubiformat -yq $MTDDEV || return 1
 
-	# Attach ubifs device
-	check_tool ubiattach BR2_PACKAGE_MTD_UBIATTACH || return 1
-	ubiattach /dev/ubi_ctrl -p $DEV -d $PART_NO || return 1
+	# Attach ubi device
+	ubiattach /dev/ubi_ctrl -m $PART_NO -d $PART_NO || return 1
 
-	# Create ubifs volume
+	# Create ubi volume
 	check_tool ubimkvol BR2_PACKAGE_MTD_UBIMKVOL || return 1
-	ubimkvol /dev/ubi$PART_NO -N $PART_NAME -m
+	ubimkvol /dev/ubi$PART_NO -N $PART_NAME -m || return 1
+
+	# Create ubi block device
+	if echo $DEV | grep -q ubiblock; then
+		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
+		ubiblock -c /dev/ubi${PART_NO}_0 || return 1
+	fi
 }
 
 remount_part()
@@ -269,6 +306,20 @@ convert_mount_opts()
 
 prepare_part()
 {
+	# Try to umount the mounted partitions
+	[ "$IS_ROOTDEV" ] || umount $MOUNT_POINT &>/dev/null
+
+	# Prepare for ubi (consider /dev/mtdX as ubiblock)
+	if [ $FSGROUP == ubifs ] || echo $DEV | grep -q "/dev/mtd[0-9]";then
+		if ! prepare_ubi; then
+			echo "Failed to prepare ubi for $DEV"
+			[ "$AUTO_MKFS" ] || return 1
+
+			echo "Auto formatting"
+			format_ubifs || return 1
+		fi
+	fi
+
 	case $FSGROUP in
 		ext2)
 			MOUNT="busybox mount"
@@ -293,12 +344,10 @@ prepare_part()
 			LABEL=$(ntfslabel $DEV)
 			;;
 		ubifs)
-			MOUNT="mount_ubifs"
+			MOUNT="busybox mount -t ubifs"
 			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
 
-			# TODO: Support resize?
-			prepare_ubifs &&
-				LABEL=$PART_NAME
+			LABEL=$PART_NAME
 			;;
 		squashfs|auto)
 			MOUNT="busybox mount"
@@ -316,7 +365,7 @@ prepare_part()
 		echo "Wrong fs type($FSTYPE) for $DEV"
 		if [ "$AUTO_MKFS" ]; then
 			echo "Auto formatting $DEV to $FSTYPE"
-			format_part && prepare_part && return
+			format_part && prepare_part && return 0
 		fi
 		return 1
 	fi
@@ -325,11 +374,9 @@ prepare_part()
 
 	MOUNT_OPTS=${MOUNT_OPTS:+" -o ${MOUNT_OPTS%,}"}
 
-	# Try to umount the mounted partitions
-	[ "$IS_ROOTDEV" ] || umount $MOUNT_POINT &>/dev/null
 	mountpoint -q $MOUNT_POINT || return 0
-
 	MOUNTED_RO_RW=$(touch $MOUNT_POINT &>/dev/null && echo rw || echo ro)
+	return 0
 }
 
 check_part()
