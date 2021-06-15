@@ -154,12 +154,9 @@ source "package/rockchip/rv1108_package/Config.in"
 
 # Shared packages with all chips
 source "package/rockchip/ros/Config.in"
-source "package/rockchip/liblog/Config.in"
 source "package/rockchip/LocalPlayer/Config.in"
 source "package/rockchip/alexaClientSDK/Config.in"
-source "package/rockchip/libcutils/Config.in"
 source "package/rockchip/mpp/Config.in"
-source "package/rockchip/adbd/Config.in"
 source "package/rockchip/address_sanitizer/Config.in"
 source "package/rockchip/gstreamer1-rockchip/Config.in"
 source "package/rockchip/gstreamer1-rockchip-extra/Config.in"
