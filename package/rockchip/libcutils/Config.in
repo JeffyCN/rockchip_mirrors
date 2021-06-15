@@ -1,3 +1,0 @@
-config BR2_PACKAGE_LIBCUTILS
-	bool "libcutils porting from Android"
-
