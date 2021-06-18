@@ -1,7 +1,7 @@
-From 2c938a0a6708959d8564b237d7ee9797489c1b5a Mon Sep 17 00:00:00 2001
+From d1b8a19097d4d7bb0cbbc4d0aaaeeb909aad6f8f Mon Sep 17 00:00:00 2001
 From: Eirik Aavitsland <eirik.aavitsland@qt.io>
 Date: Wed, 2 Oct 2019 09:45:57 +0200
-Subject: [PATCH 4/6] Fix sprites leaking textures in SW and OpenVG backends
+Subject: [PATCH 5/7] Fix sprites leaking textures in SW and OpenVG backends
 
 When a QSGSpriteNode is initialized with a texture, it is supposed to
 take ownership of the texture and delete it when the node gets
