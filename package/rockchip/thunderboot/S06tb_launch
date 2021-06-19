@@ -3,10 +3,11 @@
 
 lunch_start()
 {
-	echo none > /sys/class/leds/red/trigger
-	echo 5 > /sys/class/leds/red/brightness
+#	echo none > /sys/class/leds/white/trigger
+#	echo 90 > /sys/class/leds/white/brightness
 	export HDR_MODE=0
-	ispserver -f CAMERA_FPS &
+	export normal_no_read_back=1
+	ispserver -f 25 &
 	echo "Now we are ready to start your first application" > /dev/kmsg
 
 	{
@@ -20,8 +21,6 @@ lunch_start()
 
 	export mediaserver_log_level=2
 	mediaserver -a -d -c /usr/share/mediaserver/tb.conf > /dev/kmsg 2>&1 &
-
-	echo 20 > /proc/pir/sensibility
 	auto_poweroff.sh &
 }
 
