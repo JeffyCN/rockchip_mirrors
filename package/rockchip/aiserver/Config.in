@@ -26,6 +26,10 @@ config BR2_PACKAGE_AISERVER_CONIFG
     string "aiserver config"
     default "none"
 
+config BR2_PACKAGE_AISERVER_RKVO
+    bool "enable aiserver with rkvo"
+    default n
+
 config BR2_PACKAGE_AISERVER_MINILOGGER
         bool "enable miniloger print"
         select BR2_PACKAGE_MINILOGGER

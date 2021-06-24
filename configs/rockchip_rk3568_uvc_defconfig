@@ -1,5 +1,4 @@
 #include "audio.config"
-#include "audio_gst.config"
 #include "base.config"
 #include "base_extra.config"
 #include "bt.config"
@@ -37,5 +36,6 @@ BR2_PACKAGE_ISP2_IPC_DBUS=y
 BR2_PACKAGE_ISP2_IPC_DBSERVER=y
 BR2_PACKAGE_DBUS_GLIB=y
 BR2_PACKPAG_ISP2_IPC_FORCE_INSTALL_TO_ROOTFS=y
+BR2_PACKAGE_AISERVER_RKVO=y
 BR2_PACKAGE_GDB=y
 BR2_PACKAGE_GDB_DEBUGGER=y
