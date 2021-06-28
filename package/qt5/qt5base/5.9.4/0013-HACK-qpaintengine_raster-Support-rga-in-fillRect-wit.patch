@@ -1,7 +1,7 @@
-From 0cb632865a0f9d7e2c62b537261bf83e449aa815 Mon Sep 17 00:00:00 2001
+From aa8b68fd2af8629d6185f53a4252fe2e4fb26a98 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Jun 2020 09:09:47 +0800
-Subject: [PATCH 13/19] HACK: qpaintengine_raster: Support rga in fillRect with
+Subject: [PATCH 13/22] HACK: qpaintengine_raster: Support rga in fillRect with
  texture
 
 Use QT_USE_RGA macro to enable it.
@@ -10,8 +10,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  src/gui/image/qimage_p.h                 |   4 +
  src/gui/painting/qpaintengine_raster.cpp |  46 +++++++++
- src/gui/painting/rga.c                   | 115 +++++++++++++++++++++++
- 3 files changed, 165 insertions(+)
+ src/gui/painting/rga.c                   | 117 +++++++++++++++++++++++
+ 3 files changed, 167 insertions(+)
  create mode 100644 src/gui/painting/rga.c
 
 diff --git a/src/gui/image/qimage_p.h b/src/gui/image/qimage_p.h
@@ -31,7 +31,7 @@ index 775ab6d541..ff66dfe6bd 100644
          return QImage::Format_ARGB8555_Premultiplied;
      case QImage::Format_RGB666:
 diff --git a/src/gui/painting/qpaintengine_raster.cpp b/src/gui/painting/qpaintengine_raster.cpp
-index 92ab6e8375..4b09d95e52 100644
+index 92ab6e8375..ee487fa7b9 100644
 --- a/src/gui/painting/qpaintengine_raster.cpp
 +++ b/src/gui/painting/qpaintengine_raster.cpp
 @@ -1410,6 +1410,10 @@ void QRasterPaintEngine::fillPath(const QPainterPath &path, QSpanData *fillData)
@@ -50,7 +50,7 @@ index 92ab6e8375..4b09d95e52 100644
                         || (pe && pe->isUnclipped_normalized(QRect(x1, y1, width, height)));
  
 +#ifdef QT_USE_RGA
-+    if (pe && width > 64 && height > 64) {
++    if (pe && isUnclipped && width > 64 && height > 64) {
 +        const QPainter::CompositionMode mode = pe->rasterBuffer->compositionMode;
 +        const uchar *dst = data->rasterBuffer->buffer();
 +        int dst_stride = data->rasterBuffer->bytesPerLine();
@@ -96,10 +96,10 @@ index 92ab6e8375..4b09d95e52 100644
  
 diff --git a/src/gui/painting/rga.c b/src/gui/painting/rga.c
 new file mode 100644
-index 0000000000..9f356b7f2b
+index 0000000000..7f2833ee20
 --- /dev/null
 +++ b/src/gui/painting/rga.c
-@@ -0,0 +1,115 @@
+@@ -0,0 +1,117 @@
 +#include <rga/rga.h>
 +#include <rga/RgaApi.h>
 +
@@ -192,6 +192,8 @@ index 0000000000..9f356b7f2b
 +    int blend = ((alpha * 255) >> 8) << 16;
 +    if (mode == QPainter::CompositionMode_Source)
 +        blend |= 0x0100;
++    else if (src_format == QImage::Format_ARGB32_Premultiplied)
++        blend |= 0x0105;
 +    else
 +        blend |= 0x0405;
 +
