@@ -51,5 +51,11 @@ else
     ISP2_IPC_CONF_OPTS += -DENABLE_MEDIASERVER=OFF
 endif
 
+ifeq ($(BR2_PACKAGE_RV1126_RV1109),y)
+    ISP2_IPC_CONF_OPTS += -DISP_HW_VERSION=-DISP_HW_V20
+else ifeq ($(BR2_PACKAGE_RK356X),y)
+    ISP2_IPC_CONF_OPTS += -DISP_HW_VERSION=-DISP_HW_V21
+endif
+
 endif
 $(eval $(cmake-package))
