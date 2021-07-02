@@ -27,7 +27,8 @@ done
 if [ ! -e "$rtmp_file" ]; then
     echo "$boot_limit_time seconds without client access"
     usb_detect
-    kill -3 `pidof mediaserver`
+    aplay /etc/go_to_sleep.wav &
+    killall -3 mediaserver
     exit 0
 fi
 
@@ -43,9 +44,10 @@ do
             interval_time=$((current_time-prev_time))
             echo "interval_time is $interval_time, no rtmp time is $no_client_time"
             if [ $interval_time -gt $no_client_time ]; then
-                usb_detect
-		kill -3 `pidof mediaserver`
-                exit 0
+		usb_detect
+		aplay /etc/go_to_sleep.wav &
+		killall -3 mediaserver
+		exit 0
             fi
             if [ -e "$rtmp_file" ]; then
                 break
