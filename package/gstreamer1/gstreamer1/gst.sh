@@ -16,6 +16,9 @@ export GST_DEBUG_NO_COLOR=1
 # Preferred formats for V4L2
 export GST_V4L2_PREFERRED_FOURCC=YU12:NV12
 
+# Using libv4l2 for V4L2
+export GST_V4L2_USE_LIBV4L2=1
+
 # Preferred sinks for playbin3(autoaudiosink/autovideosink) and playbin.
 # export AUTOAUDIOSINK_PREFERRED=alsasink
 # export AUTOVIDEOSINK_PREFERRED=waylandsink
