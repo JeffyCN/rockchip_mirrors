@@ -15,6 +15,7 @@ size_t my_write_func(void *ptr, size_t size, size_t nmemb, FILE *stream)
 }
 
 extern double processvalue;
+static int down_processvalue;
 
 int my_progress_func(char *progress_data,
                      double t, /* dltotal */
@@ -23,6 +24,12 @@ int my_progress_func(char *progress_data,
                      double ulnow)
 {
     processvalue = ulnow / ultotal * 100 / 110;
+    //LOGI("ultotal is %f, ulnow is %f, t is %f, d is %f\n", ultotal, ulnow, t, d);
+    if (down_processvalue != (int)(d / t * 100)) {
+        down_processvalue = (int)(d / t * 100);
+        LOGI("down_processvalue is %d%\n", down_processvalue);
+    }
+
     return 0;
 }
 
@@ -36,6 +43,7 @@ int download_file(char *url, char *output_filename)
     CURLcode res;
     FILE *outfile;
     char *progress_data = "* ";
+    down_processvalue = -1;
 
     curl = curl_easy_init();
     if(curl)

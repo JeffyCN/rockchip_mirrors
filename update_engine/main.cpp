@@ -159,7 +159,7 @@ static const struct option engine_options[] = {
 };
 
 int main(int argc, char *argv[]) {
-    LOGI("*** update_engine: Version V1.1.3 ***.\n");
+    LOGI("*** update_engine: Version V1.1.4 ***.\n");
     int arg;
     char *image_url = NULL;
     char *version_url = NULL;
