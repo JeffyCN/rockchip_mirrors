@@ -1,7 +1,7 @@
-From 4bd6c11af4bbfa98edaf16425c6303629baf4b43 Mon Sep 17 00:00:00 2001
+From 16f109aea816562fd0c16ee86f68f0aca880e234 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 13/41] backend-drm: Support mirror mode
+Subject: [PATCH 13/48] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -14,11 +14,11 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/backend-drm/drm-internal.h  |   6 +
  libweston/backend-drm/drm.c           | 293 ++++++++++++++++++++++++--
  libweston/backend-drm/meson.build     |   3 +-
- libweston/backend-drm/state-propose.c |  16 +-
+ libweston/backend-drm/state-propose.c |  22 +-
  libweston/compositor.c                |   2 +-
  libweston/input.c                     |   7 +
  meson.build                           |   8 +
- 10 files changed, 326 insertions(+), 18 deletions(-)
+ 10 files changed, 332 insertions(+), 18 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
 index 0908763..27eb99f 100644
@@ -496,38 +496,47 @@ index a7f6296..e199f63 100644
  
  if get_option('renderer-gl')
 diff --git a/libweston/backend-drm/state-propose.c b/libweston/backend-drm/state-propose.c
-index 767c34f..057087e 100644
+index 767c34f..7af5a2f 100644
 --- a/libweston/backend-drm/state-propose.c
 +++ b/libweston/backend-drm/state-propose.c
-@@ -528,7 +528,7 @@ drm_output_try_view_on_plane(struct drm_plane *plane,
+@@ -53,6 +53,21 @@ static const char *const drm_output_propose_state_mode_as_string[] = {
+ 	[DRM_OUTPUT_PROPOSE_STATE_PLANES_ONLY]	= "plane-only state"
+ };
+ 
++static bool
++drm_is_mirroring(struct drm_backend *b)
++{
++	struct drm_output *tmp;
++
++	if (!b->mirror_mode)
++		return false;
++
++	wl_list_for_each(tmp, &b->compositor->output_list, base.link)
++		if (tmp->is_mirror)
++			return true;
++
++	return false;
++}
++
+ static const char *
+ drm_propose_state_mode_to_string(enum drm_output_propose_state_mode mode)
+ {
+@@ -528,7 +543,7 @@ drm_output_try_view_on_plane(struct drm_plane *plane,
  
  	switch (plane->type) {
  	case WDRM_PLANE_TYPE_CURSOR:
 -		if (b->cursors_are_broken) {
-+		if (b->cursors_are_broken || b->mirror_mode) {
++		if (b->cursors_are_broken || drm_is_mirroring(b)) {
  			availability = NO_PLANES_ACCEPTED;
  			goto out;
  		}
-@@ -1040,11 +1040,23 @@ drm_assign_planes(struct weston_output *output_base, void *repaint_data)
- 	struct weston_view *ev;
- 	struct weston_plane *primary = &output_base->compositor->primary_plane;
- 	enum drm_output_propose_state_mode mode = DRM_OUTPUT_PROPOSE_STATE_PLANES_ONLY;
-+	bool mirroring = false;
- 
+@@ -1044,7 +1059,10 @@ drm_assign_planes(struct weston_output *output_base, void *repaint_data)
  	drm_debug(b, "\t[repaint] preparing state for output %s (%lu)\n",
  		  output_base->name, (unsigned long) output_base->id);
  
 -	if (!b->sprites_are_broken && !output->virtual) {
-+	if (b->mirror_mode) {
-+		struct drm_output *tmp;
-+
-+		wl_list_for_each(tmp, &b->compositor->output_list, base.link)
-+			if (tmp->is_mirror)
-+				mirroring = true;
-+	}
-+
 +	/* Force single plane in mirror mode */
-+	if (mirroring) {
++	if (drm_is_mirroring(b)) {
 +		drm_debug(b, "\t[state] no overlay plane in mirror mode\n");
 +	} else if (!b->sprites_are_broken && !output->virtual) {
  		drm_debug(b, "\t[repaint] trying planes-only build state\n");
