@@ -56,7 +56,7 @@ dir=`echo $(1)`; \
 iqfile=`echo $(2)`; \
 if [[ -z "$$iqfile" ]]; then \
 	echo "## conver iqfiles"; \
-	for i in $$dir/*.xml; do \
+	for i in $$dir/*.json; do \
 		echo "### conver iqfiles: $$i"; \
 		$(RKISP_PARSER_HOST_BINARY) $$i; \
 	done; \
@@ -86,13 +86,13 @@ else
 	ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE)),)
 		CAMERA_ENGINE_RKAIQ_IQFILE = $(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE))
 	else
-		CAMERA_ENGINE_RKAIQ_IQFILE = *.xml
+		CAMERA_ENGINE_RKAIQ_IQFILE = */*.json
 	endif
 endif
 
 define INSTALL_FAKE_CAMERA_IQFILE_CMD
        $(INSTALL) -D -m  644 $(@D)/iqfiles/$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE) \
-                $(CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR)/etc/iqfiles/FakeCamera.xml
+                $(CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR)/etc/iqfiles/FakeCamera.json
 endef
 ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE)),)
         CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += INSTALL_FAKE_CAMERA_IQFILE_CMD
