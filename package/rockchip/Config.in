@@ -142,6 +142,7 @@ config BR2_PACKAGE_CAMERA_ENGINE
     depends on BR2_ROCKCHIP_HAS_ISP1 || BR2_ROCKCHIP_HAS_ISP2
     select BR2_PACKAGE_CAMERA_ENGINE_RKISP if BR2_ROCKCHIP_HAS_ISP1
     select BR2_PACKAGE_CAMERA_ENGINE_RKAIQ if BR2_ROCKCHIP_HAS_ISP2
+    select BR2_PACKAGE_RKAIQ_TOOL_SERVER if BR2_ROCKCHIP_HAS_ISP2
     help
         Depend on Chip Type, there are different camera_engine packages.
         Enable this config to choose camera_engine package by chip automatically.
@@ -279,4 +280,5 @@ source "package/rockchip/pcba_adb_test/Config.in"
 source "package/rockchip/camera_factory_test_server/Config.in"
 source "package/rockchip/thunderboot/Config.in"
 source "package/rockchip/startup_app_ipc/Config.in"
+source "package/rockchip/rkaiq_tool_server/Config.in"
 endif
