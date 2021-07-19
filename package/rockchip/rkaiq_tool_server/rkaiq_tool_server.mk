@@ -28,7 +28,7 @@ define RKAIQ_TOOL_SERVER_INSTALL_TARGET_CMDS
 	mkdir -p $(RKAIQ_TOOL_SERVER_TARGET_INSTALL_DIR)/usr/bin/
 	mkdir -p $(RKAIQ_TOOL_SERVER_TARGET_INSTALL_DIR)/usr/lib/
 	$(INSTALL) -D -m  644 $(@D)/rkmedia/librkmedia/librkmedia.so $(RKAIQ_TOOL_SERVER_TARGET_INSTALL_DIR)/usr/lib/
-	$(INSTALL) -D -m  644 $(@D)/rkaiq_tool_server $(RKAIQ_TOOL_SERVER_TARGET_INSTALL_DIR)/usr/bin/
+	$(INSTALL) -D -m  755 $(@D)/rkaiq_tool_server $(RKAIQ_TOOL_SERVER_TARGET_INSTALL_DIR)/usr/bin/
 endef
 
 $(eval $(cmake-package))
