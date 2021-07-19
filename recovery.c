@@ -939,8 +939,9 @@ main(int argc, char **argv) {
         #endif
 
         #ifdef USE_UPDATEENGINE
+#define	FACTORY_FIRMWARE_IMAGE "/mnt/sdcard/out_image.img"
 #define	CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
-        if (access(CMD4RECOVERY_FILENAME, F_OK)) {
+        if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
             int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
             if (tmp_fd < 0) {
                 printf("creat % error.\n", CMD4RECOVERY_FILENAME);
@@ -962,6 +963,10 @@ main(int argc, char **argv) {
                 part = mtd_find_partition_by_name("spi-nand0");
             }
             if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
+                if ((!access(FACTORY_FIRMWARE_IMAGE, F_OK)) && mtd_find_partition_by_name("sfc_nor") != NULL) {
+                    printf("Info: start flash out_image.img to spi nor.\n");
+                    system("flashcp -v " FACTORY_FIRMWARE_IMAGE " /dev/mtd0");
+                } else
                 printf("Error: Can't find rk-nand or spi-nand0.\n");
             }else{
                 system("flash_erase /dev/mtd0 0x0 0");
