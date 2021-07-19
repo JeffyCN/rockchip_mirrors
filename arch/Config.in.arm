@@ -624,6 +624,7 @@ endchoice
 
 choice
 	prompt "Floating point strategy"
+	default BR2_ARM_FPU_AUTO if BR2_ARCH_NEEDS_GCC_AT_LEAST_8
 	default BR2_ARM_FPU_NEON_FP_ARMV8 if BR2_ARM_CPU_HAS_FP_ARMV8 && BR2_ARM_CPU_HAS_NEON
 	default BR2_ARM_FPU_FP_ARMV8 if BR2_ARM_CPU_HAS_FP_ARMV8
 	default BR2_ARM_FPU_FPV5D16 if BR2_ARM_CPU_HAS_FPV5
@@ -642,6 +643,11 @@ config BR2_ARM_SOFT_FLOAT
 	  point. It should be used for ARM cores that do not include a
 	  Vector Floating Point unit, such as ARMv5 cores (ARM926 for
 	  example) or certain ARMv6 cores.
+
+config BR2_ARM_FPU_AUTO
+	bool "Auto"
+	help
+	  This option allows to use GCC's default floating point unit.
 
 config BR2_ARM_FPU_VFPV2
 	bool "VFPv2"
@@ -910,6 +916,7 @@ config BR2_GCC_TARGET_ABI
 	default "lp64"		if BR2_aarch64 || BR2_aarch64_be
 
 config BR2_GCC_TARGET_FPU
+	default "auto"		if BR2_ARM_FPU_AUTO
 	default "vfp"		if BR2_ARM_FPU_VFPV2
 	default "vfpv3"		if BR2_ARM_FPU_VFPV3
 	default "vfpv3-d16"	if BR2_ARM_FPU_VFPV3D16
