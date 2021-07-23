@@ -44,6 +44,7 @@ F:	package/gstreamer1/gst1-vaapi/
 F:	package/imx-usb-loader/
 F:	package/janus-gateway/
 F:	package/json-for-modern-cpp/
+F:	package/libasio/
 F:	package/libcpprestsdk/
 F:	package/libressl/
 F:	package/libselinux/
@@ -1525,6 +1526,7 @@ F:	package/python-pysnmp/
 F:	package/python-pysnmp-apps/
 F:	package/python-pysnmp-mibs/
 F:	package/python-tornado/
+F:	package/websocketpp/
 
 N:	Ryan Coe <bluemrp9@gmail.com>
 F:	package/inadyn/
@@ -1700,6 +1702,7 @@ F:	package/lcdproc/
 
 N:	Sven Neumann <neumann@teufel.de>
 F:	package/gstreamer1/gst1-libav/
+F:	package/wampcc/
 
 N:	Sven Neumann <s.neumann@raumfeld.com>
 F:	package/glib-networking/
