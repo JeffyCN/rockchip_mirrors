@@ -13,7 +13,7 @@ CAMERA_ENGINE_RKAIQ_INSTALL_STAGING = YES
 CAMERA_ENGINE_RKAIQ_LICENSE = Apache V2.0
 CAMERA_ENGINE_RKAIQ_LICENSE_FILES = NOTICE
 
-CAMERA_ENGINE_RKAIQ_DEPENDENCIES = host-camera_engine_rkaiq
+CAMERA_ENGINE_RKAIQ_DEPENDENCIES =
 
 CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR = $(TARGET_DIR)
 
@@ -41,14 +41,6 @@ endif
 
 ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN), y)
 
-define HOST_CAMERA_ENGINE_RKAIQ_BUILD_CMDS
-	cd $(@D)/rkisp_parser_demo/build/linux && ./make-Makefiles.bash && $(MAKE)
-endef
-
-define HOST_CAMERA_ENGINE_RKAIQ_INSTALL_CMDS
-	$(INSTALL) -D -m  755 $(@D)/rkisp_parser_demo/build/linux/exe/debug/rkisp_parser  $(HOST_DIR)/bin
-endef
-
 RKISP_PARSER_HOST_BINARY = $(HOST_DIR)/bin/rkisp_parser
 
 define conver_iqfiles
@@ -66,6 +58,14 @@ else  \
 fi;
 endef
 
+define INSTALL_RKISP_PARSER_M32_CMD
+	$(INSTALL) -D -m  755 $(@D)/rkisp_parser_demo/bin/rkisp_parser_m32   $(HOST_DIR)/bin/rkisp_parser
+endef
+
+define INSTALL_RKISP_PARSER_M64_CMD
+	$(INSTALL) -D -m  755 $(@D)/rkisp_parser_demo/bin/rkisp_parser_m64   $(HOST_DIR)/bin/rkisp_parser
+endef
+
 define IQFILE_CONVER_CMD
         $(foreach iqfile, $(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE)),
 		$(call conver_iqfiles, $(@D)/iqfiles, $(iqfile))
@@ -76,42 +76,25 @@ define IQFILES_CONVER_CMD
 	$(call conver_iqfiles, $(@D)/iqfiles)
 endef
 
+	ifeq ($(BR2_arm), y)
+		CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += INSTALL_RKISP_PARSER_M32_CMD
+	else
+		CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += INSTALL_RKISP_PARSER_M64_CMD
+	endif
+
 	ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE)),)
 		CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += IQFILE_CONVER_CMD
 	else
 		CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += IQFILES_CONVER_CMD
 	endif
 	CAMERA_ENGINE_RKAIQ_IQFILE = *.bin
-else
+else # BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN
 	ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE)),)
 		CAMERA_ENGINE_RKAIQ_IQFILE = $(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE))
 	else
 		CAMERA_ENGINE_RKAIQ_IQFILE = */*.json
 	endif
-endif
-
-	ifeq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE)),$(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE)))
-		ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN), y)
-define INSTALL_FAKE_CAMERA_IQFILE_CMD
-			ln -sf `echo ${BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE} | sed "s/xml/bin/g"` \
-				$(CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR)/etc/iqfiles/FakeCamera.bin
-endef
-		else
-define INSTALL_FAKE_CAMERA_IQFILE_CMD
-			ln -sf $(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE) \
-				$(CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR)/etc/iqfiles/FakeCamera.xml
-endef
-		endif
-	else
-define INSTALL_FAKE_CAMERA_IQFILE_CMD
-		$(INSTALL) -D -m  644 $(@D)/iqfiles/$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE) \
-			$(CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR)/etc/iqfiles/FakeCamera.json
-endef
-	endif
-
-ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE)),)
-        CAMERA_ENGINE_RKAIQ_POST_INSTALL_TARGET_HOOKS += INSTALL_FAKE_CAMERA_IQFILE_CMD
-endif
+endif # BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN
 
 ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_RKISP_DEMO), y)
 CAMERA_ENGINE_RKAIQ_CONF_OPTS += -DENABLE_RKISP_DEMO=ON
@@ -134,6 +117,29 @@ define CAMERA_ENGINE_RKAIQ_INSTALL_CMDS
 endef
 
 CAMERA_ENGINE_RKAIQ_POST_INSTALL_TARGET_HOOKS += CAMERA_ENGINE_RKAIQ_INSTALL_CMDS
+
+ifeq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE)),$(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE)))
+		ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN), y)
+define INSTALL_FAKE_CAMERA_IQFILE_CMD
+			ln -sf `echo ${BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE} | sed "s/xml/bin/g"` \
+				$(CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR)/etc/iqfiles/FakeCamera.bin
+endef
+		else
+define INSTALL_FAKE_CAMERA_IQFILE_CMD
+			ln -sf $(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE) \
+				$(CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR)/etc/iqfiles/FakeCamera.xml
+endef
+		endif
+	else
+define INSTALL_FAKE_CAMERA_IQFILE_CMD
+		$(INSTALL) -D -m  644 $(@D)/iqfiles/$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE) \
+			$(CAMERA_ENGINE_RKAIQ_TARGET_INSTALL_DIR)/etc/iqfiles/FakeCamera.json
+endef
+	endif
+
+ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE)),)
+        CAMERA_ENGINE_RKAIQ_POST_INSTALL_TARGET_HOOKS += INSTALL_FAKE_CAMERA_IQFILE_CMD
+endif
 
 $(eval $(cmake-package))
 $(eval $(host-generic-package))
