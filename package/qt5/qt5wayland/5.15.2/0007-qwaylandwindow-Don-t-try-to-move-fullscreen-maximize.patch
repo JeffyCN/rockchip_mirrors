@@ -1,4 +1,4 @@
-From 0591cb31ca493bddad273d0a07481d0694a8041b Mon Sep 17 00:00:00 2001
+From 5eeaa0670eadeb32246cc97cacfbc63fe77d521f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 4 Mar 2019 17:22:51 +0800
 Subject: [PATCH 07/15] qwaylandwindow: Don't try to move fullscreen/maximized
@@ -10,10 +10,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index a8d6ad5..b9b0bd9 100644
+index 133b3359..aa048393 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -352,7 +352,11 @@ void QWaylandWindow::setGeometry_helper(const QRect &rect)
+@@ -346,7 +346,11 @@ void QWaylandWindow::setGeometry_helper(const QRect &rect)
  
  void QWaylandWindow::setGeometry(const QRect &rect)
  {

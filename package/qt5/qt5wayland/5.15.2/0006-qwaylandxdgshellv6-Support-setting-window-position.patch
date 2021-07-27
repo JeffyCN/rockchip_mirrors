@@ -1,4 +1,4 @@
-From 704e4f5ea05b5d98e5c249a0ab651629a4853824 Mon Sep 17 00:00:00 2001
+From f989e0a7beb325b8cb438cdd0d3a0496e31e0cf4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Feb 2019 16:52:15 +0800
 Subject: [PATCH 06/15] qwaylandxdgshellv6: Support setting window position
@@ -17,7 +17,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 16 insertions(+)
 
 diff --git a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
-index c137b30..f7f376b 100644
+index c137b308..f7f376bd 100644
 --- a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
 +++ b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
 @@ -321,6 +321,20 @@ void QWaylandXdgSurfaceV6::propagateSizeHints()
@@ -42,7 +42,7 @@ index c137b30..f7f376b 100644
  
  void QWaylandXdgSurfaceV6::setSizeHints()
 diff --git a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6_p.h b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6_p.h
-index 757b982..5fa6f34 100644
+index 757b982b..5fa6f341 100644
 --- a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6_p.h
 +++ b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6_p.h
 @@ -147,6 +147,8 @@ private:

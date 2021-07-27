@@ -1,7 +1,7 @@
 From a9a7eab89ba159fde359c2f9c5f14d6953866b4f Mon Sep 17 00:00:00 2001
 From: Johan Klokkhammer Helsing <johan.helsing@qt.io>
 Date: Thu, 30 Aug 2018 09:31:33 +0200
-Subject: [PATCH 02/18] Fix regression in QWaylandGlContext::makeCurrent for
+Subject: [PATCH 02/20] Fix regression in QWaylandGlContext::makeCurrent for
  offscreen surfaces
 
 [ChangeLog][QPA plugin] Fixed a bug where offscreen surfaces would get

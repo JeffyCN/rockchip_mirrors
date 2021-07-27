@@ -1,7 +1,7 @@
 From 0a906ec0481b71da8a4c4f115ac0cbbbb7a02274 Mon Sep 17 00:00:00 2001
 From: David Edmundson <davidedmundson@kde.org>
 Date: Wed, 8 Apr 2020 18:19:00 +0100
-Subject: [PATCH 02/16] Client: Reset wl_egl_window before wl_surface
+Subject: [PATCH 02/19] Client: Reset wl_egl_window before wl_surface
 
 Semantically we want things in this order as wl_egl_window_create takes
 a reference to the wl_surface. Teardown typically is the opposite of
@@ -28,7 +28,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 3 insertions(+), 8 deletions(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 0bef413..881b4d3 100644
+index 0bef413a..881b4d39 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
 @@ -239,6 +239,9 @@ void QWaylandWindow::reset(bool sendDestroyEvent)
@@ -42,7 +42,7 @@ index 0bef413..881b4d3 100644
          destroy();
      mScreens.clear();
 diff --git a/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp b/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp
-index 24dadff..27ece30 100644
+index 24dadff4..27ece30a 100644
 --- a/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp
 +++ b/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.cpp
 @@ -163,13 +163,6 @@ QSurfaceFormat QWaylandEglWindow::format() const
@@ -60,7 +60,7 @@ index 24dadff..27ece30 100644
  {
      if (m_eglSurface) {
 diff --git a/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h b/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h
-index 88e893a..dbd5ded 100644
+index 88e893a7..dbd5dedd 100644
 --- a/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h
 +++ b/src/hardwareintegration/client/wayland-egl/qwaylandeglwindow.h
 @@ -75,7 +75,6 @@ public:

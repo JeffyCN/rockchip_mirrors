@@ -1,4 +1,4 @@
-From 0d6a255aae4bacce7d2bdac4a497323a2fb3c24a Mon Sep 17 00:00:00 2001
+From 7a5033131beefaa0d1142473aee37386f5750630 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:05:32 +0800
 Subject: [PATCH 09/15] qwaylanddisplay: Wakeup main event dispatcher when
@@ -18,7 +18,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 51 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylanddisplay.cpp b/src/client/qwaylanddisplay.cpp
-index ba4ce93..d07477a 100644
+index ba4ce931..d07477ac 100644
 --- a/src/client/qwaylanddisplay.cpp
 +++ b/src/client/qwaylanddisplay.cpp
 @@ -83,6 +83,8 @@
@@ -101,7 +101,7 @@ index ba4ce93..d07477a 100644
  
  void QWaylandDisplay::ensureScreen()
 diff --git a/src/client/qwaylanddisplay_p.h b/src/client/qwaylanddisplay_p.h
-index 188e913..42b6c09 100644
+index 188e9131..42b6c092 100644
 --- a/src/client/qwaylanddisplay_p.h
 +++ b/src/client/qwaylanddisplay_p.h
 @@ -109,6 +109,7 @@ class QWaylandSurface;

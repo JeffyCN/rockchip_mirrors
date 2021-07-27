@@ -1,6 +1,6 @@
-From 7806698dc515bed8d8c7431b96e5e054534dcc96 Mon Sep 17 00:00:00 2001
+From 037af9e746932634fd4d85359300775b411d6bb9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
-Date: Wed, 9 Jan 2019 11:23:14 +0800
+Date: Mon, 26 Jul 2021 17:07:24 +0800
 Subject: [PATCH 05/15] qwaylandwindow: Disable input when blocked
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
@@ -10,7 +10,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 39 insertions(+), 8 deletions(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 53da83b..a8d6ad5 100644
+index fd34798d..133b3359 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
 @@ -78,6 +78,7 @@ QWaylandWindow::QWaylandWindow(QWindow *window, QWaylandDisplay *display)
@@ -21,7 +21,7 @@ index 53da83b..a8d6ad5 100644
  {
      {
          bool ok;
-@@ -460,23 +461,19 @@ void QWaylandWindow::lower()
+@@ -455,24 +456,20 @@ void QWaylandWindow::lower()
          mShellSurface->lower();
  }
  
@@ -33,6 +33,7 @@ index 53da83b..a8d6ad5 100644
 -
 -    mMask = mask;
 -
+     QReadLocker locker(&mSurfaceLock);
      if (!mSurface)
          return;
  
@@ -49,7 +50,7 @@ index 53da83b..a8d6ad5 100644
          mSurface->set_input_region(region);
          wl_region_destroy(region);
  
-@@ -487,6 +484,35 @@ void QWaylandWindow::setMask(const QRegion &mask)
+@@ -483,6 +480,35 @@ void QWaylandWindow::setMask(const QRegion &mask)
      mSurface->commit();
  }
  
@@ -86,7 +87,7 @@ index 53da83b..a8d6ad5 100644
  {
      QMutexLocker resizeLocker(&mResizeLock);
 diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
-index 9be9096..9675a10 100644
+index 01337cff..8091f4c7 100644
 --- a/src/client/qwaylandwindow_p.h
 +++ b/src/client/qwaylandwindow_p.h
 @@ -154,6 +154,8 @@ public:

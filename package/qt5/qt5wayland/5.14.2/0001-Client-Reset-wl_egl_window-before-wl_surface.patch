@@ -1,7 +1,7 @@
 From 08d59626383c27ad57c8d6a95622c87e1688a3ab Mon Sep 17 00:00:00 2001
 From: David Edmundson <davidedmundson@kde.org>
 Date: Wed, 8 Apr 2020 18:19:00 +0100
-Subject: [PATCH 01/16] Client: Reset wl_egl_window before wl_surface
+Subject: [PATCH 01/18] Client: Reset wl_egl_window before wl_surface
 
 Semantically we want things in this order as wl_egl_window_create takes
 a reference to the wl_surface. Teardown typically is the opposite of

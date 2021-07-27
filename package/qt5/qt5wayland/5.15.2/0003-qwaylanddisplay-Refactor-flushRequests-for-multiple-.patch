@@ -1,4 +1,4 @@
-From 6a499ba765e5d8199c1172b91c665f7aafddb9cf Mon Sep 17 00:00:00 2001
+From 85894201917e1d1c8d3d4da94a867ee8c8c1a60c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Nov 2018 17:04:59 +0800
 Subject: [PATCH 03/15] qwaylanddisplay: Refactor flushRequests() for multiple
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 21 insertions(+), 6 deletions(-)
 
 diff --git a/src/client/qwaylanddisplay.cpp b/src/client/qwaylanddisplay.cpp
-index fe094f6..ba4ce93 100644
+index fe094f6f..ba4ce931 100644
 --- a/src/client/qwaylanddisplay.cpp
 +++ b/src/client/qwaylanddisplay.cpp
 @@ -84,6 +84,7 @@

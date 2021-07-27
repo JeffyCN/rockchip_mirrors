@@ -1,4 +1,4 @@
-From dd0f557df0b2e497c7c5767cac0be2c07a87f2f9 Mon Sep 17 00:00:00 2001
+From 400246434a1d50b0f0f8af98a9e6814af66c9acb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:28:29 +0800
 Subject: [PATCH 11/15] qwaylandwindow: Support setting window activate
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index f91e977..b432589 100644
+index 6b17f558..50cd0cf9 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -1073,7 +1073,13 @@ void QWaylandWindow::restoreMouseCursor(QWaylandInputDevice *device)
+@@ -1084,7 +1084,13 @@ void QWaylandWindow::restoreMouseCursor(QWaylandInputDevice *device)
  
  void QWaylandWindow::requestActivateWindow()
  {

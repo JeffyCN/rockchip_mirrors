@@ -1,4 +1,4 @@
-From cf7545ddb074cfda8c9ce9466104b100af4b437f Mon Sep 17 00:00:00 2001
+From 171b113b8ec0cc41ed6d00430761414aaeb8452f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:23:59 +0800
 Subject: [PATCH 10/15] qwaylandxdgshellv6: Support switching between
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 8 insertions(+), 2 deletions(-)
 
 diff --git a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
-index f7f376b..8a69003 100644
+index f7f376bd..8a690032 100644
 --- a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
 +++ b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
 @@ -96,6 +96,9 @@ void QWaylandXdgSurfaceV6::Toplevel::applyConfigure()

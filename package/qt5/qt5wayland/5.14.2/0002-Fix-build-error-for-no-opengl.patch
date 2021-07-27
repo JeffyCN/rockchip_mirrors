@@ -1,7 +1,7 @@
 From f20d5e3a9a416121715a22ae101e8808757d229d Mon Sep 17 00:00:00 2001
 From: Inho Lee <inho.lee@qt.io>
 Date: Mon, 20 Apr 2020 12:46:56 +0200
-Subject: [PATCH 02/16] Fix build error for -no-opengl
+Subject: [PATCH 02/18] Fix build error for -no-opengl
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit

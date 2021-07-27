@@ -1,4 +1,4 @@
-From 5c10f16a1952bae941a3edb577823d0551d14f25 Mon Sep 17 00:00:00 2001
+From 0d088976017201d3132d11dfcaf53eb5333eed9f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 09:12:08 +0800
 Subject: [PATCH 08/15] qwaylandwindow: Support setting window flags
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index b9b0bd9..f91e977 100644
+index aa048393..6b17f558 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -802,8 +802,21 @@ void QWaylandWindow::setWindowState(Qt::WindowStates states)
+@@ -813,8 +813,21 @@ void QWaylandWindow::setWindowState(Qt::WindowStates states)
  
  void QWaylandWindow::setWindowFlags(Qt::WindowFlags flags)
  {

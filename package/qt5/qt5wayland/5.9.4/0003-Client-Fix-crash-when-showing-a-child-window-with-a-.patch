@@ -1,7 +1,7 @@
 From 93548b15379cc59b84cdabcbd1dbbece646a2ffc Mon Sep 17 00:00:00 2001
 From: Johan Klokkhammer Helsing <johan.helsing@qt.io>
 Date: Fri, 1 Nov 2019 11:24:26 +0100
-Subject: [PATCH 03/18] Client: Fix crash when showing a child window with a
+Subject: [PATCH 03/20] Client: Fix crash when showing a child window with a
  hidden parent
 
 [ChangeLog][QPA plugin] Fixed a crash when showing a window with a hidden
