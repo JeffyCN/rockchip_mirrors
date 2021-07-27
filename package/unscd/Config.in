@@ -25,3 +25,10 @@ config BR2_PACKAGE_UNSCD
 comment "unscd needs a glibc toolchain"
 	depends on !BR2_RISCV_32
 	depends on !BR2_TOOLCHAIN_USES_GLIBC
+
+if BR2_PACKAGE_UNSCD
+
+config BR2_PACKAGE_UNSCD_HOSTS_CACHE
+	bool "Cache hosts"
+
+endif
