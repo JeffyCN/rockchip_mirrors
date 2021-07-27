@@ -24,6 +24,13 @@ define UNSCD_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 600 -D package/unscd/nscd.conf $(TARGET_DIR)/etc/nscd.conf
 endef
 
+ifeq ($(BR2_PACKAGE_UNSCD_HOSTS_CACHE),y)
+define UNSCD_ENABLE_HOSTS_CACHE
+	sed -i "s/\(enable-cache.*\)no/\1yes/" $(TARGET_DIR)/etc/nscd.conf
+endef
+UNSCD_POST_INSTALL_TARGET_HOOKS += UNSCD_ENABLE_HOSTS_CACHE
+endif
+
 define UNSCD_INSTALL_INIT_SYSV
 	$(INSTALL) -m 755 -D package/unscd/S46unscd \
 		$(TARGET_DIR)/etc/init.d/S46unscd
