@@ -28,7 +28,11 @@ endif
 
 ifeq ($(BR2_PACKAGE_QT5WAYLAND_COMPOSITOR),y)
 QT5WAYLAND_CONF_OPTS += CONFIG+=wayland-compositor
+else
+QT5WAYLAND_CONFIG += --no-feature-wayland-server
 endif
+
+QT5WAYLAND_CONF_OPTS += -- $(QT5WAYLAND_CONFIG)
 
 define QT5WAYLAND_FORCE_XDG_SHELL_V6
 	cd $(TARGET_DIR)/usr/lib/qt/plugins/wayland-shell-integration/ && \
