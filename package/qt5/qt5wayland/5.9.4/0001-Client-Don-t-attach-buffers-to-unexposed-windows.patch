@@ -1,7 +1,7 @@
-From dd23f321e8ae1f74639848ac78327bb91d90eb70 Mon Sep 17 00:00:00 2001
+From cc400ad4e798081188c082c7cc7be5153a3d5f17 Mon Sep 17 00:00:00 2001
 From: Johan Klokkhammer Helsing <johan.helsing@qt.io>
 Date: Mon, 24 Sep 2018 13:04:51 +0200
-Subject: [PATCH 01/20] Client: Don't attach buffers to unexposed windows
+Subject: [PATCH 01/23] Client: Don't attach buffers to unexposed windows
 
 QBackingStore::flush is sometimes called with an unxeposed window, in that
 case, don't attach the buffer to the wl_surface immediately, as that causes
