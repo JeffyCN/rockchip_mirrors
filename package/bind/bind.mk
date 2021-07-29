@@ -142,8 +142,4 @@ ifeq ($(BR2_PACKAGE_BIND_TOOLS),)
 BIND_POST_INSTALL_TARGET_HOOKS += BIND_TARGET_REMOVE_TOOLS
 endif
 
-define BIND_USERS
-	named -1 named -1 * /etc/bind - - BIND daemon
-endef
-
 $(eval $(autotools-package))

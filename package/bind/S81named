@@ -14,7 +14,7 @@ case "$1" in
 		    rndc-confgen -a -r /dev/urandom 2>/dev/null && echo "OK" || echo "FAIL"
 		fi
 		printf "Starting domain name daemon: "
-		start-stop-daemon -S -x $DAEMON -- -c $CONFIG -u named
+		start-stop-daemon -S -x $DAEMON -- -c $CONFIG
 		[ $? = 0 ] && echo "OK" || echo "FAIL"
 		;;
 	stop)
