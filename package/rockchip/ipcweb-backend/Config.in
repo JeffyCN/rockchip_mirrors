@@ -2,7 +2,8 @@ config BR2_PACKAGE_IPCWEB_BACKEND
 	bool "ipcweb backend for Linux"
 	select BR2_PACKAGE_LIBCGICC
 	select BR2_PACKAGE_OPENSSL
-	select BR2_PACKAGE_LIBIPCPROTOCOL
+	select BR2_PACKAGE_JSON_FOR_MODERN_CPP
+	select BR2_PACKAGE_MINILOGGER
 	help
 		ipcweb backend for Linux
 
@@ -13,5 +14,19 @@ config BR2_PACKAGE_IPCWEB_BACKEND_JWT
         default y
         help
                 enable jwt in ipcweb backend
+
+choice
+prompt "select main application"
+	default BR2_PACKAGE_IPCWEB_BACKEND_USE_MEDIASERVER
+	help
+	  Select main application.
+
+config BR2_PACKAGE_IPCWEB_BACKEND_USE_MEDIASERVER
+	bool "use mediaserver"
+	select BR2_PACKAGE_LIBIPCPROTOCOL
+
+config BR2_PACKAGE_IPCWEB_BACKEND_USE_RKIPC
+	bool "use rkipc"
+endchoice
 
 endif # BR2_PACKAGE_IPCWEB_BACKEND
