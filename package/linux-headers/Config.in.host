@@ -89,6 +89,14 @@ config BR2_KERNEL_HEADERS_CUSTOM_TARBALL
 	  to use a make variable like $(TOPDIR) to reference the root of
 	  the Buildroot tree.
 
+config BR2_KERNEL_HEADERS_CUSTOM_LOCAL
+	bool "Custom local"
+	help
+      This option allows you to specify path of local kernel source.
+
+	  You may want to use a make variable like $(TOPDIR) to reference
+	  the root of the Buildroot tree.
+
 config BR2_KERNEL_HEADERS_CUSTOM_GIT
 	bool "Custom Git repository"
 	help
@@ -112,6 +120,10 @@ config BR2_KERNEL_HEADERS_CUSTOM_TARBALL_LOCATION
 	string "URL of custom kernel tarball"
 	depends on BR2_KERNEL_HEADERS_CUSTOM_TARBALL
 
+config BR2_KERNEL_HEADERS_CUSTOM_LOCAL_LOCATION
+	string "URL of custom local kernel"
+	depends on BR2_KERNEL_HEADERS_CUSTOM_LOCAL
+
 if BR2_KERNEL_HEADERS_CUSTOM_GIT
 
 config BR2_KERNEL_HEADERS_CUSTOM_REPO_URL
@@ -128,7 +140,7 @@ endif
 choice
 	bool "Custom kernel headers series"
 	depends on BR2_KERNEL_HEADERS_VERSION || BR2_KERNEL_HEADERS_AS_KERNEL || \
-		   BR2_KERNEL_HEADERS_CUSTOM_TARBALL || BR2_KERNEL_HEADERS_CUSTOM_GIT
+		   BR2_KERNEL_HEADERS_CUSTOM_TARBALL || BR2_KERNEL_HEADERS_CUSTOM_GIT || BR2_KERNEL_HEADERS_CUSTOM_LOCAL
 	help
 	  Specify the kernel headers series you manually selected,
 	  above.
@@ -383,6 +395,6 @@ config BR2_DEFAULT_KERNEL_HEADERS
 	default "5.14.21"	if BR2_KERNEL_HEADERS_5_14
 	default "5.15.6"	if BR2_KERNEL_HEADERS_5_15
 	default BR2_DEFAULT_KERNEL_VERSION if BR2_KERNEL_HEADERS_VERSION
-	default "custom"	if BR2_KERNEL_HEADERS_CUSTOM_TARBALL
+	default "custom"	if BR2_KERNEL_HEADERS_CUSTOM_TARBALL || BR2_KERNEL_HEADERS_CUSTOM_LOCAL
 	default BR2_KERNEL_HEADERS_CUSTOM_REPO_VERSION \
 		if BR2_KERNEL_HEADERS_CUSTOM_GIT

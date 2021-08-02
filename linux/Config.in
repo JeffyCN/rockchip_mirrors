@@ -23,6 +23,7 @@ config BR2_LINUX_NEEDS_MODULES
 #  2. A custom stable version
 #  3. A custom tarball
 #  4. A set of custom repository locations
+#  5. A custom local version
 #
 choice
 	prompt "Kernel version"
@@ -82,6 +83,14 @@ config BR2_LINUX_KERNEL_CUSTOM_TARBALL
 	  to use a make variable like $(TOPDIR) to reference the root of
 	  the Buildroot tree.
 
+config BR2_LINUX_KERNEL_CUSTOM_LOCAL
+	bool "Custom local"
+	help
+	  This option allows to specify path of local kernel source.
+
+	  You may want to use a make variable like $(TOPDIR) to reference
+	  the root of the Buildroot tree.
+
 config BR2_LINUX_KERNEL_CUSTOM_GIT
 	bool "Custom Git repository"
 	help
@@ -110,6 +119,10 @@ config BR2_LINUX_KERNEL_CUSTOM_TARBALL_LOCATION
 	string "URL of custom kernel tarball"
 	depends on BR2_LINUX_KERNEL_CUSTOM_TARBALL
 
+config BR2_LINUX_KERNEL_CUSTOM_LOCAL_LOCATION
+	string "URL of custom local kernel"
+	depends on BR2_LINUX_KERNEL_CUSTOM_LOCAL
+
 if BR2_LINUX_KERNEL_CUSTOM_GIT || BR2_LINUX_KERNEL_CUSTOM_HG || BR2_LINUX_KERNEL_CUSTOM_SVN
 
 config BR2_LINUX_KERNEL_CUSTOM_REPO_URL
@@ -130,7 +143,7 @@ config BR2_LINUX_KERNEL_VERSION
 	default "4.19.198-cip54-rt21" if BR2_LINUX_KERNEL_LATEST_CIP_RT_VERSION
 	default BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE \
 		if BR2_LINUX_KERNEL_CUSTOM_VERSION
-	default "custom" if BR2_LINUX_KERNEL_CUSTOM_TARBALL
+	default "custom" if BR2_LINUX_KERNEL_CUSTOM_TARBALL || BR2_LINUX_KERNEL_CUSTOM_LOCAL
 	default BR2_LINUX_KERNEL_CUSTOM_REPO_VERSION \
 		if BR2_LINUX_KERNEL_CUSTOM_GIT || BR2_LINUX_KERNEL_CUSTOM_HG || BR2_LINUX_KERNEL_CUSTOM_SVN
 
