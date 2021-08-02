@@ -157,6 +157,7 @@ define LINUX_HEADERS_INSTALL_STAGING_CMDS
 			headers_install)
 endef
 
+ifneq ($(BR2_PACKAGE_GLIBC_AUTO_KERNEL_VERSION),y)
 ifeq ($(BR2_KERNEL_HEADERS_VERSION)$(BR2_KERNEL_HEADERS_AS_KERNEL)$(BR2_KERNEL_HEADERS_CUSTOM_TARBALL)$(BR2_KERNEL_HEADERS_CUSTOM_GIT)$(BR2_KERNEL_HEADERS_CUSTOM_LOCAL),y)
 # In this case, we must always do a 'loose' test, because they are all
 # custom versions which may be later than what we know right now.
@@ -168,6 +169,7 @@ define LINUX_HEADERS_CHECK_VERSION
 		loose)
 endef
 LINUX_HEADERS_POST_INSTALL_STAGING_HOOKS += LINUX_HEADERS_CHECK_VERSION
+endif
 endif
 
 $(eval $(generic-package))

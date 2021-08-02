@@ -93,6 +93,12 @@ endif
 GLIBC_MAKE = $(BR2_MAKE)
 GLIBC_CONF_ENV += ac_cv_prog_MAKE="$(BR2_MAKE)"
 
+ifeq ($(BR2_PACKAGE_GLIBC_AUTO_KERNEL_VERSION),y)
+GLIBC_KERNEL_HEADERS_VERSION = $(LINUX_HEADERS_VERSION_REAL)
+else
+GLIBC_KERNEL_HEADERS_VERSION = $(BR2_TOOLCHAIN_HEADERS_AT_LEAST)
+endif
+
 # Even though we use the autotools-package infrastructure, we have to
 # override the default configure commands for several reasons:
 #
@@ -123,7 +129,7 @@ define GLIBC_CONFIGURE_CMDS
 		--disable-profile \
 		--disable-werror \
 		--without-gd \
-		--enable-kernel=$(call qstrip,$(BR2_TOOLCHAIN_HEADERS_AT_LEAST)) \
+		--enable-kernel=$(GLIBC_KERNEL_HEADERS_VERSION) \
 		--disable-experimental-malloc \
 		--with-headers=$(STAGING_DIR)/usr/include)
 	$(GLIBC_ADD_MISSING_STUB_H)

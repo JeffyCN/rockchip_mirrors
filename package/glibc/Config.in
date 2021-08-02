@@ -12,6 +12,10 @@ config BR2_PACKAGE_GLIBC
 
 if BR2_PACKAGE_GLIBC
 
+config BR2_PACKAGE_GLIBC_AUTO_KERNEL_VERSION
+	bool "auto detect header version"
+	default y
+
 config BR2_PACKAGE_GLIBC_GEN_LD_CACHE
 	bool "glibc gen ld.so.cache"
 	default y
