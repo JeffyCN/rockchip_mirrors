@@ -5,7 +5,7 @@ config BR2_PACKAGE_HOST_LINUX_HEADERS
 
 choice
 	prompt "Kernel Headers"
-	default BR2_KERNEL_HEADERS_AS_KERNEL if BR2_LINUX_KERNEL
+	default BR2_KERNEL_HEADERS_AS_KERNEL
 	default BR2_KERNEL_HEADERS_5_15
 	help
 	  Select the kernel version to get headers from.
@@ -24,7 +24,6 @@ choice
 
 config BR2_KERNEL_HEADERS_AS_KERNEL
 	bool "Same as kernel being built"
-	depends on BR2_LINUX_KERNEL
 	select BR2_KERNEL_HEADERS_LATEST if BR2_LINUX_KERNEL_LATEST_VERSION
 
 config BR2_KERNEL_HEADERS_4_4

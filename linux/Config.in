@@ -16,6 +16,8 @@ if BR2_LINUX_KERNEL
 config BR2_LINUX_NEEDS_MODULES
 	bool
 
+endif # BR2_LINUX_KERNEL
+
 #
 # Version selection. We provide the choice between:
 #
@@ -158,6 +160,8 @@ config BR2_LINUX_KERNEL_PATCH
 	  kernel. Each patch can be described as an URL, a local file
 	  path, or a directory. In the case of a directory, all files
 	  matching *.patch in the directory will be applied.
+
+if BR2_LINUX_KERNEL
 
 #
 # Configuration selection
@@ -486,9 +490,9 @@ config BR2_LINUX_KERNEL_NEEDS_HOST_LIBELF
 # Linux extensions
 source "linux/Config.ext.in"
 
+endif # BR2_LINUX_KERNEL
+
 # Linux tools
 source "package/linux-tools/Config.in"
-
-endif # BR2_LINUX_KERNEL
 
 endmenu
