@@ -29,15 +29,10 @@ else
 BT_DRIVER_ARCH = arm
 endif
 
-ifeq (y,$(BR2_TOOLCHAIN_EXTERNAL_HEADERS_4_19))
-FIRMWARE_DIR = vendor
+ifeq ($(BR2_PACKAGE_RV1126_RV1109),y)
 SXLOAD_WIFI = "S36load_rv1109_wifi_modules"
 RK_WIFI_CHIP_NAME1 = AP6256
 RK_WIFI_CHIP_NAME2 = AP6255
-endif
-
-ifeq (y,$(BR2_KERNEL_HEADERS_4_19))
-FIRMWARE_DIR = vendor
 endif
 
 ifeq (y,$(BR2_PACKAGE_RKWIFIBT_AMPAKALL))
@@ -113,6 +108,7 @@ define RKWIFIBT_ROCKCHIP_INSTALL
 endef
 
 define RKWIFIBT_BUILD_CMDS
+    ln -sf $(FIRMWARE_DIR) $(TARGET_DIR)/vendor
     mkdir -p $(TARGET_DIR)/$(FIRMWARE_DIR)/lib/modules/
     -$(TOPDIR)/../build.sh modules
     find $(TOPDIR)/../kernel/drivers/net/wireless/rockchip_wlan/* -name $(BR2_PACKAGE_RKWIFIBT_WIFI_KO) | xargs -n1 -i cp {} $(TARGET_DIR)/$(FIRMWARE_DIR)/lib/modules/

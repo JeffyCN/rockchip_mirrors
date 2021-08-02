@@ -5,14 +5,6 @@ BROADCOM_BSA_INSTALL_STAGING = YES
 BT_TTY_DEV = $(call qstrip,$(BR2_PACKAGE_RKWIFIBT_BTUART))
 BT_FW_DIR = system
 
-ifeq (y,$(BR2_TOOLCHAIN_EXTERNAL_HEADERS_4_19))
-	BT_FW_DIR = vendor
-endif
-
-ifeq (y,$(BR2_KERNEL_HEADERS_4_19))
-	BT_FW_DIR = vendor
-endif
-
 ifeq ($(BR2_PACKAGE_BROADCOM_BSA)$(BR2_PACKAGE_CYPRESS_BSA),yy)
 $(error "You can only choose one type of BSA module (Broadcom or Cypress).")
 endif
