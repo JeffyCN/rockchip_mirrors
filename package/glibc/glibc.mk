@@ -10,11 +10,6 @@ GLIBC_SITE = $(call github,foss-for-synopsys-dwc-arc-processors,glibc,$(GLIBC_VE
 else ifeq ($(BR2_RISCV_32),y)
 GLIBC_VERSION = 06983fe52cfe8e4779035c27e8cc5d2caab31531
 GLIBC_SITE = $(call github,riscv,riscv-glibc,$(GLIBC_VERSION))
-else ifeq ($(BR2_PACKAGE_GLIBC_2_22),y)
-GLIBC_VERSION = 2.22
-GLIBC_SITE = $(BR2_GNU_MIRROR)/libc
-GLIBC_SOURCE = glibc-$(GLIBC_VERSION).tar.xz
-GLIBC_SRC_SUBDIR = .
 else
 # Generate version string using:
 #   git describe --match 'glibc-*' --abbrev=40 origin/release/MAJOR.MINOR/master | cut -d '-' -f 2-
