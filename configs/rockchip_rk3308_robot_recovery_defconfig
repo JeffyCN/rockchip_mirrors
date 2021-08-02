@@ -1,13 +1,8 @@
 #include "rk3308_arm.config"
 #include "recovery.config"
+#include "kernel.config"
 #  - use glibc as the basic libc
 BR2_TOOLCHAIN_BUILDROOT_GLIBC=y
-#  - Rockchip use 4.4 kernel, so we need 4.4 kernel header
-BR2_KERNEL_HEADERS_4_4=y
-#  - use local kernel source
-BR2_LINUX_KERNEL_CUSTOM_GIT=y
-BR2_LINUX_KERNEL_CUSTOM_REPO_URL="file://$(TOPDIR)/../kernel"
-BR2_LINUX_KERNEL_CUSTOM_REPO_VERSION="HEAD"
 #  - we use buildroot toolcharn here, may change to custom toolchain in the feature
 BR2_TOOLCHAIN_BUILDROOT_CXX=y
 #  - the post build script will be excuted after all fs-overlay copyed

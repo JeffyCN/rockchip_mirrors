@@ -1,6 +1,6 @@
 #include "arm_a7.config"
 #include "gdb.config"
-#include "kernel_4_4.config"
+#include "kernel.config"
 #include "toolchain_glibc.config"
 BR2_INIT_NONE=y
 BR2_SYSTEM_BIN_SH_NONE=y
