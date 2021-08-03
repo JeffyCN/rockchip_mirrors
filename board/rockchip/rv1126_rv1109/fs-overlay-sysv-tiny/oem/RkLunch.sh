@@ -38,6 +38,9 @@ else
   HasAudio=1
 fi
 
+# default disable audio
+HasAudio=0
+
 dst_w=2688
 dst_h=1520
 media-ctl -p -d /dev/media1 | grep 3840x2160
