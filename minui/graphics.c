@@ -461,7 +461,6 @@ int gr_init(void)
     overscan_offset_y = gr_draw->height * overscan_percent / 100;
 
     gr_flip();
-    gr_flip();
 
     gr_rotate(ROTATION_NONE);
     return 0;
