@@ -69,6 +69,14 @@ config BR2_PACKAGE_RKMEDIA_AUDIO_ALGORITHM
     default n
     help
       audio algorithm(3A and ANR) switch
+
+config BR2_PACKAGE_RKMEDIA_AUDIO_ALGORITHM_PLUS
+    bool "use audio algorithm plus"
+    depends on BR2_PACKAGE_RKMEDIA_AUDIO_ALGORITHM
+    default n
+    help
+      audio process algorithm plus version
+
 endif # BR2_PACKAGE_RKMEDIA_ALSA
 
 config BR2_PACKAGE_RKMEDIA_AUDIO_CODEC
