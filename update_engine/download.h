@@ -7,5 +7,5 @@
 
 #ifndef _DOWNLOAD_H
 #define _DOWNLOAD_H
-int download_file(char *url, char *output_filename);
+int download_file(char *url, const char *output_filename);
 #endif

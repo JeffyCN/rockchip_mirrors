@@ -9,6 +9,7 @@
 #include <curl/curl.h>
 #include <string.h>
 #include "log.h"
+
 size_t my_write_func(void *ptr, size_t size, size_t nmemb, FILE *stream)
 {
     return fwrite(ptr, size, nmemb, stream);
@@ -33,7 +34,7 @@ int my_progress_func(char *progress_data,
     return 0;
 }
 
-int download_file(char *url, char *output_filename)
+int download_file(char *url, char const *output_filename)
 {
     if (strncmp(url, "http", 4) != 0) {
         LOGI("where the file is local.\n");
@@ -42,7 +43,7 @@ int download_file(char *url, char *output_filename)
     CURL *curl;
     CURLcode res;
     FILE *outfile;
-    char *progress_data = "* ";
+    char const *progress_data = "* ";
     down_processvalue = -1;
 
     curl = curl_easy_init();

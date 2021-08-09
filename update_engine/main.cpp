@@ -19,6 +19,7 @@
 
 extern bool is_sdboot;
 RK_Upgrade_Status_t m_status = RK_UPGRADE_ERR;
+FILE* cmd_pipe = NULL;
 
 void handle_upgrade_callback(void *user_data, RK_Upgrade_Status_t status){
     if (status == RK_UPGRADE_FINISHED) {
@@ -27,6 +28,13 @@ void handle_upgrade_callback(void *user_data, RK_Upgrade_Status_t status){
     }
     m_status = status;
     LOGI("rk m_status = %d.\n", m_status);
+}
+
+void handle_print_callback(char *szPrompt)
+{
+    if(cmd_pipe != NULL){
+        fprintf(cmd_pipe, "ui_print %s\n", szPrompt);
+    }
 }
 
 static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
@@ -74,7 +82,7 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
                 LOGE("ota file is error.\n");
                 return -1;
             }
-            RK_ota_start(handle_upgrade_callback);
+            RK_ota_start(handle_upgrade_callback, handle_print_callback);
             if (m_status != RK_UPGRADE_FINISHED) {
                 return -1;
             }
@@ -86,7 +94,7 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
             strcpy(msg.command, "boot-recovery");
             sprintf(msg.recovery, "%s%s", recovery_str, savepath);
             msg.recovery[strlen(msg.recovery) + 1] = '\n';
-            memcpy(msg.needupdate, &partition, 6);
+            memcpy(msg.needupdate, &partition, 4);
             set_bootloader_message(&msg);
             return 0;
         }
@@ -102,7 +110,7 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
         LOGE("ota file is error.\n");
         return -1;
     }
-    RK_ota_start(handle_upgrade_callback);
+    RK_ota_start(handle_upgrade_callback, handle_print_callback);
     if (m_status != RK_UPGRADE_FINISHED) {
         return -1;
     }
@@ -159,7 +167,7 @@ static const struct option engine_options[] = {
 };
 
 int main(int argc, char *argv[]) {
-    LOGI("*** update_engine: Version V1.1.4 ***.\n");
+    LOGI("*** update_engine: Version V1.1.5 ***.\n");
     int arg;
     char *image_url = NULL;
     char *version_url = NULL;
@@ -188,6 +196,9 @@ int main(int argc, char *argv[]) {
         }
     }
 
+    cmd_pipe = fdopen(pipefd, "wb");
+    setlinebuf(cmd_pipe);
+
     if (is_update) {
         if (is_sdboot) {
             int res = 0x3FFC00; //默认升级的分区
@@ -208,7 +219,7 @@ int main(int argc, char *argv[]) {
                 }
             }
 
-            RK_ota_start(handle_upgrade_callback);
+            RK_ota_start(handle_upgrade_callback, handle_print_callback);
         } else {
             LOGI("%s-%d: is ota update\n", __func__, __LINE__);
             if (MiscUpdate(image_url, partition, save_path) == 0) {

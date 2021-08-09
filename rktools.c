@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -162,7 +163,7 @@ void setFlashPoint(){
 
 #define MTD_PATH "/proc/mtd"
 //判断是MTD还是block 设备
-int isMtdDevice() {
+bool isMtdDevice() {
     char param[2048];
     int fd, ret;
     char *s = NULL;
@@ -172,7 +173,7 @@ int isMtdDevice() {
     s = strstr(param,"storagemedia");
     if(s == NULL){
         printf("no found storagemedia in cmdline, default is not MTD.\n");
-        return -1;
+        return false;
     }else{
         s = strstr(s, "=");
         if (s == NULL) {
@@ -187,7 +188,7 @@ int isMtdDevice() {
 
         if (strncmp(s, "mtd", 3) == 0 ) {
             printf("Now is MTD.\n");
-            return 0;
+            return true;
         } else if (strncmp(s, "sd", 2) == 0) {
             printf("Now is SD.\n");
             if ( !access(MTD_PATH, F_OK) ) {
@@ -198,14 +199,13 @@ int isMtdDevice() {
                 s = strstr(param,"mtd");
                 if(s == NULL){
                     LOGI("no found mtd.\n");
-                    return -1;
+                    return false;
                 }
                 LOGI("Now is MTD.\n");
-                return 0;
+                return true;
             }
-
         }
     }
-    printf("devices is not MTD.\n");
-    return -1;
+    LOGI("devices is not MTD.\n");
+    return false;
 }

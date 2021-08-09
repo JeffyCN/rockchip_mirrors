@@ -20,6 +20,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <sys/mount.h>
+#include <unistd.h>
 
 #include "mounts.h"
 

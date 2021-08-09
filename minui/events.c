@@ -19,6 +19,8 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <sys/epoll.h>
+#include <unistd.h>
+#include <string.h>
 
 #include <linux/input.h>
 

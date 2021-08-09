@@ -28,6 +28,7 @@
 #include "roots.h"
 #include "common.h"
 #include "rktools.h"
+#include "mtdutils/rk29.h"
 //#include "make_ext4fs.h"
 
 static int num_volumes = 0;
@@ -51,7 +52,7 @@ char * get_link_path(const char* linkpath, char * buf, int count)
 
 	rslt = readlink(path, buf, count - 1);
 	if (rslt < 0 || (rslt >= count - 1)) {
-		printf("No link to path [%s]!!! \n", path);
+		// printf("No link to path [%s]!!! \n", path);
 		return NULL;
 	}
 
@@ -66,8 +67,7 @@ char * get_link_path(const char* linkpath, char * buf, int count)
 		buf[0] = '/';
 	}
 
-
-	printf("buf = %s \n", buf);
+	// printf("buf = %s \n", buf);
 	return buf;
 }
 
@@ -200,8 +200,8 @@ Volume* volume_for_path(const char* path) {
 	memset(mount_point, 0, sizeof(mount_point));
 	char* tmp = get_link_path(path, mount_point, 1024);
 
-	if ( tmp != NULL)
-		printf(" ### get mount_ponit = %s ### \n", mount_point);
+	// if ( tmp != NULL)
+	// 	printf(" ### get mount_ponit = %s ### \n", mount_point);
 
 	for (i = 0; i < num_volumes; ++i) {
 		Volume* v = device_volumes+i;
@@ -328,7 +328,7 @@ int ensure_ex_path_unmounted(const char* path) {
 	const MountedVolume* mv =
 		find_mounted_volume_by_mount_point(path);
 	if (mv == NULL) {
-		printf("path: %s is already unmounted or not existed\n");
+		LOGE("path: %s is already unmounted or not existed\n");
 		return 0;
 	}
 
@@ -426,7 +426,7 @@ int format_volume(const char* volume) {
 	}
 
 	if (strcmp(v->fs_type, "ext2") == 0) {
-		int result = rk_make_ext2fs(v->device, 0, v->mount_point);//make_ext2fs(v->device, NULL, NULL, 0, 0, 0);
+		int result = rk_make_ext2fs(v->device);//make_ext2fs(v->device, NULL, NULL, 0, 0, 0);
 		if (result != 0) {
 			LOGE("format_volume: make_extf2fs failed on %s\n", v->device);
 			return -1;
@@ -434,7 +434,7 @@ int format_volume(const char* volume) {
 		return 0;
 	}
 	if (strcmp(v->fs_type, "vfat") == 0) {
-		int result = make_vfat(v->device, 0, v->mount_point);
+		int result = make_vfat(v->device, v->mount_point);
 		if (result != 0) {
 			LOGE("format_volume: make_vfat failed on %s\n", v->device);
 			return -1;
@@ -443,7 +443,7 @@ int format_volume(const char* volume) {
 	}
 
 	if (strcmp(v->fs_type, "ntfs") == 0) {
-		int result = make_ntfs(v->device, 0, v->mount_point);
+		int result = make_ntfs(v->device, v->mount_point);
 		if (result != 0) {
 			LOGE("format_volume: make_ntfs failed on %s\n", v->device);
 			return -1;

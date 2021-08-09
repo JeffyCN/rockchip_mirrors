@@ -18,6 +18,7 @@
 #define RECOVERY_COMMON_H
 
 #include <stdio.h>
+#include <stdbool.h>
 
 // Initialize the graphics system.
 void ui_init();
@@ -72,14 +73,13 @@ void ui_show_indeterminate_progress();
 // Hide and reset the progress bar.
 void ui_reset_progress();
 
-#define LOGE(...) fprintf(stdout, "E:" __VA_ARGS__)
-#define LOGW(...) fprintf(stdout, "W:" __VA_ARGS__)
-#define LOGI(...) fprintf(stdout, "I:" __VA_ARGS__)
+#define MOD_TAG "RECOVERY"
 
+#define LOGE(...) fprintf(stdout, "[E/]"MOD_TAG __VA_ARGS__)
+#define LOGW(...) fprintf(stdout, "[W/]"MOD_TAG __VA_ARGS__)
+#define LOGI(...) fprintf(stdout, "[I/]"MOD_TAG __VA_ARGS__)
+#define LOGD(...) fprintf(stdout, "[D/]"MOD_TAG __VA_ARGS__)
 #if 0
-#define LOGV(...) fprintf(stdout, "V:" __VA_ARGS__)
-#define LOGD(...) fprintf(stdout, "D:" __VA_ARGS__)
-#else
 #define LOGV(...) do {} while (0)
 #define LOGD(...) do {} while (0)
 #endif

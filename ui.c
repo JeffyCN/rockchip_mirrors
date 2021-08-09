@@ -193,8 +193,10 @@ static void draw_screen_locked(void)
 // Should only be called with gUpdateMutex locked.
 static void update_screen_locked(void)
 {
+    printf("%s: Enter >>>>>\n", __func__);
     draw_screen_locked();
     gr_flip();
+    printf("%s: Leave <<<<<\n", __func__);
 }
 
 // Updates only the progress bar, if possible, otherwise redraws the screen.

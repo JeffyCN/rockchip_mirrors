@@ -18,11 +18,13 @@
 #include "common.h"
 #include "mtdutils/mtdutils.h"
 #include "roots.h"
+#include "rktools.h"
 
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/stat.h>
+#include <unistd.h>
 
 
 static int get_bootloader_message_mtd(struct bootloader_message *out, const Volume* v);
@@ -35,7 +37,7 @@ int get_bootloader_message(struct bootloader_message *out) {
 
     if(!v) return -1;
     //if (strcmp(v->fs_type, "mtd") == 0) {
-    if (isMtdDevice() == 0) {
+    if (isMtdDevice()) {
         return get_bootloader_message_mtd(out, v);
     } else if (strcmp(v->fs_type, "emmc") == 0) {
         return get_bootloader_message_block(out, v);
@@ -47,7 +49,7 @@ int get_bootloader_message(struct bootloader_message *out) {
 int set_bootloader_message(const struct bootloader_message *in) {
     Volume* v = volume_for_path("/misc");
     //if (strcmp(v->fs_type, "mtd") == 0) {
-    if (isMtdDevice() == 0) {
+    if (isMtdDevice()) {
         return set_bootloader_message_mtd(in, v);
     } else if (strcmp(v->fs_type, "emmc") == 0) {
         return set_bootloader_message_block(in, v);

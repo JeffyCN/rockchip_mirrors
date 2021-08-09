@@ -411,7 +411,7 @@ int setSlotActivity() {
 *格式化userdata_data
 */
 int wipe_userdata(int auto_reboot) {
-    if (writeCmdMisc(CMD_WIPE_USERDATA, sizeof(CMD_WIPE_USERDATA)) != 0) {
+    if (writeCmdMisc((char *)CMD_WIPE_USERDATA, sizeof(CMD_WIPE_USERDATA)) != 0) {
         return -1;
     }
 

@@ -180,6 +180,7 @@ void gr_text(int x, int y, const char *s)
             ch = '?';
         }
 
+    if(!gr_draw) return;
     int row_pixels = gr_draw->row_bytes / gr_draw->pixel_bytes;
     uint8_t* src_p = font->texture->data + ((ch - ' ') * font->char_width) +
                      (bold ? font->char_height * font->texture->row_bytes : 0);
@@ -204,6 +205,7 @@ void gr_texticon(int x, int y, GRSurface* icon) {
 
     if (outside(x, y) || outside(x+icon->width-1, y+icon->height-1)) return;
 
+    if(!gr_draw) return;
     int row_pixels = gr_draw->row_bytes / gr_draw->pixel_bytes;
     uint8_t* src_p = icon->data;
     uint32_t* dst_p = pixel_at(gr_draw, x, y, row_pixels);
@@ -224,7 +226,8 @@ void gr_color(unsigned char r, unsigned char g, unsigned char b, unsigned char a
 
 void gr_clear()
 {
-  if ((gr_current & 0xff) == ((gr_current >> 8) & 0xff) &&
+    if(!gr_draw) return;
+    if ((gr_current & 0xff) == ((gr_current >> 8) & 0xff) &&
       (gr_current & 0xff) == ((gr_current >> 16) & 0xff) &&
       (gr_current & 0xff) == ((gr_current >> 24) & 0xff) &&
       gr_draw->row_bytes == gr_draw->width * gr_draw->pixel_bytes) {
@@ -244,6 +247,9 @@ void gr_clear()
 
 void gr_fill(int x1, int y1, int x2, int y2)
 {
+    if(!gr_draw)
+        return;
+
     x1 += overscan_offset_x;
     y1 += overscan_offset_y;
 
@@ -415,6 +421,7 @@ static void gr_test() {
 #endif
 
 void gr_flip() {
+    if(!gr_draw) return;
     gr_draw = gr_backend->flip(gr_backend);
 }
 
@@ -486,13 +493,17 @@ void gr_exit(void)
 //}
 
 int gr_fb_width() {
-  return rotation % 2 ? gr_draw->height - 2 * overscan_offset_y
-                      : gr_draw->width - 2 * overscan_offset_x;
+    if(!gr_draw)
+        return 0;
+    return rotation % 2 ? gr_draw->height - 2 * overscan_offset_y
+                        : gr_draw->width - 2 * overscan_offset_x;
 }
 
 int gr_fb_height() {
-  return rotation % 2 ? gr_draw->width - 2 * overscan_offset_x
-                      : gr_draw->height - 2 * overscan_offset_y;
+    if(!gr_draw)
+        return 0;
+    return rotation % 2 ? gr_draw->width - 2 * overscan_offset_x
+                        : gr_draw->height - 2 * overscan_offset_y;
 }
 
 void gr_fb_blank(bool blank)

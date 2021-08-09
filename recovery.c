@@ -147,6 +147,7 @@ static const int MAX_ARG_LENGTH = 4096;
 static const int MAX_ARGS = 100;
 extern size_t strlcpy(char *dst, const char *src, size_t dsize);
 extern size_t strlcat(char *dst, const char *src, size_t dsize);
+extern int do_rk_updateEngine(const char *binary, const char *path);
 
 
 int read_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {
@@ -728,12 +729,16 @@ main(int argc, char **argv) {
         freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
         freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
     } else {
-        printf("\n\n");
+        printf("\n");
         printf("*********************************************************\n");
         printf("            ROCKCHIP recovery system                     \n");
         printf("*********************************************************\n");
     }
     printf("Starting recovery on %s\n", ctime(&start));
+
+#ifndef RecoveryNoUi
+    printf("Recovery System have UI defined.\n");
+#endif
 
     ui_init();
     ui_set_background(BACKGROUND_ICON_INSTALLING);
@@ -953,7 +958,7 @@ main(int argc, char **argv) {
             }
         }
 
-        if(isMtdDevice() == 0){
+        if (isMtdDevice()) {
             printf("start flash write to /dev/mtd0.\n");
             size_t total_size;
             size_t erase_size;
@@ -972,14 +977,14 @@ main(int argc, char **argv) {
                 system("flash_erase /dev/mtd0 0x0 0");
                 system("sh "CMD4RECOVERY_FILENAME);
             }
-        }else{
+        } else {
             printf("Start to dd data to emmc partition.\n");
             system("sh "CMD4RECOVERY_FILENAME);
         }
 
         #endif
 
-        if(status == INSTALL_SUCCESS){
+        if (status == INSTALL_SUCCESS) {
             printf("update.img Installation success.\n");
             ui_print("update.img Installation success.\n");
             ui_show_text(0);
@@ -992,8 +997,14 @@ main(int argc, char **argv) {
     } else if (wipe_all) {
         if (device_wipe_data()) status = INSTALL_ERROR;
         if (erase_volume("/userdata")) status = INSTALL_ERROR;
-        if (status != INSTALL_SUCCESS) ui_print("Data wipe failed.\n");
-        ui_print("Data wipe done.\n");
+        if (status != INSTALL_SUCCESS) {
+            ui_print("Data wipe failed.\n");
+            printf("userdata wipe failed.\n");
+        } else {
+            ui_print("Data wipe done.\n");
+            printf("userdata wipe done.\n");
+        }
+
         if (access("/dev/block/by-name/oem", F_OK) == 0) {
             if (resize_volume("/oem")) status = INSTALL_ERROR;
             if (status != INSTALL_SUCCESS) ui_print("resize failed.\n");

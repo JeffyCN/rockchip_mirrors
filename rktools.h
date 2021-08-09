@@ -37,6 +37,6 @@ static const char *typeName[] = {
 char* getSerial();
 void setFlashPoint();
 extern Volume* volume_for_path(const char* path);
-int isMtdDevice();
+bool isMtdDevice();
 
 #endif

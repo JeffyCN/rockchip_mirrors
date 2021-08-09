@@ -36,7 +36,7 @@ bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long o
     system(nanddump_cmd);
 
     int dest_fd = open(TMP_MD5SUM_NAME, O_RDONLY );
-    if(dest_fd == NULL){
+    if(dest_fd == 0){
         LOGE("open file failed %s", TMP_MD5SUM_NAME);
         return -1;
     }
