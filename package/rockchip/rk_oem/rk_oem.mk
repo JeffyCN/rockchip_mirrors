@@ -87,13 +87,6 @@ endef
 RK_OEM_TARGET_FINALIZE_HOOKS += RK_OEM_TARGET_FINALIZE_MKIMAGE_HOOK_CMDS
 endif
 
-# reflash itself to make sure it will be built during every build
-define RK_OEM_POST_INSTALL_TARGET_HOOKS_CMDS
-    rm -f $(@D)/.stamp_built
-endef
-
-RK_OEM_POST_INSTALL_TARGET_HOOKS += RK_OEM_POST_INSTALL_TARGET_HOOKS_CMDS
-
 endif
 
 $(eval $(generic-package))
