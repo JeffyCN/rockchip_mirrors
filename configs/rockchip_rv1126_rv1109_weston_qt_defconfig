@@ -19,6 +19,7 @@
 #include "benchmark.config"
 #include "qt_app.config"
 BR2_CCACHE=y
+BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="ov7251_default_default.xml"
 BR2_PACKAGE_RKWIFIBT_AP6256=y
 BR2_PACKAGE_RKNPU_USE_MINI_DRIVER=y
 BR2_PACKAGE_RKNPU_USE_RKNN_API=y
