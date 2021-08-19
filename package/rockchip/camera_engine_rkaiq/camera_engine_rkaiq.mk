@@ -48,10 +48,17 @@ dir=`echo $(1)`; \
 iqfile=`echo $(2)`; \
 if [[ -z "$$iqfile" ]]; then \
 	echo "## conver iqfiles"; \
-	for i in $$dir/*.json; do \
-		echo "### conver iqfiles: $$i"; \
-		$(RKISP_PARSER_HOST_BINARY) $$i; \
-	done; \
+	ifeq ($(BR2_PACKAGE_RV1126_RV1109),y) \
+		for i in $$dir/*.xml; do \
+			echo "### conver iqfiles: $$i"; \
+			$(RKISP_PARSER_HOST_BINARY) $$i; \
+		done; \
+	else ifeq ($(BR2_PACKAGE_RK356X),y) \
+		for i in $$dir/*.json; do \
+			echo "### conver iqfiles: $$i"; \
+			$(RKISP_PARSER_HOST_BINARY) $$i; \
+		done; \
+	endif \
 else  \
 	echo "### conver iqfile: $$dir/$$iqfile"; \
 	$(RKISP_PARSER_HOST_BINARY) $$dir/$$iqfile; \
@@ -92,7 +99,11 @@ else # BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN
 	ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE)),)
 		CAMERA_ENGINE_RKAIQ_IQFILE = $(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE))
 	else
+		ifeq ($(BR2_PACKAGE_RV1126_RV1109),y)
+		CAMERA_ENGINE_RKAIQ_IQFILE = */*.xml
+		else ifeq ($(BR2_PACKAGE_RK356X),y)
 		CAMERA_ENGINE_RKAIQ_IQFILE = */*.json
+		endif
 	endif
 endif # BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN
 
