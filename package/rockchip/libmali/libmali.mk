@@ -68,7 +68,7 @@ LIBMALI_GPU = bifrost-g52
 LIBMALI_VER = g2p0
 endif
 
-LIBMALI_CONF_OPTS = -Dwith-overlay=true -Dopencl-icd=false -Dkhr-header=true \
+LIBMALI_CONF_OPTS += -Dwith-overlay=true -Dopencl-icd=false -Dkhr-header=true \
 		    -Dplatform=$(LIBMALI_PLATFORM) -Dgpu=$(LIBMALI_GPU) \
 		    -Dversion=$(LIBMALI_VER)
 
@@ -81,5 +81,9 @@ LIBMALI_SUBVER += dummy
 endif
 
 LIBMALI_CONF_OPTS += -Dsubversion=$(subst $(eval) $(eval),-,$(LIBMALI_SUBVER))
+
+ifeq ($(BR2_PACKAGE_LIBMALI_OPTIMIZE_s),y)
+LIBMALI_CONF_OPTS += -Doptimize-level=Os
+endif
 
 $(eval $(meson-package))

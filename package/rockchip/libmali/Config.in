@@ -10,6 +10,26 @@ config BR2_PACKAGE_LIBMALI
 
 if BR2_PACKAGE_LIBMALI
 
+comment "mali optimize level"
+
+choice
+	prompt "optimize level"
+	default BR2_PACKAGE_LIBMALI_OPTIMIZE_3
+	help
+	  Set the optimization level for libmali
+
+config BR2_PACKAGE_LIBMALI_OPTIMIZE_3
+	bool "optimization level 3"
+	help
+	  Built with -O3.
+
+config BR2_PACKAGE_LIBMALI_OPTIMIZE_s
+	bool "optimization level s"
+	help
+	  Built with -Os.
+
+endchoice
+
 comment "mali special configs"
 
 config BR2_PACKAGE_LIBMALI_WITHOUT_CL
