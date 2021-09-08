@@ -1,5 +1,6 @@
 config BR2_PACKAGE_RKSCRIPT
 	bool "rockchip script"
+	select BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV
 	help
 	  rockchip script for linux use.
 
