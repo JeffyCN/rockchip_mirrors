@@ -62,7 +62,7 @@ LIBMALI_GPU = midgard-t86x
 LIBMALI_VER = r18p0
 else ifneq ($(BR2_PACKAGE_RK3326)$(BR2_PACKAGE_PX30),)
 LIBMALI_GPU = bifrost-g31
-LIBMALI_VER = rxp0
+LIBMALI_VER = g2p0
 else ifeq ($(BR2_PACKAGE_RK356X),y)
 LIBMALI_GPU = bifrost-g52
 LIBMALI_VER = g2p0
