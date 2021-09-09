@@ -10,7 +10,7 @@ lunch_start()
 lunch_stop()
 {
 	echo "All applications have been stopped"
-    killall rkmedia_snapshot_test
+	killall rkmedia_snapshot_test
 }
 
 case "$1" in

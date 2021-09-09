@@ -22,7 +22,7 @@
 ::sysinit:/bin/hostname -F /etc/hostname
 # now run any rc scripts
 ::respawn:-/bin/sh
-::sysinit:/etc/preinit.d/rcS
+::sysinit:/etc/init.d/rcS
 
 # Put a getty on the serial port
 #ttyFIQ0::respawn:/sbin/getty -L  ttyFIQ0 0 vt100 # GENERIC_SERIAL
@@ -31,6 +31,6 @@
 #::ctrlaltdel:/sbin/reboot
 
 # Stuff to do before rebooting
-::shutdown:/etc/preinit.d/rcK
+::shutdown:/etc/init.d/rcK
 ::shutdown:/sbin/swapoff -a
 ::shutdown:/bin/umount -a -r

@@ -7,11 +7,6 @@ HOST=$(hostname)
 KERNEL_DIR=$BUILDROOT/../kernel
 OUTPUT_DIR=$TARGET/../
 
-
-mkdir -p $TARGET/overlayfs/rw
-mkdir -p $TARGET/overlayfs/ro
-mkdir -p $TARGET/overlayfs/ovlfs
-
 rm -rf $TARGET/lib/udev/v4l_id
 rm -f $TARGET/lib/udev/rules.d/75-net-description.rules
 rm -f $TARGET/lib/udev/rules.d/60-persistent-input.rules
@@ -42,6 +37,6 @@ rm -rf $TARGET/lib/udev/ata_id
 rm -rf $TARGET/lib/udev/collect
 rm -rf $TARGET/lib/udev/cdrom_id
 rm -rf $TARGET/lib/udev/mtd_probe
-rm -rf $TARGET/etc/init.d
+rm -rf $TARGET/etc/init.d/S20urandom
 
 exit 0

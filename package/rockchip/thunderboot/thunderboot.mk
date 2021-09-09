@@ -12,7 +12,7 @@ KERNEL_VERSION=`make -C $(TOPDIR)/../kernel kernelversion |grep -v make`
 THUNDERBOOT_INSTALL_MODULES = $(call qstrip,$(BR2_THUNDERBOOT_INSTALL_MODULES))
 THUNDERBOOT_ADB = $(call qstrip,$(BR2_THUNDERBOOT_USB_ADBD))
 THUNDERBOOT_RNDIS = $(call qstrip,$(BR2_THUNDERBOOT_USB_RNDIS))
-THUNDERBOOT_USB_CONFIG = $(TARGET_DIR)/etc/preinit.d/.usb_config
+THUNDERBOOT_USB_CONFIG = $(TARGET_DIR)/etc/init.d/.usb_config
 THUNDERBOOT_USB_MODULES = dwc3.ko,dwc3-rockchip-inno.ko,phy-rockchip-naneng-usb2.ko,dwc3-of-simple.ko
 INSTALL_MODULES = $(THUNDERBOOT_INSTALL_MODULES)
 
@@ -22,7 +22,7 @@ endef
 
 ifeq ($(BR2_THUNDERBOOT_SIMPLIFY_USB),y)
 define THUNDERBOOT_USB
-	$(INSTALL) -D -m 755 $(@D)/S50tb_usbdevice $(TARGET_DIR)/etc/preinit.d/
+	$(INSTALL) -D -m 755 $(@D)/S50tb_usbdevice $(TARGET_DIR)/etc/init.d/
 	if test -e $(THUNDERBOOT_USB_CONFIG) ; then \
 		rm $(THUNDERBOOT_USB_CONFIG) ; \
 	fi
@@ -34,8 +34,8 @@ endif
 
 ifeq ($(BR2_THUNDERBOOT_EMMC),y)
 define THUNDERBOOT_EMMC
-	$(INSTALL) -D -m 755 $(@D)/S90tb_emmc $(TARGET_DIR)/etc/preinit.d/
-	$(INSTALL) -D -m 755 $(@D)/S07mountall $(TARGET_DIR)/etc/preinit.d/
+	$(INSTALL) -D -m 755 $(@D)/S90tb_emmc $(TARGET_DIR)/etc/init.d/
+	$(INSTALL) -D -m 755 $(@D)/S07mountall $(TARGET_DIR)/etc/init.d/
 endef
 THUNDERBOOT_EMMC_MODULES = dw_mmc-rockchip.ko
 INSTALL_MODULES += $(THUNDERBOOT_EMMC_MODULES)
@@ -44,7 +44,7 @@ endif
 
 ifeq ($(BR2_THUNDERBOOT_ETH),y)
 define THUNDERBOOT_ETH
-	$(INSTALL) -D -m 755 $(@D)/S90tb_eth $(TARGET_DIR)/etc/preinit.d/
+	$(INSTALL) -D -m 755 $(@D)/S90tb_eth $(TARGET_DIR)/etc/init.d/
 endef
 THUNDERBOOT_ETH_MODULES = stmmac.ko,stmmac-platform.ko,dwmac-rockchip.ko
 INSTALL_MODULES += $(THUNDERBOOT_ETH_MODULES)
@@ -53,7 +53,7 @@ endif
 
 ifeq ($(BR2_THUNDERBOOT_SOUND),y)
 define THUNDERBOOT_SOUND
-	$(INSTALL) -D -m 755 $(@D)/S04tb_sound $(TARGET_DIR)/etc/preinit.d/
+	$(INSTALL) -D -m 755 $(@D)/S04tb_sound $(TARGET_DIR)/etc/init.d/
 endef
 THUNDERBOOT_SOUND_MODULES = snd-soc-dummy-codec.ko,snd-soc-rk817.ko,snd-soc-core.ko,\
 							snd-soc-simple-card-utils.ko,snd-soc-simple-card.ko,\
@@ -68,7 +68,7 @@ endif
 
 define THUNDERBOOT_INSTALL_TARGET_CMDS
 	rm -rf $(TARGET_DIR)/oem $(TARGET_DIR)/userdata && mkdir -p $(TARGET_DIR)/oem $(TARGET_DIR)/userdata
-	mkdir -p $(TARGET_DIR)/lib/modules/ $(TARGET_DIR)/etc/preinit.d/
+	mkdir -p $(TARGET_DIR)/lib/modules/ $(TARGET_DIR)/etc/init.d/
 
 	for module in `echo ${INSTALL_MODULES} | tr ',' '\n'`; do \
 		find ${THUNDERBOOT_BUILDDIR}/lib/modules/${KERNEL_VERSION}/kernel -name $$module | xargs -i cp {} $(TARGET_DIR)/lib/modules/; \
@@ -80,11 +80,11 @@ ifeq ($(BR2_PACKAGE_THUNDERBOOT_BATIPC_LAUNCH),y)
 define THUNDERBOOT_INSTALL_BATIPC_CMDS
 	ln -rsf $(TARGET_DIR)/usr/share/mediaserver/$(call qstrip,$(BR2_PACKAGE_MEDIASERVE_CONFIG)) $(TARGET_DIR)/usr/share/mediaserver/tb.conf
 
-	$(INSTALL) -D -m 755 $(@D)/S06tb_launch $(TARGET_DIR)/etc/preinit.d/
-	$(INSTALL) -D -m 755 $(@D)/S07mountall $(TARGET_DIR)/etc/preinit.d/
+	$(INSTALL) -D -m 755 $(@D)/S06tb_launch $(TARGET_DIR)/etc/init.d/
+	$(INSTALL) -D -m 755 $(@D)/S07mountall $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -D -m 755 $(@D)/tb_poweroff $(TARGET_DIR)/usr/bin/
 
-	sed -i 's/CAMERA_FPS/$(BR2_PACKAGE_THUNDERBOOT_CAMERA_FPS)/g' $(TARGET_DIR)/etc/preinit.d/S06tb_launch
+	sed -i 's/CAMERA_FPS/$(BR2_PACKAGE_THUNDERBOOT_CAMERA_FPS)/g' $(TARGET_DIR)/etc/init.d/S06tb_launch
 endef
 THUNDERBOOT_POST_INSTALL_TARGET_HOOKS += THUNDERBOOT_INSTALL_BATIPC_CMDS
 endif
