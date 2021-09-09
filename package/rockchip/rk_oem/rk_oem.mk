@@ -69,6 +69,7 @@ define RK_OEM_TARGET_FINALIZE_STRIP_HOOK_CMDS
 	find $(RK_OEM_INSTALL_TARGET_DIR) -type f \( -perm /111 -o -name '*.so*' \) \
 		-not \( -name 'libpthread*.so*' -o -name 'ld-*.so*' -o -name '*.ko' \) -print0 | \
 		xargs -0 $(STRIPCMD) 2>/dev/null || true
+	touch $(TARGET_DIR)/.auto_mkfs # format userdata partition default if mount error.
 endef
 
 ifneq ($(BR2_ENABLE_DEBUG),y)
