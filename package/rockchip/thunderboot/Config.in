@@ -43,6 +43,11 @@ config BR2_THUNDERBOOT_SIMPLIFY_USB
 	help
 	  Kernel driver modules to be installed.
 
+config BR2_PACKAGE_THUNDERBOOT_USE_EUDEV
+	bool "enable udev for usb-otg/sdcard/block-byname, etc..."
+	help
+	  enable udev for usb-otg/sdcard/block-byname, etc...
+
 if BR2_THUNDERBOOT_SIMPLIFY_USB
 
 config BR2_THUNDERBOOT_USB_ADBD

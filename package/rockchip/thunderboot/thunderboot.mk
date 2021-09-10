@@ -42,6 +42,18 @@ INSTALL_MODULES += $(THUNDERBOOT_EMMC_MODULES)
 THUNDERBOOT_POST_INSTALL_TARGET_HOOKS += THUNDERBOOT_EMMC
 endif
 
+ifeq ($(BR2_PACKAGE_THUNDERBOOT_USE_EUDEV),y)
+define THUNDERBOOT_INSTALL_UDEV_RULES
+	$(RM) $(TARGET_DIR)/lib/udev/rules.d/*
+	mkdir -p $(TARGET_DIR)/mnt/sdcard
+	$(INSTALL) -D -m 755 $(@D)/usbdevice $(TARGET_DIR)//usr/bin/usbdevice
+	$(INSTALL) -D -m 755 $(TOPDIR)/../external/rkscript/61-usbdevice.rules $(TARGET_DIR)/lib/udev/rules.d/
+	$(INSTALL) -D -m 755 $(TOPDIR)/../external/rkscript/61-sd-cards-auto-mount.rules $(TARGET_DIR)/lib/udev/rules.d/
+	$(INSTALL) -D -m 755 $(TOPDIR)/../external/rkscript/61-partition-init.rules $(TARGET_DIR)/lib/udev/rules.d/
+endef
+THUNDERBOOT_POST_INSTALL_TARGET_HOOKS += THUNDERBOOT_INSTALL_UDEV_RULES
+endif
+
 ifeq ($(BR2_THUNDERBOOT_ETH),y)
 define THUNDERBOOT_ETH
 	$(INSTALL) -D -m 755 $(@D)/S90tb_eth $(TARGET_DIR)/etc/init.d/

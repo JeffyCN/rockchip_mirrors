@@ -15,7 +15,6 @@ rm -f $TARGET/lib/udev/rules.d/70-joystick.rules
 rm -f $TARGET/lib/udev/rules.d/64-btrfs.rules
 rm -f $TARGET/lib/udev/rules.d/60-persistent-storage-tape.rules
 rm -f $TARGET/lib/udev/rules.d/60-serial.rules
-rm -f $TARGET/lib/udev/rules.d/60-persistent-storage.rules
 rm -f $TARGET/lib/udev/rules.d/70-touchpad.rules
 rm -f $TARGET/lib/udev/rules.d/60-block.rules
 rm -f $TARGET/lib/udev/rules.d/60-drm.rules
