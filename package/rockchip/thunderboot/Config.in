@@ -56,6 +56,13 @@ config BR2_THUNDERBOOT_USB_ADBD
 	help
 	  Use simplify ADB configuration.
 
+config BR2_THUNDERBOOT_USB_MTP
+	bool "rockchip thunderboot USB MTP"
+	select BR2_PACKAGE_MTP
+	select BR2_PACKAGE_THUNDERBOOT_USE_EUDEV
+	help
+	  Use simplify MTP configuration.
+
 config BR2_THUNDERBOOT_USB_RNDIS
 	bool "rockchip thunderboot USB RNDIS"
 	help

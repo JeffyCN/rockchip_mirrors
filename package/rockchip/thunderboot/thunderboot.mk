@@ -110,6 +110,15 @@ endef
 THUNDERBOOT_POST_INSTALL_TARGET_HOOKS += THUNDERBOOT_USB_ADBD
 endif
 
+ifeq ($(BR2_THUNDERBOOT_USB_MTP),y)
+define THUNDERBOOT_USB_MTP
+	if test ! `grep usb_mtp_en $(THUNDERBOOT_USB_CONFIG)` ; then \
+		echo usb_mtp_en >> $(THUNDERBOOT_USB_CONFIG) ; \
+	fi
+endef
+THUNDERBOOT_POST_INSTALL_TARGET_HOOKS += THUNDERBOOT_USB_MTP
+endif
+
 ifeq ($(BR2_THUNDERBOOT_USB_RNDIS),y)
 define THUNDERBOOT_USB_RNDIS
 	if test ! `grep usb_rndis_en $(THUNDERBOOT_USB_CONFIG)` ; then \

@@ -7,6 +7,7 @@
 
 RNDIS_EN=off
 ADB_EN=off
+MTP_EN=off
 RNDIS_ADDR=192.168.1.100
 
 USB_ATTRIBUTE=0x409
@@ -28,6 +29,7 @@ syslink_function()
 bind_functions()
 {
 	USB_FUNCTIONS_CNT=1
+	test $MTP_EN = on && syslink_function mtp.gs0
 	test $RNDIS_EN = on && syslink_function rndis.gs0
 	test $ADB_EN = on && syslink_function ffs.adb
 
@@ -37,6 +39,7 @@ bind_functions()
 function_init()
 {
 	test $RNDIS_EN = on && mkdir ${USB_FUNCTIONS_DIR}/rndis.gs0
+	test $MTP_EN = on && mkdir ${USB_FUNCTIONS_DIR}/mtp.gs0
 
 	if [ $ADB_EN = on ];then
 		mkdir ${USB_FUNCTIONS_DIR}/ffs.adb
@@ -103,13 +106,33 @@ parameter_init()
 				RNDIS_EN=on
 				make_config_string rndis
 				;;
+			usb_mtp_en)
+				MTP_EN=on
+				make_config_string mtp
+				;;
 		esac
 	done < $USB_CONFIG_FILE
 
-	if [ "$CONFIG_STRING"x = "adb"x ];then
-		PID=0x0006
-	else
-		PID=0x0019
+	case "$CONFIG_STRING" in
+		mtp)
+			PID=0x0001
+			;;
+		adb)
+			PID=0x0006
+			;;
+		mtp_adb | adb_mtp)
+			PID=0x0011
+			;;
+		*)
+			PID=0x0019
+	esac
+}
+
+use_os_desc()
+{
+	if [ $MTP_EN = on ];then
+		echo "MTP" > ${USB_FUNCTIONS_DIR}/mtp.gs0/os_desc/interface.MTP/compatible_id
+		echo 1 > ${USB_CONFIGFS_DIR}/os_desc/use
 	fi
 }
 
@@ -130,6 +153,10 @@ run_binary()
 		ifconfig usb0 $RNDIS_ADDR
 		ifconfig usb0 up
 	fi
+
+	if [ $MTP_EN = on ];then
+		start-stop-daemon --start --quiet --background --exec /usr/bin/mtp-server
+	fi
 }
 
 program_kill()
@@ -142,6 +169,7 @@ usb_device_stop()
 {
 	echo "none" > ${USB_CONFIGFS_DIR}/UDC
 	program_kill adbd
+	program_kill mtp-server
 	ls ${USB_CONFIGS_DIR} | grep f[0-9] | xargs -I {} rm ${USB_CONFIGS_DIR}/{}
 }
 
@@ -168,6 +196,7 @@ start)
 		fi
 
 		test -d ${USB_CONFIGFS_DIR} || configfs_init
+		use_os_desc
 		echo $PID > ${USB_CONFIGFS_DIR}/idProduct
 		bind_functions
 		pre_run_binary
