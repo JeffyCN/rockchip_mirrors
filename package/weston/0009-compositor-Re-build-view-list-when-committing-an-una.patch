@@ -1,7 +1,7 @@
-From f4eae355006cd9819d42f6cbc4d17324bfed7e55 Mon Sep 17 00:00:00 2001
+From 955397a445a4be13e073cd0bb721d40c8621a898 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Nov 2018 20:23:17 +0800
-Subject: [PATCH 09/41] compositor: Re-build view list when committing an
+Subject: [PATCH 09/51] compositor: Re-build view list when committing an
  unassigned surface
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>

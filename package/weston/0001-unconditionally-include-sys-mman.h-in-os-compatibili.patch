@@ -1,7 +1,7 @@
-From 4a045ca0f9b045dc3e3bb424421bbfdf59500a0f Mon Sep 17 00:00:00 2001
+From 61180b918947da87472c0a2b255923769557cdb4 Mon Sep 17 00:00:00 2001
 From: James Hilliard <james.hilliard1@gmail.com>
 Date: Sat, 1 Feb 2020 20:02:29 -0700
-Subject: [PATCH 01/41] unconditionally include sys/mman.h in
+Subject: [PATCH 01/51] unconditionally include sys/mman.h in
  os-compatibility.c
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8

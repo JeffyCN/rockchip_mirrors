@@ -1,7 +1,7 @@
-From 364db3251a77ce6757a14b9c463aaef29f37d465 Mon Sep 17 00:00:00 2001
+From 4d0748a1a9de3533316c0f9a331860d45592c1dc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 11:23:36 +0800
-Subject: [PATCH 46/46] backend-drm: Bind Nth primary plane to Nth crtc
+Subject: [PATCH 46/51] backend-drm: Bind Nth primary plane to Nth crtc
 
 The vop2 allows primary planes to bind with random crtc, but we need to
 use the same pair as the driver registered when using drm legacy API.
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 18 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index d148b50..675e66b 100644
+index 87c60e6..052cbe2 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1271,6 +1271,7 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
+@@ -1274,6 +1274,7 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
  			      enum wdrm_plane_type type)
  {
  	struct drm_plane *plane;
@@ -23,7 +23,7 @@ index d148b50..675e66b 100644
  	bool prefer_modifier =
  		b->fb_modifiers && type == WDRM_PLANE_TYPE_PRIMARY;
  
-@@ -1297,9 +1298,16 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
+@@ -1300,9 +1301,16 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
  	}
  
  retry:
@@ -41,7 +41,7 @@ index d148b50..675e66b 100644
  
  		if (!drm_plane_is_available(plane, output))
  			continue;
-@@ -1330,6 +1338,15 @@ retry:
+@@ -1333,6 +1341,15 @@ retry:
  		if (plane->type != type)
  			continue;
  

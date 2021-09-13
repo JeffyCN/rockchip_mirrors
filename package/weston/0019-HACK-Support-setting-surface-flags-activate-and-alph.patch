@@ -1,7 +1,7 @@
-From a86111565708fc546ba1a0bff9f1b419c2e07b43 Mon Sep 17 00:00:00 2001
+From 0a38f9c5841fd90853a649b4209da0dede89888b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 08:55:42 +0800
-Subject: [PATCH 19/44] HACK: Support setting surface flags activate and alpha
+Subject: [PATCH 19/51] HACK: Support setting surface flags activate and alpha
 
 Support setting surface flags activate and alpha through app_id or
 title, for example:
@@ -331,7 +331,7 @@ index 21ff080..c05aab6 100644
  	if (tmp == NULL)
  		return;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index e9607c7..6ba0f5d 100644
+index 2025f29..0ea0cb1 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -358,7 +358,7 @@ weston_view_create(struct weston_surface *surface)

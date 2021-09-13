@@ -1,7 +1,7 @@
-From b896c5462a1a70d3567d1e77a4ef7fa71934c227 Mon Sep 17 00:00:00 2001
+From 9ccbb415f5b9666f369108e2f222990cc972141b Mon Sep 17 00:00:00 2001
 From: Scott Anderson <scott.anderson@collabora.com>
 Date: Tue, 2 Jun 2020 17:39:43 +1200
-Subject: [PATCH 03/41] drm: Fix leak of damage blob id
+Subject: [PATCH 03/51] drm: Fix leak of damage blob id
 
 This moves the creation of the blob to be earlier, to when the damage is
 calculated. It replaces the damage tracked inside of the plane state

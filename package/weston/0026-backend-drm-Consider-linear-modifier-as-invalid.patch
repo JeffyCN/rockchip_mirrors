@@ -1,7 +1,7 @@
-From 61b572d3a08adeafcd2d1b0df78c08d2863cf426 Mon Sep 17 00:00:00 2001
+From e2f92ab647d8c36877443037c7913e9d1ac1f1c5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
-Subject: [PATCH 26/41] backend-drm: Consider linear modifier as invalid
+Subject: [PATCH 26/51] backend-drm: Consider linear modifier as invalid
 
 There's no need to use modifier APIs for linear.
 
@@ -37,10 +37,10 @@ index e7349c4..2bc72d4 100644
  	    dmabuf->attributes.offset[0] > 0) {
  #ifdef HAVE_GBM_FD_IMPORT
 diff --git a/libweston/backend-drm/state-propose.c b/libweston/backend-drm/state-propose.c
-index 057087e..faee1ad 100644
+index 7af5a2f..c4c2785 100644
 --- a/libweston/backend-drm/state-propose.c
 +++ b/libweston/backend-drm/state-propose.c
-@@ -141,7 +141,7 @@ drm_output_plane_has_valid_format(struct drm_plane *plane,
+@@ -156,7 +156,7 @@ drm_output_plane_has_valid_format(struct drm_plane *plane,
  		if (plane->formats[i].format != fb->format->format)
  			continue;
  
@@ -65,10 +65,10 @@ index 926dd9e..b786fbd 100644
  typedef void (*dmabuf_user_data_destroy_func)(
  			struct linux_dmabuf_buffer *buffer);
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index ee76278..0159770 100644
+index d9b0ad2..78cab1f 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -1096,7 +1096,7 @@ pixman_renderer_import_dmabuf(struct weston_compositor *ec,
+@@ -1097,7 +1097,7 @@ pixman_renderer_import_dmabuf(struct weston_compositor *ec,
  	int i;
  
  	for (i = 0; i < attributes->n_planes; i++) {

@@ -1,7 +1,7 @@
-From 52d855ca2bc20c85a01420e6bfe4cb35c8359878 Mon Sep 17 00:00:00 2001
+From fb66d80e4be988401f6dffc12da9f830dbf0571d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
-Subject: [PATCH 11/41] backend-drm: Support prefer connectors
+Subject: [PATCH 11/51] backend-drm: Support prefer connectors
 
 Using internal connector as main output by default.
 

@@ -1,7 +1,7 @@
-From 0af27a1b104f568db624423b3774a0fae315db54 Mon Sep 17 00:00:00 2001
+From 101379ea4459744c8ff4f7aca53379e95c7b1636 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 24 Jun 2020 11:59:42 +0800
-Subject: [PATCH 12/41] backend-drm: Support virtual screen size
+Subject: [PATCH 12/51] backend-drm: Support virtual screen size
 
 Support setting virtual screen size, for example:
 export WESTON_DRM_VIRTUAL_SIZE=1024x768

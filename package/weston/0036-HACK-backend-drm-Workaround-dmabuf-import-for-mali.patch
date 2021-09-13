@@ -1,7 +1,7 @@
-From aca7b62a20938a9e1acd75af7d42158fbffa30a7 Mon Sep 17 00:00:00 2001
+From 569529241d4f2f14482f2ef90527d14bf070cea8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 26 Oct 2020 17:15:31 +0800
-Subject: [PATCH 36/41] HACK: backend-drm: Workaround dmabuf import for mali
+Subject: [PATCH 36/51] HACK: backend-drm: Workaround dmabuf import for mali
 
 Tested on rk3399 with libmali-midgard-t86x-r18p0-wayland.so, the
 sprites works with waylandsink.

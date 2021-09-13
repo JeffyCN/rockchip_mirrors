@@ -1,7 +1,7 @@
-From 8a8507217e6e05c670b30dda1edd49830f7862fb Mon Sep 17 00:00:00 2001
+From 95405cde2638c2c5dec0183d652b3d14af827e76 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 12 May 2020 15:35:40 +0800
-Subject: [PATCH 20/41] input: Fix losing focus during re-attaching keyboard
+Subject: [PATCH 20/51] input: Fix losing focus during re-attaching keyboard
 
 Call notify_keyboard_focus_out() when releasing the last keyboard to
 pair with the notify_keyboard_focus_in().

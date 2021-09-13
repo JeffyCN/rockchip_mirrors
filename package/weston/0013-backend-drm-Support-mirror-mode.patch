@@ -1,7 +1,7 @@
 From 16f109aea816562fd0c16ee86f68f0aca880e234 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 13/48] backend-drm: Support mirror mode
+Subject: [PATCH 13/51] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.

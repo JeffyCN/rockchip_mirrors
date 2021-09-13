@@ -1,7 +1,7 @@
-From 48d556e52d8087dd070fa95ed080d94dcf70ff94 Mon Sep 17 00:00:00 2001
+From 8fea00408b196347ad0a56e58b05fe7212a102e2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 09:49:09 +0800
-Subject: [PATCH 45/46] libinput-seat: Don't assign input device to unavailable
+Subject: [PATCH 45/51] libinput-seat: Don't assign input device to unavailable
  output
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>

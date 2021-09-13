@@ -1,7 +1,7 @@
-From 3d8958ba3729ebabe02981ac8a1081353e55bd17 Mon Sep 17 00:00:00 2001
+From 9734977ecdd2698ddc829007932872ffed8c70ac Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 9 Oct 2020 18:00:11 +0800
-Subject: [PATCH 28/41] libweston: animation: Fix double-destroy
+Subject: [PATCH 28/51] libweston: animation: Fix double-destroy
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

@@ -1,7 +1,7 @@
-From 8da339038abdc66d266cb89176ab2ee28cc83fb4 Mon Sep 17 00:00:00 2001
+From 077af23e8922bc79c13ee85210e3f547115daed4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 19 Apr 2021 09:40:10 +0800
-Subject: [PATCH] HACK: gl-renderer: Fix random hang during hotplug
+Subject: [PATCH 48/51] HACK: gl-renderer: Fix random hang during hotplug
 
 Try to bind to a valid output before attaching buffers for mali.
 

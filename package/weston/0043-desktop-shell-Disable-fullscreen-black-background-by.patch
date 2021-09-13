@@ -1,7 +1,7 @@
-From 01e1dd1be5c7d51e04ddf280e84fff4bf5964ec7 Mon Sep 17 00:00:00 2001
+From 00fffa9a5781be5c3708745e16990392eb645d8a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Mar 2021 22:34:54 +0800
-Subject: [PATCH 43/46] desktop-shell: Disable fullscreen black background by
+Subject: [PATCH 43/51] desktop-shell: Disable fullscreen black background by
  default
 
 There's a force black background for fullscreen views.

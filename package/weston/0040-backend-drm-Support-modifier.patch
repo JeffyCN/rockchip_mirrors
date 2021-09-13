@@ -1,7 +1,7 @@
-From 13fcbc18fcc83dc8cbdeb49f872ae35d2ee2663a Mon Sep 17 00:00:00 2001
+From d5aff544da195e5c5c1b73d45d829961836721d3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
-Subject: [PATCH 40/46] backend-drm: Support modifier
+Subject: [PATCH 40/51] backend-drm: Support modifier
 
 Tested on rk356x with ARM AFBC modifier.
 
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 82 insertions(+), 10 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index fdc5401..d148b50 100644
+index cdf9b8f..87c60e6 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1207,6 +1207,44 @@ err:
+@@ -1210,6 +1210,44 @@ err:
  	return NULL;
  }
  
@@ -60,7 +60,7 @@ index fdc5401..d148b50 100644
  /**
   * Find, or create, a special-purpose plane
   *
-@@ -1233,6 +1271,8 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
+@@ -1236,6 +1274,8 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
  			      enum wdrm_plane_type type)
  {
  	struct drm_plane *plane;
@@ -69,7 +69,7 @@ index fdc5401..d148b50 100644
  
  	if (!b->universal_planes) {
  		uint32_t format;
-@@ -1256,12 +1296,11 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
+@@ -1259,12 +1299,11 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
  		return drm_plane_create(b, NULL, output, type, format);
  	}
  
@@ -83,7 +83,7 @@ index fdc5401..d148b50 100644
  		if (!drm_plane_is_available(plane, output))
  			continue;
  
-@@ -1280,10 +1319,26 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
+@@ -1283,10 +1322,26 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
  		if (found_elsewhere)
  			continue;
  
@@ -110,7 +110,7 @@ index fdc5401..d148b50 100644
  	return NULL;
  }
  
-@@ -3717,9 +3772,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3721,9 +3776,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	compositor->backend = &b->base;
  
@@ -120,7 +120,7 @@ index fdc5401..d148b50 100644
  	/* Check if we run drm-backend using weston-launch */
  	compositor->launcher = weston_launcher_connect(compositor, config->tty,
  						       seat_id, true);
-@@ -3753,15 +3805,36 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3757,15 +3809,36 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
@@ -159,7 +159,7 @@ index fdc5401..d148b50 100644
  		}
  	}
  
-@@ -3775,9 +3848,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3779,9 +3852,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	weston_setup_vt_switch_bindings(compositor);
  
