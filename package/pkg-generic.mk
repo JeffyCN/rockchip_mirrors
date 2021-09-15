@@ -65,7 +65,7 @@ GLOBAL_INSTRUMENTATION_HOOKS += step_time
 define step_pkg_size_inner
 	cd $(2); \
 	find . \( -type f -o -type l \) \
-		-newer $($(PKG)_DIR)/.stamp_built \
+		-cnewer $($(PKG)_DIR)/.stamp_built \
 		-exec printf '$(1),%s\n' {} + \
 		>> $(BUILD_DIR)/packages-file-list$(3).txt
 
@@ -235,6 +235,7 @@ $(BUILD_DIR)/%/.stamp_built::
 
 # Install to host dir
 $(BUILD_DIR)/%/.stamp_host_installed:
+	touch $($(PKG)_TARGET_BUILD)
 	@$(call step_start,install-host)
 	@$(call MESSAGE,"Installing to host directory")
 	$(foreach hook,$($(PKG)_PRE_INSTALL_HOOKS),$(call $(hook))$(sep))
@@ -264,6 +265,7 @@ $(BUILD_DIR)/%/.stamp_host_installed:
 # empty when we use an internal toolchain.
 #
 $(BUILD_DIR)/%/.stamp_staging_installed:
+	touch $($(PKG)_TARGET_BUILD)
 	@$(call step_start,install-staging)
 	@$(call MESSAGE,"Installing to staging directory")
 	$(foreach hook,$($(PKG)_PRE_INSTALL_STAGING_HOOKS),$(call $(hook))$(sep))
@@ -296,6 +298,7 @@ $(BUILD_DIR)/%/.stamp_staging_installed:
 
 # Install to images dir
 $(BUILD_DIR)/%/.stamp_images_installed:
+	touch $($(PKG)_TARGET_BUILD)
 	@$(call step_start,install-image)
 	$(foreach hook,$($(PKG)_PRE_INSTALL_IMAGES_HOOKS),$(call $(hook))$(sep))
 	@$(call MESSAGE,"Installing to images directory")
@@ -306,6 +309,7 @@ $(BUILD_DIR)/%/.stamp_images_installed:
 
 # Install to target dir
 $(BUILD_DIR)/%/.stamp_target_installed:
+	touch $($(PKG)_TARGET_BUILD)
 	@$(call step_start,install-target)
 	@$(call MESSAGE,"Installing to target")
 	$(foreach hook,$($(PKG)_PRE_INSTALL_TARGET_HOOKS),$(call $(hook))$(sep))
