@@ -1,6 +1,5 @@
 menuconfig BR2_PACKAGE_THUNDERBOOT
 	bool "rockchip thunderboot"
-	depends on BR2_PACKAGE_RV1126_RV1109
 	help
 	  Rockchip tb(thunder boot) configuration.
 
