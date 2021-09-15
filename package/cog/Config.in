@@ -7,8 +7,8 @@ config BR2_PACKAGE_COG
 	depends on BR2_PACKAGE_WPEWEBKIT
 	depends on BR2_TOOLCHAIN_HAS_THREADS # dbus
 	depends on BR2_USE_MMU # dbus
+	depends on BR2_PACKAGE_WAYLAND
 	select BR2_PACKAGE_DBUS
-	select BR2_PACKAGE_WAYLAND
 	help
 	  Single "window" launcher for the WebKit WPE port, and
 	  helper library for implementing WPE launcher. It does
