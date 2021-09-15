@@ -7,8 +7,8 @@ config BR2_PACKAGE_COG
 	depends on BR2_PACKAGE_WPEWEBKIT
 	depends on BR2_TOOLCHAIN_HAS_THREADS # dbus
 	depends on BR2_USE_MMU # dbus
+	depends on BR2_PACKAGE_WAYLAND
 	select BR2_PACKAGE_DBUS
-	select BR2_PACKAGE_WAYLAND
 	help
 	  Single "window" launcher for the WebKit WPE port, and
 	  helper library for implementing WPE launcher. It does
@@ -39,7 +39,7 @@ config BR2_PACKAGE_COG_PLATFORM_FDO
 config BR2_PACKAGE_COG_PLATFORM_DRM
 	bool "DRM backend"
 	depends on BR2_PACKAGE_HAS_UDEV # libinput
-	depends on BR2_PACKAGE_MESA3D_OPENGL_EGL # gbm
+	depends on BR2_PACKAGE_HAS_LIBGBM # gbm
 	select BR2_PACKAGE_LIBDRM
 	select BR2_PACKAGE_LIBINPUT
 	help
