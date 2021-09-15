@@ -32,10 +32,7 @@ cp $LIBDIR/librga.* ./lib/ -dv
 cp $LIBDIR/librockchip_mpp.* ./lib/ -dv
 
 cp $LIBDIR/libasound.* ./lib/ -dv
-cp $LIBDIR/libavformat.* ./lib/ -dv
-cp $LIBDIR/libavcodec.* ./lib/ -dv
-cp $LIBDIR/libswresample.* ./lib/ -dv
-cp $LIBDIR/libavutil.* ./lib/ -dv
+cp $LIBDIR/libthird_media.* ./lib/ -dv
 
 cp $LIBDIR/libRKAP* ./lib/ -dv
 cp $LIBDIR/libmd_share.so ./lib/ -dv
