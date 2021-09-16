@@ -9,7 +9,7 @@ case "$1" in
 			insmod /vendor/lib/modules/rfkill-rk.ko
 			insmod /vendor/lib/modules/cfg80211.ko
 			insmod /vendor/lib/modules/mac80211.ko
-			insmod /vendor/lib/modules/cywdhd.ko
+			insmod /vendor/lib/modules/bcmdhd_indep_power.ko
 		}&
 		;;
 	stop)
