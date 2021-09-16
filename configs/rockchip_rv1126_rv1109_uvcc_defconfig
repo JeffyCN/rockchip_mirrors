@@ -27,3 +27,5 @@ BR2_PACKAGE_E2FSPROGS=y
 BR2_PACKAGE_E2FSPROGS_RESIZE2FS=y
 BR2_PACKAGE_DBUS_GLIB=y
 BR2_PACKAGE_ANDROID_TOOLS=y
+#- input event daemon used to handle key event, ie. power on/off system
+BR2_PACKAGE_INPUT_EVENT_DAEMON=y
