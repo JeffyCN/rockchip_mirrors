@@ -16,6 +16,9 @@ export GST_DEBUG_NO_COLOR=1
 # Preferred formats for V4L2
 export GST_V4L2_PREFERRED_FOURCC=NV12:YU12:NV16:YUY2
 
+# Preferred formats for videoconvert
+export GST_VIDEO_CONVERT_PREFERRED_FORMAT=NV12:NV16:I420:YUY2
+
 # Using libv4l2 for V4L2
 export GST_V4L2_USE_LIBV4L2=1
 
