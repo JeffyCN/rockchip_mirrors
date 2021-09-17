@@ -1,16 +1,16 @@
-From ddb94a3300ec3b339cf4c546730b8385e4c9b5ef Mon Sep 17 00:00:00 2001
+From e50870d7c08030046c2f8a7bb0d5219f9968a3f1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 31 Oct 2019 18:45:19 +0800
-Subject: [PATCH 44/46] video-converter: Support rockchip RGA 2D accel
+Subject: [PATCH] video-converter: Support rockchip RGA 2D accel
 
 Disabled by default, set env GST_VIDEO_CONVERT_USE_RGA=1 to enable.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- configure.ac                         |   7 +
+ configure.ac                         |   7 ++
  gst-libs/gst/video/Makefile.am       |   2 +-
- gst-libs/gst/video/video-converter.c | 183 +++++++++++++++++++++++++++
- 3 files changed, 191 insertions(+), 1 deletion(-)
+ gst-libs/gst/video/video-converter.c | 180 +++++++++++++++++++++++++++
+ 3 files changed, 188 insertions(+), 1 deletion(-)
 
 diff --git a/configure.ac b/configure.ac
 index 1287583..08966a3 100644
@@ -44,7 +44,7 @@ index 9fc1ccf..5006854 100644
  
  include $(top_srcdir)/common/gst-glib-gen.mak
 diff --git a/gst-libs/gst/video/video-converter.c b/gst-libs/gst/video/video-converter.c
-index 147ca0b..7becd9f 100644
+index 147ca0b..7b70070 100644
 --- a/gst-libs/gst/video/video-converter.c
 +++ b/gst-libs/gst/video/video-converter.c
 @@ -37,6 +37,11 @@
@@ -59,7 +59,7 @@ index 147ca0b..7becd9f 100644
  /**
   * SECTION:videoconverter
   * @title: GstVideoConverter
-@@ -2624,6 +2629,172 @@ gst_video_converter_get_config (GstVideoConverter * convert)
+@@ -2624,6 +2629,169 @@ gst_video_converter_get_config (GstVideoConverter * convert)
    return convert->config;
  }
  
@@ -79,9 +79,7 @@ index 147ca0b..7becd9f 100644
 +      return RK_FORMAT_BGR_888;
 +    case GST_VIDEO_FORMAT_RGB:
 +      return RK_FORMAT_RGB_888;
-+    case GST_VIDEO_FORMAT_RGB15:
-+      return RK_FORMAT_RGBA_5551;
-+    case GST_VIDEO_FORMAT_RGB16:
++    case GST_VIDEO_FORMAT_BGR16:
 +      return RK_FORMAT_RGB_565;
 +    case GST_VIDEO_FORMAT_NV12:
 +      return RK_FORMAT_YCbCr_420_SP;
@@ -149,7 +147,6 @@ index 147ca0b..7becd9f 100644
 +    case RK_FORMAT_BGR_888:
 +      hstride /= 3;
 +      break;
-+    case RK_FORMAT_RGBA_5551:
 +    case RK_FORMAT_RGB_565:
 +      hstride /= 2;
 +      break;
@@ -232,7 +229,7 @@ index 147ca0b..7becd9f 100644
  /**
   * gst_video_converter_frame:
   * @convert: a #GstVideoConverter
-@@ -2642,6 +2813,12 @@ gst_video_converter_frame (GstVideoConverter * convert,
+@@ -2642,6 +2810,12 @@ gst_video_converter_frame (GstVideoConverter * convert,
    g_return_if_fail (src != NULL);
    g_return_if_fail (dest != NULL);
  
@@ -245,7 +242,7 @@ index 147ca0b..7becd9f 100644
    convert->convert (convert, src, dest);
  }
  
-@@ -5781,6 +5958,12 @@ convert_scale_planes (GstVideoConverter * convert,
+@@ -5781,6 +5955,12 @@ convert_scale_planes (GstVideoConverter * convert,
  {
    int i, n_planes;
  

@@ -1,7 +1,7 @@
-From c8bf972dd92f7c3f76767bd3eac7605242104387 Mon Sep 17 00:00:00 2001
+From f7dd547ae68f145974236dbb72bc442a21744eb7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 8 Nov 2019 17:36:20 +0800
-Subject: [PATCH 6/6] video-flip: Support rockchip RGA 2D accel
+Subject: [PATCH] video-flip: Support rockchip RGA 2D accel
 
 Disabled by default, set env GST_VIDEO_FLIP_USE_RGA=1 to enable.
 
@@ -9,11 +9,11 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  configure.ac                   |  15 +++
  gst/videofilter/Makefile.am    |   2 +-
- gst/videofilter/gstvideoflip.c | 225 +++++++++++++++++++++++++++++++++
- 3 files changed, 241 insertions(+), 1 deletion(-)
+ gst/videofilter/gstvideoflip.c | 222 +++++++++++++++++++++++++++++++++
+ 3 files changed, 238 insertions(+), 1 deletion(-)
 
 diff --git a/configure.ac b/configure.ac
-index deb74f1..aa45ccb 100644
+index deb74f105..aa45ccb01 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -285,6 +285,14 @@ fi
@@ -46,7 +46,7 @@ index deb74f1..aa45ccb 100644
  HAVE_GTK=no
  GTK_REQ=3.0.0
 diff --git a/gst/videofilter/Makefile.am b/gst/videofilter/Makefile.am
-index cb517fe..daf6721 100644
+index cb517fe9c..daf672182 100644
 --- a/gst/videofilter/Makefile.am
 +++ b/gst/videofilter/Makefile.am
 @@ -15,7 +15,7 @@ libgstvideofilter_la_CFLAGS = $(GST_CFLAGS) \
@@ -59,7 +59,7 @@ index cb517fe..daf6721 100644
  
  gstvideoexample.c: $(srcdir)/make_filter $(srcdir)/gstvideotemplate.c
 diff --git a/gst/videofilter/gstvideoflip.c b/gst/videofilter/gstvideoflip.c
-index c6132f5..39344c0 100644
+index c6132f587..f1f7bb5b9 100644
 --- a/gst/videofilter/gstvideoflip.c
 +++ b/gst/videofilter/gstvideoflip.c
 @@ -48,6 +48,11 @@
@@ -94,7 +94,7 @@ index c6132f5..39344c0 100644
              "GRAY8, GRAY16_BE, GRAY16_LE }"))
      );
  
-@@ -959,6 +970,197 @@ gst_video_flip_y422 (GstVideoFlip * videoflip, GstVideoFrame * dest,
+@@ -959,6 +970,194 @@ gst_video_flip_y422 (GstVideoFlip * videoflip, GstVideoFrame * dest,
    }
  }
  
@@ -114,8 +114,6 @@ index c6132f5..39344c0 100644
 +      return RK_FORMAT_BGR_888;
 +    case GST_VIDEO_FORMAT_RGB:
 +      return RK_FORMAT_RGB_888;
-+    case GST_VIDEO_FORMAT_RGB15:
-+      return RK_FORMAT_RGBA_5551;
 +    case GST_VIDEO_FORMAT_RGB16:
 +      return RK_FORMAT_RGB_565;
 +    case GST_VIDEO_FORMAT_NV12:
@@ -186,7 +184,6 @@ index c6132f5..39344c0 100644
 +    case RK_FORMAT_BGR_888:
 +      hstride /= 3;
 +      break;
-+    case RK_FORMAT_RGBA_5551:
 +    case RK_FORMAT_RGB_565:
 +      hstride /= 2;
 +      break;
@@ -292,7 +289,7 @@ index c6132f5..39344c0 100644
  
  static gboolean
  gst_video_flip_set_info (GstVideoFilter * vfilter, GstCaps * incaps,
-@@ -1038,6 +1240,14 @@ gst_video_flip_set_info (GstVideoFilter * vfilter, GstCaps * incaps,
+@@ -1038,6 +1237,14 @@ gst_video_flip_set_info (GstVideoFilter * vfilter, GstCaps * incaps,
      case GST_VIDEO_FORMAT_NV21:
        vf->process = gst_video_flip_semi_planar_yuv;
        break;
@@ -307,7 +304,7 @@ index c6132f5..39344c0 100644
      default:
        break;
    }
-@@ -1136,6 +1346,21 @@ gst_video_flip_transform_frame (GstVideoFilter * vfilter,
+@@ -1136,6 +1343,21 @@ gst_video_flip_transform_frame (GstVideoFilter * vfilter,
    g_type_class_unref (enum_class);
  
    GST_OBJECT_LOCK (videoflip);
