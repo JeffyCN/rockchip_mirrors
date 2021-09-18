@@ -34,11 +34,12 @@ module_choice()
     echo "ethernet test:        9"
     echo "auto reboot test:     10"
     echo "ddr freq scaling test 11"
-    echo "npu test       	12"
-    echo "camera test           13 (use rkisp_demo)"
-    echo "video test            14 (use gstreamer-wayland and app_demo)"
-    echo "gpu test              15 (use glmark2)"
-    echo "chromium test         16 (chromium with video hardware acceleration)"
+    echo "npu test              12"
+    echo "npu2 test             13 (rk356x)"
+    echo "camera test           14 (use rkisp_demo)"
+    echo "video test            15 (use gstreamer-wayland and app_demo)"
+    echo "gpu test              16 (use glmark2)"
+    echo "chromium test         17 (chromium with video hardware acceleration)"
     echo "*****************************************************"
 
     echo  "please input your test moudle: "
@@ -48,6 +49,11 @@ module_choice()
 npu_stress_test()
 {
     sh /rockchip_test/npu/npu_test.sh
+}
+
+npu2_stress_test()
+{
+    sh /rockchip_test/npu2/npu_test.sh
 }
 
 ddr_test()
@@ -169,15 +175,18 @@ module_test()
 	    npu_stress_test
 	    ;;
 	13)
-	    camera_test
+	    npu2_stress_test
 	    ;;
 	14)
-	    video_test
+	    camera_test
 	    ;;
 	15)
-	    gpu_test
+	    video_test
 	    ;;
 	16)
+	    gpu_test
+	    ;;
+	17)
 	    chromium_test
 	    ;;
     esac
