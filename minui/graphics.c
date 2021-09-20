@@ -34,6 +34,7 @@
 #include "font_10x18.h"
 #include "minui.h"
 #include "graphics.h"
+#include "common.h"
 
 typedef struct {
     GRSurface* texture;

@@ -25,6 +25,8 @@ char* MENU_HEADERS[] = { "Linux system recovery utility",
 
 char* MENU_ITEMS[] = { "reboot system now",
                        "apply update from sdcard",
+                       "apply update from local userdata",
+                       "apply update from udisk",
                        "wipe data/factory reset",
                        NULL };
 
@@ -33,7 +35,8 @@ int device_recovery_start() {
 }
 
 int device_toggle_display(volatile char* key_pressed, int key_code) {
-    return key_code == KEY_MENU;
+    // return key_code == KEY_MENU;
+    return 0;
 }
 
 int device_reboot_now(volatile char* key_pressed, int key_code) {

@@ -164,8 +164,8 @@ static void draw_screen_locked(void)
         int i = 0;
         if (show_menu) {
             gr_color(64, 96, 255, 255);
-            gr_fill(0, (menu_top+menu_sel) * CHAR_HEIGHT,
-                    gr_fb_width(), (menu_top+menu_sel+1)*CHAR_HEIGHT+1);
+            gr_fill(0, (menu_top+1+menu_sel) * CHAR_HEIGHT,
+                    gr_fb_width(), (menu_top+menu_sel+2)*CHAR_HEIGHT+1);
 
             for (; i < menu_top + menu_items; ++i) {
                 if (i == menu_top + menu_sel) {
@@ -176,9 +176,9 @@ static void draw_screen_locked(void)
                     draw_text_line(i, menu[i]);
                 }
             }
+            ++i;
             gr_fill(0, i*CHAR_HEIGHT+CHAR_HEIGHT/2-1,
                     gr_fb_width(), i*CHAR_HEIGHT+CHAR_HEIGHT/2+1);
-            ++i;
         }
 
         gr_color(255, 255, 0, 255);
@@ -193,10 +193,8 @@ static void draw_screen_locked(void)
 // Should only be called with gUpdateMutex locked.
 static void update_screen_locked(void)
 {
-    printf("%s: Enter >>>>>\n", __func__);
     draw_screen_locked();
     gr_flip();
-    printf("%s: Leave <<<<<\n", __func__);
 }
 
 // Updates only the progress bar, if possible, otherwise redraws the screen.
@@ -306,7 +304,7 @@ static int input_callback(int fd, short revents, void *data)
     }
 
     if (ev.value > 0 && device_reboot_now(key_pressed, ev.code)) {
-            reboot(RB_AUTOBOOT);
+        reboot(RB_AUTOBOOT);
     }
 
     return 0;

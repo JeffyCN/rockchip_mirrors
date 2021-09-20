@@ -59,6 +59,10 @@ static const char *INTENT_FILE = "/userdata/recovery/intent";
 static const char *LOG_FILE = "/userdata/recovery/log";
 static const char *LAST_LOG_FILE = "/userdata/recovery/last_log";
 static const char *SDCARD_ROOT = "/sdcard";
+static const char *SDCARD_ROOT2 = "/mnt/external_sd";
+static const char *USERDATA_ROOT = "/userdata";
+static const char *UDISK_ROOT = "/udisk";
+static const char *UDISK_ROOT2 = "/mnt/usb_storage";
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
 static const char *coldboot_done = "/dev/.coldboot_done";
@@ -658,6 +662,60 @@ wipe_data(int confirm) {
     ui_print("Data wipe complete.\n");
 }
 
+static int ui_update(const char * fw_package) {
+    const char* binary = "/usr/bin/rkupdate";
+    int i, ret = 0;
+    int status = INSTALL_SUCCESS;
+
+    for(i = 0; i < 5; i++) {
+    ret = ensure_path_mounted(fw_package);
+    if(ret == 0)
+        break;
+        sleep(1);
+        LOGD("mounted %s failed.\n", fw_package);
+    }
+
+    if(ret == 0 && access(fw_package, F_OK) == 0) {
+        LOGD(">>>rkflash will update from %s\n", fw_package);
+#ifdef USE_RKUPDATE
+        status = do_rk_update(binary, fw_package);
+#endif
+
+#ifdef USE_UPDATEENGINE
+        const char* updateEnginebin = "/usr/bin/updateEngine";
+        status = do_rk_updateEngine(updateEnginebin, fw_package);
+#endif
+        if(status == INSTALL_SUCCESS){
+            strcpy(systemFlag, fw_package);
+
+            if(strncmp(fw_package,"/userdata", 9) != 0) {
+                if (resize_volume("/userdata"))
+                    LOGE("\n ---resize_volume userdata error ---\n");
+            } else {
+                //update success, delete userdata/update.img and write result to file.
+                if(access(fw_package, F_OK) == 0)
+                    remove(fw_package);
+            }
+        }
+    } else {
+        status = INSTALL_ERROR;
+    }
+
+    if (status != INSTALL_SUCCESS) {
+        ui_print("Installation aborted.\n");
+        while (1)
+        {
+            /* code */
+        }
+
+        return -1;
+    }
+    ui_print("update.img Installation done.\n");
+    ui_show_text(0);
+
+    return 0;
+}
+
 static void
 prompt_and_wait() {
     char** headers = prepend_title((const char**)MENU_HEADERS);
@@ -690,7 +748,6 @@ prompt_and_wait() {
                 break;
 #endif
             case ITEM_APPLY_SDCARD:
-                ;
                 int status = sdcard_directory(SDCARD_ROOT);
                 if (status >= 0) {
                     if (status != INSTALL_SUCCESS) {
@@ -703,6 +760,39 @@ prompt_and_wait() {
                     }
                 }
                 break;
+
+            case ITEM_APPLY_USERDATA:
+            {
+                //update firmware from local userdata;
+                const char* fw_package = "/userdata/update.img";
+                // LOGD("%s:%d:-------->>>>> USERDATA update\n",__func__, __LINE__);
+                int status = ui_update(fw_package);
+                if (status < 0) {
+                    ui_set_background(BACKGROUND_ICON_ERROR);
+                } else if (!ui_text_visible()) {
+                    return;  // reboot if logs aren't visible
+                } else {
+                    ui_print("\nInstall from sdcard complete.\n");
+                }
+            }
+                break;
+
+            case ITEM_APPLY_UDISK:
+            {
+                //update firmware from udisk;
+                const char* fw_package = "/udisk/update.img";
+                // LOGD("%s:%d:-------->>>> UDISK update\n",__func__, __LINE__);
+                int status = ui_update(fw_package);
+                if (status < 0) {
+                    ui_set_background(BACKGROUND_ICON_ERROR);
+                } else if (!ui_text_visible()) {
+                    ui_print("\nInstall from sdcard complete.\n");
+                    return;  // reboot if logs aren't visible
+                } else {
+                    ui_print("\nInstall from sdcard complete.\n");
+                }
+            }
+               break;
         }
     }
 }
@@ -733,6 +823,7 @@ main(int argc, char **argv) {
         printf("*********************************************************\n");
         printf("            ROCKCHIP recovery system                     \n");
         printf("*********************************************************\n");
+        printf("**** version : v1.0.1 ****\n");
     }
     printf("Starting recovery on %s\n", ctime(&start));
 
@@ -873,14 +964,14 @@ main(int argc, char **argv) {
 
         const char* binary = "/usr/bin/rkupdate";
         int i, ret = 0;
-        for(i = 0; i < 5; i++){
+        for (i = 0; i < 5; i++) {
             ret = ensure_path_mounted(update_package);
             if(ret == 0)
                 break;
             sleep(1);
             printf("mounted %s failed.\n", update_package);
         }
-        if(ret == 0) {
+        if (ret == 0) {
             printf(">>>rkflash will update from %s\n", update_package);
             #ifdef USE_RKUPDATE
             status = do_rk_update(binary, update_package);
@@ -889,10 +980,10 @@ main(int argc, char **argv) {
             const char* updateEnginebin = "/usr/bin/updateEngine";
             status = do_rk_updateEngine(updateEnginebin, update_package);
             #endif
-            if(status == INSTALL_SUCCESS){
+            if (status == INSTALL_SUCCESS) {
                 strcpy(systemFlag, update_package);
 
-                if(strncmp(update_package,"/userdata", 9) != 0) {
+                if (strncmp(update_package,"/userdata", 9) != 0) {
                     if (resize_volume("/userdata"))
                         LOGE("\n ---resize_volume userdata error ---\n");
                 } else {
@@ -955,7 +1046,7 @@ main(int argc, char **argv) {
                     system("flashcp -v " FACTORY_FIRMWARE_IMAGE " /dev/mtd0");
                 } else
                 printf("Error: Can't find rk-nand or spi-nand0.\n");
-            }else{
+            } else {
                 system("flash_erase /dev/mtd0 0x0 0");
                 system("sh "CMD4RECOVERY_FILENAME);
             }

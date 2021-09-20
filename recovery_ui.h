@@ -67,7 +67,9 @@ int device_wipe_data();
 
 #define ITEM_REBOOT          0
 #define ITEM_APPLY_SDCARD    1
-#define ITEM_WIPE_DATA       2
+#define ITEM_APPLY_USERDATA  2
+#define ITEM_APPLY_UDISK     3
+#define ITEM_WIPE_DATA       4
 #define ITEM_WIPE_CACHE      3
 
 // Header text to display above the main menu.
