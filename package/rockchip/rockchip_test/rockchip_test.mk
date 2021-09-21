@@ -7,11 +7,18 @@ ROCKCHIP_TEST_SITE = $(TOPDIR)/package/rockchip/rockchip_test/src
 ROCKCHIP_TEST_LICENSE = Apache V2.0
 ROCKCHIP_TEST_LICENSE_FILES = NOTICE
 
+ifeq ($(BR2_PACKAGE_RK356X),y)
+ROCKCHIP_TEST_NPU_SOURCE = npu2_${ARCH}
+ROCKCHIP_TEST_NPU_TARGET = npu2
+else
+ROCKCHIP_TEST_NPU_SOURCE = npu_${ARCH}
+ROCKCHIP_TEST_NPU_TARGET = npu
+endif
+
 ifeq ($(BR2_PACKAGE_RKNPU)$(BR2_PACKAGE_RKNN_DEMO),y)
 define ROCKCHIP_TEST_INSTALL_NPU_TARGET_CMDS
 	rm -rf ${TARGET_DIR}/rockchip_test/npu
-	cp -rf $(@D)/npu_${ARCH}  ${TARGET_DIR}/rockchip_test/npu
-	cp -rf $(@D)/npu2_aarch64  ${TARGET_DIR}/rockchip_test/npu2
+	cp -rf $(@D)/$(ROCKCHIP_TEST_NPU_SOURCE) ${TARGET_DIR}/rockchip_test/$(ROCKCHIP_TEST_NPU_TARGET)
 endef
 ROCKCHIP_TEST_POST_INSTALL_TARGET_HOOKS = ROCKCHIP_TEST_INSTALL_NPU_TARGET_CMDS
 endif
@@ -20,7 +27,8 @@ define ROCKCHIP_TEST_INSTALL_TARGET_CMDS
 	cp -rf  $(@D)/rockchip_test  ${TARGET_DIR}/
 	cp -rf $(@D)/rockchip_test_${ARCH}/* ${TARGET_DIR}/rockchip_test/ || true
 	$(INSTALL) -D -m 0755 $(@D)/rockchip_test/auto_reboot/S99_auto_reboot $(TARGET_DIR)/etc/init.d/
-	$(INSTALL) -D -m 0755 $(@D)/npu2_aarch64/rknn_mobilenet_demo $(TARGET_DIR)/rockchip_test/npu2/
+	test "${ROCKCHIP_TEST_NPU_TARGET}" = "npu2" && \
+		$(INSTALL) -D -m 0755 $(@D)/npu2_aarch64/rknn_mobilenet_demo $(TARGET_DIR)/rockchip_test/npu2/ || true
 endef
 
 $(eval $(generic-package))
