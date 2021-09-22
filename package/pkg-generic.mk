@@ -772,7 +772,7 @@ endif
 			rm -f $$($(2)_TARGET_INSTALL_TARGET)
 			rm -f $$($(2)_TARGET_INSTALL_IMAGES)
 			rm -f $$($(2)_TARGET_INSTALL_HOST)
-			touch $$($(2)_TARGET_BUILD)
+			touch $$($(2)_TARGET_BUILD) || true
 
 $(1)-reinstall:		$(1)-clean-for-reinstall $(1)
 
