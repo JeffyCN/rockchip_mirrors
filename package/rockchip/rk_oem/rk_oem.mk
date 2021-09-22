@@ -54,6 +54,7 @@ endef
 define RK_OEM_TARGET_POST_MKIMAGE_HOOK_CMDS
 	echo "#!/bin/sh" > $(@D)/$(RK_OEM_FAKEROOT_SCRIPT)
 	echo "set -e" >> $(@D)/$(RK_OEM_FAKEROOT_SCRIPT)
+	echo "export TARGET_OUTPUT_DIR=$(TARGET_DIR)" >> $(@D)/$(RK_OEM_FAKEROOT_SCRIPT)
 	echo "[ -d $(RK_OEM_INSTALL_TARGET_DIR)/www ] && chown -R www-data:www-data $(RK_OEM_INSTALL_TARGET_DIR)/www" >> $(@D)/$(RK_OEM_FAKEROOT_SCRIPT)
 	echo "[ -d $(RK_OEM_INSTALL_TARGET_DIR)/usr/www ] && chown -R www-data:www-data $(RK_OEM_INSTALL_TARGET_DIR)/usr/www" >> $(@D)/$(RK_OEM_FAKEROOT_SCRIPT)
 	echo "mkdir -p $$(dirname $(RK_OEM_IMAGE_OUTPUT))" >> $(@D)/$(RK_OEM_FAKEROOT_SCRIPT)
