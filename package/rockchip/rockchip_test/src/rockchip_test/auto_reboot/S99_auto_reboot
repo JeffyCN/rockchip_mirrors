@@ -8,6 +8,10 @@ case "$1" in
 			cp /oem/rockchip_test/auto_reboot.sh /data/cfg/rockchip_test/
 		fi
 
+		if [ -e "/data/cfg/rockchip_test/power_lost_test.sh" ]; then
+			echo "start test flash power lost"
+			source /data/cfg/rockchip_test/power_lost_test.sh &
+		fi
 		if [ -e "/data/cfg/rockchip_test/auto_reboot.sh" ]; then
 			echo "start auto-reboot"
 			source /data/cfg/rockchip_test/auto_reboot.sh `cat /data/cfg/rockchip_test/reboot_total_cnt`&
