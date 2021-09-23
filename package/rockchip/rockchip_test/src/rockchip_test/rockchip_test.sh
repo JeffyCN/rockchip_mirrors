@@ -40,6 +40,7 @@ module_choice()
     echo "video test            15 (use gstreamer-wayland and app_demo)"
     echo "gpu test              16 (use glmark2)"
     echo "chromium test         17 (chromium with video hardware acceleration)"
+    echo "nand power lost test: 18"
     echo "*****************************************************"
 
     echo  "please input your test moudle: "
@@ -135,6 +136,15 @@ chromium_test()
     sh /rockchip_test/chromium/chromium_test.sh
 }
 
+power_lost_test()
+{
+        fcnt=/data/config/rockchip_test/reboot_cnt;
+        if [ -e "$fcnt" ]; then
+                rm -f $fcnt;
+        fi
+        sh /rockchip_test/flash_test/power_lost_test.sh &
+}
+
 module_test()
 {
     case ${MODULE_CHOICE} in
@@ -188,6 +198,9 @@ module_test()
 	    ;;
 	17)
 	    chromium_test
+	    ;;
+	18)
+	    power_lost_test
 	    ;;
     esac
 }
