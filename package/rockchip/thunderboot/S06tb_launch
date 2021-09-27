@@ -15,11 +15,24 @@ lunch_start()
 		insmod /lib/modules/rk_sdmmc_ops.ko
 		insmod /lib/modules/sdmmc_vendor_storage.ko
 	}&
-	insmod /lib/modules/snd-soc-es8311.ko &
+
+	if [ -f "/lib/modules/snd-soc-es8311.ko" ]; then
+		insmod /lib/modules/snd-soc-es8311.ko
+	elif [ -f "/lib/modules/snd-soc-es7202.ko" ]; then
+		# playback
+		insmod /lib/modules/snd-soc-rk-codec-digital.ko
+		insmod /lib/modules/snd-soc-dummy-codec.ko
+		# capture
+		insmod /lib/modules/snd-soc-es7202.ko
+		insmod /lib/modules/snd-soc-rockchip-pdm.ko
+	else
+		echo "es7202.ko and es8311.ko are not found, the codec driver failed to load"
+	fi
 
 	echo 297000000 > /proc/mpp_service/rkvenc/clk_core
 
 	export mediaserver_log_level=2
+	rkmedia_vi_rockx_vo_test > /dev/kmsg 2>&1 &
 	mediaserver -a -d -c /usr/share/mediaserver/tb.conf > /dev/kmsg 2>&1 &
 	auto_poweroff.sh &
 }
