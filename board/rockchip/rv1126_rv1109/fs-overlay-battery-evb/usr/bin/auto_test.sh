@@ -11,7 +11,9 @@ echo "-------------------------------------------"
 
 echo "============================================"
 echo "开始三秒录音测试"
-arecord -D hw:1,0 -f S16_LE /tmp/test.wav -d 5 -r 16000 -c 2
+arecord -D hw:1,0 -f S16_LE /tmp/test.wav -d 3 -r 16000 -c 2 &
+aplay /etc/no_key.wav
+sleep 3
 echo "-------------------------------------------"
 
 echo "============================================"
@@ -20,23 +22,16 @@ aplay -Dhw:0,0 -r 16000 -c 2 -f S16_LE /tmp/test.wav
 echo "-------------------------------------------"
 
 echo "============================================"
-echo "开始LED闪烁测试"
+echo "开始LED闪烁和光敏测试，观测是否有变化"
+cat /sys/bus/iio/devices/iio:device1/in_illuminance_input
 echo 255 > /sys/class/leds/white/brightness
+cat /sys/bus/iio/devices/iio:device1/in_illuminance_input
 sleep 1
 echo 0 > /sys/class/leds/white/brightness
 sleep .5
 echo 255 > /sys/class/leds/white/brightness
 sleep .5
 echo 0 > /sys/class/leds/white/brightness
-echo "-------------------------------------------"
-
-echo "============================================"
-echo "接下来读三次光敏数值，请遮挡和移开，观测是否有变化"
-cat /sys/bus/iio/devices/iio:device1/in_illuminance_input
-sleep 1
-cat /sys/bus/iio/devices/iio:device1/in_illuminance_input
-sleep 1
-cat /sys/bus/iio/devices/iio:device1/in_illuminance_input
 echo "-------------------------------------------"
 
 echo "============================================"
@@ -61,6 +56,6 @@ echo "-------------------------------------------"
 echo "============================================"
 echo "接下来将连接wifi，默认连Rockchip，有可能连不上，请手动执行tb_start_wifi.sh wifi名称 wifi密码 true"
 sleep 2
-tb_start_wifi.sh Rockchip Wlan@83991906 true
+tb_start_wifi.sh Rockchip-guest RKguest2.4 true
 ping baidu.com -c 3
 echo "-------------------------------------------"
