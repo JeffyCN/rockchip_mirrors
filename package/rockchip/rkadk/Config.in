@@ -1,7 +1,16 @@
 config BR2_PACKAGE_RKADK
     bool "rkadk"
     select BR2_PACKAGE_RKMEDIA
-    select BR2_PACKAGE_ROCKIT
     select BR2_PACKAGE_INIPARSER
     help
       rkadk
+
+if BR2_PACKAGE_RKADK
+
+config BR2_PACKAGE_RKADK_ROCKIT
+    bool "rockit"
+    select BR2_PACKAGE_ROCKIT
+    help
+      enable rockit
+
+endif #BR2_PACKAGE_RKADK
