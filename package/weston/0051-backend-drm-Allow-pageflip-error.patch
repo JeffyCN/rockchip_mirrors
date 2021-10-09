@@ -1,4 +1,4 @@
-From 042767a362c40373203c274a4b40b9ff85f62c75 Mon Sep 17 00:00:00 2001
+From 5010c379e02f50a54e2fdd16e25e6db005659282 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 13 Aug 2021 10:10:01 +0800
 Subject: [PATCH 51/51] backend-drm: Allow pageflip error

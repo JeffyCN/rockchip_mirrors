@@ -1,4 +1,4 @@
-From d5aff544da195e5c5c1b73d45d829961836721d3 Mon Sep 17 00:00:00 2001
+From 79159372ae382e765d49693ed8f28edcdf3e2bda Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
 Subject: [PATCH 40/51] backend-drm: Support modifier
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 82 insertions(+), 10 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index cdf9b8f..87c60e6 100644
+index 8cc1083..33d158f 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1210,6 +1210,44 @@ err:
@@ -110,7 +110,7 @@ index cdf9b8f..87c60e6 100644
  	return NULL;
  }
  
-@@ -3721,9 +3776,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3723,9 +3778,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	compositor->backend = &b->base;
  
@@ -120,7 +120,7 @@ index cdf9b8f..87c60e6 100644
  	/* Check if we run drm-backend using weston-launch */
  	compositor->launcher = weston_launcher_connect(compositor, config->tty,
  						       seat_id, true);
-@@ -3757,15 +3809,36 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3759,15 +3811,36 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
@@ -159,7 +159,7 @@ index cdf9b8f..87c60e6 100644
  		}
  	}
  
-@@ -3779,9 +3852,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3781,9 +3854,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	weston_setup_vt_switch_bindings(compositor);
  

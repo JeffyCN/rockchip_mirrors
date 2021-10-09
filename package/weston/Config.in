@@ -35,11 +35,7 @@ choice
 
 config BR2_PACKAGE_WESTON_DEFAULT_DRM
 	bool "drm"
-	depends on BR2_PACKAGE_HAS_LIBEGL
 	select BR2_PACKAGE_WESTON_DRM
-
-comment "drm backend needs EGL driver"
-	depends on !BR2_PACKAGE_HAS_LIBEGL
 
 config BR2_PACKAGE_WESTON_DEFAULT_X11
 	bool "X11"
@@ -63,10 +59,6 @@ config BR2_PACKAGE_WESTON_DEFAULT_COMPOSITOR
 
 config BR2_PACKAGE_WESTON_DRM
 	bool "DRM compositor"
-	depends on BR2_PACKAGE_HAS_LIBEGL
-
-comment "DRM compositor needs an OpenGL EGL backend"
-	depends on !BR2_PACKAGE_HAS_LIBEGL
 
 config BR2_PACKAGE_WESTON_FBDEV
 	bool "fbdev compositor"
@@ -140,6 +132,6 @@ comment "demo clients needs an OpenGL ES provider, an OpenEGL-capable Wayland ba
 
 config BR2_PACKAGE_WESTON_DEFAULT_PIXMAN
 	bool "Use pixman-renderer by default"
-	default y if BR2_PACKAGE_MESA3D_OPENGL_EGL
+	default y if BR2_PACKAGE_MESA3D_OPENGL_EGL || !BR2_PACKAGE_HAS_LIBEGL
 
 endif
