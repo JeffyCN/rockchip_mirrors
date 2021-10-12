@@ -12,8 +12,13 @@ prompt "Platform type"
 
 config BR2_PACKAGE_RKIPC_RV1126
 	bool "Compile for rv1126"
-	select BR2_PACKAGE_RKMEDIA
+	select BR2_PACKAGE_ROCKIT
 	depends on BR2_PACKAGE_RKIPC
+
+config BR2_PACKAGE_RKIPC_RV1126_SNAPSHOT
+        bool "Compile for rv1126 snapshot"
+        select BR2_PACKAGE_RKMEDIA
+        depends on BR2_PACKAGE_RKIPC
 
 config BR2_PACKAGE_RKIPC_RK356X
 	bool "Compile for rk356x"
