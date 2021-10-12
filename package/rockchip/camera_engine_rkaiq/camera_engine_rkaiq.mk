@@ -60,6 +60,10 @@ else  \
 fi;
 endef
 
+define INSTALL_RKISP_PARSER_M32_CMD
+	$(INSTALL) -D -m  755 $(@D)/rkisp_parser_demo/bin/rkisp_parser_m32   $(HOST_DIR)/bin/rkisp_parser
+endef
+
 define INSTALL_RKISP_PARSER_M64_CMD
 	$(INSTALL) -D -m  755 $(@D)/rkisp_parser_demo/bin/rkisp_parser_m64   $(HOST_DIR)/bin/rkisp_parser
 endef
@@ -74,7 +78,11 @@ define IQFILES_CONVER_CMD
 	$(call conver_iqfiles, $(@D)/iqfiles)
 endef
 
-	CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += INSTALL_RKISP_PARSER_M64_CMD
+	ifeq ($(BR2_arm), y)
+		CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += INSTALL_RKISP_PARSER_M32_CMD
+	else
+		CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += INSTALL_RKISP_PARSER_M64_CMD
+	endif
 
 	ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE)),)
 		CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += IQFILE_CONVER_CMD
