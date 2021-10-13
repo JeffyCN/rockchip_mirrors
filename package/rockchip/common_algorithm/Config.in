@@ -21,16 +21,22 @@ config BR2_PACKAGE_COMMON_ALGORITHM_64
 endchoice
 
 config BR2_PACKAGE_COMMON_ALGORITHM_AEC_ANR_AGC
-	bool "audio 3a"
-	default n
+	bool "RKAP-3A"
+	default y
 	help
 	  Echo cancellation algorithm, applied to voice call scenarios
 
 config BR2_PACKAGE_COMMON_ALGORITHM_ANR
-	bool "audio anr"
+	bool "RKAP-ANR"
 	default n
 	help
 	  Automatic noise reduction algorithm, applied to recording scene
+
+config BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS
+	bool "RKAP-PLUS"
+	default n
+	help
+	  Audio 3A Algorithm Plus by Rockchip, applied talking scene
 
 config BR2_PACKAGE_COMMON_ALGORITHM_TWO_MIC_BEAMFORM
 	bool "beamforming of two mic"
