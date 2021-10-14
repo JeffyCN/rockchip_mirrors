@@ -6,11 +6,12 @@ config BR2_PACKAGE_RKADK
       rkadk
 
 if BR2_PACKAGE_RKADK
-
 config BR2_PACKAGE_RKADK_ROCKIT
     bool "rockit"
+    default n
     select BR2_PACKAGE_ROCKIT
+    select BR2_PACKAGE_ROCKIT_TGI
+    select BR2_PACKAGE_ROCKIT_MPI
     help
       enable rockit
-
 endif #BR2_PACKAGE_RKADK
