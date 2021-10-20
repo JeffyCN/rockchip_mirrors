@@ -798,21 +798,6 @@ main(int argc, char **argv) {
     }
     printf("\n");
 
-#if 0   //add for test fopen /userdata/* function.
-    FILE *hfile;
-    char* filename = "/userdata/test.txt";
-    char buffer[1024];
-    hfile = fopen(filename, "rb");
-    if (!hfile)
-    {
-        printf("fopen <%s> fail\n", filename);
-        return;
-    }
-
-    fread(buffer,1,sizeof(buffer),hfile);
-    printf("%s \n", buffer);
-#endif
-
     if (update_package) {
         // For backwards compatibility on the cache partition only, if
         // we're given an old 'root' path "CACHE:foo", change it to
@@ -827,9 +812,6 @@ main(int argc, char **argv) {
             update_package = modified_path;
         }
     }
-    printf("\n");
-
-    //property_list(print_property, NULL);
     printf("\n");
 
     int status = INSTALL_SUCCESS;
@@ -934,14 +916,14 @@ main(int argc, char **argv) {
 
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
         ui_print("update.img Installation done.\n");
-        ui_show_text(0);
+        //ui_show_text(0);
     }else if (sdupdate_package != NULL) {
         // update image from sdcard
-        #ifdef USE_RKUPDATE
+#ifdef USE_RKUPDATE
         const char* binary = "/usr/bin/rkupdate";
         printf(">>>sdboot update will update from %s\n", sdupdate_package);
         status = do_rk_update(binary, sdupdate_package);
-        #endif
+#endif
 
         #ifdef USE_UPDATEENGINE
 #define	FACTORY_FIRMWARE_IMAGE "/mnt/sdcard/out_image.img"
@@ -982,12 +964,12 @@ main(int argc, char **argv) {
             system("sh "CMD4RECOVERY_FILENAME);
         }
 
-        #endif
+#endif
 
         if (status == INSTALL_SUCCESS) {
             printf("update.img Installation success.\n");
             ui_print("update.img Installation success.\n");
-            ui_show_text(0);
+            //ui_show_text(0);
         }
 
     } else if (wipe_data) {
@@ -1011,7 +993,7 @@ main(int argc, char **argv) {
         }
 
         ui_print("resize oem done.\n");
-        ui_show_text(0);
+        //ui_show_text(0);
     }
     else if (pcba_test)
     {
@@ -1025,8 +1007,10 @@ main(int argc, char **argv) {
     }
 
     if (status != INSTALL_SUCCESS) ui_set_background(BACKGROUND_ICON_ERROR);
-    if (status != INSTALL_SUCCESS || ui_text_visible()) {
-        prompt_and_wait();
+    if (status != INSTALL_SUCCESS) {
+        printf("\n Install fail! \n");
+        if (!bSDBootUpdate && ui_text_visible())
+            prompt_and_wait();
     }
 
     if (sdupdate_package != NULL && bSDBootUpdate) {
@@ -1052,6 +1036,7 @@ main(int argc, char **argv) {
     finish_recovery(send_intent);
     ui_print("Rebooting...\n");
     printf("Reboot...\n");
+    ui_show_text(0);
     fflush(stdout);
     sync();
     reboot(RB_AUTOBOOT);
