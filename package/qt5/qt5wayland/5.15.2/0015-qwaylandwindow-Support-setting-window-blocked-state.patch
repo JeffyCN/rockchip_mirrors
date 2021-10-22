@@ -1,0 +1,69 @@
+From 97cc0dee8195d01e6beda3da38095cad6afd2c56 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 22 Oct 2021 17:18:40 +0800
+Subject: [PATCH 15/15] qwaylandwindow: Support setting window blocked state
+
+Support setting window blocked state through app_id, for example:
+app_id = "flags=blocked"
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ src/client/qwaylandwindow.cpp | 20 ++++++++++++++++++++
+ src/client/qwaylandwindow_p.h |  3 +++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
+index 88a3683..7c6603f 100644
+--- a/src/client/qwaylandwindow.cpp
++++ b/src/client/qwaylandwindow.cpp
+@@ -509,6 +509,26 @@ void QWaylandWindow::setMask(const QRegion &mask)
+     mSurface->commit();
+ }
+ 
++bool QWaylandWindow::windowEvent(QEvent *event)
++{
++    switch (event->type()) {
++    case QEvent::WindowBlocked:
++    case QEvent::WindowUnblocked:
++        {
++            bool blocked = event->type() == QEvent::WindowBlocked;
++            const char *str = blocked ? "flags=blocked" : "flags=-blocked";
++
++            // HACK: Set window flags through app id
++            mShellSurface->setAppId(QLatin1String(str));
++        }
++        break;
++    default:
++        break;
++    }
++
++    return QPlatformWindow::windowEvent(event);
++}
++
+ void QWaylandWindow::applyConfigureWhenPossible()
+ {
+     QMutexLocker resizeLocker(&mResizeLock);
+diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
+index 01337cf..a6acb9d 100644
+--- a/src/client/qwaylandwindow_p.h
++++ b/src/client/qwaylandwindow_p.h
+@@ -154,6 +154,8 @@ public:
+ 
+     void setMask(const QRegion &region) override;
+ 
++    bool windowEvent(QEvent *event) override;
++
+     int scale() const;
+     qreal devicePixelRatio() const override;
+ 
+@@ -278,6 +280,7 @@ private:
+     void handleScreensChanged();
+     void sendRecursiveExposeEvent();
+ 
++    bool mBlocked = false;
+     bool mInResizeFromApplyConfigure = false;
+     bool lastVisible = false;
+     QRect mLastExposeGeometry;
+-- 
+2.20.1
+

@@ -1,7 +1,7 @@
-From 3a4703900364607d895b2c4743d96966ce1f69e9 Mon Sep 17 00:00:00 2001
+From 6fae4332c12e1163aacdc5c58e7f34ad2586ffaa Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:28:29 +0800
-Subject: [PATCH 18/24] qwaylandwindow: Support setting window activate
+Subject: [PATCH 10/15] qwaylandwindow: Support setting window activate
 
 Support setting window activate through app_id, for example:
 app_id = "requests=activate"
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 0ef50654..0f6377b5 100644
+index 3310a2f..8a5484d 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -1012,7 +1012,13 @@ void QWaylandWindow::restoreMouseCursor(QWaylandInputDevice *device)
+@@ -1059,7 +1059,13 @@ void QWaylandWindow::restoreMouseCursor(QWaylandInputDevice *device)
  
  void QWaylandWindow::requestActivateWindow()
  {
@@ -29,7 +29,7 @@ index 0ef50654..0f6377b5 100644
 +    mShellSurface->setAppId(QLatin1String("requests=activate"));
  }
  
- void QWaylandWindow::unfocus()
+ bool QWaylandWindow::isExposed() const
 -- 
 2.20.1
 

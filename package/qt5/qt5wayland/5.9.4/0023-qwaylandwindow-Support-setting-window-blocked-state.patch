@@ -1,0 +1,69 @@
+From 434a5a28f7eba101881651dfaf093d70c408810a Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 22 Oct 2021 17:18:40 +0800
+Subject: [PATCH 23/23] qwaylandwindow: Support setting window blocked state
+
+Support setting window blocked state through app_id, for example:
+app_id = "flags=blocked"
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ src/client/qwaylandwindow.cpp | 20 ++++++++++++++++++++
+ src/client/qwaylandwindow_p.h |  3 +++
+ 2 files changed, 23 insertions(+)
+
+diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
+index 25413841..229907e7 100644
+--- a/src/client/qwaylandwindow.cpp
++++ b/src/client/qwaylandwindow.cpp
+@@ -464,6 +464,26 @@ void QWaylandWindow::setMask(const QRegion &mask)
+     wl_surface::commit();
+ }
+ 
++void QWaylandWindow::windowEvent(QEvent *event)
++{
++    switch (event->type()) {
++    case QEvent::WindowBlocked:
++    case QEvent::WindowUnblocked:
++        {
++            bool blocked = event->type() == QEvent::WindowBlocked;
++            const char *str = blocked ? "flags=blocked" : "flags=-blocked";
++
++            // HACK: Set window flags through app id
++            mShellSurface->setAppId(QLatin1String(str));
++        }
++        break;
++    default:
++        break;
++    }
++
++    QPlatformWindow::windowEvent(event);
++}
++
+ void QWaylandWindow::configure(uint32_t edges, int32_t width, int32_t height)
+ {
+     QMutexLocker resizeLocker(&mResizeLock);
+diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
+index 0c0bee61..9615b734 100644
+--- a/src/client/qwaylandwindow_p.h
++++ b/src/client/qwaylandwindow_p.h
+@@ -159,6 +159,8 @@ public:
+ 
+     void setMask(const QRegion &region) override;
+ 
++    void windowEvent(QEvent *event) override;
++
+     int scale() const;
+     qreal devicePixelRatio() const override;
+ 
+@@ -270,6 +272,7 @@ private:
+ 
+     void handleMouseEventWithDecoration(QWaylandInputDevice *inputDevice, const QWaylandPointerEvent &e);
+ 
++    bool mBlocked = false;
+     bool mUpdateRequested;
+     bool lastVisible = false;
+ 
+-- 
+2.20.1
+

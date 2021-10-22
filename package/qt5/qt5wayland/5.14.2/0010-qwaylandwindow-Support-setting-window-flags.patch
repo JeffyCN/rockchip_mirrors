@@ -1,7 +1,7 @@
-From f9df51c94d089e0ef426e62eb473c37d2236cb98 Mon Sep 17 00:00:00 2001
+From f78fb4ee47b474738802c6ce2399398b7a9d8d52 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 09:12:08 +0800
-Subject: [PATCH 15/24] qwaylandwindow: Support setting window flags
+Subject: [PATCH 10/18] qwaylandwindow: Support setting window flags
 
 Support setting window flags through app_id, for example:
 app_id = "flags=stay-on-top|stay-on-bottom|no-focus"
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 15 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 2bde0e93..0ef50654 100644
+index 1d2352f1d..32720e2f1 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
 @@ -754,8 +754,22 @@ void QWaylandWindow::setWindowState(Qt::WindowStates states)
