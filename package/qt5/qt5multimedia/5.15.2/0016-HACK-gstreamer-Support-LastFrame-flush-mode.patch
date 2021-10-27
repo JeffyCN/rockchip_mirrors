@@ -1,7 +1,7 @@
-From fb5b4793db2f03456464840125538b5f9aaad490 Mon Sep 17 00:00:00 2001
+From 19341fd8f1cc1509b36e794241320d9631ad6144 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 06:32:34 +0800
-Subject: [PATCH 16/16] HACK: gstreamer: Support LastFrame flush mode
+Subject: [PATCH 16/17] HACK: gstreamer: Support LastFrame flush mode
 
 Hold last frame for VideoOutput.LastFrame.
 
@@ -56,10 +56,10 @@ index cc0681b..b0a37f8 100755
          m_renderer->stopRenderer();
  
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index 900a83a..a4a68de 100644
+index 3a00663..1d657fd 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
-@@ -694,6 +694,10 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -695,6 +695,10 @@ void QGstreamerVideoOverlay::updateIsActive()
  
      bool newIsActive = (state == GST_STATE_PLAYING || (state == GST_STATE_PAUSED && showPreroll));
  

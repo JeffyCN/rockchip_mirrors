@@ -1,16 +1,16 @@
-From 0b52bec38d7fc4be4e6ebc70132176255b023e1a Mon Sep 17 00:00:00 2001
+From fb571df355404e7acf6912d13bf7d8ef94cb0822 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Nov 2018 21:31:49 +0800
-Subject: [PATCH 03/12] gsttools: videooverlay: Support waylandsink and kmssink
+Subject: [PATCH 03/14] gsttools: videooverlay: Support waylandsink and kmssink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- src/gsttools/qgstreamervideooverlay.cpp       | 163 ++++++++++++++----
+ src/gsttools/qgstreamervideooverlay.cpp       | 164 ++++++++++++++----
  .../qgstreamervideooverlay_p.h                |   2 +
- 2 files changed, 135 insertions(+), 30 deletions(-)
+ 2 files changed, 136 insertions(+), 30 deletions(-)
 
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index 6ad70fd..a73ddfd 100644
+index 6ad70fd..f4485e7 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
 @@ -40,7 +40,11 @@
@@ -162,7 +162,7 @@ index 6ad70fd..a73ddfd 100644
  }
  
  void QGstreamerVideoOverlay::expose()
-@@ -246,24 +330,42 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
+@@ -246,24 +330,43 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
          h = rect.height();
      }
  
@@ -208,6 +208,7 @@ index 6ad70fd..a73ddfd 100644
 +            gst_structure_set(gst_context_writable_structure(context),
 +                    "handle", G_TYPE_POINTER, handle, NULL);
 +            gst_element_set_context(GST_ELEMENT(GST_MESSAGE_SRC(gm)), context);
++            gst_context_unref(context);
 +            return true;
 +        }
 +    }
@@ -217,7 +218,7 @@ index 6ad70fd..a73ddfd 100644
  #if !GST_CHECK_VERSION(1,0,0)
      if (gm && (GST_MESSAGE_TYPE(gm) == GST_MESSAGE_ELEMENT) &&
              gst_structure_has_name(gm->structure, "prepare-xwindow-id")) {
-@@ -321,6 +423,7 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -321,6 +424,7 @@ void QGstreamerVideoOverlay::updateIsActive()
      if (newIsActive != m_isActive) {
          m_isActive = newIsActive;
          emit activeChanged();

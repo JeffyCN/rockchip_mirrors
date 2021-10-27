@@ -1,17 +1,17 @@
-From 04e755ca8a4218b79e6cb8a0da30c09de307356b Mon Sep 17 00:00:00 2001
+From 94a64dc350bbf8f06bd0c2c7bd9930f7661eb6cd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Nov 2018 21:31:49 +0800
-Subject: [PATCH 04/13] gsttools: videooverlay: Support waylandsink and kmssink
+Subject: [PATCH 04/16] gsttools: videooverlay: Support waylandsink and kmssink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- src/gsttools/qgstreamervideooverlay.cpp       | 155 +++++++++++++++---
+ src/gsttools/qgstreamervideooverlay.cpp       | 156 +++++++++++++++---
  src/gsttools/qgstreamervideowidget.cpp        |  15 +-
  .../qgstreamervideooverlay_p.h                |   2 +
- 3 files changed, 143 insertions(+), 29 deletions(-)
+ 3 files changed, 144 insertions(+), 29 deletions(-)
 
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index 1f3e285..34ece6b 100644
+index 1f3e2854..74faf72e 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
 @@ -40,7 +40,11 @@
@@ -155,7 +155,7 @@ index 1f3e285..34ece6b 100644
  }
  
  void QGstreamerVideoOverlay::expose()
-@@ -490,24 +574,42 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
+@@ -490,24 +574,43 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
          h = rect.height();
      }
  
@@ -201,6 +201,7 @@ index 1f3e285..34ece6b 100644
 +            gst_structure_set(gst_context_writable_structure(context),
 +                    "handle", G_TYPE_POINTER, handle, NULL);
 +            gst_element_set_context(GST_ELEMENT(GST_MESSAGE_SRC(gm)), context);
++            gst_context_unref(context);
 +            return true;
 +        }
 +    }
@@ -210,7 +211,7 @@ index 1f3e285..34ece6b 100644
  #if !GST_CHECK_VERSION(1,0,0)
      if (gm && (GST_MESSAGE_TYPE(gm) == GST_MESSAGE_ELEMENT) &&
              gst_structure_has_name(gm->structure, "prepare-xwindow-id")) {
-@@ -565,6 +667,7 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -565,6 +668,7 @@ void QGstreamerVideoOverlay::updateIsActive()
      if (newIsActive != m_isActive) {
          m_isActive = newIsActive;
          emit activeChanged();
@@ -219,7 +220,7 @@ index 1f3e285..34ece6b 100644
  }
  
 diff --git a/src/gsttools/qgstreamervideowidget.cpp b/src/gsttools/qgstreamervideowidget.cpp
-index 0e1940e..f243084 100644
+index 0e1940e3..f243084c 100644
 --- a/src/gsttools/qgstreamervideowidget.cpp
 +++ b/src/gsttools/qgstreamervideowidget.cpp
 @@ -43,10 +43,11 @@
@@ -269,7 +270,7 @@ index 0e1940e..f243084 100644
                  m_videoOverlay.setWindowHandle(m_windowId = newWId);
          }
 diff --git a/src/multimedia/gsttools_headers/qgstreamervideooverlay_p.h b/src/multimedia/gsttools_headers/qgstreamervideooverlay_p.h
-index f2ca8a2..32b3d93 100644
+index f2ca8a23..32b3d939 100644
 --- a/src/multimedia/gsttools_headers/qgstreamervideooverlay_p.h
 +++ b/src/multimedia/gsttools_headers/qgstreamervideooverlay_p.h
 @@ -54,6 +54,7 @@
