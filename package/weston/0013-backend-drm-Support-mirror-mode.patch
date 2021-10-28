@@ -1,7 +1,7 @@
-From 16f109aea816562fd0c16ee86f68f0aca880e234 Mon Sep 17 00:00:00 2001
+From 8392b887a4a84e31d0dd304b484372434dc2832e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 13/51] backend-drm: Support mirror mode
+Subject: [PATCH 13/52] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -11,14 +11,14 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                 |   3 +
  include/libweston/libweston.h         |   2 +
  libweston/backend-drm/drm-gbm.c       |   4 +-
- libweston/backend-drm/drm-internal.h  |   6 +
- libweston/backend-drm/drm.c           | 293 ++++++++++++++++++++++++--
+ libweston/backend-drm/drm-internal.h  |  10 +
+ libweston/backend-drm/drm.c           | 338 +++++++++++++++++++++++++-
  libweston/backend-drm/meson.build     |   3 +-
  libweston/backend-drm/state-propose.c |  22 +-
  libweston/compositor.c                |   2 +-
  libweston/input.c                     |   7 +
  meson.build                           |   8 +
- 10 files changed, 332 insertions(+), 18 deletions(-)
+ 10 files changed, 381 insertions(+), 18 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
 index 0908763..27eb99f 100644
@@ -63,7 +63,7 @@ index 324c2a8..a0ab85e 100644
  		output->scanout_plane->state_cur =
  			drm_plane_state_alloc(NULL, output->scanout_plane);
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index f72cd2a..1e163c3 100644
+index f72cd2a..a2bf8a6 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -321,6 +321,8 @@ struct drm_backend {
@@ -75,7 +75,18 @@ index f72cd2a..1e163c3 100644
  };
  
  struct drm_mode {
-@@ -558,6 +560,10 @@ struct drm_output {
+@@ -545,6 +547,10 @@ struct drm_output {
+ 	int current_image;
+ 	pixman_region32_t previous_damage;
+ 
++	/* Wrap fb for scale/rotate usage */
++	struct drm_fb *wrap[2];
++	int next_wrap;
++
+ 	struct vaapi_recorder *recorder;
+ 	struct wl_listener recorder_frame_listener;
+ 
+@@ -558,6 +564,10 @@ struct drm_output {
  
  	/* The dummy framebuffer for SET_CRTC. */
  	struct drm_fb *fb_dummy;
@@ -87,7 +98,7 @@ index f72cd2a..1e163c3 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index bdb8572..89d33ca 100644
+index bdb8572..02a1329 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -66,6 +66,11 @@
@@ -277,7 +288,7 @@ index bdb8572..89d33ca 100644
  }
  
  static void
-@@ -395,6 +545,28 @@ drm_output_render_pixman(struct drm_output_state *state,
+@@ -395,6 +545,69 @@ drm_output_render_pixman(struct drm_output_state *state,
  	return drm_fb_ref(output->dumb[output->current_image]);
  }
  
@@ -303,10 +314,51 @@ index bdb8572..89d33ca 100644
 +	return scanout_state->fb;
 +}
 +
++static void
++drm_output_try_destroy_wrap_fb(struct drm_output *output)
++{
++	if (output->wrap[0]) {
++		drm_fb_unref(output->wrap[0]);
++		output->wrap[0] = NULL;
++	}
++
++	if (output->wrap[1]) {
++		drm_fb_unref(output->wrap[1]);
++		output->wrap[1] = NULL;
++	}
++
++	output->next_wrap = 0;
++}
++
++static struct drm_fb *
++drm_output_get_wrap_fb(struct drm_backend *b, struct drm_output *output,
++		       int width, int height)
++{
++	struct drm_fb *fb = output->wrap[output->next_wrap];
++
++	if (fb) {
++		if (fb->width == width && fb->height == height)
++			goto out;
++
++		drm_fb_unref(fb);
++	}
++
++	fb = drm_fb_create_dumb(b, width, height, output->gbm_format);
++	if (!fb) {
++		weston_log("failed to create wrap fb\n");
++		return NULL;
++	}
++
++	output->wrap[output->next_wrap] = fb;
++out:
++	output->next_wrap ^= 1;
++	return drm_fb_ref(fb);
++}
++
  void
  drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  {
-@@ -406,10 +578,13 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -406,10 +619,13 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  		&scanout_plane->props[WDRM_PLANE_FB_DAMAGE_CLIPS];
  	struct drm_backend *b = to_drm_backend(c);
  	struct drm_mode *mode;
@@ -321,7 +373,7 @@ index bdb8572..89d33ca 100644
  
  	/* If we already have a client buffer promoted to scanout, then we don't
  	 * want to render. */
-@@ -418,6 +593,29 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -418,6 +634,29 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  	if (scanout_state->fb)
  		return;
  
@@ -351,7 +403,7 @@ index bdb8572..89d33ca 100644
  	if (!pixman_region32_not_empty(damage) &&
  	    scanout_plane->state_cur->fb &&
  	    (scanout_plane->state_cur->fb->type == BUFFER_GBM_SURFACE ||
-@@ -433,24 +631,83 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -433,24 +672,85 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  		fb = drm_output_render_gl(state, damage);
  	}
  
@@ -398,14 +450,14 @@ index bdb8572..89d33ca 100644
 +	scaling = sw != dw || sh != dh;
 +
 +	if (rotation || (scaling && !output->scanout_plane->can_scale)) {
-+		struct drm_fb *new_fb =
-+			drm_fb_create_dumb(b, dw, dh, output->gbm_format);
-+		if (!new_fb) {
-+			weston_log("failed to create fb\n");
++		struct drm_fb *wrap_fb =
++			drm_output_get_wrap_fb(b, output, dw, dh);
++		if (!wrap_fb) {
++			weston_log("failed to get wrap fb\n");
 +			goto err;
 +		}
 +
-+		if (drm_copy_fb(fb, new_fb, rotation) < 0) {
++		if (drm_copy_fb(fb, wrap_fb, rotation) < 0) {
 +			weston_log("failed to copy fb\n");
 +			goto err;
 +		}
@@ -415,7 +467,9 @@ index bdb8572..89d33ca 100644
 +		sh = dh;
 +
 +		drm_fb_unref(fb);
-+		fb = new_fb;
++		fb = wrap_fb;
++	} else {
++		drm_output_try_destroy_wrap_fb(output);
 +	}
 +
  	scanout_state->fb = fb;
@@ -444,7 +498,7 @@ index bdb8572..89d33ca 100644
  
  	pixman_region32_subtract(&c->primary_plane.damage,
  				 &c->primary_plane.damage, damage);
-@@ -492,6 +749,12 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -492,6 +792,12 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  				  &scanout_state->damage_blob_id);
  
  	pixman_region32_fini(&scanout_damage);
@@ -457,7 +511,7 @@ index bdb8572..89d33ca 100644
  }
  
  static int
-@@ -1334,8 +1597,8 @@ drm_output_fini_pixman(struct drm_output *output)
+@@ -1334,8 +1640,8 @@ drm_output_fini_pixman(struct drm_output *output)
  	/* Destroying the Pixman surface will destroy all our buffers,
  	 * regardless of refcount. Ensure we destroy them here. */
  	if (!b->shutting_down &&
@@ -468,7 +522,16 @@ index bdb8572..89d33ca 100644
  		drm_plane_state_free(output->scanout_plane->state_cur, true);
  		output->scanout_plane->state_cur =
  			drm_plane_state_alloc(NULL, output->scanout_plane);
-@@ -3034,6 +3297,12 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -1915,6 +2221,8 @@ drm_output_destroy(struct weston_output *base)
+ 	assert(!output->state_last);
+ 	drm_output_state_free(output->state_cur);
+ 
++	drm_output_try_destroy_wrap_fb(output);
++
+ 	free(output);
+ }
+ 
+@@ -3034,6 +3342,12 @@ drm_backend_create(struct weston_compositor *compositor,
  	if (buf)
  		sscanf(buf, "%dx%d", &b->virtual_width, &b->virtual_height);
  
