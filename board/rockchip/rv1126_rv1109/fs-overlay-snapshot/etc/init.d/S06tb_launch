@@ -5,13 +5,13 @@ lunch_start()
 {
 	insmod /lib/modules/dw_mmc-rockchip.ko &
 	echo "Now we are ready to start your first application" > /dev/kmsg
-	rkmedia_snapshot_test -s /dev/v4l-subdev7 -d /dev/video34 -a /etc/iqfiles -n 1 > /dev/kmsg 2>&1 &
+	rkipc -a /etc/iqfiles -d /dev/video34 -s /dev/v4l-subdev7 &
 }
 
 lunch_stop()
 {
 	echo "All applications have been stopped"
-	killall rkmedia_snapshot_test
+	killall -9 rkipc
 }
 
 case "$1" in
