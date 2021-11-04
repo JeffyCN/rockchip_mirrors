@@ -17,7 +17,7 @@
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
-#include "rk356x_arm64.config"
+#include "rk3588_arm64.config"
 #include "test.config"
 BR2_PACKAGE_RKNPU=y
 BR2_PACKAGE_RKNPU_USE_RKNN_API=y
