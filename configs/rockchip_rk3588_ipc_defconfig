@@ -8,7 +8,7 @@
 #include "video_mpp.config"
 #include "gpu_dummy.config"
 #include "wifi.config"
-BR2_ROOTFS_OVERLAY="board/rockchip/orion/fs-overlay-ipc/"
+BR2_ROOTFS_OVERLAY="board/rockchip/rk3588/fs-overlay-ipc/"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="isp21/ov5695_TongJu_CHT842-MD.json isp21/gc8034_RK-CMK-8M-2-v1_CK8401.json"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_RKISP_DEMO=y
 BR2_PACKAGE_GSTREAMER1_ROCKCHIP=y
