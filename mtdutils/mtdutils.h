@@ -19,7 +19,14 @@
 
 #include <sys/types.h>  // for size_t, etc.
 
-typedef struct MtdPartition MtdPartition;
+//typedef struct MtdPartition MtdPartition;
+typedef struct {
+    int device_index;
+    unsigned int size;
+    unsigned int erase_size;
+    char *name;
+} MtdPartition;
+
 
 int mtd_scan_partitions(void);
 

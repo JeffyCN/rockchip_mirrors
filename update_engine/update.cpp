@@ -22,6 +22,10 @@
 #include <errno.h>
 #include <libgen.h>
 
+extern "C" {
+    #include "../mtdutils/mtdutils.h"
+}
+
 #define	CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
 static char * _url = NULL;
 static char const * _save_path = NULL;
@@ -196,7 +200,19 @@ bool RK_ota_set_partition(int partition) {
                 if (strcmp(update_cmd[i].name, "parameter") == 0) {
                     sprintf(update_cmd[i].dest_path, "/dev/block/by-name/gpt");
                 } else {
-                    sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
+                    if (!isMtdDevice()) {
+                       sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
+                    } else {
+                       if ( update_cmd[i].need_update && (mtd_scan_partitions() > 0) ) {
+                          const MtdPartition *mtdp = mtd_find_partition_by_name(update_cmd[i].name);
+                          if (mtdp) {
+                             sprintf(update_cmd[i].dest_path, "/dev/mtd%d", mtdp->device_index);
+                             LOGI("need update %s ,.dest_path: %s.\n", update_cmd[i].name,update_cmd[i].dest_path);
+                          }
+                       } else {
+                          sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
+                       }
+                    }
                 }
             }
         }
