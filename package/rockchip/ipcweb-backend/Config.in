@@ -23,6 +23,8 @@ prompt "select main application"
 
 config BR2_PACKAGE_IPCWEB_BACKEND_USE_MEDIASERVER
 	bool "use mediaserver"
+	select BR2_PACKAGE_LIBRKDB
+	select BR2_PACKAGE_LIBGDBUS
 	select BR2_PACKAGE_LIBIPCPROTOCOL
 
 config BR2_PACKAGE_IPCWEB_BACKEND_USE_RKIPC
