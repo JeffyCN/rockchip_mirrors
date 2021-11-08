@@ -10,6 +10,9 @@ export GST_DEBUG_NO_COLOR=1
 # Skip it would bring better performance with frame dropping.
 # export KMSSINK_DISABLE_VSYNC=1
 
+# The waylandsink is async by default, which allows frame dropping.
+# export WAYLANDSINK_SYNC_FRAME=1
+
 # Put video surface above UI window in waylandsink.
 # export WAYLANDSINK_PLACE_ABOVE=1
 
