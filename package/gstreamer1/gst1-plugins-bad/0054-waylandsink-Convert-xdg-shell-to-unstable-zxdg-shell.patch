@@ -1,7 +1,7 @@
-From 8d5d688a9f5dc466acc506ba5a296a4ceac73617 Mon Sep 17 00:00:00 2001
+From 7690722c44f2c7434bb54406b7c76bc8953220c1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 26 Nov 2020 11:32:16 +0800
-Subject: [PATCH 50/68] waylandsink: Convert xdg shell to unstable zxdg shell
+Subject: [PATCH 54/73] waylandsink: Convert xdg shell to unstable zxdg shell
  v6
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
@@ -11,11 +11,11 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  ext/wayland/wldisplay.c | 24 +++++++++----------
  ext/wayland/wldisplay.h |  4 ++--
  ext/wayland/wlwindow.c  | 51 +++++++++++++++++++++--------------------
- ext/wayland/wlwindow.h  |  4 ++--
- 6 files changed, 47 insertions(+), 45 deletions(-)
+ ext/wayland/wlwindow.h  |  1 +
+ 6 files changed, 46 insertions(+), 43 deletions(-)
 
 diff --git a/ext/wayland/Makefile.am b/ext/wayland/Makefile.am
-index 95bb97e..97fdd81 100644
+index 95bb97e7f..97fdd81f9 100644
 --- a/ext/wayland/Makefile.am
 +++ b/ext/wayland/Makefile.am
 @@ -7,8 +7,8 @@ BUILT_SOURCES = \
@@ -39,7 +39,7 @@ index 95bb97e..97fdd81 100644
  libgstwaylandsink_la_CFLAGS = \
  	$(GST_PLUGINS_BAD_CFLAGS) \
 diff --git a/ext/wayland/meson.build b/ext/wayland/meson.build
-index 598536b..db06f9d 100644
+index 598536b29..db06f9d61 100644
 --- a/ext/wayland/meson.build
 +++ b/ext/wayland/meson.build
 @@ -17,7 +17,8 @@ if use_wayland
@@ -53,7 +53,7 @@ index 598536b..db06f9d 100644
      protocols_files = []
  
 diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
-index 6cbdc0c..714bfe1 100644
+index 6cbdc0cce..714bfe1cd 100644
 --- a/ext/wayland/wldisplay.c
 +++ b/ext/wayland/wldisplay.c
 @@ -96,8 +96,8 @@ gst_wl_display_finalize (GObject * gobject)
@@ -117,7 +117,7 @@ index 6cbdc0c..714bfe1 100644
    }
  
 diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
-index f2025a6..365031d 100644
+index f2025a6a0..365031d78 100644
 --- a/ext/wayland/wldisplay.h
 +++ b/ext/wayland/wldisplay.h
 @@ -24,7 +24,7 @@
@@ -139,7 +139,7 @@ index f2025a6..365031d 100644
    struct wl_shm *shm;
    struct wp_viewporter *viewporter;
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index d5e1c8c..35e2b71 100644
+index 89b104f00..6f929dbb2 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -46,7 +46,7 @@ G_DEFINE_TYPE (GstWlWindow, gst_wl_window, G_TYPE_OBJECT);
@@ -208,7 +208,7 @@ index d5e1c8c..35e2b71 100644
    handle_xdg_surface_configure,
  };
  
-@@ -166,9 +167,9 @@ gst_wl_window_finalize (GObject * gobject)
+@@ -163,9 +164,9 @@ gst_wl_window_finalize (GObject * gobject)
      wl_shell_surface_destroy (self->wl_shell_surface);
  
    if (self->xdg_toplevel)
@@ -220,7 +220,7 @@ index d5e1c8c..35e2b71 100644
  
    if (self->video_viewport)
      wp_viewport_destroy (self->video_viewport);
-@@ -246,11 +247,11 @@ gst_wl_window_ensure_fullscreen (GstWlWindow * window, gboolean fullscreen)
+@@ -242,11 +243,11 @@ gst_wl_window_ensure_fullscreen (GstWlWindow * window, gboolean fullscreen)
    if (!window)
      return;
  
@@ -235,7 +235,7 @@ index d5e1c8c..35e2b71 100644
    } else {
      if (fullscreen)
        wl_shell_surface_set_fullscreen (window->wl_shell_surface,
-@@ -269,24 +270,24 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+@@ -265,24 +266,24 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
    window = gst_wl_window_new_internal (display, render_lock);
  
    /* Check which protocol we will use (in order of preference) */
@@ -265,7 +265,7 @@ index d5e1c8c..35e2b71 100644
          &xdg_toplevel_listener, window);
  
      gst_wl_window_ensure_fullscreen (window, fullscreen);
-@@ -317,14 +318,14 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+@@ -313,14 +314,14 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
          window->area_surface, ZWP_FULLSCREEN_SHELL_V1_PRESENT_METHOD_ZOOM,
          NULL);
    } else {
@@ -283,7 +283,7 @@ index d5e1c8c..35e2b71 100644
      /* set the initial size to be the same as the reported video size */
      gint width =
          gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
-@@ -382,7 +383,7 @@ gst_wl_window_is_toplevel (GstWlWindow * window)
+@@ -378,7 +379,7 @@ gst_wl_window_is_toplevel (GstWlWindow * window)
  {
    g_return_val_if_fail (window != NULL, FALSE);
  
@@ -293,20 +293,17 @@ index d5e1c8c..35e2b71 100644
    else
      return (window->wl_shell_surface != NULL);
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
-index cecbda6..47e86e7 100644
+index c3f017216..cecbda664 100644
 --- a/ext/wayland/wlwindow.h
 +++ b/ext/wayland/wlwindow.h
-@@ -53,8 +53,8 @@ struct _GstWlWindow
-   struct wl_subsurface *video_subsurface;
-   struct wp_viewport *video_viewport;
+@@ -55,6 +55,7 @@ struct _GstWlWindow
    struct wl_shell_surface *wl_shell_surface;
--  struct xdg_surface *xdg_surface;
--  struct xdg_toplevel *xdg_toplevel;
-+  struct zxdg_surface_v6 *xdg_surface;
-+  struct zxdg_toplevel_v6 *xdg_toplevel;
-   struct wl_callback *callback;
+   struct xdg_surface *xdg_surface;
+   struct xdg_toplevel *xdg_toplevel;
++  struct wl_callback *callback;
    gboolean configured;
    GCond configure_cond;
+   GMutex configure_mutex;
 -- 
 2.20.1
 

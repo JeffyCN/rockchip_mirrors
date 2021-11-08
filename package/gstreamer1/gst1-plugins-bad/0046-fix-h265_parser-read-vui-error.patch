@@ -1,14 +1,14 @@
-From dfad2d7c1c1bcb8465a30bab71f06536f7fc4119 Mon Sep 17 00:00:00 2001
+From 68d2f641a4b2da594cdfe4c352008a2be72e9464 Mon Sep 17 00:00:00 2001
 From: "james.lin" <james.lin@rock-chips.com>
 Date: Mon, 9 Apr 2018 15:32:21 +0800
-Subject: [PATCH 42/68] fix h265_parser read vui error
+Subject: [PATCH 46/73] fix h265_parser read vui error
 
 ---
  gst-libs/gst/codecparsers/gsth265parser.c | 10 +++++-----
  1 file changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/gst-libs/gst/codecparsers/gsth265parser.c b/gst-libs/gst/codecparsers/gsth265parser.c
-index cf7f71f..3e63aa0 100644
+index cf7f71f5d..3e63aa081 100644
 --- a/gst-libs/gst/codecparsers/gsth265parser.c
 +++ b/gst-libs/gst/codecparsers/gsth265parser.c
 @@ -525,11 +525,11 @@ gst_h265_parse_vui_parameters (GstH265SPS * sps, NalReader * nr)

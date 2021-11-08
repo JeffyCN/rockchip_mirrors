@@ -1,7 +1,7 @@
-From d28609fbbf54a44db969d468406f21f517e10c49 Mon Sep 17 00:00:00 2001
+From 4323eefec025171f6c26aba0dd7abcbbfbed3388 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 8 Jun 2021 09:09:38 +0800
-Subject: [PATCH] waylandsink: Use create_immed to create dmabuf
+Subject: [PATCH 73/73] waylandsink: Use create_immed to create dmabuf
 
 The async creation has lots of issues when the device overloaded.
 
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 2 insertions(+), 57 deletions(-)
 
 diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
-index 714bfe1..3551097 100644
+index 714bfe1cd..355109716 100644
 --- a/ext/wayland/wldisplay.c
 +++ b/ext/wayland/wldisplay.c
 @@ -239,7 +239,7 @@ registry_handle_global (void *data, struct wl_registry *registry,
@@ -25,7 +25,7 @@ index 714bfe1..3551097 100644
    }
  }
 diff --git a/ext/wayland/wllinuxdmabuf.c b/ext/wayland/wllinuxdmabuf.c
-index 96487d1..2bfbca5 100644
+index 96487d142..2bfbca5db 100644
 --- a/ext/wayland/wllinuxdmabuf.c
 +++ b/ext/wayland/wllinuxdmabuf.c
 @@ -33,41 +33,9 @@ GST_DEBUG_CATEGORY_EXTERN (gstwayland_debug);

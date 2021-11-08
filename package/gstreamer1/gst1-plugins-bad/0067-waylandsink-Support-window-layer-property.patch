@@ -1,7 +1,7 @@
-From 66de3c99911cd6e7f97bbea96fec29eaead16e9a Mon Sep 17 00:00:00 2001
+From 36a9679bb0de77348f5ae8213b556bbe470b6566 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Mar 2021 10:15:51 +0800
-Subject: [PATCH 63/68] waylandsink: Support window layer property
+Subject: [PATCH 67/73] waylandsink: Support window layer property
 
 Support setting top|normal|bottom window layer.
 
@@ -17,7 +17,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 97 insertions(+), 5 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 0d11167..697c394 100644
+index 3ec20af63..55f4fc44b 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -63,6 +63,7 @@ enum
@@ -117,7 +117,7 @@ index 0d11167..697c394 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_LAST, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -717,8 +765,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -721,8 +769,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
      if (!sink->window) {
        /* if we were not provided a window, create one ourselves */
        sink->window = gst_wl_window_new_toplevel (sink->display,
@@ -129,7 +129,7 @@ index 0d11167..697c394 100644
            G_CALLBACK (on_window_closed), sink, 0);
      }
 diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
-index bcaadaf..8f4d2f1 100644
+index 194e5bc52..c5fdd5000 100644
 --- a/ext/wayland/gstwaylandsink.h
 +++ b/ext/wayland/gstwaylandsink.h
 @@ -62,6 +62,7 @@ struct _GstWaylandSink
@@ -141,10 +141,10 @@ index bcaadaf..8f4d2f1 100644
    gchar *display_name;
  
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index e361be1..6d5bc7c 100644
+index bee5b2a3d..c9eacc429 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
-@@ -241,6 +241,39 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
+@@ -237,6 +237,39 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
    return window;
  }
  
@@ -184,7 +184,7 @@ index e361be1..6d5bc7c 100644
  void
  gst_wl_window_ensure_fullscreen (GstWlWindow * window, gboolean fullscreen)
  {
-@@ -263,7 +296,7 @@ gst_wl_window_ensure_fullscreen (GstWlWindow * window, gboolean fullscreen)
+@@ -259,7 +292,7 @@ gst_wl_window_ensure_fullscreen (GstWlWindow * window, gboolean fullscreen)
  
  GstWlWindow *
  gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
@@ -193,7 +193,7 @@ index e361be1..6d5bc7c 100644
      GstVideoRectangle * render_rectangle)
  {
    GstWlWindow *window;
-@@ -292,6 +325,7 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+@@ -288,6 +321,7 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
          &xdg_toplevel_listener, window);
  
      gst_wl_window_ensure_fullscreen (window, fullscreen);
@@ -202,7 +202,7 @@ index e361be1..6d5bc7c 100644
      /* Finally, commit the xdg_surface state as toplevel */
      window->configured = FALSE;
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
-index 759a078..562633c 100644
+index 02608a235..bc7acd9b4 100644
 --- a/ext/wayland/wlwindow.h
 +++ b/ext/wayland/wlwindow.h
 @@ -82,11 +82,20 @@ struct _GstWlWindowClass

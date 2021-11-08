@@ -1,7 +1,7 @@
-From d62f443292ea31673776e2101f681b502dec14a8 Mon Sep 17 00:00:00 2001
+From c53be69e64b0e1b143afe088beddb9a5d9c066b7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 26 Mar 2021 02:32:27 +0800
-Subject: [PATCH 65/68] waylandsink: Support window alpha property
+Subject: [PATCH 69/73] waylandsink: Support window alpha property
 
 Tested with:
 gst-launch-1.0 videotestsrc ! waylandsink alpha=0.5
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 62 insertions(+), 15 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 697c394..a8ae51c 100644
+index 55f4fc44b..4fb5d0eaa 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -64,6 +64,7 @@ enum
@@ -89,7 +89,7 @@ index 697c394..a8ae51c 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_LAST, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -767,6 +796,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -771,6 +800,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
        sink->window = gst_wl_window_new_toplevel (sink->display,
            &sink->video_info, sink->fullscreen, sink->layer,
            &sink->render_lock, &sink->render_rectangle);
@@ -98,7 +98,7 @@ index 697c394..a8ae51c 100644
        g_signal_connect_object (sink->window, "closed",
            G_CALLBACK (on_window_closed), sink, 0);
      }
-@@ -1017,6 +1048,7 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
+@@ -1022,6 +1053,7 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
        } else {
          sink->window = gst_wl_window_new_in_surface (sink->display, surface,
              &sink->render_lock);
@@ -107,7 +107,7 @@ index 697c394..a8ae51c 100644
          if (sink->last_buffer) {
            /* Resend video info to force resize video surface */
 diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
-index 8f4d2f1..966830d 100644
+index c5fdd5000..6fa4de344 100644
 --- a/ext/wayland/gstwaylandsink.h
 +++ b/ext/wayland/gstwaylandsink.h
 @@ -63,6 +63,7 @@ struct _GstWaylandSink
@@ -119,7 +119,7 @@ index 8f4d2f1..966830d 100644
    gchar *display_name;
  
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index 202034f..bb032b6 100644
+index 77da03873..fffd3992a 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -24,6 +24,7 @@
@@ -130,7 +130,7 @@ index 202034f..bb032b6 100644
  #include <stdlib.h>
  
  #include "wlwindow.h"
-@@ -242,36 +243,48 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
+@@ -238,36 +239,48 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
  }
  
  static void
@@ -195,7 +195,7 @@ index 202034f..bb032b6 100644
  
  void
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
-index 562633c..d3c99ac 100644
+index bc7acd9b4..d8faf07d2 100644
 --- a/ext/wayland/wlwindow.h
 +++ b/ext/wayland/wlwindow.h
 @@ -89,6 +89,7 @@ typedef enum

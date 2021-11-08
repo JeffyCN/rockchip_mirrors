@@ -1,7 +1,7 @@
-From e5f6fc403da8dddf88d2445f7ffd71c440ee997a Mon Sep 17 00:00:00 2001
+From 69d9bf27ab41b6d30b49eae4bebd20586c387d2a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Jun 2020 10:01:54 +0800
-Subject: [PATCH 47/68] waylandsink: Support place below/above
+Subject: [PATCH 51/73] waylandsink: Support place below/above
 
 Set environment WAYLANDSINK_PLACE_ABOVE=1 to place it above parent.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 7 insertions(+)
 
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index ff66166..d5e1c8c 100644
+index 4e2614506..89b104f00 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -24,6 +24,8 @@
@@ -23,7 +23,7 @@ index ff66166..d5e1c8c 100644
  #include "wlwindow.h"
  #include "wlshmallocator.h"
  #include "wlbuffer.h"
-@@ -349,6 +351,11 @@ gst_wl_window_new_in_surface (GstWlDisplay * display,
+@@ -345,6 +347,11 @@ gst_wl_window_new_in_surface (GstWlDisplay * display,
        window->area_surface, parent);
    wl_subsurface_set_desync (window->area_subsurface);
  

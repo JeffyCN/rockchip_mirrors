@@ -1,7 +1,7 @@
-From 7ed0f1ecda02d9757350b6b2e7e1a5d9280cb736 Mon Sep 17 00:00:00 2001
+From b6ff1c8dd2ea9032c9ca7ad0fc624c84660d2aa0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 20 Nov 2020 17:13:11 +0800
-Subject: [PATCH 56/68] kmssink: Support disabling vsync
+Subject: [PATCH 60/73] kmssink: Support disabling vsync
 
 Set env KMSSINK_DISABLE_VSYNC to enable it.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 00ff417..aecc70c 100644
+index 00ff417db..aecc70c6b 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -1767,6 +1767,8 @@ retry_set_plane:

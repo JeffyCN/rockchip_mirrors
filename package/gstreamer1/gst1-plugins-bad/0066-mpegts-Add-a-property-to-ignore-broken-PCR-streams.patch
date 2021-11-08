@@ -1,7 +1,7 @@
-From 6b867977cffd682d6d1842d8b38e69be6f7c98cd Mon Sep 17 00:00:00 2001
+From a4d35aa02ebae7346b8e9a2ec7b1b39f06f74d63 Mon Sep 17 00:00:00 2001
 From: Edward Hervey <edward@centricular.com>
 Date: Sat, 1 Feb 2020 11:52:04 +0100
-Subject: [PATCH 62/68] mpegts: Add a property to ignore broken PCR streams
+Subject: [PATCH 66/73] mpegts: Add a property to ignore broken PCR streams
 
 Some mpeg-ts (HLS, DVB, ...) streams out there have completely broken
 PCR streams on which we can't reliably recover correct timestamps.
@@ -22,7 +22,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 36 insertions(+), 4 deletions(-)
 
 diff --git a/gst/mpegtsdemux/mpegtsbase.c b/gst/mpegtsdemux/mpegtsbase.c
-index 5180c2e..cee4633 100644
+index 5180c2ee5..cee4633b8 100644
 --- a/gst/mpegtsdemux/mpegtsbase.c
 +++ b/gst/mpegtsdemux/mpegtsbase.c
 @@ -59,10 +59,13 @@ static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE ("sink",
@@ -122,7 +122,7 @@ index 5180c2e..cee4633 100644
    program->active = TRUE;
    program->initial_program = initial_program;
 diff --git a/gst/mpegtsdemux/mpegtsbase.h b/gst/mpegtsdemux/mpegtsbase.h
-index 80a454f..ca0ece5 100644
+index 80a454f68..ca0ece5c8 100644
 --- a/gst/mpegtsdemux/mpegtsbase.h
 +++ b/gst/mpegtsdemux/mpegtsbase.h
 @@ -161,6 +161,10 @@ struct _MpegTSBase {

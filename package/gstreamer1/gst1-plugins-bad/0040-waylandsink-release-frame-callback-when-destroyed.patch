@@ -1,7 +1,7 @@
-From 458877fa594c98dc9f8dc02c91480610b6a05ebd Mon Sep 17 00:00:00 2001
+From d9932abd20b3489a23fd4bd0f0de0b45ff5250ea Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 26 Nov 2020 11:31:58 +0800
-Subject: [PATCH 40/68] waylandsink: release frame callback when destroyed
+Subject: [PATCH 40/73] waylandsink: release frame callback when destroyed
 
 We would use a frame callback from the surface to indicate
 that last buffer is rendered, but when we destroy the surface
@@ -11,6 +11,8 @@ queue crash.
 Part-of: <https://gitlab.freedesktop.org/gstreamer/gst-plugins-bad/-/merge_requests/1729>
 (cherry picked from commit 6d8133e41e3e2c2f2bc65e22675a4c68a8539ac8)
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+(cherry picked from commit 482a5af682197f62d83d31891c187d1c054f86da)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  ext/wayland/gstwaylandsink.c | 2 ++
  ext/wayland/wlwindow.c       | 4 ++++
@@ -18,7 +20,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 7 insertions(+)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 264cea3..aa18bef 100644
+index 264cea3f4..aa18bef9b 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -627,6 +627,7 @@ frame_redraw_callback (void *data, struct wl_callback *callback, uint32_t time)
@@ -38,7 +40,7 @@ index 264cea3..aa18bef 100644
  
    if (G_UNLIKELY (sink->video_info_changed && !redraw)) {
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index 4358a35..ff66166 100644
+index 4358a3573..ff66166c1 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -157,6 +157,9 @@ gst_wl_window_finalize (GObject * gobject)
@@ -60,7 +62,7 @@ index 4358a35..ff66166 100644
    window->video_surface = wl_compositor_create_surface (display->compositor);
  
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
-index c3f0172..cecbda6 100644
+index c3f017216..cecbda664 100644
 --- a/ext/wayland/wlwindow.h
 +++ b/ext/wayland/wlwindow.h
 @@ -55,6 +55,7 @@ struct _GstWlWindow

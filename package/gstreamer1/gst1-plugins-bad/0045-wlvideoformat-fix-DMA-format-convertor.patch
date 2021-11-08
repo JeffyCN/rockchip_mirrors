@@ -1,7 +1,7 @@
-From 72a5b346d85b07607e6dd68e6601af941519ad98 Mon Sep 17 00:00:00 2001
+From f68c2920a9406e848d9f32f9773d1aca9612103e Mon Sep 17 00:00:00 2001
 From: Randy Li <ayaka@soulik.info>
 Date: Mon, 2 Nov 2020 08:46:25 +0000
-Subject: [PATCH 41/68] wlvideoformat: fix DMA format convertor
+Subject: [PATCH 45/73] wlvideoformat: fix DMA format convertor
 
 In the most of case, this typo would work. But for
 ARGB8888 and XRGB8888, which shm format is not based on fourcc,
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/ext/wayland/wlvideoformat.c b/ext/wayland/wlvideoformat.c
-index e1d6271..68cec50 100644
+index e1d6271ea..68cec5093 100644
 --- a/ext/wayland/wlvideoformat.c
 +++ b/ext/wayland/wlvideoformat.c
 @@ -112,7 +112,7 @@ gst_wl_dmabuf_format_to_video_format (guint wl_format)

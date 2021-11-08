@@ -1,7 +1,7 @@
-From 0514c205ecfe8863e5c33f58855233e5c7a70fe6 Mon Sep 17 00:00:00 2001
+From 84a694afcbb31c8e1b3dc3bd91b5bab4e50f33e6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 8 Mar 2021 10:07:39 +0800
-Subject: [PATCH 64/68] waylandsink: Support stretching video area
+Subject: [PATCH 68/73] waylandsink: Support stretching video area
 
 Set env WAYLANDSINK_STRETCH to enable it.
 
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index 6d5bc7c..202034f 100644
+index c9eacc429..77da03873 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
-@@ -449,6 +449,10 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+@@ -445,6 +445,10 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
    dst.w = window->render_rectangle.w;
    dst.h = window->render_rectangle.h;
  

@@ -1,7 +1,7 @@
-From a2d904a9cd104335d0ea8fd5fea47a2252262b30 Mon Sep 17 00:00:00 2001
+From 88697e09b0c1dad7229d810eb59bd768e163a577 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Jun 2020 10:11:42 +0800
-Subject: [PATCH 51/68] waylandsink: Support setting toplevel window position
+Subject: [PATCH 55/73] waylandsink: Support setting toplevel window position
 
 Needs hacked wayland server, tested with:
 	waylandsink render-rectangle="<100,200,300,400>"
@@ -9,14 +9,14 @@ Needs hacked wayland server, tested with:
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  ext/wayland/gstwaylandsink.c | 32 ++++++++++++++++++++------------
- ext/wayland/gstwaylandsink.h |  2 ++
+ ext/wayland/gstwaylandsink.h |  1 +
  ext/wayland/wldisplay.h      |  2 +-
  ext/wayland/wlwindow.c       | 29 +++++++++++++++++++++++------
  ext/wayland/wlwindow.h       |  5 +++--
- 5 files changed, 49 insertions(+), 21 deletions(-)
+ 5 files changed, 48 insertions(+), 21 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index ca201f9..6f26088 100644
+index 0ee5310ac..d5e152611 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -62,7 +62,8 @@ enum
@@ -48,7 +48,7 @@ index ca201f9..6f26088 100644
        break;
    }
  }
-@@ -700,7 +704,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -709,7 +713,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
      if (!sink->window) {
        /* if we were not provided a window, create one ourselves */
        sink->window = gst_wl_window_new_toplevel (sink->display,
@@ -58,7 +58,7 @@ index ca201f9..6f26088 100644
        g_signal_connect_object (sink->window, "closed",
            G_CALLBACK (on_window_closed), sink, 0);
      }
-@@ -972,16 +977,19 @@ gst_wayland_sink_set_render_rectangle (GstVideoOverlay * overlay,
+@@ -982,16 +987,19 @@ gst_wayland_sink_set_render_rectangle (GstVideoOverlay * overlay,
    g_return_if_fail (sink != NULL);
  
    g_mutex_lock (&sink->render_lock);
@@ -88,20 +88,19 @@ index ca201f9..6f26088 100644
    g_mutex_unlock (&sink->render_lock);
  }
 diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
-index f63e8b8..bcaadaf 100644
+index 0ec444de5..194e5bc52 100644
 --- a/ext/wayland/gstwaylandsink.h
 +++ b/ext/wayland/gstwaylandsink.h
-@@ -69,6 +69,8 @@ struct _GstWaylandSink
+@@ -69,6 +69,7 @@ struct _GstWaylandSink
    gboolean redraw_pending;
    GMutex render_lock;
    GstBuffer *last_buffer;
-+
 +  GstVideoRectangle render_rectangle;
- };
  
- struct _GstWaylandSinkClass
+   struct wl_callback *callback;
+ };
 diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
-index 365031d..d938977 100644
+index 365031d78..d9389773b 100644
 --- a/ext/wayland/wldisplay.h
 +++ b/ext/wayland/wldisplay.h
 @@ -55,8 +55,8 @@ struct _GstWlDisplay
@@ -115,7 +114,7 @@ index 365031d..d938977 100644
    struct wp_viewporter *viewporter;
    struct zwp_linux_dmabuf_v1 *dmabuf;
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index 35e2b71..ec8d6e9 100644
+index 6f929dbb2..88489b308 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -78,7 +78,7 @@ handle_xdg_toplevel_configure (void *data,
@@ -136,7 +135,7 @@ index 35e2b71..ec8d6e9 100644
  }
  
  static void
-@@ -263,7 +263,8 @@ gst_wl_window_ensure_fullscreen (GstWlWindow * window, gboolean fullscreen)
+@@ -259,7 +259,8 @@ gst_wl_window_ensure_fullscreen (GstWlWindow * window, gboolean fullscreen)
  
  GstWlWindow *
  gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
@@ -146,7 +145,7 @@ index 35e2b71..ec8d6e9 100644
  {
    GstWlWindow *window;
  
-@@ -325,11 +326,23 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+@@ -321,11 +322,23 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
  
    /* render_rectangle is already set via toplevel_configure in
     * fullscreen mode */
@@ -172,7 +171,7 @@ index 35e2b71..ec8d6e9 100644
    }
  
    return window;
-@@ -540,7 +553,7 @@ gst_wl_window_update_borders (GstWlWindow * window)
+@@ -536,7 +549,7 @@ gst_wl_window_update_borders (GstWlWindow * window)
  
  void
  gst_wl_window_set_render_rectangle (GstWlWindow * window, gint x, gint y,
@@ -181,7 +180,7 @@ index 35e2b71..ec8d6e9 100644
  {
    g_return_if_fail (window != NULL);
  
-@@ -549,6 +562,10 @@ gst_wl_window_set_render_rectangle (GstWlWindow * window, gint x, gint y,
+@@ -545,6 +558,10 @@ gst_wl_window_set_render_rectangle (GstWlWindow * window, gint x, gint y,
    window->render_rectangle.w = w;
    window->render_rectangle.h = h;
  
@@ -193,7 +192,7 @@ index 35e2b71..ec8d6e9 100644
    if (window->area_subsurface)
      wl_subsurface_set_position (window->area_subsurface, x, y);
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
-index 47e86e7..759a078 100644
+index cecbda664..02608a235 100644
 --- a/ext/wayland/wlwindow.h
 +++ b/ext/wayland/wlwindow.h
 @@ -85,7 +85,8 @@ GType gst_wl_window_get_type (void);
