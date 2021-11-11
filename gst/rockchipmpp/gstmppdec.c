@@ -297,8 +297,30 @@ gst_mpp_dec_set_format (GstVideoDecoder * decoder, GstVideoCodecState * state)
 }
 
 gboolean
+gst_mpp_dec_allow_afbc (GstVideoDecoder * decoder)
+{
+  GstStructure *s;
+  GstCaps *caps;
+  gboolean ret = FALSE;
+
+  caps = gst_pad_get_allowed_caps (GST_VIDEO_DECODER_SRC_PAD (decoder));
+  if (caps) {
+    caps = gst_caps_truncate (caps);
+    s = gst_caps_get_structure (caps, 0);
+
+    if (gst_structure_has_field (s, "arm-afbc"))
+      ret = TRUE;
+
+    gst_caps_unref (caps);
+  }
+
+  return ret;
+}
+
+gboolean
 gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
-    guint width, guint height, gint hstride, gint vstride, guint align)
+    guint width, guint height, gint hstride, gint vstride, guint align,
+    gboolean afbc)
 {
   GstMppDec *self = GST_MPP_DEC (decoder);
   GstVideoInfo *info = &self->info;
@@ -309,8 +331,23 @@ gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
   /* Sinks like kmssink require width and height align to 2 */
   output_state = gst_video_decoder_set_output_state (decoder, format,
       GST_ROUND_UP_2 (width), GST_ROUND_UP_2 (height), self->input_state);
+
+  if (afbc) {
+    if (!gst_mpp_dec_allow_afbc (decoder)) {
+      GST_ERROR_OBJECT (self, "AFBC not allowed");
+      return FALSE;
+    }
+
+    GST_VIDEO_INFO_SET_AFBC (&output_state->info);
+    output_state->caps = gst_video_info_to_caps (&output_state->info);
+    gst_caps_set_simple (output_state->caps, "arm-afbc", G_TYPE_INT, 1, NULL);
+  }
+
   *info = output_state->info;
   gst_video_codec_state_unref (output_state);
+
+  if (!gst_video_decoder_negotiate (decoder))
+    return FALSE;
 
   align = align ? : 2;
 
@@ -357,12 +394,19 @@ gst_mpp_dec_apply_info_change (GstVideoDecoder * decoder, MppFrame mframe)
   gint hstride = mpp_frame_get_hor_stride (mframe);
   gint vstride = mpp_frame_get_ver_stride (mframe);
   gint dst_width, dst_height;
+  gboolean afbc;
 
   if (hstride % 2 || vstride % 2)
     return GST_FLOW_NOT_NEGOTIATED;
 
   mpp_format = mpp_frame_get_fmt (mframe);
+  afbc = !!MPP_FRAME_FMT_IS_FBC (mpp_format);
+  mpp_format &= ~MPP_FRAME_FBC_MASK;
   src_format = gst_mpp_mpp_format_to_gst_format (mpp_format);
+
+  GST_INFO_OBJECT (self, "applying %s%s %dx%d (%dx%d)",
+      gst_video_format_to_string (src_format), afbc ? "(AFBC)" : "",
+      width, height, hstride, vstride);
 
   /* Figure out final output info */
   gst_mpp_dec_fixup_video_info (decoder, src_format, width, height);
@@ -381,7 +425,7 @@ gst_mpp_dec_apply_info_change (GstVideoDecoder * decoder, MppFrame mframe)
   }
 
   if (!gst_mpp_dec_update_video_info (decoder, dst_format,
-          dst_width, dst_height, hstride, vstride, 0))
+          dst_width, dst_height, hstride, vstride, 0, afbc))
     return GST_FLOW_NOT_NEGOTIATED;
 
   return GST_FLOW_OK;
@@ -520,6 +564,10 @@ gst_mpp_dec_info_matched (GstVideoDecoder * decoder, MppFrame mframe)
   width = GST_ROUND_UP_2 (width);
   height = GST_ROUND_UP_2 (height);
 
+  if (!!MPP_FRAME_FMT_IS_FBC (mpp_format) != !!GST_VIDEO_INFO_IS_AFBC (info))
+    return FALSE;
+
+  mpp_format &= ~MPP_FRAME_FBC_MASK;
   if (mpp_format != gst_mpp_gst_format_to_mpp_format (format))
     return FALSE;
 
@@ -586,6 +634,9 @@ gst_mpp_dec_get_gst_buffer (GstVideoDecoder * decoder, MppFrame mframe)
     gst_memory_unref (mem);
     return NULL;
   }
+
+  if (GST_VIDEO_INFO_IS_AFBC (info))
+    GST_MEMORY_FLAGS (mem) |= GST_MEMORY_FLAG_NOT_MAPPABLE;
 
   gst_buffer_append_memory (buffer, mem);
 

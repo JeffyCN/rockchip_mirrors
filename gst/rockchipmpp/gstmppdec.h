@@ -110,9 +110,11 @@ GType gst_mpp_dec_get_type (void);
 void gst_mpp_dec_fixup_video_info (GstVideoDecoder * decoder,
     GstVideoFormat format, gint width, gint height);
 
+gboolean gst_mpp_dec_allow_afbc (GstVideoDecoder * decoder);
+
 gboolean gst_mpp_dec_update_video_info (GstVideoDecoder * decoder,
     GstVideoFormat format, guint width, guint height,
-    gint hstride, gint vstride, guint align);
+    gint hstride, gint vstride, guint align, gboolean afbc);
 
 G_END_DECLS;
 

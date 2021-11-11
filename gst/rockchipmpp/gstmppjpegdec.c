@@ -322,7 +322,7 @@ gst_mpp_jpeg_dec_set_format (GstVideoDecoder * decoder,
 
   /* Update final output info */
   return gst_mpp_dec_update_video_info (decoder, dst_format,
-      dst_width, dst_height, 0, 0, align);
+      dst_width, dst_height, 0, 0, align, FALSE);
 }
 
 static MppPacket
