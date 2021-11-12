@@ -37,6 +37,7 @@
 
 /* it needs to be below because is internal to libdrm */
 #include <drm.h>
+#include <drm_fourcc.h>
 
 #include <gst/allocators/gstdmabuf.h>
 
@@ -468,8 +469,18 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
   GST_DEBUG_OBJECT (alloc, "bo handles: %d, %d, %d, %d", bo_handles[0],
       bo_handles[1], bo_handles[2], bo_handles[3]);
 
-  ret = drmModeAddFB2 (alloc->priv->fd, w, h, fmt, bo_handles, pitches,
-      offsets, &kmsmem->fb_id, 0);
+  if (GST_VIDEO_INFO_IS_AFBC (vinfo)) {
+    uint64_t modifiers[4] = { 0 };
+
+    for (i = 0; i < num_planes && bo_handles[i]; i++)
+      modifiers[i] = DRM_AFBC_MODIFIER;
+
+    ret = drmModeAddFB2WithModifiers (alloc->priv->fd, w, h, fmt, bo_handles,
+        pitches, offsets, modifiers, &kmsmem->fb_id, DRM_MODE_FB_MODIFIERS);
+  } else {
+    ret = drmModeAddFB2 (alloc->priv->fd, w, h, fmt, bo_handles, pitches,
+        offsets, &kmsmem->fb_id, 0);
+  }
   if (ret) {
     GST_ERROR_OBJECT (alloc, "Failed to bind to framebuffer: %s (%d)",
         strerror (-ret), ret);

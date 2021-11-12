@@ -348,6 +348,79 @@ drm_get_caps (GstRkXImageSink * self)
 }
 
 static gboolean
+support_afbc (GstRkXImageSink * self, drmModePlane * plane, guint32 drmfmt)
+{
+  drmModeObjectPropertiesPtr props;
+  drmModePropertyBlobPtr blob;
+  drmModePropertyPtr prop;
+  drmModeResPtr res;
+  struct drm_format_modifier_blob *header;
+  struct drm_format_modifier *modifiers;
+  gboolean found;
+  guint64 value;
+  gint i, j;
+
+  res = drmModeGetResources (self->fd);
+  if (!res)
+    return FALSE;
+
+  props = drmModeObjectGetProperties (self->fd, plane->plane_id,
+      DRM_MODE_OBJECT_PLANE);
+  if (!props) {
+    drmModeFreeResources (res);
+    return FALSE;
+  }
+
+  for (i = 0, found = FALSE; i < props->count_props; i++) {
+    prop = drmModeGetProperty (self->fd, props->props[i]);
+    if (prop) {
+      if (!strcmp (prop->name, "IN_FORMATS"))
+        found = TRUE;
+
+      drmModeFreeProperty (prop);
+    }
+
+    if (found) {
+      value = props->prop_values[i];
+      break;
+    }
+  }
+
+  drmModeFreeObjectProperties (props);
+  drmModeFreeResources (res);
+
+  if (!found)
+    return FALSE;
+
+  blob = drmModeGetPropertyBlob (self->fd, value);
+  if (!blob)
+    return FALSE;
+
+  header = blob->data;
+  modifiers = (struct drm_format_modifier *)
+    ((char *) header + header->modifiers_offset);
+
+  for (i = 0, found = FALSE; i < header->count_formats; i++) {
+    for (j = 0; j < header->count_modifiers; j++) {
+      struct drm_format_modifier *mod = &modifiers[j];
+
+      if ((i < mod->offset) || (i > mod->offset + 63))
+        continue;
+      if (!(mod->formats & (1 << (i - mod->offset))))
+        continue;
+
+      if (mod->modifier == DRM_AFBC_MODIFIER) {
+        found = TRUE;
+        break;
+      }
+    }
+  }
+
+  drmModeFreePropertyBlob(blob);
+  return found;
+}
+
+static gboolean
 drm_ensure_allowed_caps (GstRkXImageSink * self, drmModePlane * plane,
     drmModeRes * res)
 {
@@ -378,6 +451,9 @@ drm_ensure_allowed_caps (GstRkXImageSink * self, drmModePlane * plane,
         "framerate", GST_TYPE_FRACTION_RANGE, 0, 1, G_MAXINT, 1, NULL);
     if (!caps)
       continue;
+
+    if (support_afbc (self, plane, plane->formats[i]))
+      gst_caps_set_simple (caps, "arm-afbc", GST_TYPE_INT_RANGE, 0, 1, NULL);
 
     out_caps = gst_caps_merge (out_caps, caps);
   }
@@ -518,7 +594,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
   gboolean need_pool;
   GstVideoInfo vinfo;
   GstBufferPool *pool;
+  GstStructure *s;
   gsize size;
+  gint value;
 
   self = GST_X_IMAGE_SINK (bsink);
 
@@ -527,6 +605,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
     goto no_caps;
   if (!gst_video_info_from_caps (&vinfo, caps))
     goto invalid_caps;
+
+  s = gst_caps_get_structure (caps, 0);
+  if (gst_structure_get_int (s, "arm-afbc", &value) && value)
+    goto afbc_caps;
 
   size = GST_VIDEO_INFO_SIZE (&vinfo);
 
@@ -564,6 +646,11 @@ no_caps:
 invalid_caps:
   {
     GST_DEBUG_OBJECT (bsink, "invalid caps specified");
+    return FALSE;
+  }
+afbc_caps:
+  {
+    GST_DEBUG_OBJECT (bsink, "no allocation for AFBC");
     return FALSE;
   }
 no_pool:
@@ -674,6 +761,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstRkXImageSink * self, GstBuffer * inbuf)
   GstVideoFrame inframe, outframe;
   gboolean success;
   GstBuffer *buf = NULL;
+
+  if (GST_VIDEO_INFO_IS_AFBC (&self->vinfo)) {
+    GST_ERROR_OBJECT (self, "unable to copy AFBC");
+    return NULL;
+  }
 
   if (!gst_buffer_pool_set_active (self->pool, TRUE))
     goto activate_pool_failed;
@@ -1790,6 +1882,8 @@ gst_x_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
   GstRkXImageSink *ximagesink;
   GstVideoInfo info;
   GstBufferPool *newpool, *oldpool;
+  GstStructure *s;
+  gint value;
 
   ximagesink = GST_X_IMAGE_SINK (bsink);
 
@@ -1805,6 +1899,15 @@ gst_x_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
 
   if (!gst_video_info_from_caps (&info, caps))
     goto invalid_format;
+
+  /* parse AFBC from caps */
+  s = gst_caps_get_structure (caps, 0);
+  if (gst_structure_get_int (s, "arm-afbc", &value)) {
+    if (value)
+      GST_VIDEO_INFO_SET_AFBC (&info);
+    else
+      GST_VIDEO_INFO_UNSET_AFBC (&info);
+  }
 
   GST_VIDEO_SINK_WIDTH (ximagesink) = info.width;
   GST_VIDEO_SINK_HEIGHT (ximagesink) = info.height;
