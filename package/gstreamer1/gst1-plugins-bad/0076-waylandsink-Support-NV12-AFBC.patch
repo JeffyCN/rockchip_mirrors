@@ -1,4 +1,4 @@
-From 825b9720ab94d324adc948ad366bd38be19299a1 Mon Sep 17 00:00:00 2001
+From d0e570788e411ee43da8cf987d3e9bbd16a3caf9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
 Subject: [PATCH 76/76] waylandsink: Support NV12(AFBC)
@@ -12,7 +12,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  ext/wayland/wldisplay.c      | 14 +++++++++++++-
  ext/wayland/wldisplay.h      | 31 +++++++++++++++++++++++++++++++
  ext/wayland/wllinuxdmabuf.c  | 18 +++++++++++++++++-
- 4 files changed, 92 insertions(+), 2 deletions(-)
+ ext/wayland/wlwindow.c       | 14 ++++++++------
+ 5 files changed, 100 insertions(+), 8 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
 index 99b41577a..5d8f61414 100644
@@ -220,6 +221,52 @@ index 2bfbca5db..358313442 100644
      } else {
        GST_ERROR_OBJECT (mem->allocator, "memory does not seem to contain "
            "enough data for the specified format");
+diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
+index ba7af693f..4e12c8f63 100644
+--- a/ext/wayland/wlwindow.c
++++ b/ext/wayland/wlwindow.c
+@@ -458,6 +458,9 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+   dst.w = window->render_rectangle.w;
+   dst.h = window->render_rectangle.h;
+ 
++  /* HACK: MPP has this offset */
++  src.y = 4;
++
+   if (window->video_viewport) {
+     if (window->fill_mode == GST_WL_WINDOW_STRETCH) {
+       res = dst;
+@@ -471,7 +474,7 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+ 
+       if (src_ratio < dst_ratio) {
+         int h = src.w / dst_ratio;
+-        src.y = (src.h - h) / 2;
++        src.y += (src.h - h) / 2;
+         src.h = h;
+       } else if (src_ratio > dst_ratio) {
+         int w = src.h * dst_ratio;
+@@ -479,11 +482,6 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+         src.w = w;
+       }
+ 
+-      // Crop src
+-      wp_viewport_set_source (window->video_viewport,
+-          wl_fixed_from_int (src.x), wl_fixed_from_int (src.y),
+-          wl_fixed_from_int (src.w), wl_fixed_from_int (src.h));
+-
+       // Fill dst
+       res = dst;
+     }
+@@ -494,6 +492,10 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+     gst_video_sink_center_rect (src, dst, &res, FALSE);
+   }
+ 
++  wp_viewport_set_source (window->video_viewport,
++      wl_fixed_from_int (src.x), wl_fixed_from_int (src.y),
++      wl_fixed_from_int (src.w), wl_fixed_from_int (src.h));
++
+   wl_subsurface_set_position (window->video_subsurface, res.x, res.y);
+ 
+   if (commit) {
 -- 
 2.20.1
 

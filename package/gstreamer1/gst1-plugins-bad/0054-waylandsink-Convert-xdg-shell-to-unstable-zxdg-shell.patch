@@ -1,7 +1,7 @@
-From 7690722c44f2c7434bb54406b7c76bc8953220c1 Mon Sep 17 00:00:00 2001
+From cd94fd9e50e5a7135ce78fbeb7ab5a9b96794d03 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 26 Nov 2020 11:32:16 +0800
-Subject: [PATCH 54/73] waylandsink: Convert xdg shell to unstable zxdg shell
+Subject: [PATCH 54/76] waylandsink: Convert xdg shell to unstable zxdg shell
  v6
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
@@ -11,8 +11,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  ext/wayland/wldisplay.c | 24 +++++++++----------
  ext/wayland/wldisplay.h |  4 ++--
  ext/wayland/wlwindow.c  | 51 +++++++++++++++++++++--------------------
- ext/wayland/wlwindow.h  |  1 +
- 6 files changed, 46 insertions(+), 43 deletions(-)
+ ext/wayland/wlwindow.h  |  5 ++--
+ 6 files changed, 48 insertions(+), 45 deletions(-)
 
 diff --git a/ext/wayland/Makefile.am b/ext/wayland/Makefile.am
 index 95bb97e7f..97fdd81f9 100644
@@ -293,13 +293,17 @@ index 89b104f00..6f929dbb2 100644
    else
      return (window->wl_shell_surface != NULL);
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
-index c3f017216..cecbda664 100644
+index c3f017216..47e86e7c4 100644
 --- a/ext/wayland/wlwindow.h
 +++ b/ext/wayland/wlwindow.h
-@@ -55,6 +55,7 @@ struct _GstWlWindow
+@@ -53,8 +53,9 @@ struct _GstWlWindow
+   struct wl_subsurface *video_subsurface;
+   struct wp_viewport *video_viewport;
    struct wl_shell_surface *wl_shell_surface;
-   struct xdg_surface *xdg_surface;
-   struct xdg_toplevel *xdg_toplevel;
+-  struct xdg_surface *xdg_surface;
+-  struct xdg_toplevel *xdg_toplevel;
++  struct zxdg_surface_v6 *xdg_surface;
++  struct zxdg_toplevel_v6 *xdg_toplevel;
 +  struct wl_callback *callback;
    gboolean configured;
    GCond configure_cond;
