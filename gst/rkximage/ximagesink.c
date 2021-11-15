@@ -1183,9 +1183,13 @@ gst_x_image_sink_ximage_put (GstRkXImageSink * ximagesink, GstBuffer * buf)
   xwindow_calculate_display_ratio (ximagesink, &result.x, &result.y, &result.w,
       &result.h);
 
-  if (GST_VIDEO_INFO_IS_AFBC (&ximagesink->vinfo))
+  if (GST_VIDEO_INFO_IS_AFBC (&ximagesink->vinfo)) {
     /* The AFBC's width should align to 4 */
     src.w &= ~3;
+
+    /* HACK: MPP has this offset */
+    src.y += 4;
+  }
 
   GST_TRACE_OBJECT (ximagesink,
       "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",

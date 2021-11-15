@@ -475,6 +475,9 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
     for (i = 0; i < num_planes && bo_handles[i]; i++)
       modifiers[i] = DRM_AFBC_MODIFIER;
 
+    /* HACK: MPP has this offset */
+    h += 4;
+
     if (fmt == DRM_FORMAT_NV12) {
       /* The newer kernel might use DRM_FORMAT_YUV420_8BIT instead */
 #ifndef DRM_FORMAT_YUV420_8BIT
