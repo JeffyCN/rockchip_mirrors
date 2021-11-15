@@ -931,6 +931,8 @@ gst_kms_sink_drain (GstRkXImageSink * self)
   if (parent_meta) {
     GstBuffer *dumb_buf;
     dumb_buf = gst_kms_sink_copy_to_dumb_buffer (self, parent_meta->buffer);
+    if (!dumb_buf)
+      dumb_buf = gst_buffer_ref (self->last_buffer);
 
     gst_kms_allocator_clear_cache (self->allocator);
     gst_x_image_sink_show_frame (GST_VIDEO_SINK (self), dumb_buf);
@@ -1208,6 +1210,10 @@ gst_x_image_sink_ximage_put (GstRkXImageSink * ximagesink, GstBuffer * buf)
     /* drop pixel */
     src.w = 3840;
   }
+
+  if (GST_VIDEO_INFO_IS_AFBC (&ximagesink->vinfo))
+    /* The AFBC's width should align to 4 */
+    src.w &= ~3;
 
   GST_TRACE_OBJECT (ximagesink,
       "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",

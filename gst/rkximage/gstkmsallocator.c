@@ -443,7 +443,7 @@ static gboolean
 gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
     gsize in_offsets[GST_VIDEO_MAX_PLANES], GstVideoInfo * vinfo)
 {
-  gint i, ret;
+  gint i, ret = -1;
   gint num_planes = GST_VIDEO_INFO_N_PLANES (vinfo);
   guint32 w, h, fmt, bo_handles[4] = { 0, };
   guint32 pitches[4] = { 0, };
@@ -470,13 +470,30 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
       bo_handles[1], bo_handles[2], bo_handles[3]);
 
   if (GST_VIDEO_INFO_IS_AFBC (vinfo)) {
-    uint64_t modifiers[4] = { 0 };
+    guint64 modifiers[4] = { 0 };
 
     for (i = 0; i < num_planes && bo_handles[i]; i++)
       modifiers[i] = DRM_AFBC_MODIFIER;
 
-    ret = drmModeAddFB2WithModifiers (alloc->priv->fd, w, h, fmt, bo_handles,
-        pitches, offsets, modifiers, &kmsmem->fb_id, DRM_MODE_FB_MODIFIERS);
+    if (fmt == DRM_FORMAT_NV12) {
+      /* The newer kernel might use DRM_FORMAT_YUV420_8BIT instead */
+#ifndef DRM_FORMAT_YUV420_8BIT
+#define DRM_FORMAT_YUV420_8BIT fourcc_code('Y', 'U', '0', '8')
+#endif
+
+      guint32 _handles[4] = { bo_handles[0], 0, };
+      guint32 _pitches[4] = { pitches[0], 0, };
+      guint32 _offsets[4] = { offsets[0], 0, };
+      guint64 _modifiers[4] = { modifiers[0], 0, };
+
+      ret = drmModeAddFB2WithModifiers (alloc->priv->fd, w, h,
+          DRM_FORMAT_YUV420_8BIT, _handles, _pitches, _offsets, _modifiers,
+          &kmsmem->fb_id, DRM_MODE_FB_MODIFIERS);
+    }
+
+    if (ret)
+      ret = drmModeAddFB2WithModifiers (alloc->priv->fd, w, h, fmt, bo_handles,
+          pitches, offsets, modifiers, &kmsmem->fb_id, DRM_MODE_FB_MODIFIERS);
   } else {
     ret = drmModeAddFB2 (alloc->priv->fd, w, h, fmt, bo_handles, pitches,
         offsets, &kmsmem->fb_id, 0);
