@@ -1,0 +1,225 @@
+From 825b9720ab94d324adc948ad366bd38be19299a1 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 12 Nov 2021 11:14:37 +0800
+Subject: [PATCH 76/76] waylandsink: Support NV12(AFBC)
+
+Tested on RK356x with:
+gst-play-1.0 video.mp4 --videosink=waylandsink
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ ext/wayland/gstwaylandsink.c | 31 +++++++++++++++++++++++++++++++
+ ext/wayland/wldisplay.c      | 14 +++++++++++++-
+ ext/wayland/wldisplay.h      | 31 +++++++++++++++++++++++++++++++
+ ext/wayland/wllinuxdmabuf.c  | 18 +++++++++++++++++-
+ 4 files changed, 92 insertions(+), 2 deletions(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 99b41577a..5d8f61414 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -645,6 +645,9 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
+     gst_structure_take_value (gst_caps_get_structure (caps, 1), "format",
+         &dmabuf_list);
+ 
++    if (sink->display->support_afbc)
++      gst_caps_set_simple (caps, "arm-afbc", GST_TYPE_INT_RANGE, 0, 1, NULL);
++
+     GST_DEBUG_OBJECT (sink, "display caps: %" GST_PTR_FORMAT, caps);
+   }
+ 
+@@ -692,6 +695,8 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+   GstWaylandSink *sink;
+   gboolean use_dmabuf;
+   GstVideoFormat format;
++  GstStructure *s;
++  gint value;
+ 
+   sink = GST_WAYLAND_SINK (bsink);
+ 
+@@ -701,6 +706,15 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+   if (!gst_video_info_from_caps (&sink->video_info, caps))
+     goto invalid_format;
+ 
++  /* parse AFBC from caps */
++  s = gst_caps_get_structure (caps, 0);
++  if (gst_structure_get_int (s, "arm-afbc", &value)) {
++    if (value)
++      GST_VIDEO_INFO_SET_AFBC (&sink->video_info);
++    else
++      GST_VIDEO_INFO_UNSET_AFBC (&sink->video_info);
++  }
++
+   format = GST_VIDEO_INFO_FORMAT (&sink->video_info);
+   sink->video_info_changed = TRUE;
+ 
+@@ -746,9 +760,17 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+   GstBufferPool *pool = NULL;
+   gboolean need_pool;
+   GstAllocator *alloc;
++  GstStructure *s;
++  gint value;
+ 
+   gst_query_parse_allocation (query, &caps, &need_pool);
+ 
++  s = gst_caps_get_structure (caps, 0);
++  if (gst_structure_get_int (s, "arm-afbc", &value) && value) {
++    GST_DEBUG_OBJECT (sink, "no allocation for AFBC");
++    return FALSE;
++  }
++
+   if (need_pool)
+     pool = gst_wayland_create_pool (sink, caps);
+ 
+@@ -915,6 +937,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+           &sink->video_info);
+   }
+ 
++  if (!wbuf && GST_VIDEO_INFO_IS_AFBC (&sink->video_info))
++    goto no_afbc;
++
+   if (!wbuf && gst_wl_display_check_format_for_shm (sink->display, format)) {
+     if (gst_buffer_n_memory (buffer) == 1 && gst_is_fd_memory (mem))
+       wbuf = gst_wl_shm_memory_construct_wl_buffer (mem, sink->display,
+@@ -1047,6 +1072,12 @@ no_wl_buffer:
+     ret = GST_FLOW_ERROR;
+     goto done;
+   }
++no_afbc:
++  {
++    GST_ERROR_OBJECT (sink, "could not import AFBC");
++    ret = GST_FLOW_ERROR;
++    goto done;
++  }
+ activate_failed:
+   {
+     GST_ERROR_OBJECT (sink, "failed to activate bufferpool.");
+diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
+index 355109716..ec4ab7d2e 100644
+--- a/ext/wayland/wldisplay.c
++++ b/ext/wayland/wldisplay.c
+@@ -147,8 +147,20 @@ dmabuf_format (void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
+     g_array_append_val (self->dmabuf_formats, format);
+ }
+ 
++static void
++dmabuf_modifier (void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
++    uint32_t format, uint32_t modifier_hi, uint32_t modifier_lo)
++{
++  GstWlDisplay *self = data;
++  uint64_t modifier = ((uint64_t)modifier_hi << 32) | modifier_lo;
++
++  if (modifier == DRM_AFBC_MODIFIER)
++    self->support_afbc = TRUE;
++}
++
+ static const struct zwp_linux_dmabuf_v1_listener dmabuf_listener = {
+   dmabuf_format,
++  dmabuf_modifier,
+ };
+ 
+ gboolean
+@@ -239,7 +251,7 @@ registry_handle_global (void *data, struct wl_registry *registry,
+         wl_registry_bind (registry, id, &wp_viewporter_interface, 1);
+   } else if (g_strcmp0 (interface, "zwp_linux_dmabuf_v1") == 0) {
+     self->dmabuf =
+-        wl_registry_bind (registry, id, &zwp_linux_dmabuf_v1_interface, 2);
++        wl_registry_bind (registry, id, &zwp_linux_dmabuf_v1_interface, 3);
+     zwp_linux_dmabuf_v1_add_listener (self->dmabuf, &dmabuf_listener, self);
+   }
+ }
+diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
+index d9389773b..cf5ff469f 100644
+--- a/ext/wayland/wldisplay.h
++++ b/ext/wayland/wldisplay.h
+@@ -31,6 +31,36 @@
+ 
+ G_BEGIN_DECLS
+ 
++#ifndef DRM_FORMAT_MOD_VENDOR_ARM
++#define DRM_FORMAT_MOD_VENDOR_ARM 0x08
++#endif
++
++#ifndef DRM_FORMAT_MOD_ARM_AFBC
++#define DRM_FORMAT_MOD_ARM_AFBC(__afbc_mode) fourcc_mod_code(ARM, __afbc_mode)
++#endif
++
++#ifndef AFBC_FORMAT_MOD_BLOCK_SIZE_16x16
++#define AFBC_FORMAT_MOD_BLOCK_SIZE_16x16 (1ULL)
++#endif
++
++#ifndef AFBC_FORMAT_MOD_SPARSE
++#define AFBC_FORMAT_MOD_SPARSE (((__u64)1) << 6)
++#endif
++
++#define DRM_AFBC_MODIFIER \
++  (DRM_FORMAT_MOD_ARM_AFBC(AFBC_FORMAT_MOD_SPARSE) | \
++   DRM_FORMAT_MOD_ARM_AFBC(AFBC_FORMAT_MOD_BLOCK_SIZE_16x16))
++
++#ifndef GST_VIDEO_FLAG_ARM_AFBC
++#define GST_VIDEO_FLAG_ARM_AFBC (1UL << 31)
++#define GST_VIDEO_INFO_SET_AFBC(i) \
++  GST_VIDEO_INFO_FLAG_SET (i, GST_VIDEO_FLAG_ARM_AFBC)
++#define GST_VIDEO_INFO_UNSET_AFBC(i) \
++  GST_VIDEO_INFO_FLAG_UNSET (i, GST_VIDEO_FLAG_ARM_AFBC)
++#define GST_VIDEO_INFO_IS_AFBC(i) \
++  GST_VIDEO_INFO_FLAG_IS_SET (i, GST_VIDEO_FLAG_ARM_AFBC)
++#endif
++
+ #define GST_TYPE_WL_DISPLAY                  (gst_wl_display_get_type ())
+ #define GST_WL_DISPLAY(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_WL_DISPLAY, GstWlDisplay))
+ #define GST_IS_WL_DISPLAY(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_WL_DISPLAY))
+@@ -62,6 +92,7 @@ struct _GstWlDisplay
+   struct zwp_linux_dmabuf_v1 *dmabuf;
+   GArray *shm_formats;
+   GArray *dmabuf_formats;
++  gboolean support_afbc;
+ 
+   /* private */
+   gboolean own_display;
+diff --git a/ext/wayland/wllinuxdmabuf.c b/ext/wayland/wllinuxdmabuf.c
+index 2bfbca5db..358313442 100644
+--- a/ext/wayland/wllinuxdmabuf.c
++++ b/ext/wayland/wllinuxdmabuf.c
+@@ -46,6 +46,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+   guint nplanes, flags = 0;
+   struct zwp_linux_buffer_params_v1 *params;
+   ConstructBufferData data;
++  guint64 modifier = GST_VIDEO_INFO_IS_AFBC (info) ? DRM_AFBC_MODIFIER : 0;
+ 
+   g_return_val_if_fail (gst_wl_display_check_format_for_dmabuf (display,
+           GST_VIDEO_INFO_FORMAT (info)), NULL);
+@@ -61,6 +62,21 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+       G_GSSIZE_FORMAT " (%d x %d), format %s", info->size, width, height,
+       gst_wl_dmabuf_format_to_string (format));
+ 
++  if (modifier) {
++    if (format == DRM_FORMAT_NV12) {
++      /* Mali uses DRM_FORMAT_YUV420_8BIT for NV12(AFBC) */
++#ifndef DRM_FORMAT_YUV420_8BIT
++#define DRM_FORMAT_YUV420_8BIT fourcc_code('Y', 'U', '0', '8')
++#endif
++      format = DRM_FORMAT_YUV420_8BIT;
++      nplanes = 1;
++    } else {
++      GST_ERROR_OBJECT (mem->allocator, "only support AFBC for NV12");
++      data.wbuf = NULL;
++      goto out;
++    }
++  }
++
+   /* Creation and configuration of planes  */
+   params = zwp_linux_dmabuf_v1_create_params (display->dmabuf);
+ 
+@@ -74,7 +90,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+       GstMemory *m = gst_buffer_peek_memory (buf, mem_idx);
+       gint fd = gst_dmabuf_memory_get_fd (m);
+       zwp_linux_buffer_params_v1_add (params, fd, i, m->offset + skip,
+-          stride, 0, 0);
++          stride, modifier >> 32, modifier & 0xFFFFFFFF);
+     } else {
+       GST_ERROR_OBJECT (mem->allocator, "memory does not seem to contain "
+           "enough data for the specified format");
+-- 
+2.20.1
+
