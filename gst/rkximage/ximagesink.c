@@ -1183,13 +1183,12 @@ gst_x_image_sink_ximage_put (GstRkXImageSink * ximagesink, GstBuffer * buf)
   xwindow_calculate_display_ratio (ximagesink, &result.x, &result.y, &result.w,
       &result.h);
 
-  if (GST_VIDEO_INFO_IS_AFBC (&ximagesink->vinfo)) {
+  if (GST_VIDEO_INFO_IS_AFBC (&ximagesink->vinfo))
     /* The AFBC's width should align to 4 */
     src.w &= ~3;
 
-    /* HACK: MPP has this offset */
-    src.y += 4;
-  }
+  src.x += GST_VIDEO_INFO_OFFSET_X (&ximagesink->vinfo);
+  src.y += GST_VIDEO_INFO_OFFSET_Y (&ximagesink->vinfo);
 
   GST_TRACE_OBJECT (ximagesink,
       "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
@@ -1890,6 +1889,20 @@ gst_x_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
     else
       GST_VIDEO_INFO_UNSET_AFBC (&info);
   }
+
+  /* HACK: Hide MPP offsets in the last plane's offset/stride */
+  if (GST_VIDEO_INFO_N_PLANES (&info) == GST_VIDEO_MAX_PLANES)
+    goto invalid_format;
+
+  if (!gst_structure_get_int (s, "offset-x", &value))
+    value = 0;
+
+  GST_VIDEO_INFO_OFFSET_X (&info) = value;
+
+  if (!gst_structure_get_int (s, "offset-y", &value))
+    value = 0;
+
+  GST_VIDEO_INFO_OFFSET_Y (&info) = value;
 
   GST_VIDEO_SINK_WIDTH (ximagesink) = info.width;
   GST_VIDEO_SINK_HEIGHT (ximagesink) = info.height;

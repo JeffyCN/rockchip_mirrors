@@ -60,6 +60,12 @@ G_BEGIN_DECLS
   GST_VIDEO_INFO_FLAG_IS_SET (i, GST_VIDEO_FLAG_ARM_AFBC)
 #endif
 
+/* HACK: Hide MPP offsets in the last plane's offset/stride */
+#define GST_VIDEO_INFO_OFFSET_X(i) \
+  GST_VIDEO_INFO_PLANE_OFFSET (i, GST_VIDEO_MAX_PLANES - 1)
+#define GST_VIDEO_INFO_OFFSET_Y(i) \
+  GST_VIDEO_INFO_PLANE_STRIDE (i, GST_VIDEO_MAX_PLANES - 1)
+
 GstVideoFormat gst_video_format_from_drm (guint32 drmfmt);
 guint32        gst_drm_format_from_video (GstVideoFormat fmt);
 guint32        gst_drm_bpp_from_drm (guint32 drmfmt);

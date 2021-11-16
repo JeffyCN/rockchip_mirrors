@@ -445,6 +445,8 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
 {
   gint i, ret = -1;
   gint num_planes = GST_VIDEO_INFO_N_PLANES (vinfo);
+  gint32 offset_x = GST_VIDEO_INFO_OFFSET_X (vinfo);
+  gint32 offset_y = GST_VIDEO_INFO_OFFSET_Y (vinfo);
   guint32 w, h, fmt, bo_handles[4] = { 0, };
   guint32 pitches[4] = { 0, };
   guint32 offsets[4] = { 0, };
@@ -456,6 +458,8 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
   h = GST_VIDEO_INFO_HEIGHT (vinfo);
   fmt = gst_drm_format_from_video (GST_VIDEO_INFO_FORMAT (vinfo));
 
+  h += offset_y;
+
   for (i = 0; i < num_planes; i++) {
     if (kmsmem->bo)
       bo_handles[i] = kmsmem->bo->handle;
@@ -464,6 +468,9 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
 
     pitches[i] = GST_VIDEO_INFO_PLANE_STRIDE (vinfo, i);
     offsets[i] = in_offsets[i];
+
+    /* TODO: bytes per pixel? */
+    offsets[i] += offset_x;
   }
 
   GST_DEBUG_OBJECT (alloc, "bo handles: %d, %d, %d, %d", bo_handles[0],
@@ -472,11 +479,8 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
   if (GST_VIDEO_INFO_IS_AFBC (vinfo)) {
     guint64 modifiers[4] = { 0 };
 
-    for (i = 0; i < num_planes && bo_handles[i]; i++)
+    for (i = 0; i < num_planes; i++)
       modifiers[i] = DRM_AFBC_MODIFIER;
-
-    /* HACK: MPP has this offset */
-    h += 4;
 
     if (fmt == DRM_FORMAT_NV12) {
       /* The newer kernel might use DRM_FORMAT_YUV420_8BIT instead */
