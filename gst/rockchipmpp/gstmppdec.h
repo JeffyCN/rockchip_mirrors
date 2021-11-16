@@ -108,9 +108,8 @@ void gst_mpp_dec_fixup_video_info (GstVideoDecoder * decoder,
 
 gboolean gst_mpp_dec_allow_afbc (GstVideoDecoder * decoder);
 
-gboolean gst_mpp_dec_update_video_info (GstVideoDecoder * decoder,
-    GstVideoFormat format, guint width, guint height,
-    gint hstride, gint vstride, guint align, gboolean afbc);
+gboolean gst_mpp_dec_update_simple_video_info (GstVideoDecoder * decoder,
+    GstVideoFormat format, guint width, guint height, guint align);
 
 G_END_DECLS;
 

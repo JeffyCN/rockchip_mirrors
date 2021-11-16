@@ -321,8 +321,8 @@ gst_mpp_jpeg_dec_set_format (GstVideoDecoder * decoder,
       MAX (self->buf_size, GST_VIDEO_INFO_PLANE_OFFSET (info, 1) * 2);
 
   /* Update final output info */
-  return gst_mpp_dec_update_video_info (decoder, dst_format,
-      dst_width, dst_height, 0, 0, align, FALSE);
+  return gst_mpp_dec_update_simple_video_info (decoder, dst_format,
+      dst_width, dst_height, align);
 }
 
 static MppPacket

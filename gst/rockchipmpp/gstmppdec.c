@@ -317,10 +317,10 @@ gst_mpp_dec_allow_afbc (GstVideoDecoder * decoder)
   return ret;
 }
 
-gboolean
+static gboolean
 gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
     guint width, guint height, gint hstride, gint vstride, guint align,
-    gboolean afbc)
+    gboolean afbc, guint offset_x, guint offset_y)
 {
   GstMppDec *self = GST_MPP_DEC (decoder);
   GstVideoInfo *info = &self->info;
@@ -340,7 +340,9 @@ gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
 
     GST_VIDEO_INFO_SET_AFBC (&output_state->info);
     output_state->caps = gst_video_info_to_caps (&output_state->info);
-    gst_caps_set_simple (output_state->caps, "arm-afbc", G_TYPE_INT, 1, NULL);
+    gst_caps_set_simple (output_state->caps, "arm-afbc", G_TYPE_INT, 1,
+        "offset-x", G_TYPE_INT, offset_x, "offset-y", G_TYPE_INT, offset_y,
+        NULL);
   }
 
   *info = output_state->info;
@@ -358,6 +360,14 @@ gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
   vstride = GST_ROUND_UP_N (vstride, align);
 
   return gst_mpp_video_info_align (info, hstride, vstride);
+}
+
+gboolean
+gst_mpp_dec_update_simple_video_info (GstVideoDecoder * decoder,
+    GstVideoFormat format, guint width, guint height, guint align)
+{
+  return gst_mpp_dec_update_video_info (decoder, format, width, height, 0, 0,
+      align, FALSE, 0, 0);
 }
 
 void
@@ -425,7 +435,8 @@ gst_mpp_dec_apply_info_change (GstVideoDecoder * decoder, MppFrame mframe)
   }
 
   if (!gst_mpp_dec_update_video_info (decoder, dst_format,
-          dst_width, dst_height, hstride, vstride, 0, afbc))
+          dst_width, dst_height, hstride, vstride, 0, afbc,
+          mpp_frame_get_offset_x (mframe), mpp_frame_get_offset_y (mframe)))
     return GST_FLOW_NOT_NEGOTIATED;
 
   return GST_FLOW_OK;
