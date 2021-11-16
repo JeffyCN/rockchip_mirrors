@@ -1,4 +1,4 @@
-From d0e570788e411ee43da8cf987d3e9bbd16a3caf9 Mon Sep 17 00:00:00 2001
+From 00de90802cd3444752e76d884d3f196a900c1a66 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
 Subject: [PATCH 76/76] waylandsink: Support NV12(AFBC)
@@ -8,15 +8,16 @@ gst-play-1.0 video.mp4 --videosink=waylandsink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- ext/wayland/gstwaylandsink.c | 31 +++++++++++++++++++++++++++++++
- ext/wayland/wldisplay.c      | 14 +++++++++++++-
- ext/wayland/wldisplay.h      | 31 +++++++++++++++++++++++++++++++
- ext/wayland/wllinuxdmabuf.c  | 18 +++++++++++++++++-
- ext/wayland/wlwindow.c       | 14 ++++++++------
- 5 files changed, 100 insertions(+), 8 deletions(-)
+ ext/wayland/gstwaylandsink.c | 45 ++++++++++++++++++++++++++++++++++++
+ ext/wayland/wldisplay.c      | 14 ++++++++++-
+ ext/wayland/wldisplay.h      | 37 +++++++++++++++++++++++++++++
+ ext/wayland/wllinuxdmabuf.c  | 21 ++++++++++++++++-
+ ext/wayland/wlwindow.c       | 19 +++++++++------
+ ext/wayland/wlwindow.h       |  2 +-
+ 6 files changed, 128 insertions(+), 10 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 99b41577a..5d8f61414 100644
+index 99b41577a..4dff6afea 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -645,6 +645,9 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
@@ -38,7 +39,7 @@ index 99b41577a..5d8f61414 100644
  
    sink = GST_WAYLAND_SINK (bsink);
  
-@@ -701,6 +706,15 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -701,6 +706,29 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
    if (!gst_video_info_from_caps (&sink->video_info, caps))
      goto invalid_format;
  
@@ -51,10 +52,24 @@ index 99b41577a..5d8f61414 100644
 +      GST_VIDEO_INFO_UNSET_AFBC (&sink->video_info);
 +  }
 +
++  /* HACK: Hide MPP offsets in the last plane's offset/stride */
++  if (GST_VIDEO_INFO_N_PLANES (&sink->video_info) == GST_VIDEO_MAX_PLANES)
++    goto invalid_format;
++
++  if (!gst_structure_get_int (s, "offset-x", &value))
++    value = 0;
++
++  GST_VIDEO_INFO_OFFSET_X (&sink->video_info) = value;
++
++  if (!gst_structure_get_int (s, "offset-y", &value))
++    value = 0;
++
++  GST_VIDEO_INFO_OFFSET_Y (&sink->video_info) = value;
++
    format = GST_VIDEO_INFO_FORMAT (&sink->video_info);
    sink->video_info_changed = TRUE;
  
-@@ -746,9 +760,17 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -746,9 +774,17 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    GstBufferPool *pool = NULL;
    gboolean need_pool;
    GstAllocator *alloc;
@@ -72,7 +87,7 @@ index 99b41577a..5d8f61414 100644
    if (need_pool)
      pool = gst_wayland_create_pool (sink, caps);
  
-@@ -915,6 +937,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -915,6 +951,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
            &sink->video_info);
    }
  
@@ -82,7 +97,7 @@ index 99b41577a..5d8f61414 100644
    if (!wbuf && gst_wl_display_check_format_for_shm (sink->display, format)) {
      if (gst_buffer_n_memory (buffer) == 1 && gst_is_fd_memory (mem))
        wbuf = gst_wl_shm_memory_construct_wl_buffer (mem, sink->display,
-@@ -1047,6 +1072,12 @@ no_wl_buffer:
+@@ -1047,6 +1086,12 @@ no_wl_buffer:
      ret = GST_FLOW_ERROR;
      goto done;
    }
@@ -130,10 +145,10 @@ index 355109716..ec4ab7d2e 100644
    }
  }
 diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
-index d9389773b..cf5ff469f 100644
+index d9389773b..5ff75389b 100644
 --- a/ext/wayland/wldisplay.h
 +++ b/ext/wayland/wldisplay.h
-@@ -31,6 +31,36 @@
+@@ -31,6 +31,42 @@
  
  G_BEGIN_DECLS
  
@@ -167,10 +182,16 @@ index d9389773b..cf5ff469f 100644
 +  GST_VIDEO_INFO_FLAG_IS_SET (i, GST_VIDEO_FLAG_ARM_AFBC)
 +#endif
 +
++/* HACK: Hide MPP offsets in the last plane's offset/stride */
++#define GST_VIDEO_INFO_OFFSET_X(i) \
++  GST_VIDEO_INFO_PLANE_OFFSET (i, GST_VIDEO_MAX_PLANES - 1)
++#define GST_VIDEO_INFO_OFFSET_Y(i) \
++  GST_VIDEO_INFO_PLANE_STRIDE (i, GST_VIDEO_MAX_PLANES - 1)
++
  #define GST_TYPE_WL_DISPLAY                  (gst_wl_display_get_type ())
  #define GST_WL_DISPLAY(obj)                  (G_TYPE_CHECK_INSTANCE_CAST ((obj), GST_TYPE_WL_DISPLAY, GstWlDisplay))
  #define GST_IS_WL_DISPLAY(obj)               (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GST_TYPE_WL_DISPLAY))
-@@ -62,6 +92,7 @@ struct _GstWlDisplay
+@@ -62,6 +98,7 @@ struct _GstWlDisplay
    struct zwp_linux_dmabuf_v1 *dmabuf;
    GArray *shm_formats;
    GArray *dmabuf_formats;
@@ -179,7 +200,7 @@ index d9389773b..cf5ff469f 100644
    /* private */
    gboolean own_display;
 diff --git a/ext/wayland/wllinuxdmabuf.c b/ext/wayland/wllinuxdmabuf.c
-index 2bfbca5db..358313442 100644
+index 2bfbca5db..bac058d87 100644
 --- a/ext/wayland/wllinuxdmabuf.c
 +++ b/ext/wayland/wllinuxdmabuf.c
 @@ -46,6 +46,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
@@ -190,7 +211,7 @@ index 2bfbca5db..358313442 100644
  
    g_return_val_if_fail (gst_wl_display_check_format_for_dmabuf (display,
            GST_VIDEO_INFO_FORMAT (info)), NULL);
-@@ -61,6 +62,21 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+@@ -61,6 +62,24 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
        G_GSSIZE_FORMAT " (%d x %d), format %s", info->size, width, height,
        gst_wl_dmabuf_format_to_string (format));
  
@@ -202,6 +223,9 @@ index 2bfbca5db..358313442 100644
 +#endif
 +      format = DRM_FORMAT_YUV420_8BIT;
 +      nplanes = 1;
++
++      /* Mali might ignore this stride, so let's use it as width */
++      width = GST_VIDEO_INFO_PLANE_STRIDE (info, 0);
 +    } else {
 +      GST_ERROR_OBJECT (mem->allocator, "only support AFBC for NV12");
 +      data.wbuf = NULL;
@@ -212,7 +236,7 @@ index 2bfbca5db..358313442 100644
    /* Creation and configuration of planes  */
    params = zwp_linux_dmabuf_v1_create_params (display->dmabuf);
  
-@@ -74,7 +90,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+@@ -74,7 +93,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
        GstMemory *m = gst_buffer_peek_memory (buf, mem_idx);
        gint fd = gst_dmabuf_memory_get_fd (m);
        zwp_linux_buffer_params_v1_add (params, fd, i, m->offset + skip,
@@ -222,20 +246,20 @@ index 2bfbca5db..358313442 100644
        GST_ERROR_OBJECT (mem->allocator, "memory does not seem to contain "
            "enough data for the specified format");
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index ba7af693f..4e12c8f63 100644
+index ba7af693f..98bf080e7 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -458,6 +458,9 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
    dst.w = window->render_rectangle.w;
    dst.h = window->render_rectangle.h;
  
-+  /* HACK: MPP has this offset */
-+  src.y = 4;
++  src.x = window->video_offset_x;
++  src.y = window->video_offset_y;
 +
    if (window->video_viewport) {
      if (window->fill_mode == GST_WL_WINDOW_STRETCH) {
        res = dst;
-@@ -471,7 +474,7 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+@@ -471,19 +474,14 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
  
        if (src_ratio < dst_ratio) {
          int h = src.w / dst_ratio;
@@ -244,7 +268,8 @@ index ba7af693f..4e12c8f63 100644
          src.h = h;
        } else if (src_ratio > dst_ratio) {
          int w = src.h * dst_ratio;
-@@ -479,11 +482,6 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+-        src.x = (src.w - w) / 2;
++        src.x += (src.w - w) / 2;
          src.w = w;
        }
  
@@ -267,6 +292,29 @@ index ba7af693f..4e12c8f63 100644
    wl_subsurface_set_position (window->video_subsurface, res.x, res.y);
  
    if (commit) {
+@@ -546,6 +548,9 @@ gst_wl_window_render (GstWlWindow * window, GstWlBuffer * buffer,
+         gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
+     window->video_height = info->height;
+ 
++    window->video_offset_x = GST_VIDEO_INFO_OFFSET_X (info);
++    window->video_offset_y = GST_VIDEO_INFO_OFFSET_Y (info);
++
+     wl_subsurface_set_sync (window->video_subsurface);
+     gst_wl_window_resize_video_surface (window, FALSE);
+     gst_wl_window_set_opaque (window, info);
+diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
+index 01a1f2336..215520de8 100644
+--- a/ext/wayland/wlwindow.h
++++ b/ext/wayland/wlwindow.h
+@@ -74,7 +74,7 @@ struct _GstWlWindow
+   GstVideoRectangle video_rectangle;
+ 
+   /* the size of the video in the buffers */
+-  gint video_width, video_height;
++  gint video_width, video_height, video_offset_x, video_offset_y;
+ 
+   /* this will be set when viewporter is available and black background has
+    * already been set on the area_subsurface */
 -- 
 2.20.1
 

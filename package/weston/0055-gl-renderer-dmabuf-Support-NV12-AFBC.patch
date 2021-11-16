@@ -1,4 +1,4 @@
-From 40681268059905a9791c1be0ac71dac7143fcfcd Mon Sep 17 00:00:00 2001
+From be7f47cb0a5b4e941623f20d892413fb1cb19bba Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Nov 2021 15:12:54 +0800
 Subject: [PATCH 55/55] gl-renderer: dmabuf: Support NV12(AFBC)
@@ -10,11 +10,11 @@ gst-play-1.0 video.mp4 --videosink=waylandsink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/renderer-gl/gl-renderer.c | 34 ++++++++++++++++++++++++-----
- 1 file changed, 29 insertions(+), 5 deletions(-)
+ libweston/renderer-gl/gl-renderer.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 33f9dc5..206606c 100644
+index 33f9dc5..9fca885 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -66,6 +66,10 @@
@@ -28,89 +28,7 @@ index 33f9dc5..206606c 100644
  enum gl_border_status {
  	BORDER_STATUS_CLEAN = 0,
  	BORDER_TOP_DIRTY = 1 << GL_RENDERER_BORDER_TOP,
-@@ -112,6 +116,7 @@ struct egl_image {
- 	struct gl_renderer *renderer;
- 	EGLImageKHR image;
- 	int refcount;
-+	float scale_w;
- };
- 
- enum import_type {
-@@ -325,13 +330,14 @@ timeline_submit_render_sync(struct gl_renderer *gr,
- 
- static struct egl_image*
- egl_image_create(struct gl_renderer *gr, EGLenum target,
--		 EGLClientBuffer buffer, const EGLint *attribs)
-+		 EGLClientBuffer buffer, const EGLint *attribs, float scale_w)
- {
- 	struct egl_image *img;
- 
- 	img = zalloc(sizeof *img);
- 	img->renderer = gr;
- 	img->refcount = 1;
-+	img->scale_w = scale_w;
- 	img->image = gr->create_image(gr->egl_display, EGL_NO_CONTEXT,
- 				      target, buffer, attribs);
- 
-@@ -588,6 +594,10 @@ texture_region(struct weston_view *ev, pixman_region32_t *region,
- 				weston_surface_to_buffer_float(ev->surface,
- 							       sx, sy,
- 							       &bx, &by);
-+
-+				if (gs->images[0])
-+					bx /= gs->images[0]->scale_w;
-+
- 				*(v++) = bx * inv_width;
- 				if (gs->y_inverted) {
- 					*(v++) = by * inv_height;
-@@ -1986,7 +1996,7 @@ gl_renderer_attach_egl(struct weston_surface *es, struct weston_buffer *buffer,
- 		gs->images[i] = egl_image_create(gr,
- 						 EGL_WAYLAND_BUFFER_WL,
- 						 buffer->legacy_buffer,
--						 attribs);
-+						 attribs, 1.0f);
- 		if (!gs->images[i]) {
- 			weston_log("failed to create img for plane %d\n", i);
- 			continue;
-@@ -2021,6 +2031,8 @@ import_simple_dmabuf(struct gl_renderer *gr,
- 	EGLint attribs[50];
- 	int atti = 0;
- 	bool has_modifier;
-+	int width = attributes->width;
-+	float scale_w = 1.0f;
- 
- 	/* This requires the Mesa commit in
- 	 * Mesa 10.3 (08264e5dad4df448e7718e782ad9077902089a07) or
-@@ -2030,8 +2042,17 @@ import_simple_dmabuf(struct gl_renderer *gr,
- 	 * https://bugs.freedesktop.org/show_bug.cgi?id=76188
- 	 */
- 
-+	if (DRM_MOD_VALID(attributes->modifier[0]) && gr->is_mali_egl) {
-+		/**
-+		 * Mali might ignore this stride, so let's hack the width and
-+		 * scale it later.
-+		 */
-+		width = attributes->stride[0];
-+		scale_w = 1.0f * attributes->stride[0] / attributes->width;
-+	}
-+
- 	attribs[atti++] = EGL_WIDTH;
--	attribs[atti++] = attributes->width;
-+	attribs[atti++] = width;
- 	attribs[atti++] = EGL_HEIGHT;
- 	attribs[atti++] = attributes->height;
- 	attribs[atti++] = EGL_LINUX_DRM_FOURCC_EXT;
-@@ -2116,8 +2137,7 @@ import_simple_dmabuf(struct gl_renderer *gr,
- 	attribs[atti++] = EGL_NONE;
- 
- 	image = egl_image_create(gr, EGL_LINUX_DMA_BUF_EXT, NULL,
--				 attribs);
--
-+				 attribs, scale_w);
- 	return image;
- }
- 
-@@ -2346,6 +2366,7 @@ choose_texture_target(struct dmabuf_attributes *attributes)
+@@ -2346,6 +2350,7 @@ choose_texture_target(struct dmabuf_attributes *attributes)
  		return GL_TEXTURE_EXTERNAL_OES;
  
  	switch (attributes->format & ~DRM_FORMAT_BIG_ENDIAN) {
@@ -118,7 +36,7 @@ index 33f9dc5..206606c 100644
  	case DRM_FORMAT_YUYV:
  	case DRM_FORMAT_YVYU:
  	case DRM_FORMAT_UYVY:
-@@ -2541,6 +2562,9 @@ dmabuf_is_opaque(struct linux_dmabuf_buffer *dmabuf)
+@@ -2541,6 +2546,9 @@ dmabuf_is_opaque(struct linux_dmabuf_buffer *dmabuf)
  {
  	const struct pixel_format_info *info;
  
