@@ -17,6 +17,10 @@ ifeq ($(RK_USERDATA_FS_TYPE),ubi)
 RK_USERDATA_FS_TYPE := ubifs
 endif
 
+ifneq ($(findstring y,$(BR2_PACKAGE_RK356X) $(BR2_PACKAGE_RV1126_RV1109) $(BR2_PACKAGE_RK3308)),)
+RK_INSTALL_IO_DOMAIN_SCRIPT:=YES
+endif
+
 define RKSCRIPT_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 0644 -D $(@D)/61-partition-init.rules $(TARGET_DIR)/lib/udev/rules.d/
 	$(INSTALL) -m 0644 -D $(@D)/61-sd-cards-auto-mount.rules $(TARGET_DIR)/lib/udev/rules.d/
@@ -32,14 +36,17 @@ define RKSCRIPT_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 0755 -D $(@D)/mp3play.sh $(TARGET_DIR)/usr/bin/
 	$(INSTALL) -m 0755 -D $(@D)/resize-helper $(TARGET_DIR)/usr/bin/
 	$(INSTALL) -m 0755 -D $(@D)/S21mountall.sh $(TARGET_DIR)/etc/init.d/
-	$(INSTALL) -m 0755 -D $(@D)/S98iodomain.sh $(TARGET_DIR)/etc/init.d/
-	$(INSTALL) -m 0755 -D $(@D)/list-iodomain.sh $(TARGET_DIR)/usr/bin/
 #	$(INSTALL) -m 0755 -D $(@D)/S22resize-disk $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -m 0755 -D $(@D)/S50usbdevice $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -m 0755 -D $(@D)/S51n4 $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -m 0755 -D $(@D)/usbdevice $(TARGET_DIR)/usr/bin/
 	$(INSTALL) -m 0755 -D $(@D)/waylandtest.sh $(TARGET_DIR)/usr/bin/
 	echo -e "/dev/block/by-name/misc\t\t/misc\t\t\temmc\t\tdefaults\t\t0\t0" >> $(TARGET_DIR)/etc/fstab
+
+	if [ "$(RK_INSTALL_IO_DOMAIN_SCRIPT)" = "YES" ]; then \
+		$(INSTALL) -m 0755 -D $(@D)/S98iodomain.sh $(TARGET_DIR)/etc/init.d/; \
+		$(INSTALL) -m 0755 -D $(@D)/list-iodomain.sh $(TARGET_DIR)/usr/bin/; \
+	fi
 
 	if [ x${RK_OEM_NODE} != x ]; then \
 	    echo -e "$$RK_OEM_NODE\t\t/oem\t\t\t$$RK_OEM_FS_TYPE\t\tdefaults\t\t0\t2" >> $(TARGET_DIR)/etc/fstab; \
