@@ -331,6 +331,7 @@ gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
   /* Sinks like kmssink require width and height align to 2 */
   output_state = gst_video_decoder_set_output_state (decoder, format,
       GST_ROUND_UP_2 (width), GST_ROUND_UP_2 (height), self->input_state);
+  output_state->caps = gst_video_info_to_caps (&output_state->info);
 
   if (afbc) {
     if (!gst_mpp_dec_allow_afbc (decoder)) {
@@ -339,9 +340,9 @@ gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
     }
 
     GST_VIDEO_INFO_SET_AFBC (&output_state->info);
-    output_state->caps = gst_video_info_to_caps (&output_state->info);
-    gst_caps_set_simple (output_state->caps, "arm-afbc", G_TYPE_INT, 1, NULL);
   }
+
+  gst_caps_set_simple (output_state->caps, "arm-afbc", G_TYPE_INT, afbc, NULL);
 
   *info = output_state->info;
   gst_video_codec_state_unref (output_state);
