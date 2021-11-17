@@ -356,6 +356,7 @@ support_afbc (GstRkXImageSink * self, drmModePlane * plane, guint32 drmfmt)
   drmModeResPtr res;
   struct drm_format_modifier_blob *header;
   struct drm_format_modifier *modifiers;
+  guint32 *formats;
   gboolean found;
   guint64 value;
   gint i, j;
@@ -398,9 +399,13 @@ support_afbc (GstRkXImageSink * self, drmModePlane * plane, guint32 drmfmt)
 
   header = blob->data;
   modifiers = (struct drm_format_modifier *)
-    ((char *) header + header->modifiers_offset);
+    ((gchar *) header + header->modifiers_offset);
+  formats = (guint32 *) ((gchar *) header + header->formats_offset);
 
   for (i = 0, found = FALSE; i < header->count_formats; i++) {
+    if (formats[i] != drmfmt)
+      continue;
+
     for (j = 0; j < header->count_modifiers; j++) {
       struct drm_format_modifier *mod = &modifiers[j];
 
@@ -665,7 +670,9 @@ gst_kms_sink_import_dmabuf (GstRkXImageSink * self, GstBuffer * inbuf,
     GstBuffer ** outbuf)
 {
   gint prime_fds[GST_VIDEO_MAX_PLANES] = { 0, };
+  GstVideoCropMeta *crop;
   GstVideoMeta *meta;
+  GstVideoInfo info;
   guint i, n_mem, n_planes;
   GstKMSMemory *kmsmem;
   guint mems_idx[GST_VIDEO_MAX_PLANES];
@@ -735,8 +742,16 @@ gst_kms_sink_import_dmabuf (GstRkXImageSink * self, GstBuffer * inbuf,
   GST_LOG_OBJECT (self, "found these prime ids: %d, %d, %d, %d", prime_fds[0],
       prime_fds[1], prime_fds[2], prime_fds[3]);
 
+  info = self->vinfo;
+  if ((crop = gst_buffer_get_video_crop_meta (inbuf))) {
+    int crop_height = crop->y + crop->height;
+
+    if (crop_height > GST_VIDEO_INFO_HEIGHT (&info))
+      GST_VIDEO_INFO_HEIGHT (&info) = crop_height;
+  }
+
   kmsmem = gst_kms_allocator_dmabuf_import (self->allocator,
-      prime_fds, n_planes, mems_skip, &self->vinfo);
+      prime_fds, n_planes, mems_skip, &info);
   if (!kmsmem)
     return FALSE;
 
@@ -1186,9 +1201,6 @@ gst_x_image_sink_ximage_put (GstRkXImageSink * ximagesink, GstBuffer * buf)
   if (GST_VIDEO_INFO_IS_AFBC (&ximagesink->vinfo))
     /* The AFBC's width should align to 4 */
     src.w &= ~3;
-
-  src.x += GST_VIDEO_INFO_OFFSET_X (&ximagesink->vinfo);
-  src.y += GST_VIDEO_INFO_OFFSET_Y (&ximagesink->vinfo);
 
   GST_TRACE_OBJECT (ximagesink,
       "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
@@ -1889,20 +1901,6 @@ gst_x_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
     else
       GST_VIDEO_INFO_UNSET_AFBC (&info);
   }
-
-  /* HACK: Hide MPP offsets in the last plane's offset/stride */
-  if (GST_VIDEO_INFO_N_PLANES (&info) == GST_VIDEO_MAX_PLANES)
-    goto invalid_format;
-
-  if (!gst_structure_get_int (s, "offset-x", &value))
-    value = 0;
-
-  GST_VIDEO_INFO_OFFSET_X (&info) = value;
-
-  if (!gst_structure_get_int (s, "offset-y", &value))
-    value = 0;
-
-  GST_VIDEO_INFO_OFFSET_Y (&info) = value;
 
   GST_VIDEO_SINK_WIDTH (ximagesink) = info.width;
   GST_VIDEO_SINK_HEIGHT (ximagesink) = info.height;
