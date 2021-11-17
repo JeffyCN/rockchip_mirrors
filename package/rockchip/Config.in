@@ -9,10 +9,16 @@ config BR2_ROCKCHIP_HAS_ISP1
     bool
     help
       To indicate this SoC has Rockchip ISP1
+
 config BR2_ROCKCHIP_HAS_ISP2
     bool
     help
       To indicate this SoC has Rockchip ISP2
+
+config BR2_ROCKCHIP_HAS_ISP3
+    bool
+    help
+      To indicate this SoC has Rockchip ISP3
 
 choice
 	default BR2_PACKAGE_RK3308
@@ -20,6 +26,7 @@ choice
 
 config BR2_PACKAGE_RK3588
 	bool "RK3588 chip"
+	select BR2_ROCKCHIP_HAS_ISP3
 	help
 		Use rockchip's rk3588 chip
 
@@ -139,9 +146,10 @@ endchoice
 # Camera Engine packages
 config BR2_PACKAGE_CAMERA_ENGINE
     bool "Rockchip Camera Engine For ISP"
-    depends on BR2_ROCKCHIP_HAS_ISP1 || BR2_ROCKCHIP_HAS_ISP2
+    depends on BR2_ROCKCHIP_HAS_ISP1 || BR2_ROCKCHIP_HAS_ISP2 || BR2_ROCKCHIP_HAS_ISP3
     select BR2_PACKAGE_CAMERA_ENGINE_RKISP if BR2_ROCKCHIP_HAS_ISP1
     select BR2_PACKAGE_CAMERA_ENGINE_RKAIQ if BR2_ROCKCHIP_HAS_ISP2
+    select BR2_PACKAGE_CAMERA_ENGINE_RKAIQ if BR2_ROCKCHIP_HAS_ISP3
     help
         Depend on Chip Type, there are different camera_engine packages.
         Enable this config to choose camera_engine package by chip automatically.
