@@ -1,4 +1,4 @@
-From 00c64e7fc89689c454323fedc3965ec264e639d9 Mon Sep 17 00:00:00 2001
+From d2ad81e5038b9be7d6657826005f17a01efb1d2e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 11 Nov 2021 18:25:36 +0800
 Subject: [PATCH 75/76] kmssink: Support AFBC
@@ -11,13 +11,13 @@ chips.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmsallocator.c |  41 +++++++++++-
- sys/kms/gstkmssink.c      | 128 ++++++++++++++++++++++++++++++++++++++
- sys/kms/gstkmsutils.h     |  36 +++++++++++
- 3 files changed, 202 insertions(+), 3 deletions(-)
+ sys/kms/gstkmsallocator.c |  34 +++++++++-
+ sys/kms/gstkmssink.c      | 128 +++++++++++++++++++++++++++++++++++++-
+ sys/kms/gstkmsutils.h     |  30 +++++++++
+ 3 files changed, 188 insertions(+), 4 deletions(-)
 
 diff --git a/sys/kms/gstkmsallocator.c b/sys/kms/gstkmsallocator.c
-index a9f0b6361..d50c02a60 100644
+index a9f0b6361..a011ea72d 100644
 --- a/sys/kms/gstkmsallocator.c
 +++ b/sys/kms/gstkmsallocator.c
 @@ -36,6 +36,7 @@
@@ -28,36 +28,16 @@ index a9f0b6361..d50c02a60 100644
  
  #include <gst/allocators/gstdmabuf.h>
  
-@@ -442,8 +443,10 @@ static gboolean
+@@ -442,7 +443,7 @@ static gboolean
  gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
      gsize in_offsets[GST_VIDEO_MAX_PLANES], GstVideoInfo * vinfo)
  {
 -  gint i, ret;
 +  gint i, ret = -1;
    gint num_planes = GST_VIDEO_INFO_N_PLANES (vinfo);
-+  gint32 offset_x = GST_VIDEO_INFO_OFFSET_X (vinfo);
-+  gint32 offset_y = GST_VIDEO_INFO_OFFSET_Y (vinfo);
    guint32 w, h, fmt, bo_handles[4] = { 0, };
    guint32 pitches[4] = { 0, };
-   guint32 offsets[4] = { 0, };
-@@ -455,6 +458,8 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
-   h = GST_VIDEO_INFO_HEIGHT (vinfo);
-   fmt = gst_drm_format_from_video (GST_VIDEO_INFO_FORMAT (vinfo));
- 
-+  h += offset_y;
-+
-   for (i = 0; i < num_planes; i++) {
-     if (kmsmem->bo)
-       bo_handles[i] = kmsmem->bo->handle;
-@@ -463,13 +468,43 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
- 
-     pitches[i] = GST_VIDEO_INFO_PLANE_STRIDE (vinfo, i);
-     offsets[i] = in_offsets[i];
-+
-+    /* TODO: bytes per pixel? */
-+    offsets[i] += offset_x;
-   }
- 
+@@ -468,8 +469,35 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
    GST_DEBUG_OBJECT (alloc, "bo handles: %d, %d, %d, %d", bo_handles[0],
        bo_handles[1], bo_handles[2], bo_handles[3]);
  
@@ -96,10 +76,10 @@ index a9f0b6361..d50c02a60 100644
      GST_ERROR_OBJECT (alloc, "Failed to bind to framebuffer: %s (%d)",
          g_strerror (errno), errno);
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 81008119e..c5f821eda 100644
+index 81008119e..670225538 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -514,6 +514,79 @@ modesetting_failed:
+@@ -514,6 +514,84 @@ modesetting_failed:
    }
  }
  
@@ -112,6 +92,7 @@ index 81008119e..c5f821eda 100644
 +  drmModeResPtr res;
 +  struct drm_format_modifier_blob *header;
 +  struct drm_format_modifier *modifiers;
++  guint32 *formats;
 +  gboolean found;
 +  guint64 value;
 +  gint i, j;
@@ -154,9 +135,13 @@ index 81008119e..c5f821eda 100644
 +
 +  header = blob->data;
 +  modifiers = (struct drm_format_modifier *)
-+    ((char *) header + header->modifiers_offset);
++    ((gchar *) header + header->modifiers_offset);
++  formats = (guint32 *) ((gchar *) header + header->formats_offset);
 +
 +  for (i = 0, found = FALSE; i < header->count_formats; i++) {
++    if (formats[i] != drmfmt)
++      continue;
++
 +    for (j = 0; j < header->count_modifiers; j++) {
 +      struct drm_format_modifier *mod = &modifiers[j];
 +
@@ -179,7 +164,7 @@ index 81008119e..c5f821eda 100644
  static gboolean
  ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
      drmModePlane * plane, drmModeRes * res)
-@@ -572,6 +645,9 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -572,6 +650,9 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
        if (!caps)
          continue;
  
@@ -189,7 +174,7 @@ index 81008119e..c5f821eda 100644
        tmp_caps = gst_caps_merge (tmp_caps, caps);
      }
  
-@@ -1215,11 +1291,37 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -1215,11 +1296,23 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
  {
    GstKMSSink *self;
    GstVideoInfo vinfo;
@@ -210,24 +195,10 @@ index 81008119e..c5f821eda 100644
 +      GST_VIDEO_INFO_UNSET_AFBC (&vinfo);
 +  }
 +
-+  /* HACK: Hide MPP offsets in the last plane's offset/stride */
-+  if (GST_VIDEO_INFO_N_PLANES (&vinfo) == GST_VIDEO_MAX_PLANES)
-+    goto invalid_format;
-+
-+  if (!gst_structure_get_int (s, "offset-x", &value))
-+    value = 0;
-+
-+  GST_VIDEO_INFO_OFFSET_X (&vinfo) = value;
-+
-+  if (!gst_structure_get_int (s, "offset-y", &value))
-+    value = 0;
-+
-+  GST_VIDEO_INFO_OFFSET_Y (&vinfo) = value;
-+
    self->vinfo = vinfo;
  
    if (!gst_kms_sink_calculate_display_ratio (self, &vinfo,
-@@ -1290,7 +1392,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1290,7 +1383,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    gboolean need_pool;
    GstVideoInfo vinfo;
    GstBufferPool *pool;
@@ -237,7 +208,7 @@ index 81008119e..c5f821eda 100644
  
    self = GST_KMS_SINK (bsink);
  
-@@ -1302,6 +1406,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1302,6 +1397,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    if (!gst_video_info_from_caps (&vinfo, caps))
      goto invalid_caps;
  
@@ -248,7 +219,7 @@ index 81008119e..c5f821eda 100644
    size = GST_VIDEO_INFO_SIZE (&vinfo);
  
    pool = NULL;
-@@ -1340,6 +1448,11 @@ invalid_caps:
+@@ -1340,6 +1439,11 @@ invalid_caps:
      GST_DEBUG_OBJECT (bsink, "invalid caps specified");
      return FALSE;
    }
@@ -260,7 +231,35 @@ index 81008119e..c5f821eda 100644
  no_pool:
    {
      /* Already warned in create_pool */
-@@ -1572,6 +1685,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
+@@ -1429,7 +1533,9 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
+     GstBuffer ** outbuf)
+ {
+   gint prime_fds[GST_VIDEO_MAX_PLANES] = { 0, };
++  GstVideoCropMeta *crop;
+   GstVideoMeta *meta;
++  GstVideoInfo info;
+   guint i, n_mem, n_planes;
+   GstKMSMemory *kmsmem;
+   guint mems_idx[GST_VIDEO_MAX_PLANES];
+@@ -1501,8 +1607,16 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
+   GST_LOG_OBJECT (self, "found these prime ids: %d, %d, %d, %d", prime_fds[0],
+       prime_fds[1], prime_fds[2], prime_fds[3]);
+ 
++  info = self->vinfo;
++  if ((crop = gst_buffer_get_video_crop_meta (inbuf))) {
++    int crop_height = crop->y + crop->height;
++
++    if (crop_height > GST_VIDEO_INFO_HEIGHT (&info))
++      GST_VIDEO_INFO_HEIGHT (&info) = crop_height;
++  }
++
+   kmsmem = gst_kms_allocator_dmabuf_import (self->allocator,
+-      prime_fds, n_planes, mems_skip, &self->vinfo);
++      prime_fds, n_planes, mems_skip, &info);
+   if (!kmsmem)
+     return FALSE;
+ 
+@@ -1572,6 +1686,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
    gboolean success;
    GstBuffer *buf = NULL;
  
@@ -272,7 +271,7 @@ index 81008119e..c5f821eda 100644
    if (!ensure_internal_pool (self, vinfo, inbuf))
      goto bail;
  
-@@ -1755,6 +1873,13 @@ retry_set_plane:
+@@ -1755,6 +1874,10 @@ retry_set_plane:
      src.h = result.h;
    }
  
@@ -280,13 +279,10 @@ index 81008119e..c5f821eda 100644
 +    /* The AFBC's width should align to 4 */
 +    src.w &= ~3;
 +
-+  src.x += GST_VIDEO_INFO_OFFSET_X (vinfo);
-+  src.y += GST_VIDEO_INFO_OFFSET_Y (vinfo);
-+
    GST_TRACE_OBJECT (self,
        "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
        result.x, result.y, result.w, result.h, src.x, src.y, src.w, src.h);
-@@ -1846,6 +1971,9 @@ gst_kms_sink_drain (GstKMSSink * self)
+@@ -1846,6 +1969,9 @@ gst_kms_sink_drain (GstKMSSink * self)
  
      dumb_buf = gst_kms_sink_copy_to_dumb_buffer (self, &self->last_vinfo,
          parent_meta->buffer);
@@ -297,10 +293,10 @@ index 81008119e..c5f821eda 100644
      self->last_buffer = dumb_buf;
  
 diff --git a/sys/kms/gstkmsutils.h b/sys/kms/gstkmsutils.h
-index 657007068..d24feed65 100644
+index 657007068..1654e28bc 100644
 --- a/sys/kms/gstkmsutils.h
 +++ b/sys/kms/gstkmsutils.h
-@@ -30,6 +30,42 @@
+@@ -30,6 +30,36 @@
  
  G_BEGIN_DECLS
  
@@ -333,12 +329,6 @@ index 657007068..d24feed65 100644
 +#define GST_VIDEO_INFO_IS_AFBC(i) \
 +  GST_VIDEO_INFO_FLAG_IS_SET (i, GST_VIDEO_FLAG_ARM_AFBC)
 +#endif
-+
-+/* HACK: Hide MPP offsets in the last plane's offset/stride */
-+#define GST_VIDEO_INFO_OFFSET_X(i) \
-+  GST_VIDEO_INFO_PLANE_OFFSET (i, GST_VIDEO_MAX_PLANES - 1)
-+#define GST_VIDEO_INFO_OFFSET_Y(i) \
-+  GST_VIDEO_INFO_PLANE_STRIDE (i, GST_VIDEO_MAX_PLANES - 1)
 +
  GstVideoFormat gst_video_format_from_drm (guint32 drmfmt);
  guint32        gst_drm_format_from_video (GstVideoFormat fmt);
