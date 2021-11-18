@@ -1,7 +1,7 @@
-From d2ad81e5038b9be7d6657826005f17a01efb1d2e Mon Sep 17 00:00:00 2001
+From 4dffc6235f3c57f4292cdcd18399ba3118b8ff95 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 11 Nov 2021 18:25:36 +0800
-Subject: [PATCH 75/76] kmssink: Support AFBC
+Subject: [PATCH 75/76] kmssink: Support NV12(AFBC) and NV12_10(AFBC)
 
 Support using ARM AFBC compressed format.
 
@@ -11,13 +11,14 @@ chips.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmsallocator.c |  34 +++++++++-
- sys/kms/gstkmssink.c      | 128 +++++++++++++++++++++++++++++++++++++-
- sys/kms/gstkmsutils.h     |  30 +++++++++
- 3 files changed, 188 insertions(+), 4 deletions(-)
+ sys/kms/gstkmsallocator.c |  44 ++++++++++--
+ sys/kms/gstkmssink.c      | 141 +++++++++++++++++++++++++++++++++++++-
+ sys/kms/gstkmsutils.c     |   9 +--
+ sys/kms/gstkmsutils.h     |  51 ++++++++++++++
+ 4 files changed, 233 insertions(+), 12 deletions(-)
 
 diff --git a/sys/kms/gstkmsallocator.c b/sys/kms/gstkmsallocator.c
-index a9f0b6361..a011ea72d 100644
+index a9f0b6361..e132412ba 100644
 --- a/sys/kms/gstkmsallocator.c
 +++ b/sys/kms/gstkmsallocator.c
 @@ -36,6 +36,7 @@
@@ -28,7 +29,17 @@ index a9f0b6361..a011ea72d 100644
  
  #include <gst/allocators/gstdmabuf.h>
  
-@@ -442,7 +443,7 @@ static gboolean
+@@ -147,9 +148,7 @@ extrapolate_stride (const GstVideoFormatInfo * finfo, gint plane, gint stride)
+   switch (finfo->format) {
+     case GST_VIDEO_FORMAT_NV12:
+     case GST_VIDEO_FORMAT_NV12_64Z32:
+-#ifdef HAVE_NV12_10LE40
+     case GST_VIDEO_FORMAT_NV12_10LE40:
+-#endif
+     case GST_VIDEO_FORMAT_NV21:
+     case GST_VIDEO_FORMAT_NV16:
+     case GST_VIDEO_FORMAT_NV61:
+@@ -442,7 +441,7 @@ static gboolean
  gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
      gsize in_offsets[GST_VIDEO_MAX_PLANES], GstVideoInfo * vinfo)
  {
@@ -37,7 +48,7 @@ index a9f0b6361..a011ea72d 100644
    gint num_planes = GST_VIDEO_INFO_N_PLANES (vinfo);
    guint32 w, h, fmt, bo_handles[4] = { 0, };
    guint32 pitches[4] = { 0, };
-@@ -468,8 +469,35 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
+@@ -468,8 +467,43 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
    GST_DEBUG_OBJECT (alloc, "bo handles: %d, %d, %d, %d", bo_handles[0],
        bo_handles[1], bo_handles[2], bo_handles[3]);
  
@@ -49,20 +60,25 @@ index a9f0b6361..a011ea72d 100644
 +    for (i = 0; i < num_planes; i++)
 +      modifiers[i] = DRM_AFBC_MODIFIER;
 +
-+    if (fmt == DRM_FORMAT_NV12) {
-+      /* The newer kernel might use DRM_FORMAT_YUV420_8BIT instead */
-+#ifndef DRM_FORMAT_YUV420_8BIT
-+#define DRM_FORMAT_YUV420_8BIT fourcc_code('Y', 'U', '0', '8')
-+#endif
-+
++    if (fmt == DRM_FORMAT_NV12 || fmt == DRM_FORMAT_NV12_10) {
++      /* The newer kernel might use DRM_FORMAT_YUV420_(8|10)BIT instead */
 +      guint32 _handles[4] = { bo_handles[0], 0, };
 +      guint32 _pitches[4] = { pitches[0], 0, };
 +      guint32 _offsets[4] = { offsets[0], 0, };
 +      guint64 _modifiers[4] = { modifiers[0], 0, };
++      guint32 _fmt;
 +
-+      ret = drmModeAddFB2WithModifiers (alloc->priv->fd, w, h,
-+          DRM_FORMAT_YUV420_8BIT, _handles, _pitches, _offsets, _modifiers,
-+          &kmsmem->fb_id, DRM_MODE_FB_MODIFIERS);
++      if (fmt == DRM_FORMAT_NV12) {
++        _fmt = DRM_FORMAT_YUV420_8BIT;
++      } else {
++        _fmt = DRM_FORMAT_YUV420_10BIT;
++        /* The bpp of YUV420_10BIT is 15 */
++        _pitches[0] *= 1.5;
++      }
++
++      ret = drmModeAddFB2WithModifiers (alloc->priv->fd, w, h, _fmt, _handles,
++          _pitches, _offsets, _modifiers, &kmsmem->fb_id,
++          DRM_MODE_FB_MODIFIERS);
 +    }
 +
 +    if (ret)
@@ -71,12 +87,15 @@ index a9f0b6361..a011ea72d 100644
 +  } else {
 +    ret = drmModeAddFB2 (alloc->priv->fd, w, h, fmt, bo_handles, pitches,
 +        offsets, &kmsmem->fb_id, 0);
++    if (ret && fmt == DRM_FORMAT_NV12_10)
++      ret = drmModeAddFB2 (alloc->priv->fd, w, h, DRM_FORMAT_NV15, bo_handles,
++          pitches, offsets, &kmsmem->fb_id, 0);
 +  }
    if (ret) {
      GST_ERROR_OBJECT (alloc, "Failed to bind to framebuffer: %s (%d)",
          g_strerror (errno), errno);
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 81008119e..670225538 100644
+index 81008119e..01c47ee09 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -514,6 +514,84 @@ modesetting_failed:
@@ -164,17 +183,22 @@ index 81008119e..670225538 100644
  static gboolean
  ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
      drmModePlane * plane, drmModeRes * res)
-@@ -572,6 +650,9 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -572,6 +650,14 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
        if (!caps)
          continue;
  
 +      if (support_afbc (self, plane, plane->formats[j]))
-+        gst_caps_set_simple (caps, "arm-afbc", GST_TYPE_INT_RANGE, 0, 1, NULL);
++        gst_caps_set_simple (tmp_caps, "arm-afbc",
++            GST_TYPE_INT_RANGE, 0, 1, NULL);
++
++      if (fmt == GST_VIDEO_FORMAT_NV12_10LE40)
++        gst_caps_set_simple (tmp_caps, "nv12-10le40",
++            GST_TYPE_INT_RANGE, 0, 1, NULL);
 +
        tmp_caps = gst_caps_merge (tmp_caps, caps);
      }
  
-@@ -1215,11 +1296,23 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -1215,11 +1301,31 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
  {
    GstKMSSink *self;
    GstVideoInfo vinfo;
@@ -195,10 +219,18 @@ index 81008119e..670225538 100644
 +      GST_VIDEO_INFO_UNSET_AFBC (&vinfo);
 +  }
 +
++#ifndef HAVE_NV12_10LE40
++  /* HACK: Fake format needs negotiation */
++  if (GST_VIDEO_INFO_FORMAT (&vinfo) == GST_VIDEO_FORMAT_NV12_10LE40) {
++    if (!gst_structure_get_int (s, "nv12-10le40", &value) || !value)
++      goto invalid_format;
++  }
++#endif
++
    self->vinfo = vinfo;
  
    if (!gst_kms_sink_calculate_display_ratio (self, &vinfo,
-@@ -1290,7 +1383,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1290,7 +1396,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    gboolean need_pool;
    GstVideoInfo vinfo;
    GstBufferPool *pool;
@@ -208,7 +240,7 @@ index 81008119e..670225538 100644
  
    self = GST_KMS_SINK (bsink);
  
-@@ -1302,6 +1397,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1302,6 +1410,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    if (!gst_video_info_from_caps (&vinfo, caps))
      goto invalid_caps;
  
@@ -219,7 +251,7 @@ index 81008119e..670225538 100644
    size = GST_VIDEO_INFO_SIZE (&vinfo);
  
    pool = NULL;
-@@ -1340,6 +1439,11 @@ invalid_caps:
+@@ -1340,6 +1452,11 @@ invalid_caps:
      GST_DEBUG_OBJECT (bsink, "invalid caps specified");
      return FALSE;
    }
@@ -231,7 +263,7 @@ index 81008119e..670225538 100644
  no_pool:
    {
      /* Already warned in create_pool */
-@@ -1429,7 +1533,9 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
+@@ -1429,7 +1546,9 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
      GstBuffer ** outbuf)
  {
    gint prime_fds[GST_VIDEO_MAX_PLANES] = { 0, };
@@ -241,7 +273,7 @@ index 81008119e..670225538 100644
    guint i, n_mem, n_planes;
    GstKMSMemory *kmsmem;
    guint mems_idx[GST_VIDEO_MAX_PLANES];
-@@ -1501,8 +1607,16 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
+@@ -1501,8 +1620,16 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
    GST_LOG_OBJECT (self, "found these prime ids: %d, %d, %d, %d", prime_fds[0],
        prime_fds[1], prime_fds[2], prime_fds[3]);
  
@@ -259,7 +291,7 @@ index 81008119e..670225538 100644
    if (!kmsmem)
      return FALSE;
  
-@@ -1572,6 +1686,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
+@@ -1572,6 +1699,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
    gboolean success;
    GstBuffer *buf = NULL;
  
@@ -271,7 +303,7 @@ index 81008119e..670225538 100644
    if (!ensure_internal_pool (self, vinfo, inbuf))
      goto bail;
  
-@@ -1755,6 +1874,10 @@ retry_set_plane:
+@@ -1755,6 +1887,10 @@ retry_set_plane:
      src.h = result.h;
    }
  
@@ -282,7 +314,7 @@ index 81008119e..670225538 100644
    GST_TRACE_OBJECT (self,
        "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
        result.x, result.y, result.w, result.h, src.x, src.y, src.w, src.h);
-@@ -1846,6 +1969,9 @@ gst_kms_sink_drain (GstKMSSink * self)
+@@ -1846,6 +1982,9 @@ gst_kms_sink_drain (GstKMSSink * self)
  
      dumb_buf = gst_kms_sink_copy_to_dumb_buffer (self, &self->last_vinfo,
          parent_meta->buffer);
@@ -292,14 +324,72 @@ index 81008119e..670225538 100644
      last_buf = self->last_buffer;
      self->last_buffer = dumb_buf;
  
+diff --git a/sys/kms/gstkmsutils.c b/sys/kms/gstkmsutils.c
+index 3bf201e5f..56b5fae11 100644
+--- a/sys/kms/gstkmsutils.c
++++ b/sys/kms/gstkmsutils.c
+@@ -31,10 +31,6 @@
+ 
+ #include "gstkmsutils.h"
+ 
+-#ifndef DRM_FORMAT_NV12_10
+-#define DRM_FORMAT_NV12_10 fourcc_code('N', 'A', '1', '2')
+-#endif
+-
+ /* *INDENT-OFF* */
+ static const struct
+ {
+@@ -53,9 +49,8 @@ static const struct
+   DEF_FMT (XBGR8888, RGBx),
+   DEF_FMT (BGR888, RGB),
+   DEF_FMT (RGB888, BGR),
+-#ifdef HAVE_NV12_10LE40
+   DEF_FMT (NV12_10, NV12_10LE40),
+-#endif
++  DEF_FMT (NV15, NV12_10LE40),
+ #else
+   DEF_FMT (ARGB8888, ARGB),
+   DEF_FMT (XRGB8888, xRGB),
+@@ -119,6 +114,7 @@ gst_drm_bpp_from_drm (guint32 drmfmt)
+       bpp = 8;
+       break;
+     case DRM_FORMAT_NV12_10:
++    case DRM_FORMAT_NV15:
+       bpp = 10;
+       break;
+     case DRM_FORMAT_UYVY:
+@@ -149,6 +145,7 @@ gst_drm_height_from_drm (guint32 drmfmt, guint32 height)
+     case DRM_FORMAT_YUV422:
+     case DRM_FORMAT_NV12:
+     case DRM_FORMAT_NV12_10:
++    case DRM_FORMAT_NV15:
+     case DRM_FORMAT_NV21:
+       ret = height * 3 / 2;
+       break;
 diff --git a/sys/kms/gstkmsutils.h b/sys/kms/gstkmsutils.h
-index 657007068..1654e28bc 100644
+index 657007068..6d709e77a 100644
 --- a/sys/kms/gstkmsutils.h
 +++ b/sys/kms/gstkmsutils.h
-@@ -30,6 +30,36 @@
+@@ -30,6 +30,57 @@
  
  G_BEGIN_DECLS
  
++#ifndef DRM_FORMAT_NV12_10
++#define DRM_FORMAT_NV12_10 fourcc_code('N', 'A', '1', '2')
++#endif
++
++#ifndef DRM_FORMAT_NV15
++#define DRM_FORMAT_NV15 fourcc_code('N', 'V', '1', '5')
++#endif
++
++#ifndef DRM_FORMAT_YUV420_8BIT
++#define DRM_FORMAT_YUV420_8BIT fourcc_code('Y', 'U', '0', '8')
++#endif
++
++#ifndef DRM_FORMAT_YUV420_10BIT
++#define DRM_FORMAT_YUV420_10BIT fourcc_code('Y', 'U', '1', '0')
++#endif
++
 +#ifndef DRM_FORMAT_MOD_VENDOR_ARM
 +#define DRM_FORMAT_MOD_VENDOR_ARM 0x08
 +#endif
@@ -328,6 +418,11 @@ index 657007068..1654e28bc 100644
 +  GST_VIDEO_INFO_FLAG_UNSET (i, GST_VIDEO_FLAG_ARM_AFBC)
 +#define GST_VIDEO_INFO_IS_AFBC(i) \
 +  GST_VIDEO_INFO_FLAG_IS_SET (i, GST_VIDEO_FLAG_ARM_AFBC)
++#endif
++
++#ifndef HAVE_NV12_10LE40
++/* HACK: Support fake format for nv12_10le40 */
++#define GST_VIDEO_FORMAT_NV12_10LE40 GST_VIDEO_FORMAT_NV12_10LE32
 +#endif
 +
  GstVideoFormat gst_video_format_from_drm (guint32 drmfmt);
