@@ -30,6 +30,22 @@
 
 G_BEGIN_DECLS
 
+#ifndef DRM_FORMAT_NV12_10
+#define DRM_FORMAT_NV12_10 fourcc_code('N', 'A', '1', '2')
+#endif
+
+#ifndef DRM_FORMAT_NV15
+#define DRM_FORMAT_NV15 fourcc_code('N', 'V', '1', '5')
+#endif
+
+#ifndef DRM_FORMAT_YUV420_8BIT
+#define DRM_FORMAT_YUV420_8BIT fourcc_code('Y', 'U', '0', '8')
+#endif
+
+#ifndef DRM_FORMAT_YUV420_10BIT
+#define DRM_FORMAT_YUV420_10BIT fourcc_code('Y', 'U', '1', '0')
+#endif
+
 #ifndef DRM_FORMAT_MOD_VENDOR_ARM
 #define DRM_FORMAT_MOD_VENDOR_ARM 0x08
 #endif
@@ -58,6 +74,11 @@ G_BEGIN_DECLS
   GST_VIDEO_INFO_FLAG_UNSET (i, GST_VIDEO_FLAG_ARM_AFBC)
 #define GST_VIDEO_INFO_IS_AFBC(i) \
   GST_VIDEO_INFO_FLAG_IS_SET (i, GST_VIDEO_FLAG_ARM_AFBC)
+#endif
+
+#ifndef HAVE_NV12_10LE40
+/* HACK: Support fake format for nv12_10le40 */
+#define GST_VIDEO_FORMAT_NV12_10LE40 GST_VIDEO_FORMAT_NV12_10LE32
 #endif
 
 GstVideoFormat gst_video_format_from_drm (guint32 drmfmt);

@@ -458,7 +458,12 @@ drm_ensure_allowed_caps (GstRkXImageSink * self, drmModePlane * plane,
       continue;
 
     if (support_afbc (self, plane, plane->formats[i]))
-      gst_caps_set_simple (caps, "arm-afbc", GST_TYPE_INT_RANGE, 0, 1, NULL);
+      gst_caps_set_simple (out_caps, "arm-afbc",
+          GST_TYPE_INT_RANGE, 0, 1, NULL);
+
+    if (fmt == GST_VIDEO_FORMAT_NV12_10LE40)
+      gst_caps_set_simple (out_caps, "nv12-10le40",
+          GST_TYPE_INT_RANGE, 0, 1, NULL);
 
     out_caps = gst_caps_merge (out_caps, caps);
   }
@@ -1901,6 +1906,14 @@ gst_x_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
     else
       GST_VIDEO_INFO_UNSET_AFBC (&info);
   }
+
+#ifndef HAVE_NV12_10LE40
+  /* HACK: Fake format needs negotiation */
+  if (GST_VIDEO_INFO_FORMAT (&info) == GST_VIDEO_FORMAT_NV12_10LE40) {
+    if (!gst_structure_get_int (s, "nv12-10le40", &value) || !value)
+      goto invalid_format;
+  }
+#endif
 
   GST_VIDEO_SINK_WIDTH (ximagesink) = info.width;
   GST_VIDEO_SINK_HEIGHT (ximagesink) = info.height;

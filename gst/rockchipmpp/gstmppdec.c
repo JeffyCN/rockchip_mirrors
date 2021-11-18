@@ -318,9 +318,30 @@ gst_mpp_dec_allow_afbc (GstVideoDecoder * decoder)
 }
 
 static gboolean
+gst_mpp_dec_allow_nv12_10le40 (GstVideoDecoder * decoder)
+{
+  GstStructure *s;
+  GstCaps *caps;
+  gboolean ret = FALSE;
+
+  caps = gst_pad_get_allowed_caps (GST_VIDEO_DECODER_SRC_PAD (decoder));
+  if (caps) {
+    caps = gst_caps_truncate (caps);
+    s = gst_caps_get_structure (caps, 0);
+
+    if (gst_structure_has_field (s, "nv12-10le40"))
+      ret = TRUE;
+
+    gst_caps_unref (caps);
+  }
+
+  return ret;
+}
+
+static gboolean
 gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
     guint width, guint height, gint hstride, gint vstride, guint align,
-    gboolean afbc)
+    gboolean afbc, gboolean nv12_10le40)
 {
   GstMppDec *self = GST_MPP_DEC (decoder);
   GstVideoInfo *info = &self->info;
@@ -333,16 +354,30 @@ gst_mpp_dec_update_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
       GST_ROUND_UP_2 (width), GST_ROUND_UP_2 (height), self->input_state);
   output_state->caps = gst_video_info_to_caps (&output_state->info);
 
-  if (afbc) {
-    if (!gst_mpp_dec_allow_afbc (decoder)) {
-      GST_ERROR_OBJECT (self, "AFBC not allowed");
-      return FALSE;
-    }
+  if (gst_mpp_dec_allow_afbc (decoder)) {
+    if (afbc)
+      GST_VIDEO_INFO_SET_AFBC (&output_state->info);
+    else
+      GST_VIDEO_INFO_UNSET_AFBC (&output_state->info);
 
-    GST_VIDEO_INFO_SET_AFBC (&output_state->info);
+    gst_caps_set_simple (output_state->caps,
+        "arm-afbc", G_TYPE_INT, afbc, NULL);
+  } else if (afbc) {
+    GST_ERROR_OBJECT (self, "AFBC not allowed");
+    return FALSE;
   }
 
-  gst_caps_set_simple (output_state->caps, "arm-afbc", G_TYPE_INT, afbc, NULL);
+
+  if (gst_mpp_dec_allow_nv12_10le40 (decoder)) {
+    gst_caps_set_simple (output_state->caps,
+        "nv12-10le40", G_TYPE_INT, nv12_10le40, NULL);
+#ifndef HAVE_NV12_10LE40
+  } else if (nv12_10le40) {
+    /* HACK: Fake format needs negotiation */
+    GST_ERROR_OBJECT (self, "NV12_10LE40 not allowed");
+    return FALSE;
+#endif
+  }
 
   *info = output_state->info;
   gst_video_codec_state_unref (output_state);
@@ -366,7 +401,7 @@ gst_mpp_dec_update_simple_video_info (GstVideoDecoder * decoder,
     GstVideoFormat format, guint width, guint height, guint align)
 {
   return gst_mpp_dec_update_video_info (decoder, format, width, height, 0, 0,
-      align, FALSE);
+      align, FALSE, FALSE);
 }
 
 void
@@ -385,6 +420,11 @@ gst_mpp_dec_fixup_video_info (GstVideoDecoder * decoder, GstVideoFormat format,
     format = self->format;
   if (format == GST_VIDEO_FORMAT_UNKNOWN)
     /* Fallback to NV12 */
+    format = GST_VIDEO_FORMAT_NV12;
+
+  /* Fallback to NV12 if downstream couldn't handle NV12_10 */
+  if (format == GST_VIDEO_FORMAT_NV12_10LE40 &&
+      !gst_mpp_dec_allow_nv12_10le40 (decoder))
     format = GST_VIDEO_FORMAT_NV12;
 
   gst_video_info_set_format (info, format,
@@ -416,7 +456,7 @@ gst_mpp_dec_apply_info_change (GstVideoDecoder * decoder, MppFrame mframe)
   src_format = gst_mpp_mpp_format_to_gst_format (mpp_format);
 
   GST_INFO_OBJECT (self, "applying %s%s %dx%d (%dx%d)",
-      gst_video_format_to_string (src_format), afbc ? "(AFBC)" : "",
+      gst_mpp_video_format_to_string (src_format), afbc ? "(AFBC)" : "",
       width, height, hstride, vstride);
 
   /* Figure out final output info */
@@ -435,15 +475,16 @@ gst_mpp_dec_apply_info_change (GstVideoDecoder * decoder, MppFrame mframe)
 
     /* Conversion required */
     GST_INFO_OBJECT (self, "convert from %s (%dx%d) to %s (%dx%d)",
-        gst_video_format_to_string (src_format), width, height,
-        gst_video_format_to_string (dst_format), dst_width, dst_height);
+        gst_mpp_video_format_to_string (src_format), width, height,
+        gst_mpp_video_format_to_string (dst_format), dst_width, dst_height);
 
     hstride = 0;
     vstride = 0;
   }
 
   if (!gst_mpp_dec_update_video_info (decoder, dst_format,
-          dst_width, dst_height, hstride, vstride, 0, afbc))
+          dst_width, dst_height, hstride, vstride, 0, afbc,
+          mpp_format == MPP_FMT_YUV420SP_10BIT))
     return GST_FLOW_NOT_NEGOTIATED;
 
   return GST_FLOW_OK;
@@ -678,7 +719,8 @@ gst_mpp_dec_get_gst_buffer (GstVideoDecoder * decoder, MppFrame mframe)
   GST_DEBUG_OBJECT (self, "frame format not matched");
 
 #ifdef HAVE_RGA
-  if (gst_mpp_dec_rga_convert (decoder, mframe, buffer))
+  if (!GST_VIDEO_INFO_IS_AFBC (info) && !offset_x && !offset_y &&
+      gst_mpp_dec_rga_convert (decoder, mframe, buffer))
     return buffer;
 #endif
 
