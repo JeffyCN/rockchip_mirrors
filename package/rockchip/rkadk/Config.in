@@ -2,6 +2,7 @@ config BR2_PACKAGE_RKADK
     bool "rkadk"
     select BR2_PACKAGE_RKMEDIA
     select BR2_PACKAGE_INIPARSER
+    select BR2_PACKAGE_CJSON
     help
       rkadk
 
