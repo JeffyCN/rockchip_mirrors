@@ -36,7 +36,11 @@ SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 # or avoid confusing packages that can use the O=<dir> syntax for out-of-tree
 # build by preventing it from being forwarded to sub-make calls.
 ifneq ("$(origin O)", "command line")
+ifneq ($(TARGET_OUTPUT_DIR),)
+O := $(TARGET_OUTPUT_DIR)
+else
 O := $(CURDIR)/output
+endif
 endif
 
 # Check if the current Buildroot execution meets all the pre-requisites.
@@ -412,6 +416,7 @@ unexport CPP
 unexport RANLIB
 unexport CFLAGS
 unexport CXXFLAGS
+unexport UNZIP
 unexport GREP_OPTIONS
 unexport TAR_OPTIONS
 unexport CONFIG_SITE
@@ -608,6 +613,14 @@ prepare-sdk: world
 	mkdir -p $(HOST_DIR)/share/buildroot
 	echo $(HOST_DIR) > $(HOST_DIR)/share/buildroot/sdk-location
 
+
+.PHONY: reinstall
+clean-for-reinstall: $(patsubst %,%-clean-for-reinstall,$(PACKAGES))
+	rm -rf $(TARGET_DIR) $(BINARIES_DIR) $(HOST_DIR)
+	find $(BUILD_DIR) -name ".stamp_*_installed" -delete
+
+reinstall: clean-for-reinstall all
+
 BR2_SDK_PREFIX ?= $(GNU_TARGET_NAME)_sdk-buildroot
 .PHONY: sdk
 sdk: prepare-sdk $(BR2_TAR_HOST_DEPENDENCY)
@@ -779,6 +792,11 @@ endif
 		echo "PRETTY_NAME=\"Buildroot $(BR2_VERSION)\"" \
 	) >  $(TARGET_DIR)/usr/lib/os-release
 	ln -sf ../usr/lib/os-release $(TARGET_DIR)/etc
+	( \
+		echo "RK_MODEL=$(RK_MODEL)"; \
+		echo "RK_VERSION=$(RK_VERSION)"; \
+		echo "RK_OTA_HOST=$(RK_OTA_HOST)"; \
+	) >  $(TARGET_DIR)/etc/version
 
 	@$(call MESSAGE,"Sanitizing RPATH in target tree")
 	PER_PACKAGE_DIR=$(PER_PACKAGE_DIR) $(TOPDIR)/support/scripts/fix-rpath target
@@ -1019,20 +1037,24 @@ defconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
 define percent_defconfig
 # Override the BR2_DEFCONFIG from COMMON_CONFIG_ENV with the new defconfig
 %_defconfig: $(BUILD_DIR)/buildroot-config/conf $(1)/configs/%_defconfig outputmakefile
-	@$$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$(1)/configs/$$@ \
-		$$< --defconfig=$(1)/configs/$$@ $$(CONFIG_CONFIG_IN)
+	$(TOPDIR)/build/defconfig_hook.py -m $(1)/configs/$$@ $(BASE_DIR)/.rockchipconfig
+	$$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$(1)/configs/$$@ \
+		$$< --defconfig=$(BASE_DIR)/.rockchipconfig $$(CONFIG_CONFIG_IN)
 endef
 $(eval $(foreach d,$(call reverse,$(TOPDIR) $(BR2_EXTERNAL_DIRS)),$(call percent_defconfig,$(d))$(sep)))
 
-update-defconfig: savedefconfig
+CFG_ := $(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig)
+savedefconfig: $(BUILD_DIR)/buildroot-config/conf prepare-kconfig
+	grep "#include" $(CFG_) > $(CFG_).split || true
 
-savedefconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
-	@$(COMMON_CONFIG_ENV) $< \
-		--savedefconfig=$(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig) \
-		$(CONFIG_CONFIG_IN)
-	@$(SED) '/^BR2_DEFCONFIG=/d' $(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig)
+	@$(COMMON_CONFIG_ENV) $< --savedefconfig=$(CFG_) $(CONFIG_CONFIG_IN)
+	@$(SED) '/BR2_DEFCONFIG=/d' $(CFG_)
 
-.PHONY: defconfig savedefconfig update-defconfig
+	cat $(CFG_) >> $(CFG_).split
+	$(TOPDIR)/build/defconfig_hook.py -s $(CFG_).split $(CFG_)
+	rm $(CFG_).split
+
+.PHONY: defconfig savedefconfig
 
 ################################################################################
 #
@@ -1095,6 +1117,7 @@ help:
 	@echo '  all                    - make world'
 	@echo '  toolchain              - build toolchain'
 	@echo '  sdk                    - build relocatable SDK'
+	@echo '  reinstall              - reinstall all'
 	@echo
 	@echo 'Configuration:'
 	@echo '  menuconfig             - interactive curses-based configurator'
