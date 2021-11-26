@@ -18,10 +18,3 @@ export WESTON_DISABLE_ATOMIC=1
 export WESTON_DRM_DISABLE_MODIFIER=1
 
 export QT_QPA_PLATFORM=wayland
-
-# The kmssink has better performance but is more limited.
-# export PREFERED_VIDEOSINK=kmssink
-export PREFERED_VIDEOSINK=waylandsink
-
-export QT_GSTREAMER_WIDGET_VIDEOSINK=${PREFERED_VIDEOSINK}
-export QT_GSTREAMER_WINDOW_VIDEOSINK=${PREFERED_VIDEOSINK}

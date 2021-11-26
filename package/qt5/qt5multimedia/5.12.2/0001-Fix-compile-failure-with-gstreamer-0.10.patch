@@ -1,7 +1,7 @@
 From 219c32d80b5c3528371f11851d1978781dcefbc8 Mon Sep 17 00:00:00 2001
 From: Richard Oehlinger <richard.oehlinger@adbsafegate.com>
 Date: Mon, 18 Mar 2019 10:15:13 +0100
-Subject: [PATCH 01/13] Fix compile failure with gstreamer 0.10
+Subject: [PATCH 01/16] Fix compile failure with gstreamer 0.10
 
 This fixes an compile failure introduced in commit 67c4ec55.
 
@@ -16,7 +16,7 @@ https://github.com/qt/qtmultimedia/commit/935967a453b47ae7c8e9ad3d94eef3813eab58
  1 file changed, 5 insertions(+)
 
 diff --git a/src/gsttools/qgstreamerplayersession.cpp b/src/gsttools/qgstreamerplayersession.cpp
-index bd402fb..ab20638 100644
+index bd402fb3..ab20638c 100644
 --- a/src/gsttools/qgstreamerplayersession.cpp
 +++ b/src/gsttools/qgstreamerplayersession.cpp
 @@ -396,9 +396,14 @@ void QGstreamerPlayerSession::setPipeline(GstElement *pipeline)
