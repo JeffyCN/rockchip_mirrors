@@ -1,0 +1,37 @@
+From 88d4166b7c49a12f021157ea217fbe3efd61d31e Mon Sep 17 00:00:00 2001
+From: Ville Voutilainen <ville.voutilainen@qt.io>
+Date: Mon, 18 Jan 2021 11:19:04 +0200
+Subject: [PATCH 8/8] Build fixes for GCC 11
+
+Task-number: QTBUG-89977
+Change-Id: I975a859d5252e2721475f86ced6c8dab06ae8c9c
+Reviewed-by: Lars Knoll <lars.knoll@qt.io>
+(cherry picked from commit eb6525f126f680f99598bac79d2682e2ebbdc4ac)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ src/qml/compiler/qv4bytecodegenerator_p.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/qml/compiler/qv4bytecodegenerator_p.h b/src/qml/compiler/qv4bytecodegenerator_p.h
+index 8c509dd9f1..6cbc5a488d 100644
+--- a/src/qml/compiler/qv4bytecodegenerator_p.h
++++ b/src/qml/compiler/qv4bytecodegenerator_p.h
+@@ -188,13 +188,13 @@ QT_WARNING_POP
+ 
+     Q_REQUIRED_RESULT Jump jumpNotUndefined()
+     {
+-        Instruction::JumpNotUndefined data;
++        Instruction::JumpNotUndefined data{};
+         return addJumpInstruction(data);
+     }
+ 
+     Q_REQUIRED_RESULT Jump jumpNoException()
+     {
+-        Instruction::JumpNoException data;
++        Instruction::JumpNoException data{};
+         return addJumpInstruction(data);
+     }
+ 
+-- 
+2.20.1
+
