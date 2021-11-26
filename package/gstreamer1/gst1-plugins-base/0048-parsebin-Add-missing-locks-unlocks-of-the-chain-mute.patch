@@ -1,7 +1,7 @@
 From cccf8ce915d00d6cd968a49a6f977c2f836dced4 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
 Date: Wed, 8 Aug 2018 17:35:08 +0200
-Subject: [PATCH] parsebin: Add missing locks/unlocks of the chain mutex
+Subject: [PATCH 48/49] parsebin: Add missing locks/unlocks of the chain mutex
 
 Before freeing pending pads it is required to hold the mutex, that's
 what is protecting the list of pending pads in other places.
