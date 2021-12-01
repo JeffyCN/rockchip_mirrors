@@ -2,7 +2,7 @@ RKADK_SITE = $(TOPDIR)/../external/rkadk
 RKADK_SITE_METHOD = local
 RKADK_INSTALL_STAGING = YES
 
-RKADK_DEPENDENCIES += rkmedia iniparser cjson
+RKADK_DEPENDENCIES += rkmedia rkfsmk iniparser cjson
 
 ifeq ($(BR2_PACKAGE_RKADK_ROCKIT), y)
 RKADK_DEPENDENCIES += rockit
