@@ -1,4 +1,4 @@
-From 4dffc6235f3c57f4292cdcd18399ba3118b8ff95 Mon Sep 17 00:00:00 2001
+From 9d9064da3d5f82294ea0f4e3b462b50085289f59 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 11 Nov 2021 18:25:36 +0800
 Subject: [PATCH 75/76] kmssink: Support NV12(AFBC) and NV12_10(AFBC)
@@ -12,10 +12,10 @@ chips.
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  sys/kms/gstkmsallocator.c |  44 ++++++++++--
- sys/kms/gstkmssink.c      | 141 +++++++++++++++++++++++++++++++++++++-
+ sys/kms/gstkmssink.c      | 148 +++++++++++++++++++++++++++++++++++++-
  sys/kms/gstkmsutils.c     |   9 +--
- sys/kms/gstkmsutils.h     |  51 ++++++++++++++
- 4 files changed, 233 insertions(+), 12 deletions(-)
+ sys/kms/gstkmsutils.h     |  51 +++++++++++++
+ 4 files changed, 240 insertions(+), 12 deletions(-)
 
 diff --git a/sys/kms/gstkmsallocator.c b/sys/kms/gstkmsallocator.c
 index a9f0b6361..e132412ba 100644
@@ -95,7 +95,7 @@ index a9f0b6361..e132412ba 100644
      GST_ERROR_OBJECT (alloc, "Failed to bind to framebuffer: %s (%d)",
          g_strerror (errno), errno);
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 81008119e..01c47ee09 100644
+index 81008119e..65350c34d 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -514,6 +514,84 @@ modesetting_failed:
@@ -183,22 +183,43 @@ index 81008119e..01c47ee09 100644
  static gboolean
  ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
      drmModePlane * plane, drmModeRes * res)
-@@ -572,6 +650,14 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -524,6 +602,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+   const gchar *format;
+   drmModeModeInfo *mode;
+   gint count_modes;
++  gboolean arm_afbc = FALSE, nv12_10le40 = FALSE;
+ 
+   if (self->allowed_caps)
+     return TRUE;
+@@ -572,6 +651,12 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
        if (!caps)
          continue;
  
 +      if (support_afbc (self, plane, plane->formats[j]))
-+        gst_caps_set_simple (tmp_caps, "arm-afbc",
-+            GST_TYPE_INT_RANGE, 0, 1, NULL);
++        arm_afbc = TRUE;
 +
 +      if (fmt == GST_VIDEO_FORMAT_NV12_10LE40)
-+        gst_caps_set_simple (tmp_caps, "nv12-10le40",
-+            GST_TYPE_INT_RANGE, 0, 1, NULL);
++        nv12_10le40 = TRUE;
 +
        tmp_caps = gst_caps_merge (tmp_caps, caps);
      }
  
-@@ -1215,11 +1301,31 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -584,6 +669,14 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+     return FALSE;
+   }
+ 
++  if (arm_afbc)
++    gst_caps_set_simple (out_caps, "arm-afbc",
++        GST_TYPE_INT_RANGE, 0, 1, NULL);
++
++  if (nv12_10le40)
++    gst_caps_set_simple (out_caps, "nv12-10le40",
++        GST_TYPE_INT_RANGE, 0, 1, NULL);
++
+   self->allowed_caps = gst_caps_simplify (out_caps);
+ 
+   GST_DEBUG_OBJECT (self, "allowed caps = %" GST_PTR_FORMAT,
+@@ -1215,11 +1308,31 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
  {
    GstKMSSink *self;
    GstVideoInfo vinfo;
@@ -230,7 +251,7 @@ index 81008119e..01c47ee09 100644
    self->vinfo = vinfo;
  
    if (!gst_kms_sink_calculate_display_ratio (self, &vinfo,
-@@ -1290,7 +1396,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1290,7 +1403,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    gboolean need_pool;
    GstVideoInfo vinfo;
    GstBufferPool *pool;
@@ -240,7 +261,7 @@ index 81008119e..01c47ee09 100644
  
    self = GST_KMS_SINK (bsink);
  
-@@ -1302,6 +1410,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1302,6 +1417,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    if (!gst_video_info_from_caps (&vinfo, caps))
      goto invalid_caps;
  
@@ -251,7 +272,7 @@ index 81008119e..01c47ee09 100644
    size = GST_VIDEO_INFO_SIZE (&vinfo);
  
    pool = NULL;
-@@ -1340,6 +1452,11 @@ invalid_caps:
+@@ -1340,6 +1459,11 @@ invalid_caps:
      GST_DEBUG_OBJECT (bsink, "invalid caps specified");
      return FALSE;
    }
@@ -263,7 +284,7 @@ index 81008119e..01c47ee09 100644
  no_pool:
    {
      /* Already warned in create_pool */
-@@ -1429,7 +1546,9 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
+@@ -1429,7 +1553,9 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
      GstBuffer ** outbuf)
  {
    gint prime_fds[GST_VIDEO_MAX_PLANES] = { 0, };
@@ -273,7 +294,7 @@ index 81008119e..01c47ee09 100644
    guint i, n_mem, n_planes;
    GstKMSMemory *kmsmem;
    guint mems_idx[GST_VIDEO_MAX_PLANES];
-@@ -1501,8 +1620,16 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
+@@ -1501,8 +1627,16 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
    GST_LOG_OBJECT (self, "found these prime ids: %d, %d, %d, %d", prime_fds[0],
        prime_fds[1], prime_fds[2], prime_fds[3]);
  
@@ -291,7 +312,7 @@ index 81008119e..01c47ee09 100644
    if (!kmsmem)
      return FALSE;
  
-@@ -1572,6 +1699,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
+@@ -1572,6 +1706,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
    gboolean success;
    GstBuffer *buf = NULL;
  
@@ -303,7 +324,7 @@ index 81008119e..01c47ee09 100644
    if (!ensure_internal_pool (self, vinfo, inbuf))
      goto bail;
  
-@@ -1755,6 +1887,10 @@ retry_set_plane:
+@@ -1755,6 +1894,10 @@ retry_set_plane:
      src.h = result.h;
    }
  
@@ -314,7 +335,7 @@ index 81008119e..01c47ee09 100644
    GST_TRACE_OBJECT (self,
        "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
        result.x, result.y, result.w, result.h, src.x, src.y, src.w, src.h);
-@@ -1846,6 +1982,9 @@ gst_kms_sink_drain (GstKMSSink * self)
+@@ -1846,6 +1989,9 @@ gst_kms_sink_drain (GstKMSSink * self)
  
      dumb_buf = gst_kms_sink_copy_to_dumb_buffer (self, &self->last_vinfo,
          parent_meta->buffer);
