@@ -1,7 +1,7 @@
-From 9d9064da3d5f82294ea0f4e3b462b50085289f59 Mon Sep 17 00:00:00 2001
+From 3e103e3bd9161a7ea19521a23373746a8203d204 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 11 Nov 2021 18:25:36 +0800
-Subject: [PATCH 75/76] kmssink: Support NV12(AFBC) and NV12_10(AFBC)
+Subject: [PATCH 76/77] kmssink: Support NV12(AFBC) and NV12_10(AFBC)
 
 Support using ARM AFBC compressed format.
 
