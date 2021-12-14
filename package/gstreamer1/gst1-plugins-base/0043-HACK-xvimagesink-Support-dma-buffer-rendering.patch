@@ -1,7 +1,7 @@
-From d0b9f1026f39440eb8c7507a0147f5bb22c9c96f Mon Sep 17 00:00:00 2001
+From 4a57fe2f01757289cf5e7b39706fcc7cf31bff25 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 3 Jul 2019 19:54:36 +0800
-Subject: [PATCH 43/46] HACK: xvimagesink: Support dma buffer rendering
+Subject: [PATCH 43/53] HACK: xvimagesink: Support dma buffer rendering
 
 Send dma buffer to xv port when it supports dma port attributes.
 
@@ -11,8 +11,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  sys/xvimage/Makefile.am   |   1 +
  sys/xvimage/xvcontext.c   |  11 +-
  sys/xvimage/xvcontext.h   |   8 ++
- sys/xvimage/xvimagesink.c | 206 ++++++++++++++++++++++++++++++++++++++
- 4 files changed, 225 insertions(+), 1 deletion(-)
+ sys/xvimage/xvimagesink.c | 205 ++++++++++++++++++++++++++++++++++++++
+ 4 files changed, 224 insertions(+), 1 deletion(-)
 
 diff --git a/sys/xvimage/Makefile.am b/sys/xvimage/Makefile.am
 index 6ccc39e..17fa0e9 100644
@@ -102,7 +102,7 @@ index af67877..68831a0 100644
    GList *formats_list;
  
 diff --git a/sys/xvimage/xvimagesink.c b/sys/xvimage/xvimagesink.c
-index 50d9dd2..99bd239 100644
+index 50d9dd2..5bde8ec 100644
 --- a/sys/xvimage/xvimagesink.c
 +++ b/sys/xvimage/xvimagesink.c
 @@ -121,6 +121,7 @@
@@ -290,15 +290,7 @@ index 50d9dd2..99bd239 100644
  
  /* This function puts a GstXvImage on a GstXvImageSink's window. Returns FALSE
   * if no window was available  */
-@@ -275,6 +439,7 @@ gst_xv_image_sink_xvimage_put (GstXvImageSink * xvimagesink,
-   }
- 
-   mem = (GstXvImageMemory *) gst_buffer_peek_memory (xvimage, 0);
-+
-   gst_xvimage_memory_get_crop (mem, &mem_crop);
- 
-   crop = gst_buffer_get_video_crop_meta (xvimage);
-@@ -308,6 +473,13 @@ gst_xv_image_sink_xvimage_put (GstXvImageSink * xvimagesink,
+@@ -308,6 +472,13 @@ gst_xv_image_sink_xvimage_put (GstXvImageSink * xvimagesink,
      memcpy (&result, &xwindow->render_rect, sizeof (GstVideoRectangle));
    }
  
@@ -312,7 +304,7 @@ index 50d9dd2..99bd239 100644
    gst_xvimage_memory_render (mem, &src, xwindow, &result, draw_border);
  
    g_mutex_unlock (&xvimagesink->flow_lock);
-@@ -963,6 +1135,37 @@ gst_xv_image_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -963,6 +1134,37 @@ gst_xv_image_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
      if (res != GST_FLOW_OK)
        goto no_buffer;
  
@@ -350,7 +342,7 @@ index 50d9dd2..99bd239 100644
      GST_CAT_LOG_OBJECT (GST_CAT_PERFORMANCE, xvimagesink,
          "slow copy buffer %p into bufferpool buffer %p", buf, to_put);
  
-@@ -980,6 +1183,7 @@ gst_xv_image_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -980,6 +1182,7 @@ gst_xv_image_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
      gst_video_frame_unmap (&src);
    }
  
@@ -358,7 +350,7 @@ index 50d9dd2..99bd239 100644
    if (!gst_xv_image_sink_xvimage_put (xvimagesink, to_put))
      goto no_window;
  
-@@ -1866,6 +2070,8 @@ gst_xv_image_sink_init (GstXvImageSink * xvimagesink)
+@@ -1866,6 +2069,8 @@ gst_xv_image_sink_init (GstXvImageSink * xvimagesink)
    xvimagesink->config.contrast = xvimagesink->config.brightness = 0;
    xvimagesink->config.cb_changed = FALSE;
  
