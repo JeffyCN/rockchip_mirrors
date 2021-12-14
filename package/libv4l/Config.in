@@ -40,6 +40,11 @@ config BR2_PACKAGE_LIBV4L_QV4L2
 	help
 	  qv4l2 is a gui tool based on Qt
 
+config BR2_PACKAGE_LIBV4L_BUILTIN_PLUGINS
+	bool "builtin plugins"
+	help
+	  Enable builtin plugins.
+
 endif
 
 comment "libv4l needs a toolchain w/ threads, C++ and headers >= 3.0"

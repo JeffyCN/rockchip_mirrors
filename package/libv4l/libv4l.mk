@@ -80,6 +80,10 @@ else
 LIBV4L_CONF_OPTS += --disable-v4l-utils
 endif
 
+ifeq ($(BR2_PACKAGE_LIBV4L_BUILTIN_PLUGINS),y)
+LIBV4L_CONF_OPTS += --enable-builtin-plugins
+endif
+
 ifeq ($(BR2_PACKAGE_SDL2_IMAGE),y)
 LIBV4L_DEPENDENCIES += sdl2_image
 endif
