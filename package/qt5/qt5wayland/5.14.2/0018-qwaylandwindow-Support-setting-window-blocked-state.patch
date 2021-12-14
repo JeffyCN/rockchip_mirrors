@@ -1,22 +1,22 @@
-From 435d819d118f9b0c2c0edc5c6415ce954069b58e Mon Sep 17 00:00:00 2001
+From 0ace661c1488a5347eefa2e58d1e318dc373a1d4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 22 Oct 2021 17:18:40 +0800
-Subject: [PATCH 18/18] qwaylandwindow: Support setting window blocked state
+Subject: [PATCH 18/19] qwaylandwindow: Support setting window blocked state
 
 Support setting window blocked state through app_id, for example:
 app_id = "flags=blocked"
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- src/client/qwaylandwindow.cpp | 20 ++++++++++++++++++++
+ src/client/qwaylandwindow.cpp | 31 +++++++++++++++++++++++++++++++
  src/client/qwaylandwindow_p.h |  3 +++
- 2 files changed, 23 insertions(+)
+ 2 files changed, 34 insertions(+)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 7be3775e9..3974a5123 100644
+index 7be3775..5f9f908 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -490,6 +490,26 @@ void QWaylandWindow::setMask(const QRegion &mask)
+@@ -490,6 +490,32 @@ void QWaylandWindow::setMask(const QRegion &mask)
      mSurface->commit();
  }
  
@@ -24,13 +24,19 @@ index 7be3775e9..3974a5123 100644
 +{
 +    switch (event->type()) {
 +    case QEvent::WindowBlocked:
++        {
++            mBlocked = true;
++
++            /* Update blocked status */
++            setWindowFlags(window()->flags());
++        }
++        break;
 +    case QEvent::WindowUnblocked:
 +        {
-+            bool blocked = event->type() == QEvent::WindowBlocked;
-+            const char *str = blocked ? "flags=blocked" : "flags=-blocked";
++            mBlocked = false;
 +
-+            // HACK: Set window flags through app id
-+            mShellSurface->setAppId(QLatin1String(str));
++            /* Update blocked status */
++            setWindowFlags(window()->flags());
 +        }
 +        break;
 +    default:
@@ -43,8 +49,20 @@ index 7be3775e9..3974a5123 100644
  void QWaylandWindow::applyConfigureWhenPossible()
  {
      QMutexLocker resizeLocker(&mResizeLock);
+@@ -780,6 +806,11 @@ void QWaylandWindow::setWindowFlags(Qt::WindowFlags flags)
+         // HACK: Set window flags through app id
+         char s[128] = "flags=";
+ 
++        if (mBlocked)
++            strcat(s, "blocked|");
++        else
++            strcat(s, "-blocked|");
++
+ #define SET_FLAG(flag, str) \
+         if (flags & (flag)) strcat(s, str "|"); \
+         else strcat(s, "-" str "|");
 diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
-index c8b355300..8a388820f 100644
+index c8b3553..8a38882 100644
 --- a/src/client/qwaylandwindow_p.h
 +++ b/src/client/qwaylandwindow_p.h
 @@ -150,6 +150,8 @@ public:
