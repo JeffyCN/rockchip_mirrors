@@ -1,17 +1,17 @@
-From 8320d3966e8f83768617b11ddd2e01f75a011e68 Mon Sep 17 00:00:00 2001
+From 51e9025f40907202b4150f1a4b404c971d707759 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 14 Dec 2021 11:45:02 +0800
-Subject: [PATCH 53/53] HACK: xvimage: Support NV12_10 dma buffer
+Subject: [PATCH 53/53] HACK: xvimage: Support NV12_10 and NV16 dma buffer
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/xvimage/xvcontext.c   | 30 +++++++++++++++++++++++++++++-
+ sys/xvimage/xvcontext.c   | 37 ++++++++++++++++++++++++++++++++++++-
  sys/xvimage/xvcontext.h   | 10 ++++++++++
- sys/xvimage/xvimagesink.c | 17 +++++++++++++++++
- 3 files changed, 56 insertions(+), 1 deletion(-)
+ sys/xvimage/xvimagesink.c | 22 ++++++++++++++++++++++
+ 3 files changed, 68 insertions(+), 1 deletion(-)
 
 diff --git a/sys/xvimage/xvcontext.c b/sys/xvimage/xvcontext.c
-index 1087786..304b2fa 100644
+index 1087786..eef02ed 100644
 --- a/sys/xvimage/xvcontext.c
 +++ b/sys/xvimage/xvcontext.c
 @@ -152,7 +152,7 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
@@ -41,12 +41,19 @@ index 1087786..304b2fa 100644
        }
      }
  
-@@ -357,6 +361,26 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
+@@ -357,6 +361,33 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
    if (gst_caps_is_empty (caps))
      goto no_caps;
  
 +  if (context->have_dma_drm_fourcc) {
 +    GstCaps *format_caps;
++
++    format_caps = gst_caps_new_simple ("video/x-raw",
++        "format", G_TYPE_STRING, "NV16",
++        "width", GST_TYPE_INT_RANGE, 1, max_w,
++        "height", GST_TYPE_INT_RANGE, 1, max_h,
++        "framerate", GST_TYPE_FRACTION_RANGE, 0, 1, G_MAXINT, 1, NULL);
++    gst_caps_append (caps, format_caps);
 +
 +    format_caps = gst_caps_new_simple ("video/x-raw",
 +        "format", G_TYPE_STRING, "NV12_10LE32",
@@ -68,7 +75,7 @@ index 1087786..304b2fa 100644
    return caps;
  
    /* ERRORS */
-@@ -884,6 +908,10 @@ gst_xvcontext_get_format_from_info (GstXvContext * context, GstVideoInfo * info)
+@@ -884,6 +915,10 @@ gst_xvcontext_get_format_from_info (GstXvContext * context, GstVideoInfo * info)
  {
    GList *list = NULL;
  
@@ -113,7 +120,7 @@ index 68831a0..cc831c3 100644
    GList *formats_list;
  
 diff --git a/sys/xvimage/xvimagesink.c b/sys/xvimage/xvimagesink.c
-index 5bde8ec..66497d1 100644
+index 5bde8ec..ecf04f2 100644
 --- a/sys/xvimage/xvimagesink.c
 +++ b/sys/xvimage/xvimagesink.c
 @@ -314,6 +314,11 @@ gst_xv_image_sink_send_dma_params (GstXvImageSink * xvimagesink,
@@ -141,7 +148,7 @@ index 5bde8ec..66497d1 100644
  
    xvimagesink = GST_XV_IMAGE_SINK (bsink);
    context = xvimagesink->context;
-@@ -991,6 +998,16 @@ gst_xv_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
+@@ -991,6 +998,21 @@ gst_xv_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
      gst_object_unref (oldpool);
    }
  
@@ -153,6 +160,11 @@ index 5bde8ec..66497d1 100644
 +      return FALSE;
 +
 +    context->drm_fourcc = DRM_FORMAT_NV12_10;
++  } else if (GST_VIDEO_INFO_FORMAT (&info) == GST_VIDEO_FORMAT_NV16) {
++    if (!context->have_dma_drm_fourcc)
++      return FALSE;
++
++    context->drm_fourcc = DRM_FORMAT_NV16;
 +  }
 +
    return TRUE;
