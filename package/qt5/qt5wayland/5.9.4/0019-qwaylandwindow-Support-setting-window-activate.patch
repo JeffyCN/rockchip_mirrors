@@ -1,0 +1,35 @@
+From 6c06bc891e134a3053e56d6e97cb52d5c7e3e673 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Sat, 9 May 2020 17:28:29 +0800
+Subject: [PATCH 19/25] qwaylandwindow: Support setting window activate
+
+Support setting window activate through app_id, for example:
+app_id = "requests=activate"
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ src/client/qwaylandwindow.cpp | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
+index 8adb964b8..e3e949616 100644
+--- a/src/client/qwaylandwindow.cpp
++++ b/src/client/qwaylandwindow.cpp
+@@ -993,6 +993,14 @@ void QWaylandWindow::requestActivateWindow()
+ {
+     // no-op. Wayland does not have activation protocol,
+     // we rely on compositor setting keyboard focus based on window stacking.
++
++    if (!mShellSurface) {
++        qWarning("Wayland does not support QWindow::requestActivate()");
++        return;
++    }
++
++    // HACK: Set window activate through app id
++    mShellSurface->setAppId(QLatin1String("requests=activate"));
+ }
+ 
+ void QWaylandWindow::unfocus()
+-- 
+2.20.1
+
