@@ -90,13 +90,13 @@ THUNDERBOOT_POST_INSTALL_TARGET_HOOKS += THUNDERBOOT_INSTALL_TARGET_CMDS
 
 ifeq ($(BR2_PACKAGE_THUNDERBOOT_BATIPC_LAUNCH),y)
 define THUNDERBOOT_INSTALL_BATIPC_CMDS
-	ln -rsf $(TARGET_DIR)/usr/share/mediaserver/$(call qstrip,$(BR2_PACKAGE_MEDIASERVE_CONFIG)) $(TARGET_DIR)/usr/share/mediaserver/tb.conf
+#	ln -rsf $(TARGET_DIR)/usr/share/mediaserver/$(call qstrip,$(BR2_PACKAGE_MEDIASERVE_CONFIG)) $(TARGET_DIR)/usr/share/mediaserver/tb.conf
 
 	$(INSTALL) -D -m 755 $(@D)/S06tb_launch $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -D -m 755 $(@D)/S07mountall $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -D -m 755 $(@D)/tb_poweroff $(TARGET_DIR)/usr/bin/
 
-	sed -i 's/CAMERA_FPS/$(BR2_PACKAGE_THUNDERBOOT_CAMERA_FPS)/g' $(TARGET_DIR)/etc/init.d/S06tb_launch
+#	sed -i 's/CAMERA_FPS/$(BR2_PACKAGE_THUNDERBOOT_CAMERA_FPS)/g' $(TARGET_DIR)/etc/init.d/S06tb_launch
 endef
 THUNDERBOOT_POST_INSTALL_TARGET_HOOKS += THUNDERBOOT_INSTALL_BATIPC_CMDS
 endif

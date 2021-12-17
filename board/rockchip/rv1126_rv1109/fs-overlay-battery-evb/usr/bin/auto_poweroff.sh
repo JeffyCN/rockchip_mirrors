@@ -28,7 +28,7 @@ if [ ! -e "$rtmp_file" ]; then
     echo "$boot_limit_time seconds without client access"
     usb_detect
     aplay /etc/go_to_sleep.wav &
-    killall -3 mediaserver
+    killall -3 rkipc
     exit 0
 fi
 
@@ -46,7 +46,7 @@ do
             if [ $interval_time -gt $no_client_time ]; then
 		usb_detect
 		aplay /etc/go_to_sleep.wav &
-		killall -3 mediaserver
+		killall -3 rkipc
 		exit 0
             fi
             if [ -e "$rtmp_file" ]; then

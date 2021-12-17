@@ -3,11 +3,7 @@
 
 lunch_start()
 {
-#	echo none > /sys/class/leds/white/trigger
-#	echo 90 > /sys/class/leds/white/brightness
-	export HDR_MODE=0
 	export normal_no_read_back=1
-	ispserver -f 25 &
 	echo "Now we are ready to start your first application" > /dev/kmsg
 
 	{
@@ -31,16 +27,13 @@ lunch_start()
 
 	echo 297000000 > /proc/mpp_service/rkvenc/clk_core
 
-	export mediaserver_log_level=2
-	rkmedia_vi_rockx_vo_test > /dev/kmsg 2>&1 &
-	mediaserver -a -d -c /usr/share/mediaserver/tb.conf > /dev/kmsg 2>&1 &
+	rkipc > /dev/kmsg 2>&1 &
 	auto_poweroff.sh &
 }
 
 lunch_stop()
 {
-	killall mediaserver
-	killall ispserver
+	killall rkipc
 	echo "All applications have been stopped"
 
 	io -4 0xfe020104 0x00840084
