@@ -1,4 +1,4 @@
-From 51e9025f40907202b4150f1a4b404c971d707759 Mon Sep 17 00:00:00 2001
+From 244b896713fa5929b4284b733633f52d845182ff Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 14 Dec 2021 11:45:02 +0800
 Subject: [PATCH 53/53] HACK: xvimage: Support NV12_10 and NV16 dma buffer
@@ -7,8 +7,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  sys/xvimage/xvcontext.c   | 37 ++++++++++++++++++++++++++++++++++++-
  sys/xvimage/xvcontext.h   | 10 ++++++++++
- sys/xvimage/xvimagesink.c | 22 ++++++++++++++++++++++
- 3 files changed, 68 insertions(+), 1 deletion(-)
+ sys/xvimage/xvimagesink.c | 20 ++++++++++++++++++++
+ 3 files changed, 66 insertions(+), 1 deletion(-)
 
 diff --git a/sys/xvimage/xvcontext.c b/sys/xvimage/xvcontext.c
 index 1087786..eef02ed 100644
@@ -120,7 +120,7 @@ index 68831a0..cc831c3 100644
    GList *formats_list;
  
 diff --git a/sys/xvimage/xvimagesink.c b/sys/xvimage/xvimagesink.c
-index 5bde8ec..ecf04f2 100644
+index 5bde8ec..94cd856 100644
 --- a/sys/xvimage/xvimagesink.c
 +++ b/sys/xvimage/xvimagesink.c
 @@ -314,6 +314,11 @@ gst_xv_image_sink_send_dma_params (GstXvImageSink * xvimagesink,
@@ -135,12 +135,7 @@ index 5bde8ec..ecf04f2 100644
    g_mutex_unlock (&context->lock);
  
    if (error == TRUE) {
-@@ -863,10 +868,12 @@ gst_xv_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
-   GstXvContext *context;
-   GstBufferPool *newpool, *oldpool;
-   GstVideoInfo info;
-+  GstStructure *s;
-   guint32 im_format = 0;
+@@ -867,6 +872,7 @@ gst_xv_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
    gint video_par_n, video_par_d;        /* video's PAR */
    gint display_par_n, display_par_d;    /* display's PAR */
    guint num, den;
@@ -148,14 +143,13 @@ index 5bde8ec..ecf04f2 100644
  
    xvimagesink = GST_XV_IMAGE_SINK (bsink);
    context = xvimagesink->context;
-@@ -991,6 +998,21 @@ gst_xv_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
+@@ -991,6 +997,20 @@ gst_xv_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
      gst_object_unref (oldpool);
    }
  
 +  context->drm_fourcc = -1;
 +
-+  s = gst_caps_get_structure (caps, 0);
-+  if (gst_structure_get_int (s, "nv12-10le40", &value) && value) {
++  if (GST_VIDEO_INFO_FORMAT (&info) == GST_VIDEO_FORMAT_NV12_10LE40) {
 +    if (!context->have_dma_drm_fourcc)
 +      return FALSE;
 +

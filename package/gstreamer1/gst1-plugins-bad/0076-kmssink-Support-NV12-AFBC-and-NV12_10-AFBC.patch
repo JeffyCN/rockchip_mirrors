@@ -1,4 +1,4 @@
-From 3e103e3bd9161a7ea19521a23373746a8203d204 Mon Sep 17 00:00:00 2001
+From 4a81d85639148601b6d05f19f2ca45227aa93207 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 11 Nov 2021 18:25:36 +0800
 Subject: [PATCH 76/77] kmssink: Support NV12(AFBC) and NV12_10(AFBC)
@@ -11,11 +11,11 @@ chips.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmsallocator.c |  44 ++++++++++--
- sys/kms/gstkmssink.c      | 148 +++++++++++++++++++++++++++++++++++++-
+ sys/kms/gstkmsallocator.c |  44 +++++++++--
+ sys/kms/gstkmssink.c      | 153 +++++++++++++++++++++++++++++++++++++-
  sys/kms/gstkmsutils.c     |   9 +--
  sys/kms/gstkmsutils.h     |  51 +++++++++++++
- 4 files changed, 240 insertions(+), 12 deletions(-)
+ 4 files changed, 245 insertions(+), 12 deletions(-)
 
 diff --git a/sys/kms/gstkmsallocator.c b/sys/kms/gstkmsallocator.c
 index a9f0b6361..e132412ba 100644
@@ -95,15 +95,16 @@ index a9f0b6361..e132412ba 100644
      GST_ERROR_OBJECT (alloc, "Failed to bind to framebuffer: %s (%d)",
          g_strerror (errno), errno);
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 81008119e..65350c34d 100644
+index 81008119e..55892bd97 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -514,6 +514,84 @@ modesetting_failed:
    }
  }
  
-+static gboolean
-+support_afbc (GstKMSSink * self, drmModePlane * plane, guint32 drmfmt)
++static void
++check_afbc (GstKMSSink * self, drmModePlane * plane, guint32 drmfmt,
++    gboolean * linear, gboolean * afbc)
 +{
 +  drmModeObjectPropertiesPtr props;
 +  drmModePropertyBlobPtr blob;
@@ -112,52 +113,52 @@ index 81008119e..65350c34d 100644
 +  struct drm_format_modifier_blob *header;
 +  struct drm_format_modifier *modifiers;
 +  guint32 *formats;
-+  gboolean found;
-+  guint64 value;
++  guint64 value = 0;
 +  gint i, j;
++
++  *linear = *afbc = FALSE;
 +
 +  res = drmModeGetResources (self->fd);
 +  if (!res)
-+    return FALSE;
++    return;
 +
 +  props = drmModeObjectGetProperties (self->fd, plane->plane_id,
 +      DRM_MODE_OBJECT_PLANE);
 +  if (!props) {
 +    drmModeFreeResources (res);
-+    return FALSE;
++    return;
 +  }
 +
-+  for (i = 0, found = FALSE; i < props->count_props; i++) {
++  for (i = 0; i < props->count_props && !value; i++) {
 +    prop = drmModeGetProperty (self->fd, props->props[i]);
-+    if (prop) {
-+      if (!strcmp (prop->name, "IN_FORMATS"))
-+        found = TRUE;
++    if (!prop)
++      continue;
 +
-+      drmModeFreeProperty (prop);
-+    }
-+
-+    if (found) {
++    if (!strcmp (prop->name, "IN_FORMATS"))
 +      value = props->prop_values[i];
-+      break;
-+    }
++
++    drmModeFreeProperty (prop);
 +  }
 +
 +  drmModeFreeObjectProperties (props);
 +  drmModeFreeResources (res);
 +
-+  if (!found)
-+    return FALSE;
++  /* No modifiers */
++  if (!value) {
++    *linear = TRUE;
++    return;
++  }
 +
 +  blob = drmModeGetPropertyBlob (self->fd, value);
 +  if (!blob)
-+    return FALSE;
++    return;
 +
 +  header = blob->data;
 +  modifiers = (struct drm_format_modifier *)
 +    ((gchar *) header + header->modifiers_offset);
 +  formats = (guint32 *) ((gchar *) header + header->formats_offset);
 +
-+  for (i = 0, found = FALSE; i < header->count_formats; i++) {
++  for (i = 0; i < header->count_formats; i++) {
 +    if (formats[i] != drmfmt)
 +      continue;
 +
@@ -169,57 +170,54 @@ index 81008119e..65350c34d 100644
 +      if (!(mod->formats & (1 << (i - mod->offset))))
 +        continue;
 +
-+      if (mod->modifier == DRM_AFBC_MODIFIER) {
-+        found = TRUE;
-+        break;
-+      }
++      if (mod->modifier == DRM_AFBC_MODIFIER)
++        *afbc = TRUE;
++      else if (mod->modifier == DRM_FORMAT_MOD_LINEAR)
++        *linear = TRUE;
 +    }
 +  }
 +
 +  drmModeFreePropertyBlob(blob);
-+  return found;
 +}
 +
  static gboolean
  ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
      drmModePlane * plane, drmModeRes * res)
-@@ -524,6 +602,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
-   const gchar *format;
-   drmModeModeInfo *mode;
-   gint count_modes;
-+  gboolean arm_afbc = FALSE, nv12_10le40 = FALSE;
+@@ -547,6 +625,8 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+       mode = &conn->modes[i];
  
-   if (self->allowed_caps)
-     return TRUE;
-@@ -572,6 +651,12 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+     for (j = 0; j < plane->count_formats; j++) {
++      gboolean linear = FALSE, afbc = FALSE;
++
+       fmt = gst_video_format_from_drm (plane->formats[j]);
+       if (fmt == GST_VIDEO_FORMAT_UNKNOWN) {
+         GST_INFO_OBJECT (self, "ignoring format %" GST_FOURCC_FORMAT,
+@@ -572,6 +652,24 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
        if (!caps)
          continue;
  
-+      if (support_afbc (self, plane, plane->formats[j]))
-+        arm_afbc = TRUE;
-+
++#ifndef HAVE_NV12_10LE40
++      /* HACK: Fake format needs negotiation */
 +      if (fmt == GST_VIDEO_FORMAT_NV12_10LE40)
-+        nv12_10le40 = TRUE;
++        gst_caps_set_simple (caps, "nv12-10le40", G_TYPE_INT, 1, NULL);
++#endif
++
++      check_afbc (self, plane, plane->formats[j], &linear, &afbc);
++
++      if (afbc) {
++        GstCaps *afbc_caps = gst_caps_copy (caps);
++        gst_caps_set_simple (afbc_caps, "arm-afbc", G_TYPE_INT, 1, NULL);
++
++        if (linear)
++          gst_caps_append (caps, afbc_caps);
++        else
++          gst_caps_replace (&caps, afbc_caps);
++      }
 +
        tmp_caps = gst_caps_merge (tmp_caps, caps);
      }
  
-@@ -584,6 +669,14 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
-     return FALSE;
-   }
- 
-+  if (arm_afbc)
-+    gst_caps_set_simple (out_caps, "arm-afbc",
-+        GST_TYPE_INT_RANGE, 0, 1, NULL);
-+
-+  if (nv12_10le40)
-+    gst_caps_set_simple (out_caps, "nv12-10le40",
-+        GST_TYPE_INT_RANGE, 0, 1, NULL);
-+
-   self->allowed_caps = gst_caps_simplify (out_caps);
- 
-   GST_DEBUG_OBJECT (self, "allowed caps = %" GST_PTR_FORMAT,
-@@ -1215,11 +1308,31 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -1215,11 +1313,31 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
  {
    GstKMSSink *self;
    GstVideoInfo vinfo;
@@ -251,7 +249,7 @@ index 81008119e..65350c34d 100644
    self->vinfo = vinfo;
  
    if (!gst_kms_sink_calculate_display_ratio (self, &vinfo,
-@@ -1290,7 +1403,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1290,7 +1408,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    gboolean need_pool;
    GstVideoInfo vinfo;
    GstBufferPool *pool;
@@ -261,7 +259,7 @@ index 81008119e..65350c34d 100644
  
    self = GST_KMS_SINK (bsink);
  
-@@ -1302,6 +1417,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1302,6 +1422,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    if (!gst_video_info_from_caps (&vinfo, caps))
      goto invalid_caps;
  
@@ -272,7 +270,7 @@ index 81008119e..65350c34d 100644
    size = GST_VIDEO_INFO_SIZE (&vinfo);
  
    pool = NULL;
-@@ -1340,6 +1459,11 @@ invalid_caps:
+@@ -1340,6 +1464,11 @@ invalid_caps:
      GST_DEBUG_OBJECT (bsink, "invalid caps specified");
      return FALSE;
    }
@@ -284,7 +282,7 @@ index 81008119e..65350c34d 100644
  no_pool:
    {
      /* Already warned in create_pool */
-@@ -1429,7 +1553,9 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
+@@ -1429,7 +1558,9 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
      GstBuffer ** outbuf)
  {
    gint prime_fds[GST_VIDEO_MAX_PLANES] = { 0, };
@@ -294,7 +292,7 @@ index 81008119e..65350c34d 100644
    guint i, n_mem, n_planes;
    GstKMSMemory *kmsmem;
    guint mems_idx[GST_VIDEO_MAX_PLANES];
-@@ -1501,8 +1627,16 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
+@@ -1501,8 +1632,16 @@ gst_kms_sink_import_dmabuf (GstKMSSink * self, GstBuffer * inbuf,
    GST_LOG_OBJECT (self, "found these prime ids: %d, %d, %d, %d", prime_fds[0],
        prime_fds[1], prime_fds[2], prime_fds[3]);
  
@@ -312,7 +310,7 @@ index 81008119e..65350c34d 100644
    if (!kmsmem)
      return FALSE;
  
-@@ -1572,6 +1706,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
+@@ -1572,6 +1711,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
    gboolean success;
    GstBuffer *buf = NULL;
  
@@ -324,7 +322,7 @@ index 81008119e..65350c34d 100644
    if (!ensure_internal_pool (self, vinfo, inbuf))
      goto bail;
  
-@@ -1755,6 +1894,10 @@ retry_set_plane:
+@@ -1755,6 +1899,10 @@ retry_set_plane:
      src.h = result.h;
    }
  
@@ -335,7 +333,7 @@ index 81008119e..65350c34d 100644
    GST_TRACE_OBJECT (self,
        "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
        result.x, result.y, result.w, result.h, src.x, src.y, src.w, src.h);
-@@ -1846,6 +1989,9 @@ gst_kms_sink_drain (GstKMSSink * self)
+@@ -1846,6 +1994,9 @@ gst_kms_sink_drain (GstKMSSink * self)
  
      dumb_buf = gst_kms_sink_copy_to_dumb_buffer (self, &self->last_vinfo,
          parent_meta->buffer);
