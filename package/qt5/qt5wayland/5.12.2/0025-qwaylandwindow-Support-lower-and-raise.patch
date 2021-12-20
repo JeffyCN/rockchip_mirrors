@@ -1,7 +1,7 @@
-From a9de47595d623fab372c21c8bbddf4ddadcf59ca Mon Sep 17 00:00:00 2001
+From b521f6e75095ed04a4caed99181e79b965de703a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 3 Nov 2021 17:55:58 +0800
-Subject: [PATCH 19/19] qwaylandwindow: Support lower() and raise()
+Subject: [PATCH 25/25] qwaylandwindow: Support lower() and raise()
 
 Support lower() and raise() through hacked subsurface::place_below() and
 subsurface::place_below().
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 21 insertions(+)
 
 diff --git a/src/client/qwaylandsubsurface.cpp b/src/client/qwaylandsubsurface.cpp
-index 2ff966c..2fcb79e 100644
+index 2ff966cb..2fcb79e2 100644
 --- a/src/client/qwaylandsubsurface.cpp
 +++ b/src/client/qwaylandsubsurface.cpp
 @@ -62,6 +62,16 @@ QWaylandSubSurface::~QWaylandSubSurface()
@@ -35,10 +35,10 @@ index 2ff966c..2fcb79e 100644
  {
      QMutexLocker l(&m_syncLock);
 diff --git a/src/client/qwaylandsubsurface_p.h b/src/client/qwaylandsubsurface_p.h
-index 76da10b..1c38151 100644
+index e9a7cb20..160a163b 100644
 --- a/src/client/qwaylandsubsurface_p.h
 +++ b/src/client/qwaylandsubsurface_p.h
-@@ -73,6 +73,9 @@ public:
+@@ -75,6 +75,9 @@ public:
      QWaylandWindow *window() const { return m_window; }
      QWaylandWindow *parent() const { return m_parent; }
  
@@ -49,10 +49,10 @@ index 76da10b..1c38151 100644
      void setDeSync();
      bool isSync() const { return m_synchronized; }
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 3974a51..18b37c5 100644
+index f00bd5de..a4c95c7b 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -459,6 +459,11 @@ void QWaylandWindow::raise()
+@@ -471,6 +471,11 @@ void QWaylandWindow::raise()
  {
      if (mShellSurface)
          mShellSurface->raise();
@@ -64,7 +64,7 @@ index 3974a51..18b37c5 100644
  }
  
  
-@@ -466,6 +471,9 @@ void QWaylandWindow::lower()
+@@ -478,6 +483,9 @@ void QWaylandWindow::lower()
  {
      if (mShellSurface)
          mShellSurface->lower();
@@ -73,7 +73,7 @@ index 3974a51..18b37c5 100644
 +        return mSubSurfaceWindow->placeBelow(wlSurface());
  }
  
- void QWaylandWindow::setMask(const QRegion &mask)
+ void QWaylandWindow::updateInputRegion()
 -- 
 2.20.1
 

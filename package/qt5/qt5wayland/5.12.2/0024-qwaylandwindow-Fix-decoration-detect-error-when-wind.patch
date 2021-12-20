@@ -1,7 +1,7 @@
-From 6c55ec2bc7d606b1da143b75eda3c51dc6fed1a8 Mon Sep 17 00:00:00 2001
+From 49df2f24b51f2919b595e1a4a296ec596d2aab75 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 25 Nov 2020 15:46:03 +0800
-Subject: [PATCH 24/26] qwaylandwindow: Fix decoration detect error when window
+Subject: [PATCH 24/25] qwaylandwindow: Fix decoration detect error when window
  invisible
 
 Use shouldCreateSubSurface() to detect decoration since the subsurface
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 0004d199..93196f89 100644
+index afad2bf5..f00bd5de 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -819,7 +819,7 @@ bool QWaylandWindow::createDecoration()
+@@ -865,7 +865,7 @@ bool QWaylandWindow::createDecoration()
          decoration = false;
      if (mFlags & Qt::BypassWindowManagerHint)
          decoration = false;

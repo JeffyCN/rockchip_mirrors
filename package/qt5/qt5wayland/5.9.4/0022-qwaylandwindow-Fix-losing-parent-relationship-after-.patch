@@ -1,7 +1,7 @@
-From a020ef0c359b8826ccb55705799c3dc429d8023e Mon Sep 17 00:00:00 2001
+From 935b044f5ec643fd42ef00ff0e1bcc5ab48544de Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 4 Nov 2020 11:42:23 +0800
-Subject: [PATCH 22/25] qwaylandwindow: Fix losing parent relationship after
+Subject: [PATCH 22/24] qwaylandwindow: Fix losing parent relationship after
  reset
 
 Reset all children to reflush the parent relationship.
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 20 insertions(+)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index e3e949616..66d38fb2d 100644
+index a83d9df63..b7cc06248 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -223,6 +223,26 @@ void QWaylandWindow::initializeWlSurface()
+@@ -252,6 +252,26 @@ void QWaylandWindow::initializeWlSurface()
      Q_ASSERT(!isInitialized());
      QWriteLocker lock(&mSurfaceLock);
      init(mDisplay->createSurface(static_cast<QtWayland::wl_surface *>(this)));

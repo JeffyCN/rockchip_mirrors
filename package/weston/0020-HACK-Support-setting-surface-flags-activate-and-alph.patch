@@ -1,4 +1,4 @@
-From 6f58b31c234d76be99dfaeac37bc3754f18aff59 Mon Sep 17 00:00:00 2001
+From 1f52cd1c1e7fabd4fad1382ac93e5e3fd15e5661 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 08:55:42 +0800
 Subject: [PATCH 20/56] HACK: Support setting surface flags activate and alpha
@@ -15,10 +15,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c         |  19 ++++
  desktop-shell/shell.h         |   2 +
  include/libweston/libweston.h |  13 +++
- libweston-desktop/surface.c   | 183 ++++++++++++++++++++++++++++++++++
+ libweston-desktop/surface.c   | 193 ++++++++++++++++++++++++++++++++++
  libweston/compositor.c        |  10 +-
  libweston/input.c             |   3 +
- 6 files changed, 229 insertions(+), 1 deletion(-)
+ 6 files changed, 239 insertions(+), 1 deletion(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
 index 159871e4..e715edee 100644
@@ -130,10 +130,10 @@ index 7a739573..1bf90577 100644
  
  struct weston_subsurface {
 diff --git a/libweston-desktop/surface.c b/libweston-desktop/surface.c
-index 21ff080d..ddc1ed7c 100644
+index 21ff080d..e86ef528 100644
 --- a/libweston-desktop/surface.c
 +++ b/libweston-desktop/surface.c
-@@ -695,12 +695,192 @@ weston_desktop_surface_set_position(struct weston_desktop_surface *surface,
+@@ -695,12 +695,202 @@ weston_desktop_surface_set_position(struct weston_desktop_surface *surface,
  		weston_view_set_position(view->view, x, y);
  }
  
@@ -237,6 +237,28 @@ index 21ff080d..ddc1ed7c 100644
 +	return true;
 +}
 +
++static void
++weston_surface_set_alpha(struct weston_surface *wsurface, float alpha)
++{
++	struct weston_subsurface *sub;
++	struct weston_view *view;
++
++	wsurface->alpha = alpha;
++	wsurface->is_opaque = !(alpha < 1.0);
++
++	wl_list_for_each(view, &wsurface->views,
++			 surface_link) {
++		view->alpha = alpha;
++		weston_view_geometry_dirty(view);
++	}
++
++	wl_list_for_each(sub, &wsurface->subsurface_list,
++			 parent_link) {
++		if (sub->surface != wsurface)
++			weston_surface_set_alpha(sub->surface, alpha);
++	}
++}
++
 +static bool
 +weston_desktop_surface_set_attrs(struct weston_desktop_surface *surface,
 +				 char *s)
@@ -265,21 +287,9 @@ index 21ff080d..ddc1ed7c 100644
 +#define SURFACE_ATTR_ALPHA "alpha:"
 +		if (!strncmp(p, SURFACE_ATTR_ALPHA,
 +			     strlen(SURFACE_ATTR_ALPHA))) {
-+			struct weston_subsurface *sub;
-+			struct weston_view *view;
 +			double alpha = atof(p + strlen(SURFACE_ATTR_ALPHA));
 +
-+			wl_list_for_each(sub, &wsurface->subsurface_list,
-+					 parent_link) {
-+				sub->surface->alpha = alpha;
-+				sub->surface->is_opaque = !(alpha < 1.0);
-+
-+				wl_list_for_each(view, &sub->surface->views,
-+						 surface_link) {
-+					view->alpha = alpha;
-+					weston_view_geometry_dirty(view);
-+				}
-+			}
++			weston_surface_set_alpha(wsurface, alpha);
 +		} else {
 +			weston_log("%s: warning: unsupported attr: %s\n",
 +				   __func__, p);
@@ -326,7 +336,7 @@ index 21ff080d..ddc1ed7c 100644
  	tmp = strdup(title);
  	if (tmp == NULL)
  		return;
-@@ -717,6 +897,9 @@ weston_desktop_surface_set_app_id(struct weston_desktop_surface *surface,
+@@ -717,6 +907,9 @@ weston_desktop_surface_set_app_id(struct weston_desktop_surface *surface,
  {
  	char *tmp, *old;
  

@@ -1,4 +1,4 @@
-From a228d10e2b2c31bd806d0c75c48c95bdf8a5a154 Mon Sep 17 00:00:00 2001
+From 9cdc6ac7191a334ef42a0061f59bd85e36ffc404 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 25 Nov 2020 15:46:03 +0800
 Subject: [PATCH 14/15] qwaylandwindow: Fix decoration detect error when window
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 7622462..88a3683 100644
+index 97282b8..8ad3296 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -852,7 +852,7 @@ bool QWaylandWindow::createDecoration()
+@@ -898,7 +898,7 @@ bool QWaylandWindow::createDecoration()
          decoration = false;
      if (mFlags & Qt::BypassWindowManagerHint)
          decoration = false;
