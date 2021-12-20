@@ -1,4 +1,4 @@
-From 3886327cfea6784476a1b1008c84217802f1a254 Mon Sep 17 00:00:00 2001
+From a9cc645fa6642693330ac48cdd84f18f926e1113 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
 Subject: [PATCH 77/77] waylandsink: Support NV12(AFBC) and NV12_10(AFBC)
@@ -14,9 +14,9 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  ext/wayland/wllinuxdmabuf.c  | 33 ++++++++++++-
  ext/wayland/wlvideoformat.c  |  1 +
  ext/wayland/wlvideoformat.h  | 50 ++++++++++++++++++++
- ext/wayland/wlwindow.c       | 23 ++++++---
+ ext/wayland/wlwindow.c       | 26 ++++++----
  ext/wayland/wlwindow.h       |  2 +
- 8 files changed, 212 insertions(+), 10 deletions(-)
+ 8 files changed, 213 insertions(+), 12 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
 index 066b858b1..add4eefb8 100644
@@ -377,7 +377,7 @@ index 331f582b1..cebcd5867 100644
  gint gst_video_format_to_wl_dmabuf_format (GstVideoFormat format);
  GstVideoFormat gst_wl_shm_format_to_video_format (enum wl_shm_format wl_format);
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index ba7af693f..7de92cc7f 100644
+index ba7af693f..c2e1789c1 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -458,6 +458,14 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
@@ -428,7 +428,15 @@ index ba7af693f..7de92cc7f 100644
    wl_subsurface_set_position (window->video_subsurface, res.x, res.y);
  
    if (commit) {
-@@ -549,6 +556,8 @@ gst_wl_window_render (GstWlWindow * window, GstWlBuffer * buffer,
+@@ -542,13 +549,14 @@ gst_wl_window_render (GstWlWindow * window, GstWlBuffer * buffer,
+     const GstVideoInfo * info)
+ {
+   if (G_UNLIKELY (info)) {
+-    window->video_width =
+-        gst_util_uint64_scale_int_round (info->width, info->par_n, info->par_d);
++    window->video_width = info->width;
+     window->video_height = info->height;
+ 
      wl_subsurface_set_sync (window->video_subsurface);
      gst_wl_window_resize_video_surface (window, FALSE);
      gst_wl_window_set_opaque (window, info);
