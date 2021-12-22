@@ -17,8 +17,12 @@ RES_STR_SETTINGS_BOX_LANG_TN	繁體中文	繁體中文	繁體中文	繁體中文
 RES_STR_SETTINGS_BOX_LANG_EN	English	English	English	English
 RES_STR_SETTINGS_BOX_LANG_JA	日本	日本	日本	日本
 RES_STR_SETTINGS_BOX_STORE_TITLE	储存状态	儲存狀態	Storage status	ストレージステータス
-RES_STR_SETTINGS_BOX_STORE_INFO	已用	已用	used	中古
+RES_STR_SETTINGS_BOX_STORE_INFO	已用	已用	used	中古  
 RES_STR_SETTINGS_BOX_FORMAT_TITLE	格式化	格式化	Format	フォーマット
-RES_STR_SETTINGS_BOX_FORMAT_INFO	确认格式化内存卡？	確認格式化內存卡？	Confirm to format the memory card?	メモリカードをフォーマットすることを確認しますか？
+RES_STR_SETTINGS_BOX_FORMAT_INFO	确认格式化？	確認格式化？	Confirm formatting?	フォーマットを確認しますか？
 RES_STR_SETTINGS_BOX_FORMAT_OK	确认	確認	OK	確認
 RES_STR_SETTINGS_BOX_FORMAT_CANCEL	取消	取消	Cancel	キャンセル
+RES_STR_SETTINGS_BOX_STORE_TOTAL	总共	總共	In total	合計で 
+RES_STR_SETTINGS_BOX_NOSDCARD	没有SD card	沒有SD card	No SD card	SDカードなし
+RES_STR_SETTINGS_BOX_SCAN	SD卡扫描进行中	SD卡掃描進行中	The SD card is being scanned	SDカードスキャンが進行中
+RES_STR_SETTINGS_BOX_NOFORMAT	未格式化	未格式化	Not formatted	書式なし
