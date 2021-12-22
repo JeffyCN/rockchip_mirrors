@@ -1,5 +1,14 @@
 export GST_DEBUG_NO_COLOR=1
 
+# Convert to NV12(using RGA) when output format is NV12_10.
+# export GST_MPP_DEC_DISABLE_NV12_10=1
+
+# Convert to NV12(using RGA) when output format is not NV12.
+# export GST_MPP_VIDEODEC_DEFAULT_FORMAT=NV12
+
+# Try to use ARM AFBC to get better performance, but not work for all sinks.
+# export GST_MPP_VIDEODEC_DEFAULT_ARM_AFBC=1
+
 # Use below env variables to configure kmssink plane ZPOS.
 # export KMSSINK_PLANE_ZPOS=0
 # export KMSSINK_PLANE_ON_TOP=1
