@@ -44,7 +44,6 @@ endif
 
 ifeq ($(BR2_PACKAGE_THUNDERBOOT_USE_EUDEV),y)
 define THUNDERBOOT_INSTALL_UDEV_RULES
-	$(RM) $(TARGET_DIR)/lib/udev/rules.d/*
 	mkdir -p $(TARGET_DIR)/mnt/sdcard
 	$(INSTALL) -D -m 755 $(@D)/usbdevice $(TARGET_DIR)//usr/bin/usbdevice
 	$(INSTALL) -D -m 755 $(TOPDIR)/../external/rkscript/61-usbdevice.rules $(TARGET_DIR)/lib/udev/rules.d/
