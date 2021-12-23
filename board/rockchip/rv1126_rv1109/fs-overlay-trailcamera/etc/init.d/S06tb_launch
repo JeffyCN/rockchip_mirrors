@@ -5,6 +5,7 @@ lunch_start()
 {
 	insmod /lib/modules/dw_mmc-rockchip.ko &
 	echo "Now we are ready to start your first application" > /dev/kmsg
+	export LVGL_EVDEV=/dev/input/event0
 	cvr_app -a /etc/iqfiles &
 }
 
