@@ -36,6 +36,7 @@ config BR2_PACKAGE_LIBDRM_RADEON
 
 config BR2_PACKAGE_LIBDRM_AMDGPU
 	bool "amdgpu"
+	depends on BR2_USE_MMU # fork()
 	depends on BR2_PACKAGE_LIBDRM_HAS_ATOMIC
 	select BR2_PACKAGE_LIBDRM_ENABLE_ATOMIC
 	help
@@ -96,15 +97,6 @@ config BR2_PACKAGE_LIBDRM_VC4
 	depends on BR2_aarch64 || BR2_arm
 	help
 	  Install vc4 (Raspberry Pi) driver.
-
-config BR2_PACKAGE_LIBDRM_ROCKCHIP
-	bool "rockchip"
-	depends on BR2_aarch64 || BR2_arm
-	depends on BR2_PACKAGE_LIBDRM_HAS_ATOMIC
-	select BR2_PACKAGE_LIBDRM_ENABLE_ATOMIC
-	default y if BR2_PACKAGE_ROCKCHIP
-	help
-	  Install rockchip driver.
 
 config BR2_PACKAGE_LIBDRM_INSTALL_TESTS
 	bool "Install test programs"
