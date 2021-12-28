@@ -1,0 +1,71 @@
+From 2fb6c4b9f934008b456d5e50125ebe61fba59bd3 Mon Sep 17 00:00:00 2001
+From: Guillaume Desmottes <guillaume.desmottes@collabora.com>
+Date: Tue, 16 Jul 2019 12:23:01 +0200
+Subject: [PATCH 43/53] video-format: add gst_video_format_info_component()
+
+New API to find out which components are packed in a given plane.
+Will prevent us from assuming a 1-1 mapping between planes and
+components.
+
+(cherry picked from commit 509d4c31f031e10f6ae5cdd3a112772fc081e919)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ gst-libs/gst/video/video-format.c | 30 ++++++++++++++++++++++++++++++
+ gst-libs/gst/video/video-format.h |  3 +++
+ 2 files changed, 33 insertions(+)
+
+diff --git a/gst-libs/gst/video/video-format.c b/gst-libs/gst/video/video-format.c
+index 4589e2f..d0c1920 100644
+--- a/gst-libs/gst/video/video-format.c
++++ b/gst-libs/gst/video/video-format.c
+@@ -5765,3 +5765,33 @@ gst_video_format_get_palette (GstVideoFormat format, gsize * size)
+       return NULL;
+   }
+ }
++
++/**
++ * gst_video_format_info_component:
++ * @info: #GstVideoFormatInfo
++ * @plane: a plane number
++ * @components: (out): array used to store component numbers
++ *
++ * Fill @components with the number of all the components packed in plane @p
++ * for the format @info. A value of -1 in @components indicates that no more
++ * components are packed in the plane.
++ *
++ * Since: 1.18
++ */
++void
++gst_video_format_info_component (const GstVideoFormatInfo * info, guint plane,
++    gint components[GST_VIDEO_MAX_COMPONENTS])
++{
++  guint c, i = 0;
++
++  /* Reverse mapping of info->plane */
++  for (c = 0; c < GST_VIDEO_FORMAT_INFO_N_COMPONENTS (info); c++) {
++    if (GST_VIDEO_FORMAT_INFO_PLANE (info, c) == plane) {
++      components[i] = c;
++      i++;
++    }
++  }
++
++  for (c = i; c < GST_VIDEO_MAX_COMPONENTS; c++)
++    components[c] = -1;
++}
+diff --git a/gst-libs/gst/video/video-format.h b/gst-libs/gst/video/video-format.h
+index 3741016..1a8ea4a 100644
+--- a/gst-libs/gst/video/video-format.h
++++ b/gst-libs/gst/video/video-format.h
+@@ -505,6 +505,9 @@ struct _GstVideoFormatInfo {
+ #define GST_VIDEO_FORMAT_INFO_TILE_WS(info) ((info)->tile_ws)
+ #define GST_VIDEO_FORMAT_INFO_TILE_HS(info) ((info)->tile_hs)
+ 
++GST_VIDEO_API
++void gst_video_format_info_component                  (const GstVideoFormatInfo *info, guint plane, gint components[GST_VIDEO_MAX_COMPONENTS]);
++
+ /* format properties */
+ 
+ GST_VIDEO_API
+-- 
+2.20.1
+

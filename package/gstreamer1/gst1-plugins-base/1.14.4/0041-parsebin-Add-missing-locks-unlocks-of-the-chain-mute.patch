@@ -1,0 +1,51 @@
+From 1bd278ee9c958451e39622d67f4d4a4cb604696b Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Sebastian=20Dr=C3=B6ge?= <sebastian@centricular.com>
+Date: Wed, 8 Aug 2018 17:35:08 +0200
+Subject: [PATCH 41/53] parsebin: Add missing locks/unlocks of the chain mutex
+
+Before freeing pending pads it is required to hold the mutex, that's
+what is protecting the list of pending pads in other places.
+
+https://bugzilla.gnome.org/show_bug.cgi?id=796935
+(cherry picked from commit 596a4ee12f2be5d3649cac22447b09453965a4ae)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ gst/playback/gstparsebin.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/gst/playback/gstparsebin.c b/gst/playback/gstparsebin.c
+index 87ee11f..0bf75b2 100644
+--- a/gst/playback/gstparsebin.c
++++ b/gst/playback/gstparsebin.c
+@@ -3472,14 +3472,16 @@ retry:
+ 
+   /* Get the pads that we're going to expose and mark things as exposed */
+   uncollected_streams = FALSE;
++  CHAIN_MUTEX_LOCK (parsebin->parse_chain);
+   if (!gst_parse_chain_expose (parsebin->parse_chain, &endpads, &missing_plugin,
+           missing_plugin_details, &last_group, &uncollected_streams)) {
+     g_list_free_full (endpads, (GDestroyNotify) gst_object_unref);
+     g_string_free (missing_plugin_details, TRUE);
+     GST_ERROR_OBJECT (parsebin, "Broken chain/group tree");
+-    g_return_val_if_reached (FALSE);
++    CHAIN_MUTEX_UNLOCK (parsebin->parse_chain);
+     return FALSE;
+   }
++  CHAIN_MUTEX_UNLOCK (parsebin->parse_chain);
+   if (endpads == NULL) {
+     if (missing_plugin) {
+       if (missing_plugin_details->len > 0) {
+@@ -3729,8 +3731,10 @@ gst_parse_chain_expose (GstParseChain * chain, GList ** endpads,
+   for (l = group->children; l; l = l->next) {
+     GstParseChain *childchain = l->data;
+ 
++    CHAIN_MUTEX_LOCK (childchain);
+     ret |= gst_parse_chain_expose (childchain, endpads, missing_plugin,
+         missing_plugin_details, last_group, uncollected_streams);
++    CHAIN_MUTEX_UNLOCK (childchain);
+   }
+ 
+   return ret;
+-- 
+2.20.1
+

@@ -6,9 +6,18 @@ menuconfig BR2_PACKAGE_GST1_PLUGINS_BASE
 	help
 	  A basic set of well-supported plug-ins for GStreamer.
 
-	  http://gstreamer.freedesktop.org/
+	  https://gstreamer.freedesktop.org/
 
 if BR2_PACKAGE_GST1_PLUGINS_BASE
+
+if !BR2_PACKAGE_GSTREAMER1_14
+config BR2_PACKAGE_GST1_PLUGINS_BASE_INSTALL_TOOLS
+	bool "install tools"
+	default y
+	help
+	  Install the gst-discoverer, gst-device-monitor and gst-play
+	  tools.
+endif
 
 comment "dependency-less plugins"
 
@@ -43,6 +52,13 @@ config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_AUDIOTESTSRC
 	help
 	  Creates audio test signals of given frequency and volume
 
+if !BR2_PACKAGE_GSTREAMER1_14
+config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_COMPOSITOR
+	bool "compositor"
+	help
+	  Video compositor plugin
+endif
+
 config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_ENCODING
 	bool "encoding"
 	help
@@ -57,6 +73,20 @@ config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_GIO
 	bool "gio"
 	help
 	  GIO elements
+
+if !BR2_PACKAGE_GSTREAMER1_14
+config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_GIO_TYPEFINDER
+	bool "gio-typefinder"
+	help
+	  GIO typefinder elements
+endif
+
+if !BR2_PACKAGE_GSTREAMER1_14
+config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_OVERLAYCOMPOSITION
+	bool "overlaycomposition"
+	help
+	  Overlaycomposition plugin.
+endif
 
 config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_PLAYBACK
 	bool "playback"
@@ -272,12 +302,14 @@ config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_PANGO
 	bool "pango font renderer"
 	depends on BR2_INSTALL_LIBSTDCPP # pango -> freetype
 	depends on BR2_TOOLCHAIN_HAS_SYNC_4 # pango -> harfbuzz
+	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_9 # pango -> harfbuzz
 	select BR2_PACKAGE_PANGO
 	help
 	  Pango-based text rendering and overlay
 
-comment "pango plugin needs a toolchain w/ C++"
-	depends on !BR2_INSTALL_LIBSTDCPP
+comment "pango plugin needs a toolchain w/ C++, gcc >= 4.9"
+	depends on !BR2_INSTALL_LIBSTDCPP || \
+		!BR2_TOOLCHAIN_GCC_AT_LEAST_4_9
 	depends on BR2_TOOLCHAIN_HAS_SYNC_4
 
 config BR2_PACKAGE_GST1_PLUGINS_BASE_PLUGIN_THEORA

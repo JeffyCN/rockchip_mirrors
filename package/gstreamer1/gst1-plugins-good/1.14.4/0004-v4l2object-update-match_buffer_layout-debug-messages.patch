@@ -1,0 +1,46 @@
+From 75141ce532a342fde8f7ca1548a5d5c572553e8d Mon Sep 17 00:00:00 2001
+From: Guillaume Desmottes <guillaume.desmottes@collabora.com>
+Date: Sat, 25 May 2019 21:19:21 +0200
+Subject: [PATCH 04/10] v4l2object: update match_buffer_layout() debug messages
+
+It's no longer used only to try importing buffers.
+
+(cherry picked from commit e9c10713a304fc22ee14c81456b716e95e1703e9)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ sys/v4l2/gstv4l2object.c | 6 +++---
+ 1 file changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/sys/v4l2/gstv4l2object.c b/sys/v4l2/gstv4l2object.c
+index c3ffa8cc3..6151c62a7 100644
+--- a/sys/v4l2/gstv4l2object.c
++++ b/sys/v4l2/gstv4l2object.c
+@@ -4268,14 +4268,14 @@ gst_v4l2_object_match_buffer_layout (GstV4l2Object * obj, guint n_planes,
+ 
+   if (n_planes != GST_VIDEO_INFO_N_PLANES (&obj->info)) {
+     GST_WARNING_OBJECT (obj->dbg_obj,
+-        "Cannot import buffers with different number planes");
++        "Cannot match buffers with different number planes");
+     return FALSE;
+   }
+ 
+   for (p = 0; p < n_planes; p++) {
+     if (stride[p] < obj->info.stride[p]) {
+       GST_DEBUG_OBJECT (obj->dbg_obj,
+-          "Not importing as remote stride %i is smaller than %i on plane %u",
++          "Not matching as remote stride %i is smaller than %i on plane %u",
+           stride[p], obj->info.stride[p], p);
+       return FALSE;
+     } else if (stride[p] > obj->info.stride[p]) {
+@@ -4287,7 +4287,7 @@ gst_v4l2_object_match_buffer_layout (GstV4l2Object * obj, guint n_planes,
+ 
+     if (offset[p] < obj->info.offset[p]) {
+       GST_DEBUG_OBJECT (obj->dbg_obj,
+-          "Not importing as offset %" G_GSIZE_FORMAT
++          "Not matching as offset %" G_GSIZE_FORMAT
+           " is smaller than %" G_GSIZE_FORMAT " on plane %u",
+           offset[p], obj->info.offset[p], p);
+       return FALSE;
+-- 
+2.20.1
+
