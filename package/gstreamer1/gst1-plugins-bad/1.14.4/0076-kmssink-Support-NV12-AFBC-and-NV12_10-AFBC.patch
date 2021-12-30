@@ -1,4 +1,4 @@
-From b3f016b28a13cc6f4b8268d83278f114827c38b0 Mon Sep 17 00:00:00 2001
+From f99d183609237eb8aee01f91042f41f13ad3bbe4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 11 Nov 2021 18:25:36 +0800
 Subject: [PATCH 76/79] kmssink: Support NV12(AFBC) and NV12_10(AFBC)
@@ -11,14 +11,14 @@ chips.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmsallocator.c |  44 +++++++++--
+ sys/kms/gstkmsallocator.c |  59 +++++++++++++--
  sys/kms/gstkmssink.c      | 153 +++++++++++++++++++++++++++++++++++++-
  sys/kms/gstkmsutils.c     |   9 +--
  sys/kms/gstkmsutils.h     |  51 +++++++++++++
- 4 files changed, 245 insertions(+), 12 deletions(-)
+ 4 files changed, 260 insertions(+), 12 deletions(-)
 
 diff --git a/sys/kms/gstkmsallocator.c b/sys/kms/gstkmsallocator.c
-index a9f0b6361..e132412ba 100644
+index a9f0b6361..b87526f8e 100644
 --- a/sys/kms/gstkmsallocator.c
 +++ b/sys/kms/gstkmsallocator.c
 @@ -36,6 +36,7 @@
@@ -48,7 +48,7 @@ index a9f0b6361..e132412ba 100644
    gint num_planes = GST_VIDEO_INFO_N_PLANES (vinfo);
    guint32 w, h, fmt, bo_handles[4] = { 0, };
    guint32 pitches[4] = { 0, };
-@@ -468,8 +467,43 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
+@@ -468,8 +467,58 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
    GST_DEBUG_OBJECT (alloc, "bo handles: %d, %d, %d, %d", bo_handles[0],
        bo_handles[1], bo_handles[2], bo_handles[3]);
  
@@ -56,6 +56,21 @@ index a9f0b6361..e132412ba 100644
 -      offsets, &kmsmem->fb_id, 0);
 +  if (GST_VIDEO_INFO_IS_AFBC (vinfo)) {
 +    guint64 modifiers[4] = { 0 };
++
++    /*
++     * HACK:
++     * When importing AFBC dma-bufs, the Rockchip VOP driver would calculate
++     * the pixel stride from pitch. But the pitch aligning algorithms are
++     * different between MPP and VOP driver:
++     *
++     * MPP uses round_up_64(round_up_64(width) * bpp / 8)
++     * VOP driver expects (pixel_stride * bpp / 8)
++     *
++     * So let's fake the pitch of NV12_10 for VOP driver to get the correct
++     * pixel stride.
++     */
++    if (fmt == DRM_FORMAT_NV12_10)
++      pitches[0] = GST_ROUND_UP_64 (GST_VIDEO_INFO_WIDTH (vinfo)) * 10 / 8;
 +
 +    for (i = 0; i < num_planes; i++)
 +      modifiers[i] = DRM_AFBC_MODIFIER;
