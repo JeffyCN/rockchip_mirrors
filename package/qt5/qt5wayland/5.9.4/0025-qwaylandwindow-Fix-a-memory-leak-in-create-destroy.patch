@@ -1,0 +1,26 @@
+From 4d31d7ad0e7606827afc59270948556b9a511912 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 30 Dec 2021 15:42:20 +0800
+Subject: [PATCH 25/25] qwaylandwindow: Fix a memory leak in create/destroy
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ src/client/qwaylandwindow.cpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
+index 441a77975..7c9045c77 100644
+--- a/src/client/qwaylandwindow.cpp
++++ b/src/client/qwaylandwindow.cpp
+@@ -126,6 +126,8 @@ QWaylandWindow::~QWaylandWindow()
+     if (mMouseGrab == this) {
+         mMouseGrab = 0;
+     }
++
++    wl_event_queue_destroy(mFrameQueue);
+ }
+ 
+ /* HACK: Set window status through app id */
+-- 
+2.20.1
+
