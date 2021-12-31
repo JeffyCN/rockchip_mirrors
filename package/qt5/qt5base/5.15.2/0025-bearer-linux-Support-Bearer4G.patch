@@ -1,7 +1,7 @@
-From 84c737946e22d78a72614b81c90d61d618dff1e9 Mon Sep 17 00:00:00 2001
+From 6c510b921d3ed640b2e097b9ad9adef520c73369 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 27 Mar 2021 04:05:16 +0800
-Subject: [PATCH 21/22] bearer: linux: Support Bearer4G
+Subject: [PATCH 25/28] bearer: linux: Support Bearer4G
 
 Add missing support for Bearer4G.
 

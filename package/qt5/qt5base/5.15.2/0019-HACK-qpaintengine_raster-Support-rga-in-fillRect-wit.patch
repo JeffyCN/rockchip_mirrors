@@ -1,7 +1,7 @@
-From ee8f0404de692fe3666bc002b5893effb3174475 Mon Sep 17 00:00:00 2001
+From dc6a30e064d10a4a221169f70aa405191579ec37 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Jun 2020 09:09:47 +0800
-Subject: [PATCH 15/23] HACK: qpaintengine_raster: Support rga in fillRect with
+Subject: [PATCH 19/28] HACK: qpaintengine_raster: Support rga in fillRect with
  texture
 
 Use QT_USE_RGA macro to enable it.

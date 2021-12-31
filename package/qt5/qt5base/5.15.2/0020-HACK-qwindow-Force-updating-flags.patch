@@ -1,7 +1,7 @@
-From 63cce8d0f7722f06404330cf0cfcc9d9f5e1406e Mon Sep 17 00:00:00 2001
+From d51679664087083430801102b009909e71cb6343 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 7 Jul 2020 17:24:27 +0800
-Subject: [PATCH 16/20] HACK: qwindow: Force updating flags
+Subject: [PATCH 20/28] HACK: qwindow: Force updating flags
 
 For force updating qwaylandwindow's decoration.
 

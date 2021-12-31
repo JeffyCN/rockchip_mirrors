@@ -1,7 +1,7 @@
-From 0a598f760f139f2a0e17035739ef448efab3b821 Mon Sep 17 00:00:00 2001
+From 2ec51a0fc985e19dcf2c60d5acbde73825a6d592 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 14 Mar 2019 20:28:34 +0800
-Subject: [PATCH 09/20] eglfs_kms: Support EGL platform display
+Subject: [PATCH 13/28] eglfs_kms: Support EGL platform display
 
 Conflicts:
     src/plugins/platforms/eglfs/deviceintegration/eglfs_kms_support/qeglfskmsscreen.cpp

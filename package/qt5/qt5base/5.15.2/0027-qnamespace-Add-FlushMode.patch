@@ -1,7 +1,7 @@
-From ad8cd55c384fd269baf919564d5d828f4ad25ddb Mon Sep 17 00:00:00 2001
+From 7f5f9df06bf6e318ffb918d0cf85c65d4665956c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 06:43:30 +0800
-Subject: [PATCH 23/23] qnamespace: Add FlushMode
+Subject: [PATCH 27/28] qnamespace: Add FlushMode
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

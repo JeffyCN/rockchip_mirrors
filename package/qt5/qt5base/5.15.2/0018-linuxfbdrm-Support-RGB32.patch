@@ -1,7 +1,7 @@
-From 7f2dc1fd2dafabe6f6e7b52f5fe39d16736f2e44 Mon Sep 17 00:00:00 2001
+From 8248157ecb7ea3330922c822fd9a2f7631a8e46a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 16 Apr 2019 21:11:12 +0800
-Subject: [PATCH 14/20] linuxfbdrm: Support RGB32
+Subject: [PATCH 18/28] linuxfbdrm: Support RGB32
 
 Use QT_FB_DRM_RGB565/QT_FB_DRM_RGB32/QT_FB_DRM_ARGB32 macro to set fb
 format.

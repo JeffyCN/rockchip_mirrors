@@ -1,7 +1,7 @@
-From 384f68da021069298bb403b7b7c88c4eaca64717 Mon Sep 17 00:00:00 2001
+From cfb0f5eb72ff640880d1569a7d5d77ad4ac90787 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 27 Mar 2021 04:08:12 +0800
-Subject: [PATCH 22/22] bearer: Support prefer using active network
+Subject: [PATCH 26/28] bearer: Support prefer using active network
 
 Set env "QT_NETWORK_PREFER_ACTIVE" to enable it.
 

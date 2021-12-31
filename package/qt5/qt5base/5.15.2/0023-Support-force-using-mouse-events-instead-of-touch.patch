@@ -1,7 +1,7 @@
-From 872fd3b892d94538257fa24f95954f68768cf024 Mon Sep 17 00:00:00 2001
+From 5436adcf8384ae3d47ead8eb0eda419dd7708443 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 16 Oct 2020 11:50:20 +0800
-Subject: [PATCH 19/20] Support force using mouse events instead of touch
+Subject: [PATCH 23/28] Support force using mouse events instead of touch
 
 Set "QT_TOUCH_TO_MOUSE" environment to enable it:
 export QT_TOUCH_TO_MOUSE=1

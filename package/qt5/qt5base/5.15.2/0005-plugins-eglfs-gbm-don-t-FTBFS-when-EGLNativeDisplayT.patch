@@ -1,7 +1,7 @@
-From 2959abf986adbbaa935639ac3b48fe9070fc5b43 Mon Sep 17 00:00:00 2001
+From bdc88912f62b0d554add66a02f2bb25897a7bec9 Mon Sep 17 00:00:00 2001
 From: "Yann E. MORIN" <yann.morin.1998@free.fr>
 Date: Mon, 14 Dec 2020 21:15:17 +0100
-Subject: [PATCH 05/20] plugins/eglfs/gbm: don't FTBFS when
+Subject: [PATCH 05/28] plugins/eglfs/gbm: don't FTBFS when
  EGLNativeDisplayType is not a pointer
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8

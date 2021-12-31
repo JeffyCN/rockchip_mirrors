@@ -1,7 +1,7 @@
-From 71fc4ac1c0185baaed386841ea4df6c6a4fbbf74 Mon Sep 17 00:00:00 2001
+From af499e2cb403789732e3398c7354a054b03706fd Mon Sep 17 00:00:00 2001
 From: Peter Seiderer <ps.report@gmx.net>
 Date: Tue, 10 Mar 2020 09:01:31 +0100
-Subject: [PATCH 04/20] double-conversion: enable for xtensa
+Subject: [PATCH 04/28] double-conversion: enable for xtensa
 
 [Upstream: https://github.com/google/double-conversion/commit/a54561be5588ac9b16d3c20760b9b554168bb8aa]
 Signed-off-by: Peter Seiderer <ps.report@gmx.net>

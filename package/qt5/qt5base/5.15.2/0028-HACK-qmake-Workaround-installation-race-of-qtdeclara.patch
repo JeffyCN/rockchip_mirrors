@@ -1,8 +1,8 @@
-From 04fb793375ecf6616d108fe465560755d1ae54e6 Mon Sep 17 00:00:00 2001
+From 089944634d023345350eb44b11d58c85dcb3edf4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 8 Oct 2021 16:39:52 +0800
-Subject: [PATCH] HACK: qmake: Workaround installation race of qtdeclarative
- qmltypes
+Subject: [PATCH 28/28] HACK: qmake: Workaround installation race of
+ qtdeclarative qmltypes
 
 When doing in-place building, the generated qtdeclarative's
 plugins.qmltypes might be installed from qtbase's qml2build and

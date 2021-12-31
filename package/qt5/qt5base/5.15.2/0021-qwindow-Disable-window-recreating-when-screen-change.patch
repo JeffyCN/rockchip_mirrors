@@ -1,7 +1,7 @@
-From a4c582386a12e7f271bb9abb1e6bd92413356433 Mon Sep 17 00:00:00 2001
+From 6134311c1c29c2dd4603487f419921a2a11a2d77 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 16 Jul 2020 17:17:27 +0800
-Subject: [PATCH 17/20] qwindow: Disable window recreating when screen changed
+Subject: [PATCH 21/28] qwindow: Disable window recreating when screen changed
 
 Recreating window is unstable.
 

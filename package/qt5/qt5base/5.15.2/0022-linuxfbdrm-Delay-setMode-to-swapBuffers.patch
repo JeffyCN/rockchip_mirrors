@@ -1,7 +1,7 @@
-From e2f9d1ad43f710824b75be9ae177a7d40870bfdd Mon Sep 17 00:00:00 2001
+From 7c41c1c068e42cee1df2c90b560567736c541636 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 14 Aug 2020 14:28:31 +0800
-Subject: [PATCH 18/20] linuxfbdrm: Delay setMode to swapBuffers()
+Subject: [PATCH 22/28] linuxfbdrm: Delay setMode to swapBuffers()
 
 To avoid blank screen during setup.
 

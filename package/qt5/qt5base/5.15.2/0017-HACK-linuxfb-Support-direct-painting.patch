@@ -1,7 +1,7 @@
-From d68b75161ba1de678478d82dbef7272335ceedb6 Mon Sep 17 00:00:00 2001
+From fef90a1d515fcd07e3bd454a98baf9b3bf14ca04 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 11 Jun 2020 10:27:16 +0800
-Subject: [PATCH 13/20] HACK: linuxfb: Support direct painting
+Subject: [PATCH 17/28] HACK: linuxfb: Support direct painting
 
 Doing direct painting on fully update single window case.
 
