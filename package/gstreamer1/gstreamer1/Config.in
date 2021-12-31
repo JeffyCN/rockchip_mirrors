@@ -18,7 +18,7 @@ if BR2_PACKAGE_GSTREAMER1
 
 choice
 	prompt "Gstreamer version"
-	default BR2_PACKAGE_GSTREAMER1_14
+	default BR2_PACKAGE_GSTREAMER1_18
 
 config BR2_PACKAGE_GSTREAMER1_14
 	bool "gstreamer-1.14"
