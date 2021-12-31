@@ -1,7 +1,7 @@
-From c99f8cfc8c0ac287bd1725b758bf9cd7905a3952 Mon Sep 17 00:00:00 2001
+From d576fe70e46738ac4124c1ee5c42d5b5ca6425b9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 09:12:08 +0800
-Subject: [PATCH 16/25] qwaylandwindow: Support setting window flags and attrs
+Subject: [PATCH 15/24] qwaylandwindow: Support setting window flags and attrs
 
 Support setting window flags and attrs through app_id, for example:
 app_id = "attrs=alpha:0.5;flags=stay-on-top|stay-on-bottom|no-focus"
@@ -9,14 +9,14 @@ app_id = "attrs=alpha:0.5;flags=stay-on-top|stay-on-bottom|no-focus"
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  src/client/qwaylandwindow.cpp | 60 +++++++++++++++++++++++++++++++++++
- src/client/qwaylandwindow_p.h |  4 +++
- 2 files changed, 64 insertions(+)
+ src/client/qwaylandwindow_p.h |  6 ++++
+ 2 files changed, 66 insertions(+)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 2bde0e93..ba35b644 100644
+index b3dd4a7..da27c75 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -119,6 +119,35 @@ void QWaylandWindow::ensureSize()
+@@ -118,6 +118,35 @@ void QWaylandWindow::ensureSize()
          mBackingStore->ensureSize();
  }
  
@@ -52,7 +52,7 @@ index 2bde0e93..ba35b644 100644
  void QWaylandWindow::initWindow()
  {
      if (window()->type() == Qt::Desktop)
-@@ -447,6 +476,13 @@ void QWaylandWindow::updateInputRegion()
+@@ -450,6 +479,35 @@ void QWaylandWindow::setMask(const QRegion &mask)
      wl_surface::commit();
  }
  
@@ -63,13 +63,6 @@ index 2bde0e93..ba35b644 100644
 +    applyWindowStatus();
 +}
 +
- void QWaylandWindow::setMask(const QRegion &mask)
- {
-     if (mMask == mask)
-@@ -476,6 +512,28 @@ bool QWaylandWindow::windowEvent(QEvent *event)
-     return QPlatformWindow::windowEvent(event);
- }
- 
 +bool QWaylandWindow::windowEvent(QEvent *event)
 +{
 +    switch (event->type()) {
@@ -95,7 +88,7 @@ index 2bde0e93..ba35b644 100644
  void QWaylandWindow::applyConfigureWhenPossible()
  {
      QMutexLocker resizeLocker(&mResizeLock);
-@@ -759,6 +817,8 @@ void QWaylandWindow::setWindowFlags(Qt::WindowFlags flags)
+@@ -733,6 +791,8 @@ void QWaylandWindow::setWindowFlags(Qt::WindowFlags flags)
  
      mFlags = flags;
      createDecoration();
@@ -105,18 +98,22 @@ index 2bde0e93..ba35b644 100644
  
  bool QWaylandWindow::createDecoration()
 diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
-index 4fa769a8..ddcf28f1 100644
+index a57fb7c..ed820b0 100644
 --- a/src/client/qwaylandwindow_p.h
 +++ b/src/client/qwaylandwindow_p.h
-@@ -143,6 +143,7 @@ public:
+@@ -143,8 +143,11 @@ public:
      void raise() override;
      void lower() override;
  
 +    void setOpacity(qreal level) override;
      void setMask(const QRegion &region) override;
  
-     bool windowEvent(QEvent *event) override;
-@@ -235,6 +236,7 @@ protected:
++    bool windowEvent(QEvent *event) override;
++
+     int scale() const;
+     qreal devicePixelRatio() const override;
+ 
+@@ -233,6 +236,7 @@ protected:
      Qt::WindowFlags mFlags;
      QRegion mMask;
      Qt::WindowStates mLastReportedWindowStates = Qt::WindowNoState;
@@ -124,7 +121,7 @@ index 4fa769a8..ddcf28f1 100644
  
      QWaylandShmBackingStore *mBackingStore = nullptr;
      QWaylandBuffer *mQueuedBuffer = nullptr;
-@@ -244,6 +246,7 @@ private slots:
+@@ -242,6 +246,7 @@ private slots:
      void handleScreenRemoved(QScreen *qScreen);
  
  private:
@@ -132,7 +129,7 @@ index 4fa769a8..ddcf28f1 100644
      void setGeometry_helper(const QRect &rect);
      void initWindow();
      void initializeWlSurface();
-@@ -262,6 +265,7 @@ private:
+@@ -257,6 +262,7 @@ private:
  
      bool mUpdateRequested = false;
      bool lastVisible = false;

@@ -1,7 +1,7 @@
-From 2e1ae6bcb427e7cbd0e970ecf94f6d33dd2debc9 Mon Sep 17 00:00:00 2001
+From 9d8b1e41877b85f71b0e50b75b30d493be31a232 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:05:32 +0800
-Subject: [PATCH 17/26] qwaylanddisplay: Wakeup main event dispatcher when
+Subject: [PATCH 16/24] qwaylanddisplay: Wakeup main event dispatcher when
  events pending
 
 The socket might not be able to generate poll events to wakeup the main
@@ -18,7 +18,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 51 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylanddisplay.cpp b/src/client/qwaylanddisplay.cpp
-index bee46a86..c8846459 100644
+index bee46a8..c884645 100644
 --- a/src/client/qwaylanddisplay.cpp
 +++ b/src/client/qwaylanddisplay.cpp
 @@ -73,6 +73,8 @@
@@ -101,7 +101,7 @@ index bee46a86..c8846459 100644
  
  void QWaylandDisplay::checkError() const
 diff --git a/src/client/qwaylanddisplay_p.h b/src/client/qwaylanddisplay_p.h
-index 43ccc0a9..1cde1e26 100644
+index 43ccc0a..1cde1e2 100644
 --- a/src/client/qwaylanddisplay_p.h
 +++ b/src/client/qwaylanddisplay_p.h
 @@ -96,6 +96,7 @@ class QWaylandIntegration;

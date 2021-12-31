@@ -1,7 +1,7 @@
-From 117a4d23258c5e1508ea9361bd6cdbb29623513e Mon Sep 17 00:00:00 2001
+From 472e9afebd0d65f46dcb5bf5fde539668de590f4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 3 Nov 2021 17:55:58 +0800
-Subject: [PATCH 18/18] qwaylandwindow: Support lower() and raise()
+Subject: [PATCH 18/19] qwaylandwindow: Support lower() and raise()
 
 Support lower() and raise() through hacked subsurface::place_below() and
 subsurface::place_below().
@@ -10,8 +10,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  src/client/qwaylandsubsurface.cpp | 10 ++++++++++
  src/client/qwaylandsubsurface_p.h |  3 +++
- src/client/qwaylandwindow.cpp     |  8 ++++++++
- 3 files changed, 21 insertions(+)
+ src/client/qwaylandwindow.cpp     | 12 ++++++++++--
+ 3 files changed, 23 insertions(+), 2 deletions(-)
 
 diff --git a/src/client/qwaylandsubsurface.cpp b/src/client/qwaylandsubsurface.cpp
 index 2ff966c..2fcb79e 100644
@@ -49,28 +49,35 @@ index 76da10b..1c38151 100644
      void setDeSync();
      bool isSync() const { return m_synchronized; }
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index cc97fe1..46475fd 100644
+index cc97fe1..3b9def7 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -488,6 +488,11 @@ void QWaylandWindow::raise()
+@@ -483,18 +483,26 @@ void QWaylandWindow::setVisible(bool visible)
+     }
+ }
+ 
+-
+ void QWaylandWindow::raise()
  {
      if (mShellSurface)
          mShellSurface->raise();
-+
+-}
+ 
 +    if (mSubSurfaceWindow && wlSurface()) {
 +        mSubSurfaceWindow->placeAbove(wlSurface());
 +        mSubSurfaceWindow->parent()->commit();
 +    }
- }
++}
  
- 
-@@ -495,6 +500,9 @@ void QWaylandWindow::lower()
+ void QWaylandWindow::lower()
  {
      if (mShellSurface)
          mShellSurface->lower();
 +
-+    if (mSubSurfaceWindow && wlSurface())
-+        return mSubSurfaceWindow->placeBelow(wlSurface());
++    if (mSubSurfaceWindow && wlSurface()) {
++        mSubSurfaceWindow->placeBelow(wlSurface());
++        mSubSurfaceWindow->parent()->commit();
++    }
  }
  
  void QWaylandWindow::setOpacity(qreal level)

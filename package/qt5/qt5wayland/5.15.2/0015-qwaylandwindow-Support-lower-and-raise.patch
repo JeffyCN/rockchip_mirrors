@@ -1,4 +1,4 @@
-From 42e5f1185a1f5b1c7a6514ba2870693ccb6bc129 Mon Sep 17 00:00:00 2001
+From f336e871c572071ba9a9e6a69a3e5deee4d129d0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 3 Nov 2021 17:55:58 +0800
 Subject: [PATCH 15/15] qwaylandwindow: Support lower() and raise()
@@ -10,8 +10,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  src/client/qwaylandsubsurface.cpp | 10 ++++++++++
  src/client/qwaylandsubsurface_p.h |  3 +++
- src/client/qwaylandwindow.cpp     |  8 ++++++++
- 3 files changed, 21 insertions(+)
+ src/client/qwaylandwindow.cpp     | 12 ++++++++++--
+ 3 files changed, 23 insertions(+), 2 deletions(-)
 
 diff --git a/src/client/qwaylandsubsurface.cpp b/src/client/qwaylandsubsurface.cpp
 index 2ff966c..2fcb79e 100644
@@ -49,28 +49,35 @@ index 76da10b..1c38151 100644
      void setDeSync();
      bool isSync() const { return m_synchronized; }
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 8ad3296..fdeae27 100644
+index 8ad3296..4f69dc5 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -501,6 +501,11 @@ void QWaylandWindow::raise()
+@@ -496,18 +496,26 @@ void QWaylandWindow::setVisible(bool visible)
+     }
+ }
+ 
+-
+ void QWaylandWindow::raise()
  {
      if (mShellSurface)
          mShellSurface->raise();
-+
+-}
+ 
 +    if (mSubSurfaceWindow && wlSurface()) {
 +        mSubSurfaceWindow->placeAbove(wlSurface());
 +        mSubSurfaceWindow->parent()->commit();
 +    }
- }
++}
  
- 
-@@ -508,6 +513,9 @@ void QWaylandWindow::lower()
+ void QWaylandWindow::lower()
  {
      if (mShellSurface)
          mShellSurface->lower();
 +
-+    if (mSubSurfaceWindow && wlSurface())
-+        return mSubSurfaceWindow->placeBelow(wlSurface());
++    if (mSubSurfaceWindow && wlSurface()) {
++        mSubSurfaceWindow->placeBelow(wlSurface());
++        mSubSurfaceWindow->parent()->commit();
++    }
  }
  
  void QWaylandWindow::setOpacity(qreal level)

@@ -1,4 +1,4 @@
-From 4ce7f37ac319963080241d808214d58f2e568234 Mon Sep 17 00:00:00 2001
+From cbbb242b2cbe7547dca3045d7b56c4fb0b8a3341 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 09:12:08 +0800
 Subject: [PATCH 16/24] qwaylandwindow: Support setting window flags and attrs
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 66 insertions(+)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index dd667c6de..d1e1e5c82 100644
+index dd667c6..90efe77 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
 @@ -128,6 +128,35 @@ QWaylandWindow::~QWaylandWindow()
@@ -70,7 +70,7 @@ index dd667c6de..d1e1e5c82 100644
      wl_surface::commit();
  }
  
-+bool QWaylandWindow::windowEvent(QEvent *event)
++void QWaylandWindow::windowEvent(QEvent *event)
 +{
 +    switch (event->type()) {
 +    case QEvent::WindowBlocked:
@@ -89,7 +89,7 @@ index dd667c6de..d1e1e5c82 100644
 +        break;
 +    }
 +
-+    return QPlatformWindow::windowEvent(event);
++    QPlatformWindow::windowEvent(event);
 +}
 +
  void QWaylandWindow::configure(uint32_t edges, int32_t width, int32_t height)
@@ -105,7 +105,7 @@ index dd667c6de..d1e1e5c82 100644
  
  bool QWaylandWindow::createDecoration()
 diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
-index 0c0bee619..4cc22397a 100644
+index 0c0bee6..9784d65 100644
 --- a/src/client/qwaylandwindow_p.h
 +++ b/src/client/qwaylandwindow_p.h
 @@ -157,8 +157,11 @@ public:
@@ -115,7 +115,7 @@ index 0c0bee619..4cc22397a 100644
 +    void setOpacity(qreal level) override;
      void setMask(const QRegion &region) override;
  
-+    bool windowEvent(QEvent *event) override;
++    void windowEvent(QEvent *event) override;
 +
      int scale() const;
      qreal devicePixelRatio() const override;

@@ -1,7 +1,7 @@
-From fe77e607f995f11bd82efe7e9b83c67da08c9a83 Mon Sep 17 00:00:00 2001
+From 7bad4b980851ee56357bd6f5691aa7742dd2eadf Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Feb 2019 16:52:15 +0800
-Subject: [PATCH 14/26] qwaylandxdgshellv6: Support setting window position
+Subject: [PATCH 13/24] qwaylandxdgshellv6: Support setting window position
 
 Support setting window position.
 Note:
@@ -17,7 +17,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 27 insertions(+)
 
 diff --git a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
-index 2f729d97..234d62a3 100644
+index 2f729d9..234d62a 100644
 --- a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
 +++ b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
 @@ -94,10 +94,31 @@ void QWaylandXdgSurfaceV6::Toplevel::applyConfigure()
@@ -64,7 +64,7 @@ index 2f729d97..234d62a3 100644
  }
  
 diff --git a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6_p.h b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6_p.h
-index 659aad04..b76b7834 100644
+index 659aad0..b76b783 100644
 --- a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6_p.h
 +++ b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6_p.h
 @@ -103,6 +103,7 @@ private:
