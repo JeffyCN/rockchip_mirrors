@@ -28,7 +28,7 @@ if BR2_PACKAGE_QT5
 
 choice
 	prompt "Qt5 version"
-	default BR2_PACKAGE_QT5_VERSION_5_14
+	default BR2_PACKAGE_QT5_VERSION_5_15
 
 config BR2_PACKAGE_QT5_VERSION_5_15
 	bool "LTS (5.15)"
