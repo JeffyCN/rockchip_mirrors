@@ -117,11 +117,13 @@ else
 QT5BASE_CONFIGURE_OPTS += -no-cups
 endif
 
+ifeq ($(BR2_PACKAGE_QT5_VERSION_5_9)$(BR2_PACKAGE_QT5_VERSION_5_12),)
 ifeq ($(BR2_PACKAGE_ZSTD),y)
 QT5BASE_DEPENDENCIES += zstd
 QT5BASE_CONFIGURE_OPTS += -zstd
 else
 QT5BASE_CONFIGURE_OPTS += -no-zstd
+endif
 endif
 
 # Qt5 SQL Plugins
