@@ -35,7 +35,7 @@ module_choice()
     echo "auto reboot test:     10"
     echo "ddr freq scaling test 11"
     echo "npu test              12"
-    echo "npu2 test             13 (rk356x)"
+    echo "npu2 test             13 (rk356x or rk3588)"
     echo "camera test           14 (use rkisp_demo)"
     echo "video test            15 (use gstreamer-wayland and app_demo)"
     echo "gpu test              16 (use glmark2)"

@@ -1,7 +1,7 @@
 # add test tool for rockchip platform
 # Author : Hans Yang <yhx@rock-chips.com>
 
-ROCKCHIP_TEST_VERSION = 20210918
+ROCKCHIP_TEST_VERSION = 20220105
 ROCKCHIP_TEST_SITE_METHOD = local
 ROCKCHIP_TEST_SITE = $(TOPDIR)/package/rockchip/rockchip_test/src
 ROCKCHIP_TEST_LICENSE = Apache V2.0
@@ -18,7 +18,7 @@ ROCKCHIP_TEST_NPU_SOURCE = npu_${ARCH}
 ROCKCHIP_TEST_NPU_TARGET = npu
 endif
 
-ifeq ($(BR2_PACKAGE_RKNPU)$(BR2_PACKAGE_RKNN_DEMO),y)
+ifeq ($(BR2_PACKAGE_RKNPU)$(BR2_PACKAGE_RKNPU2),y)
 define ROCKCHIP_TEST_INSTALL_NPU_TARGET_CMDS
 	rm -rf ${TARGET_DIR}/rockchip_test/npu
 	cp -rf $(@D)/$(ROCKCHIP_TEST_NPU_SOURCE) ${TARGET_DIR}/rockchip_test/$(ROCKCHIP_TEST_NPU_TARGET)

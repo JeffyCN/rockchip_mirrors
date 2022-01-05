@@ -64,7 +64,7 @@ else
 fi
 COMPATIBLE=${COMPATIBLE#rockchip,}
 
-echo performance | tee $(find /sys/ -name *governor)
+echo performance | tee $(find /sys/ -name *governor) /dev/null || true
 
 echo "run glmark2 wayland with fullscreen......"
 

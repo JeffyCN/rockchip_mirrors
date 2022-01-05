@@ -6,25 +6,25 @@ if [ "$1" == "rk3288" ]; then
 	glmark2-es2-wayland --fullscreen
 
 elif [[  "$1" == "rk3328"  ]]; then
-	glmark2-es2-wayland --fullscreen
+	glmark2-es2-wayland --fullscreen --visual-config='a=0:buf=24' --annotate
 
 elif [[  "$1" == "rk3399"  ]]; then
-	taskset -c 4-5 glmark2-es2-wayland --fullscreen
+	taskset -c 4-5 glmark2-es2-wayland --fullscreen --visual-config='a=0:buf=24' --annotate
 
 elif [[  "$1" == "rk3399pro"  ]]; then
-	taskset -c 4-5 glmark2-es2-wayland --fullscreen
+	taskset -c 4-5 glmark2-es2-wayland --fullscreen --visual-config='a=0:buf=24' --annotate
 
 elif [[  "$1" == "rk3566" || "$1" == "rk3568"  ]]; then
-	glmark2-es2-wayland --fullscreen
+	glmark2-es2-wayland --fullscreen --visual-config='a=0:buf=24' --annotate
 
 elif [[  "$1" == "px30" || "$1" == "rk3326"  ]]; then
-	glmark2-es2-wayland --fullscreen
+	glmark2-es2-wayland --fullscreen --visual-config='a=0:buf=24' --annotate
 
 elif [[  "$1" == "rk1808" || "$1" == "rk3308"  ]]; then
 	echo "the chips didn't support gpu"
 
 elif [[  "$1" == "px3se" || "$1" == "rk312x" ]]; then
-	glmark2-es2-wayland --fullscreen
+	glmark2-es2-wayland --fullscreen --visual-config='a=0:buf=24' --annotate
 else
 	echo "please check if the linux support it!!!!!!!"
 fi
@@ -64,7 +64,7 @@ else
 fi
 COMPATIBLE=${COMPATIBLE#rockchip,}
 
-echo performance | tee $(find /sys/ -name *governor)
+echo performance | tee $(find /sys/ -name *governor) /dev/null || true
 
 echo "run glmark2 wayland with fullscreen......"
 
