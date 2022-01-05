@@ -22,7 +22,6 @@ comment "qt5webengine needs an OpenGL and EGL-capable backend"
 
 config BR2_PACKAGE_QT5WEBENGINE
 	bool "qt5webengine"
-	depends on !BR2_PACKAGE_QT5_VERSION_5_9
 	depends on BR2_PACKAGE_QT5WEBENGINE_ARCH_SUPPORTS
 	depends on BR2_TOOLCHAIN_USES_GLIBC # execinfo.h, mallinfo
 	depends on BR2_HOST_GCC_AT_LEAST_4_8 # qt5base-icu

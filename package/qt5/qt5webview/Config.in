@@ -1,6 +1,6 @@
 config BR2_PACKAGE_QT5WEBVIEW
 	bool "qt5webview"
-	depends on !BR2_PACKAGE_QT5_VERSION_5_9 && !BR2_PACKAGE_QT5_VERSION_5_12
+	depends on !BR2_PACKAGE_QT5_VERSION_5_12
 	depends on BR2_PACKAGE_QT5WEBENGINE
 	help
 	  Qt is a cross-platform application and UI framework for
