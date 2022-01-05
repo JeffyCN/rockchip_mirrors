@@ -29,10 +29,8 @@ QT5BASE_CONFIGURE_OPTS += \
 	-no-pch \
 	-shared
 
-ifeq ($(BR2_PACKAGE_QT5_VERSION_5_12),)
 QT5BASE_CONFIGURE_OPTS += \
 	-no-feature-relocatable
-endif
 
 # starting from version 5.9.0, -optimize-debug is enabled by default
 # for debug builds and it overrides -O* with -Og which is not what we
@@ -117,13 +115,11 @@ else
 QT5BASE_CONFIGURE_OPTS += -no-cups
 endif
 
-ifeq ($(BR2_PACKAGE_QT5_VERSION_5_12),)
 ifeq ($(BR2_PACKAGE_ZSTD),y)
 QT5BASE_DEPENDENCIES += zstd
 QT5BASE_CONFIGURE_OPTS += -zstd
 else
 QT5BASE_CONFIGURE_OPTS += -no-zstd
-endif
 endif
 
 # Qt5 SQL Plugins

@@ -78,14 +78,11 @@ define QT5WEBENGINE_INSTALL_TARGET_ENV
 endef
 QT5WEBENGINE_POST_INSTALL_TARGET_HOOKS += QT5WEBENGINE_INSTALL_TARGET_ENV
 
-# qtwebengine 5.12 has color issue when using VDA for WEBRTC.
-ifneq ($(BR2_PACKAGE_QT5WEBENGINE_WEBRTC)$(BR2_PACKAGE_QT5WEBENGINE_5_12),yy)
 ifeq ($(BR2_PACKAGE_LIBV4L_RKMPP),y)
 define QT5WEBENGINE_INSTALL_INIT_SYSV
 	$(INSTALL) -D -m 755 $(QT5WEBENGINE_PKGDIR)/S99qtwebengine.sh \
 		$(TARGET_DIR)/etc/init.d/S99qtwebengine.sh
 endef
-endif
 endif
 
 $(eval $(qmake-package))
