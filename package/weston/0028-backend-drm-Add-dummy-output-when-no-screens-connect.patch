@@ -1,7 +1,7 @@
-From 41f71bb8bd4d69256a334c0881c25d3c1b16cf6a Mon Sep 17 00:00:00 2001
+From 1c8591a6920742fa1b3ceaf7af2db2674ae7797e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 28/56] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 28/55] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -9,12 +9,12 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  desktop-shell/shell.c                |   4 -
  libweston/backend-drm/drm-internal.h |   6 +
- libweston/backend-drm/drm.c          | 212 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 214 ++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          |   2 +
- 4 files changed, 216 insertions(+), 8 deletions(-)
+ 4 files changed, 217 insertions(+), 9 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index e715edee..190a303f 100644
+index e715ede..190a303 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4848,10 +4848,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
@@ -29,7 +29,7 @@ index e715edee..190a303f 100644
  
  void
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index e76434aa..88f53a35 100644
+index e76434a..88f53a3 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -128,6 +128,7 @@
@@ -60,7 +60,7 @@ index e76434aa..88f53a35 100644
  
  struct drm_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index cbeb9686..dade0215 100644
+index ae0d48c..c0b15ae 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -209,8 +209,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -98,7 +98,16 @@ index cbeb9686..dade0215 100644
  		goto not_repainted;
  	}
  
-@@ -2534,12 +2547,16 @@ drm_head_destroy(struct drm_head *head)
+@@ -1302,7 +1315,7 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
+ 		if (is_primary && (num_primary++ != output->pipe))
+ 			continue;
+ 
+-		if (plane->type != type)
++		if (!plane->plane_id || plane->type != type)
+ 			continue;
+ 		if (!drm_plane_is_available(plane, output))
+ 			continue;
+@@ -2546,12 +2559,16 @@ drm_head_destroy(struct drm_head *head)
  {
  	weston_head_release(&head->base);
  
@@ -115,7 +124,7 @@ index cbeb9686..dade0215 100644
  	free(head);
  }
  
-@@ -2640,7 +2657,7 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
+@@ -2652,7 +2669,7 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
  {
  	drmModeRes *resources;
  	struct weston_head *base, *next;
@@ -124,7 +133,7 @@ index cbeb9686..dade0215 100644
  	drm_head_match_t *match = b->head_matches;
  	struct timespec now;
  	int i;
-@@ -2677,6 +2694,8 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
+@@ -2689,6 +2706,8 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
  		bool removed = true;
  
  		head = to_drm_head(base);
@@ -133,7 +142,7 @@ index cbeb9686..dade0215 100644
  
  		for (i = 0; i < resources->count_connectors; i++) {
  			if (resources->connectors[i] == head->connector_id) {
-@@ -2697,6 +2716,7 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
+@@ -2709,6 +2728,7 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
  
  	drmModeFreeResources(resources);
  
@@ -141,7 +150,7 @@ index cbeb9686..dade0215 100644
  	b->primary_head = NULL;
  
  	wl_list_for_each_safe(base, next,
-@@ -2709,6 +2729,8 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
+@@ -2721,6 +2741,8 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
  				      &b->compositor->head_list,
  				      compositor_link) {
  			head = to_drm_head(base);
@@ -150,7 +159,7 @@ index cbeb9686..dade0215 100644
  
  			if (head->connector->connection != DRM_MODE_CONNECTED ||
  			    !(*match)(b, head))
-@@ -2723,11 +2745,17 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
+@@ -2735,11 +2757,17 @@ drm_backend_update_heads(struct drm_backend *b, struct udev_device *drm_device)
  		match++;
  	}
  
@@ -168,7 +177,7 @@ index cbeb9686..dade0215 100644
  	return 0;
  }
  
-@@ -2894,6 +2922,8 @@ drm_destroy(struct weston_compositor *ec)
+@@ -2906,6 +2934,8 @@ drm_destroy(struct weston_compositor *ec)
  	struct drm_backend *b = to_drm_backend(ec);
  	struct weston_head *base, *next;
  
@@ -177,7 +186,7 @@ index cbeb9686..dade0215 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->udev_drm_source);
-@@ -3505,6 +3535,173 @@ config_timer_handler(void *data)
+@@ -3517,6 +3547,173 @@ config_timer_handler(void *data)
  	return 0;
  }
  
@@ -351,7 +360,7 @@ index cbeb9686..dade0215 100644
  static struct drm_backend *
  drm_backend_create(struct weston_compositor *compositor,
  		   struct weston_drm_backend_config *config)
-@@ -3634,11 +3831,18 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3646,11 +3843,18 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  
@@ -371,10 +380,10 @@ index cbeb9686..dade0215 100644
  	drm_backend_create_faked_zpos(b);
  
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 227a9366..4e16c74d 100644
+index 2904ea3..31000a2 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
-@@ -1159,6 +1159,8 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
+@@ -1158,6 +1158,8 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
  				continue;
  
  			head = to_drm_head(head_base);

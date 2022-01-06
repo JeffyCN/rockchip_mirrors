@@ -1,11 +1,6 @@
 # The env variables below can be override by the init script(e.g. S50launcher)
 
-if [ -d /tmp/.xdg ]; then
-	# Compatible with old S50launcher
-	export XDG_RUNTIME_DIR=/tmp/.xdg
-else
-	export XDG_RUNTIME_DIR=/var/run
-fi
+export XDG_RUNTIME_DIR=/var/run
 
 # Comment out these to disable mirror mode
 export WESTON_DRM_MIRROR=1

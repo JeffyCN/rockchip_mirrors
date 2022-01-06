@@ -1,0 +1,72 @@
+From d45edb57143bc7b73bf4503901fa5ecf1ae8d528 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 13 Aug 2021 10:10:01 +0800
+Subject: [PATCH 51/55] backend-drm: Allow pageflip error
+
+Allow to recover from pageflip error:
+[02:08:14.089] queueing pageflip failed: Operation not permitted
+[02:08:14.090] Couldn't apply state for output eDP-1
+[02:08:14.090] repaint-flush failed: No such file or directory
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/kms.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
+index a61ef03..6da522b 100644
+--- a/libweston/backend-drm/kms.c
++++ b/libweston/backend-drm/kms.c
+@@ -1356,6 +1356,7 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
+ 	struct drm_backend *b = pending_state->backend;
+ 	struct drm_output_state *output_state, *tmp;
+ 	uint32_t *unused;
++	int has_error = 0;
+ 
+ 	if (b->atomic_modeset)
+ 		return drm_pending_state_apply_atomic(pending_state,
+@@ -1387,6 +1388,7 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
+ 		if (ret != 0) {
+ 			weston_log("Couldn't apply state for output %s\n",
+ 				   output->base.name);
++			has_error = 1;
+ 		}
+ 	}
+ 
+@@ -1394,7 +1396,7 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
+ 
+ 	drm_pending_state_free(pending_state);
+ 
+-	return 0;
++	return has_error ? -EACCES : 0;
+ }
+ 
+ /**
+@@ -1410,6 +1412,7 @@ drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
+ 	struct drm_backend *b = pending_state->backend;
+ 	struct drm_output_state *output_state, *tmp;
+ 	uint32_t *unused;
++	int has_error = 0;
+ 
+ 	if (b->atomic_modeset)
+ 		return drm_pending_state_apply_atomic(pending_state,
+@@ -1435,6 +1438,7 @@ drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
+ 		if (ret != 0) {
+ 			weston_log("Couldn't apply state for output %s\n",
+ 				   output_state->output->base.name);
++			has_error = 1;
+ 		}
+ 	}
+ 
+@@ -1442,7 +1446,7 @@ drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
+ 
+ 	drm_pending_state_free(pending_state);
+ 
+-	return 0;
++	return has_error ? -EACCES : 0;
+ }
+ 
+ void
+-- 
+2.20.1
+

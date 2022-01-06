@@ -1,4 +1,4 @@
-From abf86f5e01576fc62325888f7dcd8a4fa4ac53bf Mon Sep 17 00:00:00 2001
+From b73e81578393d4231ac80a3a80bbb35043e10f8f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 06:32:34 +0800
 Subject: [PATCH 14/17] HACK: gstreamer: Support LastFrame flush mode
@@ -21,7 +21,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  11 files changed, 62 insertions(+), 3 deletions(-)
 
 diff --git a/src/gsttools/qgstreamerplayersession.cpp b/src/gsttools/qgstreamerplayersession.cpp
-index cc0681b1..b0a37f82 100755
+index cc0681b..b0a37f8 100755
 --- a/src/gsttools/qgstreamerplayersession.cpp
 +++ b/src/gsttools/qgstreamerplayersession.cpp
 @@ -63,6 +63,8 @@
@@ -56,10 +56,10 @@ index cc0681b1..b0a37f82 100755
          m_renderer->stopRenderer();
  
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index 592b56ab..560f11f9 100644
+index 50dfde3..a41d666 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
-@@ -703,6 +703,10 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -699,6 +699,10 @@ void QGstreamerVideoOverlay::updateIsActive()
  
      bool newIsActive = (state == GST_STATE_PLAYING || (state == GST_STATE_PAUSED && showPreroll));
  
@@ -71,7 +71,7 @@ index 592b56ab..560f11f9 100644
          m_isActive = newIsActive;
          emit activeChanged();
 diff --git a/src/gsttools/qgstreamervideooverlay_p.h b/src/gsttools/qgstreamervideooverlay_p.h
-index c71124e2..8799ae70 100644
+index c71124e..8799ae7 100644
 --- a/src/gsttools/qgstreamervideooverlay_p.h
 +++ b/src/gsttools/qgstreamervideooverlay_p.h
 @@ -100,6 +100,9 @@ public:
@@ -94,7 +94,7 @@ index c71124e2..8799ae70 100644
  
  QT_END_NAMESPACE
 diff --git a/src/gsttools/qgstreamervideowindow.cpp b/src/gsttools/qgstreamervideowindow.cpp
-index e7e3c504..f813b79a 100644
+index e7e3c50..f813b79 100644
 --- a/src/gsttools/qgstreamervideowindow.cpp
 +++ b/src/gsttools/qgstreamervideowindow.cpp
 @@ -177,3 +177,13 @@ QSize QGstreamerVideoWindow::nativeSize() const
@@ -112,7 +112,7 @@ index e7e3c504..f813b79a 100644
 +    m_videoOverlay.setFlushMode(mode);
 +}
 diff --git a/src/gsttools/qgstreamervideowindow_p.h b/src/gsttools/qgstreamervideowindow_p.h
-index a0ed8599..b46e5808 100644
+index a0ed859..b46e580 100644
 --- a/src/gsttools/qgstreamervideowindow_p.h
 +++ b/src/gsttools/qgstreamervideowindow_p.h
 @@ -110,6 +110,9 @@ public:
@@ -126,7 +126,7 @@ index a0ed8599..b46e5808 100644
      void sinkChanged();
      void readyChanged(bool);
 diff --git a/src/multimedia/controls/qvideowindowcontrol.h b/src/multimedia/controls/qvideowindowcontrol.h
-index 510a2998..cb22c7b2 100644
+index 510a299..cb22c7b 100644
 --- a/src/multimedia/controls/qvideowindowcontrol.h
 +++ b/src/multimedia/controls/qvideowindowcontrol.h
 @@ -85,6 +85,9 @@ public:
@@ -140,7 +140,7 @@ index 510a2998..cb22c7b2 100644
      void fullScreenChanged(bool fullScreen);
      void brightnessChanged(int brightness);
 diff --git a/src/qtmultimediaquicktools/qdeclarativevideooutput.cpp b/src/qtmultimediaquicktools/qdeclarativevideooutput.cpp
-index d2f735b3..ae23b65c 100644
+index d2f735b..ae23b65 100644
 --- a/src/qtmultimediaquicktools/qdeclarativevideooutput.cpp
 +++ b/src/qtmultimediaquicktools/qdeclarativevideooutput.cpp
 @@ -921,7 +921,11 @@ void QDeclarativeVideoOutput::setFlushMode(FlushMode mode)
@@ -156,7 +156,7 @@ index d2f735b3..ae23b65c 100644
  
  QT_END_NAMESPACE
 diff --git a/src/qtmultimediaquicktools/qdeclarativevideooutput_backend_p.h b/src/qtmultimediaquicktools/qdeclarativevideooutput_backend_p.h
-index da99b387..677853bd 100644
+index da99b38..677853b 100644
 --- a/src/qtmultimediaquicktools/qdeclarativevideooutput_backend_p.h
 +++ b/src/qtmultimediaquicktools/qdeclarativevideooutput_backend_p.h
 @@ -94,6 +94,8 @@ public:
@@ -169,7 +169,7 @@ index da99b387..677853bd 100644
      QDeclarativeVideoOutput *q;
      QPointer<QMediaService> m_service;
 diff --git a/src/qtmultimediaquicktools/qdeclarativevideooutput_p.h b/src/qtmultimediaquicktools/qdeclarativevideooutput_p.h
-index d14731c9..010e08c6 100644
+index d14731c..010e08c 100644
 --- a/src/qtmultimediaquicktools/qdeclarativevideooutput_p.h
 +++ b/src/qtmultimediaquicktools/qdeclarativevideooutput_p.h
 @@ -89,9 +89,9 @@ public:
@@ -186,7 +186,7 @@ index d14731c9..010e08c6 100644
  
      enum FillMode
 diff --git a/src/qtmultimediaquicktools/qdeclarativevideooutput_window.cpp b/src/qtmultimediaquicktools/qdeclarativevideooutput_window.cpp
-index bae29e14..c7204a3c 100644
+index bae29e1..c7204a3 100644
 --- a/src/qtmultimediaquicktools/qdeclarativevideooutput_window.cpp
 +++ b/src/qtmultimediaquicktools/qdeclarativevideooutput_window.cpp
 @@ -57,6 +57,12 @@ QDeclarativeVideoWindowBackend::~QDeclarativeVideoWindowBackend()
@@ -213,7 +213,7 @@ index bae29e14..c7204a3c 100644
          }
      }
 diff --git a/src/qtmultimediaquicktools/qdeclarativevideooutput_window_p.h b/src/qtmultimediaquicktools/qdeclarativevideooutput_window_p.h
-index eb1814b0..b8990c88 100644
+index eb1814b..b8990c8 100644
 --- a/src/qtmultimediaquicktools/qdeclarativevideooutput_window_p.h
 +++ b/src/qtmultimediaquicktools/qdeclarativevideooutput_window_p.h
 @@ -73,6 +73,8 @@ public:

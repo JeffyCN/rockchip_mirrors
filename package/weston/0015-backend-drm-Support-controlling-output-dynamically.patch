@@ -1,7 +1,7 @@
-From ed9b85a785eeabd45d97826582ad3e6a2560de9f Mon Sep 17 00:00:00 2001
+From 5b0b208aa16c228060bd7734b80eff06b0a43426 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 15/56] backend-drm: Support controlling output dynamically
+Subject: [PATCH 15/55] backend-drm: Support controlling output dynamically
 
 Use config file to control output's rotation/mode/off/freeze/display
 rectangle.
@@ -28,7 +28,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  6 files changed, 273 insertions(+), 12 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 27eb99fa..159871e4 100644
+index 27eb99f..159871e 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4909,6 +4909,41 @@ shell_resize_surface_to_output(struct desktop_shell *shell,
@@ -99,7 +99,7 @@ index 27eb99fa..159871e4 100644
  }
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 972d23f3..7a739573 100644
+index 972d23f..7a73957 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -352,6 +352,7 @@ struct weston_output {
@@ -111,7 +111,7 @@ index 972d23f3..7a739573 100644
  
  enum weston_pointer_motion_mask {
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index a2bf8a6e..e76434aa 100644
+index a2bf8a6..e76434a 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -129,6 +129,10 @@
@@ -160,7 +160,7 @@ index a2bf8a6e..e76434aa 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 640d4194..c8c61e05 100644
+index ab67e19..4065e1c 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -227,7 +227,7 @@ index 640d4194..c8c61e05 100644
  }
  
  /* Determine the type of vblank synchronization to use for the output.
-@@ -2147,6 +2161,8 @@ drm_output_enable(struct weston_output *base)
+@@ -2159,6 +2173,8 @@ drm_output_enable(struct weston_output *base)
  				      &output->scanout_plane->base,
  				      &b->compositor->primary_plane);
  
@@ -236,7 +236,7 @@ index 640d4194..c8c61e05 100644
  	output->state_invalid = true;
  
  	weston_log("Output %s (crtc %d) video modes:\n",
-@@ -3296,6 +3312,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -3308,6 +3324,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -247,7 +247,7 @@ index 640d4194..c8c61e05 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -3304,6 +3324,163 @@ static const struct weston_drm_output_api api = {
+@@ -3316,6 +3336,163 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_seat,
  };
  
@@ -411,7 +411,7 @@ index 640d4194..c8c61e05 100644
  static struct drm_backend *
  drm_backend_create(struct weston_compositor *compositor,
  		   struct weston_drm_backend_config *config)
-@@ -3522,6 +3699,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3534,6 +3711,10 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_monitor;
  	}
  
@@ -423,7 +423,7 @@ index 640d4194..c8c61e05 100644
  
  err_udev_monitor:
 diff --git a/libweston/backend-drm/modes.c b/libweston/backend-drm/modes.c
-index cadeb3b7..f7a17def 100644
+index cadeb3b..f7a17de 100644
 --- a/libweston/backend-drm/modes.c
 +++ b/libweston/backend-drm/modes.c
 @@ -538,7 +538,7 @@ update_head_from_connector(struct drm_head *head,
@@ -447,7 +447,7 @@ index cadeb3b7..f7a17def 100644
  			if (!backend->aspect_ratio_supported ||
  			    aspect_ratio == drm_mode->base.aspect_ratio)
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 78b16d4c..aae504fd 100644
+index 5bebae4..1b672c9 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -2790,6 +2790,11 @@ weston_output_repaint(struct weston_output *output, void *repaint_data)
@@ -511,7 +511,7 @@ index 78b16d4c..aae504fd 100644
  		if (compositor->backend->repaint_flush)
  			ret = compositor->backend->repaint_flush(compositor,
  							 repaint_data);
-@@ -6091,12 +6103,15 @@ weston_output_set_transform(struct weston_output *output,
+@@ -6088,12 +6100,15 @@ weston_output_set_transform(struct weston_output *output,
  	int mid_x, mid_y;
  	struct weston_head *head;
  	int ver;
@@ -527,7 +527,7 @@ index 78b16d4c..aae504fd 100644
  	weston_output_transform_scale_init(output, transform, output->scale);
  
  	pixman_region32_init(&old_region);
-@@ -6104,6 +6119,11 @@ weston_output_set_transform(struct weston_output *output,
+@@ -6101,6 +6116,11 @@ weston_output_set_transform(struct weston_output *output,
  
  	weston_output_init_geometry(output, output->x, output->y);
  

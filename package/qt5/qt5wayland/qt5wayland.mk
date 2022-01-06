@@ -29,10 +29,10 @@ endif
 
 QT5WAYLAND_CONF_OPTS += -- $(QT5WAYLAND_CONFIG)
 
-define QT5WAYLAND_FORCE_XDG_SHELL_V6
+define QT5WAYLAND_FORCE_XDG_SHELL
 	cd $(TARGET_DIR)/usr/lib/qt/plugins/wayland-shell-integration/ && \
-		ls | grep -v v6 | xargs rm -rf
+		ls | grep -wv libxdg-shell.so | xargs rm -rf
 endef
-QT5WAYLAND_POST_INSTALL_TARGET_HOOKS += QT5WAYLAND_FORCE_XDG_SHELL_V6
+QT5WAYLAND_POST_INSTALL_TARGET_HOOKS += QT5WAYLAND_FORCE_XDG_SHELL
 
 $(eval $(qmake-package))
