@@ -20,6 +20,7 @@ config BR2_PACKAGE_WESTON
 	select BR2_PACKAGE_LIBDRM
 	# Runtime dependency
 	select BR2_PACKAGE_XKEYBOARD_CONFIG
+	select BR2_PACKAGE_WESTON_SHELL_DESKTOP if !BR2_PACKAGE_WESTON_HAS_SHELL
 	help
 	  Weston is the reference implementation of a Wayland
 	  compositor, and a useful compositor in its own right.
@@ -31,7 +32,24 @@ config BR2_PACKAGE_WESTON
 if BR2_PACKAGE_WESTON
 
 choice
+	prompt "weston version"
+	default BR2_PACKAGE_WESTON_9
+
+config BR2_PACKAGE_WESTON_8
+	bool "weston 8.0"
+
+config BR2_PACKAGE_WESTON_9
+	bool "weston 9.0"
+
+endchoice
+
+choice
 	prompt "default compositor"
+	default BR2_PACKAGE_WESTON_DEFAULT_DRM
+
+config BR2_PACKAGE_WESTON_DEFAULT_FBDEV
+	bool "fbdev"
+	select BR2_PACKAGE_WESTON_FBDEV
 
 config BR2_PACKAGE_WESTON_DEFAULT_DRM
 	bool "drm"
@@ -44,10 +62,6 @@ config BR2_PACKAGE_WESTON_DEFAULT_X11
 
 comment "X11 backend needs X.org"
 	depends on !BR2_PACKAGE_XORG7
-
-config BR2_PACKAGE_WESTON_DEFAULT_FBDEV
-	bool "fbdev"
-	select BR2_PACKAGE_WESTON_FBDEV
 
 endchoice
 
@@ -109,6 +123,25 @@ config BR2_PACKAGE_WESTON_XWAYLAND
 
 comment "XWayland support needs libepoxy and X.org enabled"
 	depends on !BR2_PACKAGE_XORG7 || !BR2_PACKAGE_LIBEPOXY
+
+# Weston needs at least one shell; this can be one of the bundled ones,
+# below, of from a third-party package, which should then select this.
+config BR2_PACKAGE_WESTON_HAS_SHELL
+	bool
+
+config BR2_PACKAGE_WESTON_SHELL_DESKTOP
+	bool "desktop shell"
+	default y
+
+config BR2_PACKAGE_WESTON_SHELL_FULLSCREEN
+	bool "fullscreen shell"
+	default y
+	select BR2_PACKAGE_WESTON_HAS_SHELL
+
+config BR2_PACKAGE_WESTON_SHELL_IVI
+	bool "ivi shell"
+	default y
+	select BR2_PACKAGE_WESTON_HAS_SHELL
 
 config BR2_PACKAGE_WESTON_DEMO_CLIENTS
 	bool "demo clients"

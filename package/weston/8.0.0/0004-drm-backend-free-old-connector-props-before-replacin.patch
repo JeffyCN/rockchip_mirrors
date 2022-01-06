@@ -1,0 +1,43 @@
+From 338965edfe7c4672f92ab9ec61ff763ce4809243 Mon Sep 17 00:00:00 2001
+From: Leandro Ribeiro <leandro.ribeiro@collabora.com>
+Date: Mon, 14 Sep 2020 18:04:33 -0300
+Subject: [PATCH 04/56] drm-backend: free old connector props before replacing
+ it with newer data
+
+In commit c1e89ba2 "compositor-drm: move connector fields into
+drm_head" the function drm_head_assign_connector_info() was
+introduced. By that time it was being used only at drm_head
+creation, and not to handle connector changes.
+
+In d2e6242e "compositor-drm: create heads for all connectors"
+it started to be used also to handle connector changes. In
+this scenario we replace old connector props with newer data.
+Before doing this, free the old connector data to avoid memory
+leak.
+
+Note that as drm_property_info_free() is safe to be called on
+a zero-initialized struct, we can call it even in the case where
+the head is being created and there are no props yet.
+
+Signed-off-by: Leandro Ribeiro <leandro.ribeiro@collabora.com>
+(cherry picked from commit bb33f90658bd4b437fd16d878503f15112814d15)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/drm.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
+index 4a80e61d..3b0b0e6a 100644
+--- a/libweston/backend-drm/drm.c
++++ b/libweston/backend-drm/drm.c
+@@ -2009,6 +2009,7 @@ drm_head_assign_connector_info(struct drm_head *head,
+ 		drmModeFreeConnector(head->connector);
+ 	head->connector = connector;
+ 
++	drm_property_info_free(head->props_conn, WDRM_CONNECTOR__COUNT);
+ 	drm_property_info_populate(head->backend, connector_props,
+ 				   head->props_conn,
+ 				   WDRM_CONNECTOR__COUNT, props);
+-- 
+2.20.1
+

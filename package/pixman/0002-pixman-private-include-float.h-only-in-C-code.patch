@@ -1,7 +1,7 @@
-From 2a5b33fe5cb921993573392afac19185e224b49a Mon Sep 17 00:00:00 2001
+From 323df0a8ea4830c7469154a86b552e1a6426a520 Mon Sep 17 00:00:00 2001
 From: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
 Date: Sun, 17 Jan 2016 14:14:28 +0100
-Subject: [PATCH] pixman-private: include <float.h> only in C code
+Subject: [PATCH 2/6] pixman-private: include <float.h> only in C code
 
 <float.h> is included unconditionally by pixman-private.h, which in
 turn gets included by assembler files. Unfortunately, with certain C
@@ -42,5 +42,5 @@ index 73108a0..73a5414 100644
  #include "pixman-compiler.h"
  
 -- 
-2.6.4
+2.20.1
 

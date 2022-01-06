@@ -1,0 +1,65 @@
+From 27320a4698bc16264be5b7bb4249caec2e80cc97 Mon Sep 17 00:00:00 2001
+From: Marius Vlad <marius.vlad@collabora.com>
+Date: Thu, 9 Dec 2021 14:07:21 +0200
+Subject: [PATCH 07/60] libweston: Convert remaning destroy signals
+
+Replaces potential corruption signal emit call sites with the more safer
+weston_signal_emit_mutable().
+
+Signed-off-by: Marius Vlad <marius.vlad@collabora.com>
+---
+ libweston/compositor.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index fb3b7094..0e0d9b24 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -2267,7 +2267,7 @@ weston_view_destroy(struct weston_view *view)
+ {
+ 	struct weston_paint_node *pnode, *pntmp;
+ 
+-	wl_signal_emit(&view->destroy_signal, view);
++	weston_signal_emit_mutable(&view->destroy_signal, view);
+ 
+ 	assert(wl_list_empty(&view->geometry.child_list));
+ 
+@@ -2378,7 +2378,7 @@ weston_buffer_destroy_handler(struct wl_listener *listener, void *data)
+ 	struct weston_buffer *buffer =
+ 		container_of(listener, struct weston_buffer, destroy_listener);
+ 
+-	wl_signal_emit(&buffer->destroy_signal, buffer);
++	weston_signal_emit_mutable(&buffer->destroy_signal, buffer);
+ 	free(buffer);
+ }
+ 
+@@ -5593,7 +5593,7 @@ weston_head_detach(struct weston_head *head)
+ WL_EXPORT void
+ weston_head_release(struct weston_head *head)
+ {
+-	wl_signal_emit(&head->destroy_signal, head);
++	weston_signal_emit_mutable(&head->destroy_signal, head);
+ 
+ 	weston_head_detach(head);
+ 
+@@ -6927,7 +6927,7 @@ weston_output_release(struct weston_output *output)
+ 
+ 	output->destroying = 1;
+ 
+-	wl_signal_emit(&output->user_destroy_signal, output);
++	weston_signal_emit_mutable(&output->user_destroy_signal, output);
+ 
+ 	if (output->idle_repaint_source)
+ 		wl_event_source_remove(output->idle_repaint_source);
+@@ -8208,7 +8208,7 @@ weston_compositor_destroy(struct weston_compositor *compositor)
+ 	/* prevent further rendering while shutting down */
+ 	compositor->state = WESTON_COMPOSITOR_OFFSCREEN;
+ 
+-	wl_signal_emit(&compositor->destroy_signal, compositor);
++	weston_signal_emit_mutable(&compositor->destroy_signal, compositor);
+ 
+ 	weston_compositor_xkb_destroy(compositor);
+ 
+-- 
+2.20.1
+

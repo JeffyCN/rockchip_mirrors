@@ -1,11 +1,11 @@
-From f14c955d97211b4eb99ea709f92ff680a501acf8 Mon Sep 17 00:00:00 2001
+From 6798aedf0daa533354ebcbb7170b8f45f13ff89b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 4 Nov 2019 11:11:59 +0800
-Subject: [PATCH 2/3] Support PIXMAN_i420 format
+Subject: [PATCH 4/6] Support PIXMAN_i420 format
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- pixman/pixman-access.c | 77 ++++++++++++++++++++++++++++++++++++++++++++++++++
+ pixman/pixman-access.c | 77 ++++++++++++++++++++++++++++++++++++++++++
  pixman/pixman.c        |  4 ++-
  pixman/pixman.h        |  2 ++
  3 files changed, 82 insertions(+), 1 deletion(-)
@@ -14,10 +14,11 @@ diff --git a/pixman/pixman-access.c b/pixman/pixman-access.c
 index 793a7a4..82f6998 100644
 --- a/pixman/pixman-access.c
 +++ b/pixman/pixman-access.c
-@@ -193,6 +193,15 @@
+@@ -192,6 +192,15 @@
+     ((uint8_t *) ((bits) + offset0 +                                    \
                    ((stride) >> 1) * ((line) >> 1)))
  
- /*
++/*
 + * I420 setup and access macros
 + */
 +
@@ -26,14 +27,14 @@ index 793a7a4..82f6998 100644
 +#define I420_U(line) YV12_V(line)
 +#define I420_V(line) YV12_U(line)
 +
-+/*
+ /*
   * NV12 setup and access macros
   */
- 
-@@ -823,6 +832,43 @@ fetch_scanline_yv12 (bits_image_t   *image,
+@@ -822,6 +831,43 @@ fetch_scanline_yv12 (bits_image_t   *image,
+     }
  }
  
- static void
++static void
 +fetch_scanline_i420 (bits_image_t   *image,
 +                     int             x,
 +                     int             line,
@@ -70,14 +71,14 @@ index 793a7a4..82f6998 100644
 +    }
 +}
 +
-+static void
+ static void
  fetch_scanline_nv12 (bits_image_t   *image,
                       int             x,
-                      int             line,
-@@ -1016,6 +1062,32 @@ fetch_pixel_yv12 (bits_image_t *image,
+@@ -1015,6 +1061,32 @@ fetch_pixel_yv12 (bits_image_t *image,
+ 	(b >= 0 ? b < 0x1000000 ? (b >> 16) & 0x0000ff : 0x0000ff : 0);
  }
  
- static uint32_t
++static uint32_t
 +fetch_pixel_i420 (bits_image_t *image,
 +		  int           offset,
 +		  int           line)
@@ -103,10 +104,9 @@ index 793a7a4..82f6998 100644
 +	(b >= 0 ? b < 0x1000000 ? (b >> 16) & 0x0000ff : 0x0000ff : 0);
 +}
 +
-+static uint32_t
+ static uint32_t
  fetch_pixel_nv12 (bits_image_t *image,
  		  int           offset,
- 		  int           line)
 @@ -1463,6 +1535,11 @@ static const format_info_t accessors[] =
        fetch_scanline_yv12, fetch_scanline_generic_float,
        fetch_pixel_yv12, fetch_pixel_generic_float,
@@ -162,5 +162,5 @@ index 99b017c..83a61a7 100644
  } pixman_format_code_t;
  
 -- 
-2.11.0
+2.20.1
 
