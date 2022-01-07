@@ -1,4 +1,4 @@
-From e89aca91c0baae7fcc879cb7bd6617721036e8ea Mon Sep 17 00:00:00 2001
+From eb1d03d3f9fdd4dc44aa1279f7dc32e13ea374e6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 11 Nov 2021 18:25:36 +0800
 Subject: [PATCH 75/78] kmssink: Support NV12(AFBC) and NV12_10(AFBC)
@@ -11,14 +11,14 @@ chips.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmsallocator.c |  59 +++++++++++++--
+ sys/kms/gstkmsallocator.c |  61 +++++++++++++--
  sys/kms/gstkmssink.c      | 153 +++++++++++++++++++++++++++++++++++++-
  sys/kms/gstkmsutils.c     |   9 +--
  sys/kms/gstkmsutils.h     |  51 +++++++++++++
- 4 files changed, 260 insertions(+), 12 deletions(-)
+ 4 files changed, 262 insertions(+), 12 deletions(-)
 
 diff --git a/sys/kms/gstkmsallocator.c b/sys/kms/gstkmsallocator.c
-index a9f0b63..b87526f 100644
+index a9f0b63..ad0a8bf 100644
 --- a/sys/kms/gstkmsallocator.c
 +++ b/sys/kms/gstkmsallocator.c
 @@ -36,6 +36,7 @@
@@ -48,7 +48,7 @@ index a9f0b63..b87526f 100644
    gint num_planes = GST_VIDEO_INFO_N_PLANES (vinfo);
    guint32 w, h, fmt, bo_handles[4] = { 0, };
    guint32 pitches[4] = { 0, };
-@@ -468,8 +467,58 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
+@@ -468,8 +467,60 @@ gst_kms_allocator_add_fb (GstKMSAllocator * alloc, GstKMSMemory * kmsmem,
    GST_DEBUG_OBJECT (alloc, "bo handles: %d, %d, %d, %d", bo_handles[0],
        bo_handles[1], bo_handles[2], bo_handles[3]);
  
@@ -85,6 +85,8 @@ index a9f0b63..b87526f 100644
 +
 +      if (fmt == DRM_FORMAT_NV12) {
 +        _fmt = DRM_FORMAT_YUV420_8BIT;
++        /* The bpp of YUV420_8BIT is 12 */
++        _pitches[0] *= 1.5;
 +      } else {
 +        _fmt = DRM_FORMAT_YUV420_10BIT;
 +        /* The bpp of YUV420_10BIT is 15 */
