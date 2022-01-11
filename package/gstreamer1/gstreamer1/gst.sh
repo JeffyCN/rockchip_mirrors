@@ -1,5 +1,8 @@
 export GST_DEBUG_NO_COLOR=1
 
+# Skip vstride aligning, which is not required when using RKVENC.
+# export GST_MPP_ENC_UNALIGNED_VSTRIDE=1
+
 # Convert to NV12(using RGA) when output format is NV12_10.
 # export GST_MPP_DEC_DISABLE_NV12_10=1
 
