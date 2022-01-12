@@ -5,7 +5,7 @@
 ################################################################################
 
 LIBDRM_CURSOR_SITE = git://github.com/JeffyCN/drm-cursor.git
-LIBDRM_CURSOR_VERSION = 1.1.2
+LIBDRM_CURSOR_VERSION = 1.3.0
 LIBDRM_CURSOR_SITE_METHOD = git
 LIBDRM_CURSOR_AUTORECONF = YES
 
