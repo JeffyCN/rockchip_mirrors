@@ -1,4 +1,4 @@
-From 33d8509fba27cb5ab1b623da2678bd20765f4370 Mon Sep 17 00:00:00 2001
+From f7cf4e890597d2c308845fc6069c6a4babe56d78 Mon Sep 17 00:00:00 2001
 From: "Yann E. MORIN" <yann.morin.1998@free.fr>
 Date: Sat, 5 Dec 2015 12:00:53 +0100
 Subject: [PATCH 1/6] Disable tests
@@ -12,7 +12,7 @@ Signed-off-by: "Yann E. MORIN" <yann.morin.1998@free.fr>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/Makefile.am b/Makefile.am
-index 5137c9e..eae79fd 100644
+index dccbf16..1366a47 100644
 --- a/Makefile.am
 +++ b/Makefile.am
 @@ -1,4 +1,4 @@
