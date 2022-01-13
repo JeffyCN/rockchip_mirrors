@@ -11,6 +11,10 @@ config BR2_PACKAGE_BUSYBOX
 
 if BR2_PACKAGE_BUSYBOX
 
+config BR2_PACKAGE_BUSYBOX_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
 config BR2_PACKAGE_BUSYBOX_CONFIG
 	string "BusyBox configuration file to use?"
 	default "package/busybox/busybox.config"
