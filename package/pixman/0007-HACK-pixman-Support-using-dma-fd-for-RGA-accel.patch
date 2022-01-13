@@ -1,7 +1,7 @@
-From 01f0ada60626250a28b6ef093711f741cec00469 Mon Sep 17 00:00:00 2001
+From 18a0812c37dfcb90e1ff896c1ab4d0f07cd281c2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:32:24 +0800
-Subject: [PATCH 6/6] HACK: pixman: Support using dma fd for RGA accel
+Subject: [PATCH 7/7] HACK: pixman: Support using dma fd for RGA accel
 
 Usage:
 pixman_image_set_destroy_function(image, NULL, (void *)(ptrdiff_t)dma_fd)
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 10 insertions(+), 2 deletions(-)
 
 diff --git a/pixman/pixman.c b/pixman/pixman.c
-index 8d726e2..f10831c 100644
+index d2f361a..4a206b5 100644
 --- a/pixman/pixman.c
 +++ b/pixman/pixman.c
-@@ -713,11 +713,19 @@ pixman_composite_try_rga (pixman_composite_info_t * info,
+@@ -715,11 +715,19 @@ pixman_composite_try_rga (pixman_composite_info_t * info,
      if (!pixman_transform_to_rga_rotate (transform, &src_info.rotation))
  	return FALSE;
  

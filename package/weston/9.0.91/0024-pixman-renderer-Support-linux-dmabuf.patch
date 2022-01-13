@@ -1,17 +1,17 @@
-From dc12ded18e1540f3f7d6e9c5a2fa8c37b86dc596 Mon Sep 17 00:00:00 2001
+From fdf68d6516739d3524902bd10fd5a5040ee1694b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:43:49 +0800
-Subject: [PATCH 23/60] pixman-renderer: Support linux dmabuf
+Subject: [PATCH 24/60] pixman-renderer: Support linux dmabuf
 
 NOTE: Only support contig dmabuf.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/pixman-renderer.c | 252 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 247 insertions(+), 5 deletions(-)
+ libweston/pixman-renderer.c | 258 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 253 insertions(+), 5 deletions(-)
 
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 754adce2..dda18df0 100644
+index 754adce2..a93f8c3e 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -37,8 +37,15 @@
@@ -62,7 +62,7 @@ index 754adce2..dda18df0 100644
  		wl_shm_buffer_end_access(ps->buffer_ref.buffer->shm_buffer);
  
  	if (pr->repaint_debug)
-@@ -619,11 +633,83 @@ buffer_state_handle_buffer_destroy(struct wl_listener *listener, void *data)
+@@ -619,11 +633,88 @@ buffer_state_handle_buffer_destroy(struct wl_listener *listener, void *data)
  	ps->buffer_destroy_listener.notify = NULL;
  }
  
@@ -117,6 +117,11 @@ index 754adce2..dda18df0 100644
 +		pixman_format = PIXMAN_nv12;
 +		break;
 +#endif
++#ifdef HAVE_PIXMAN_NV16
++	case DRM_FORMAT_NV16:
++		pixman_format = PIXMAN_nv16;
++		break;
++#endif
 +	default:
 +		weston_log("Unsupported dmabuf format\n");
 +		weston_buffer_reference(&ps->buffer_ref, NULL);
@@ -146,7 +151,7 @@ index 754adce2..dda18df0 100644
  	const struct pixel_format_info *pixel_info;
  
  	weston_buffer_reference(&ps->buffer_ref, buffer);
-@@ -646,9 +732,17 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
+@@ -646,9 +737,17 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
  	shm_buffer = wl_shm_buffer_get(buffer->resource);
  
  	if (! shm_buffer) {
@@ -167,7 +172,7 @@ index 754adce2..dda18df0 100644
  		return;
  	}
  
-@@ -747,6 +841,9 @@ pixman_renderer_create_surface(struct weston_surface *surface)
+@@ -747,6 +846,9 @@ pixman_renderer_create_surface(struct weston_surface *surface)
  	wl_signal_add(&pr->destroy_signal,
  		      &ps->renderer_destroy_listener);
  
@@ -177,7 +182,7 @@ index 754adce2..dda18df0 100644
  	return 0;
  }
  
-@@ -777,6 +874,9 @@ pixman_renderer_destroy(struct weston_compositor *ec)
+@@ -777,6 +879,9 @@ pixman_renderer_destroy(struct weston_compositor *ec)
  
  	wl_signal_emit(&pr->destroy_signal, pr);
  	weston_binding_destroy(pr->debug_binding);
@@ -187,7 +192,7 @@ index 754adce2..dda18df0 100644
  	free(pr);
  
  	ec->renderer = NULL;
-@@ -850,12 +950,140 @@ debug_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+@@ -850,12 +955,141 @@ debug_binding(struct weston_keyboard *keyboard, const struct timespec *time,
  	}
  }
  
@@ -295,6 +300,7 @@ index 754adce2..dda18df0 100644
 +		DRM_FORMAT_YVU420,
 +		DRM_FORMAT_YUV420,
 +		DRM_FORMAT_NV12,
++		DRM_FORMAT_NV16,
 +	};
 +
 +	int num_formats = ARRAY_LENGTH(formats);
@@ -328,7 +334,7 @@ index 754adce2..dda18df0 100644
  
  	renderer = zalloc(sizeof *renderer);
  	if (renderer == NULL)
-@@ -877,6 +1105,15 @@ pixman_renderer_init(struct weston_compositor *ec)
+@@ -877,6 +1111,15 @@ pixman_renderer_init(struct weston_compositor *ec)
  	ec->capabilities |= WESTON_CAP_ROTATION_ANY;
  	ec->capabilities |= WESTON_CAP_VIEW_CLIP_MASK;
  
@@ -344,7 +350,7 @@ index 754adce2..dda18df0 100644
  	renderer->debug_binding =
  		weston_compositor_add_debug_binding(ec, KEY_R,
  						    debug_binding, ec);
-@@ -899,6 +1136,11 @@ pixman_renderer_init(struct weston_compositor *ec)
+@@ -899,6 +1142,11 @@ pixman_renderer_init(struct weston_compositor *ec)
  
  	wl_signal_init(&renderer->destroy_signal);
  

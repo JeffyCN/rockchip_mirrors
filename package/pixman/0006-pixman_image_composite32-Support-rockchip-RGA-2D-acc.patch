@@ -1,7 +1,7 @@
-From 376f179f06b4b7639c8d6ff120f58f893c3c8280 Mon Sep 17 00:00:00 2001
+From 6f7a5c70c174ecf8217a828da225d44959d0d548 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 1 Nov 2019 17:55:06 +0800
-Subject: [PATCH 5/6] pixman_image_composite32: Support rockchip RGA 2D accel
+Subject: [PATCH 6/7] pixman_image_composite32: Support rockchip RGA 2D accel
 
 Disabled by default, set env PIXMAN_USE_RGA=1 to enable.
 
@@ -9,8 +9,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  configure.ac       |   7 ++
  pixman/Makefile.am |   2 +-
- pixman/pixman.c    | 275 +++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 283 insertions(+), 1 deletion(-)
+ pixman/pixman.c    | 278 +++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 286 insertions(+), 1 deletion(-)
 
 diff --git a/configure.ac b/configure.ac
 index 156edfb..25de590 100644
@@ -44,7 +44,7 @@ index 581b6f6..5f0b475 100644
  
  libpixmanincludedir = $(includedir)/pixman-1
 diff --git a/pixman/pixman.c b/pixman/pixman.c
-index 99782f7..8d726e2 100644
+index 0002ed3..d2f361a 100644
 --- a/pixman/pixman.c
 +++ b/pixman/pixman.c
 @@ -28,8 +28,19 @@
@@ -67,7 +67,7 @@ index 99782f7..8d726e2 100644
  pixman_implementation_t *global_implementation;
  
  #ifdef TOOLCHAIN_SUPPORTS_ATTRIBUTE_CONSTRUCTOR
-@@ -540,6 +551,264 @@ analyze_extent (pixman_image_t       *image,
+@@ -540,6 +551,267 @@ analyze_extent (pixman_image_t       *image,
      return TRUE;
  }
  
@@ -99,6 +99,8 @@ index 99782f7..8d726e2 100644
 +	return RK_FORMAT_YCbCr_420_P;
 +    case PIXMAN_nv12:
 +	return RK_FORMAT_YCbCr_420_SP;
++    case PIXMAN_nv16:
++	return RK_FORMAT_YCbCr_422_SP;
 +    default:
 +	return RK_FORMAT_UNKNOWN;
 +    }
@@ -243,6 +245,7 @@ index 99782f7..8d726e2 100644
 +    case PIXMAN_yv12:
 +    case PIXMAN_i420:
 +    case PIXMAN_nv12:
++    case PIXMAN_nv16:
 +	is_yuv = 1;
 +
 +	/* rowstride = rowstride_bytes / (int) sizeof (uint32_t) */
@@ -332,7 +335,7 @@ index 99782f7..8d726e2 100644
  /*
   * Work around GCC bug causing crashes in Mozilla with SSE2
   *
-@@ -686,6 +955,12 @@ pixman_image_composite32 (pixman_op_t      op,
+@@ -686,6 +958,12 @@ pixman_image_composite32 (pixman_op_t      op,
  
      pbox = pixman_region32_rectangles (&region, &n);
  

@@ -1,4 +1,4 @@
-From 66a44d87f241530bd51e156c82a351f23d402b8b Mon Sep 17 00:00:00 2001
+From d3538175ea5b724f3f3ee2828c52d71f42c218b5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Oct 2020 17:37:04 +0800
 Subject: [PATCH 39/60] backend-drm: Support using ARGB8888 gbm_format
@@ -15,10 +15,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-gbm.c b/libweston/backend-drm/drm-gbm.c
-index 25c208fd..55e6057f 100644
+index 9e47510d..6b2e99a6 100644
 --- a/libweston/backend-drm/drm-gbm.c
 +++ b/libweston/backend-drm/drm-gbm.c
-@@ -280,8 +280,10 @@ drm_output_render_gl(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -281,8 +281,10 @@ drm_output_render_gl(struct drm_output_state *state, pixman_region32_t *damage)
  {
  	struct drm_output *output = state->output;
  	struct drm_backend *b = to_drm_backend(output->base.compositor);
@@ -29,7 +29,7 @@ index 25c208fd..55e6057f 100644
  
  	output->base.compositor->renderer->repaint_output(&output->base,
  							  damage);
-@@ -293,8 +295,10 @@ drm_output_render_gl(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -294,8 +296,10 @@ drm_output_render_gl(struct drm_output_state *state, pixman_region32_t *damage)
  		return NULL;
  	}
  
@@ -43,7 +43,7 @@ index 25c208fd..55e6057f 100644
  		weston_log("failed to get drm_fb for bo\n");
  		gbm_surface_release_buffer(output->gbm_surface, bo);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c7ae51e1..2aa82228 100644
+index f28eac8a..c73f3d6c 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1553,6 +1553,9 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)

@@ -1,4 +1,4 @@
-From 776463e08481efccdf970fd2f305fa763319de6d Mon Sep 17 00:00:00 2001
+From e94c87a5b33c768b4d0de32e602fbea3cd063cc9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
 Subject: [PATCH 56/60] HACK: pixman-renderer: Support passing dma fd to pixman
@@ -28,7 +28,7 @@ index 185ab41c..3ab37964 100644
  	uint32_t plane_mask;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 741783b3..bab6ccd7 100644
+index 6bfe813f..a7327100 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1637,6 +1637,9 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
@@ -42,7 +42,7 @@ index 741783b3..bab6ccd7 100644
  
  	if (pixman_renderer_output_create(&output->base, &options) < 0)
 diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
-index 7015e1f4..3916bd77 100644
+index c6bb4ab6..5173e8a4 100644
 --- a/libweston/backend-drm/fb.c
 +++ b/libweston/backend-drm/fb.c
 @@ -58,6 +58,9 @@ drm_fb_destroy_dumb(struct drm_fb *fb)
@@ -84,10 +84,10 @@ index 7015e1f4..3916bd77 100644
  	drmModeRmFB(b->drm.fd, fb->fb_id);
  err_bo:
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 2987fa55..3b3d2beb 100644
+index 36eb29fa..55c2291f 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -733,6 +733,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -738,6 +738,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  					     data->ptr + attributes->offset[0],
  					     attributes->stride[0]);
  

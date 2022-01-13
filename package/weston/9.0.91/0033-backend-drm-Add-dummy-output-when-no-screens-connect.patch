@@ -1,4 +1,4 @@
-From 819132c67acf6daa1558374dc0ad15e7a1fbc818 Mon Sep 17 00:00:00 2001
+From 7389aeeca89c79371fa0440b825b27165a597dd6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
 Subject: [PATCH 33/60] backend-drm: Add dummy output when no screens connected
@@ -60,7 +60,7 @@ index 43112186..a591e49b 100644
  
  struct drm_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index ffd803a4..66870476 100644
+index ffd803a4..81844489 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -209,8 +209,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -305,7 +305,7 @@ index ffd803a4..66870476 100644
 +	weston_drm_format_array_init(&plane->formats);
 +	fmt = weston_drm_format_array_add_format(&plane->formats,
 +						 output->gbm_format);
-+	weston_drm_format_add_modifier(fmt, DRM_FORMAT_MOD_INVALID);
++	weston_drm_format_add_modifier(fmt, DRM_FORMAT_MOD_LINEAR);
 +
 +	weston_plane_init(&plane->base, b->compositor, 0, 0);
 +	wl_list_insert(&b->plane_list, &plane->link);
@@ -381,7 +381,7 @@ index ffd803a4..66870476 100644
  
  	/* 'compute' faked zpos values in case HW doesn't expose any */
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 1fcbdeb6..bd025f4b 100644
+index 4b5ba42b..a3c55bd3 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1170,6 +1170,9 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,

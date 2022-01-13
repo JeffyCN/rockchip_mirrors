@@ -1,4 +1,4 @@
-From d5944071fa9d7035c61b26df0c0ce44ef28682d4 Mon Sep 17 00:00:00 2001
+From 5587553a7b8fd285ce7c9ce9a7fd8cf682a4e1c1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
 Subject: [PATCH 53/56] HACK: pixman-renderer: Support passing dma fd to pixman
@@ -42,7 +42,7 @@ index 40bc8ff9..4306dae9 100644
  
  	if (b->use_pixman_shadow)
 diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
-index 8bb7b693..5acc9ba5 100644
+index ea3e72ef..9019bfcc 100644
 --- a/libweston/backend-drm/fb.c
 +++ b/libweston/backend-drm/fb.c
 @@ -60,6 +60,9 @@ drm_fb_destroy_dumb(struct drm_fb *fb)
@@ -84,10 +84,10 @@ index 8bb7b693..5acc9ba5 100644
  	drmModeRmFB(b->drm.fd, fb->fb_id);
  err_bo:
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 9428686b..0e64f180 100644
+index 7fbfb2e5..23ec4253 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -724,6 +724,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -729,6 +729,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  					     data->ptr + attributes->offset[0],
  					     attributes->stride[0]);
  
