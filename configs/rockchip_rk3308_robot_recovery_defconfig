@@ -1,6 +1,7 @@
 #include "rk3308_arm.config"
 #include "recovery.config"
 #include "kernel.config"
+#include "busybox.config"
 #  - use glibc as the basic libc
 BR2_TOOLCHAIN_BUILDROOT_GLIBC=y
 #  - we use buildroot toolcharn here, may change to custom toolchain in the feature
@@ -9,13 +10,9 @@ BR2_TOOLCHAIN_BUILDROOT_CXX=y
 BR2_ROOTFS_POST_BUILD_SCRIPT="build/post.sh"
 #  - specify this is rockchip package
 BR2_PACKAGE_ROCKCHIP=y
-#  - show other busybox config
-BR2_PACKAGE_BUSYBOX_SHOW_OTHERS=y
 #  - we need to support various rootfs, cpio for ramdisk, ext2/4 for large system, squashfs for small system
 BR2_TARGET_ROOTFS_CPIO=y
 BR2_TARGET_ROOTFS_CPIO_GZIP=y
-#  - some people may wish to use their own modified BusyBox configuration file.
-BR2_PACKAGE_BUSYBOX_CONFIG="board/rockchip/common/base/busybox.config"
 # extra base subset is the basic subset of all rootfs, ramdisk.
 #  - we have to use eudev, because wayland need udev support
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y

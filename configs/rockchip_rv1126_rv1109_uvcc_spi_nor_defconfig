@@ -3,6 +3,7 @@
 #include "audio.config"
 #include "video_mpp.config"
 #include "camera.config"
+#include "busybox_minimal.config"
 BR2_TARGET_GENERIC_HOSTNAME="RV1126_RV1109"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RV1126 rootfs"
 BR2_TARGET_GENERIC_GETTY_PORT="ttyFIQ0"
@@ -21,10 +22,6 @@ BR2_ROOTFS_OVERLAY="board/rockchip/common/base"
 BR2_ROOTFS_POST_BUILD_SCRIPT="build/post.sh"
 #  - specify this is rockchip package
 BR2_PACKAGE_ROCKCHIP=y
-#  - show other busybox config
-BR2_PACKAGE_BUSYBOX_SHOW_OTHERS=y
-#  - some people may wish to use their own modified BusyBox configuration file.
-BR2_PACKAGE_BUSYBOX_CONFIG="board/rockchip/common/tinyrootfs/busybox.config"
 
 BR2_ROOTFS_OVERLAY="board/rockchip/rv1126_rv1109/fs-overlay-spi-nor-uvc/"
 BR2_ROOTFS_POST_BUILD_SCRIPT="board/rockchip/rv1126_rv1109/pack-oem.sh"
