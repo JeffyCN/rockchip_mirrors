@@ -1,8 +1,8 @@
-From 29e6665a77534cbfd61717b059c3dddbe65de29b Mon Sep 17 00:00:00 2001
+From aa7be12f135eb7050a51d3ed3333bc0f663cc29d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
-Subject: [PATCH 76/78] waylandsink: Support NV12_10LE40 NV12(AFBC) and
- NV12_10(AFBC)
+Subject: [PATCH 76/78] waylandsink: Support NV12_10LE40 and
+ NV12|NV12_10LE40|NV16 (AFBC)
 
 Tested on RK356x with:
 export GST_MPP_VIDEODEC_DEFAULT_ARM_AFBC=1
@@ -10,18 +10,18 @@ gst-play-1.0 video.mp4 --videosink=waylandsink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- ext/wayland/gstwaylandsink.c | 92 +++++++++++++++++++++++++++++++++++-
- ext/wayland/wldisplay.c      | 19 +++++++-
+ ext/wayland/gstwaylandsink.c | 96 +++++++++++++++++++++++++++++++++++-
+ ext/wayland/wldisplay.c      | 19 ++++++-
  ext/wayland/wldisplay.h      |  2 +
- ext/wayland/wllinuxdmabuf.c  | 40 +++++++++++++++-
+ ext/wayland/wllinuxdmabuf.c  | 43 +++++++++++++++-
  ext/wayland/wlvideoformat.c  |  1 +
- ext/wayland/wlvideoformat.h  | 50 ++++++++++++++++++++
+ ext/wayland/wlvideoformat.h  | 50 +++++++++++++++++++
  ext/wayland/wlwindow.c       | 26 ++++++----
  ext/wayland/wlwindow.h       |  2 +
- 8 files changed, 220 insertions(+), 12 deletions(-)
+ 8 files changed, 227 insertions(+), 12 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 2f1aea3..281a28b 100644
+index 2f1aea3..ea2779f 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -77,7 +77,7 @@ GST_DEBUG_CATEGORY (gstwayland_debug);
@@ -33,7 +33,7 @@ index 2f1aea3..281a28b 100644
  
  static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE ("sink",
      GST_PAD_SINK,
-@@ -598,6 +598,40 @@ gst_wayland_sink_set_context (GstElement * element, GstContext * context)
+@@ -598,6 +598,44 @@ gst_wayland_sink_set_context (GstElement * element, GstContext * context)
      GST_ELEMENT_CLASS (parent_class)->set_context (element, context);
  }
  
@@ -61,9 +61,13 @@ index 2f1aea3..281a28b 100644
 +    gst_caps_append (caps, tmp_caps);
 +  }
 +
-+  /* NV12(AFBC) */
++  /* NV12|NV16 (AFBC) */
 +  if (sink->display->support_afbc) {
 +    tmp_caps = gst_caps_from_string (GST_VIDEO_CAPS_MAKE ("NV12"));
++    gst_caps_set_simple (tmp_caps, "arm-afbc", G_TYPE_INT, 1, NULL);
++    gst_caps_append (caps, tmp_caps);
++
++    tmp_caps = gst_caps_from_string (GST_VIDEO_CAPS_MAKE ("NV16"));
 +    gst_caps_set_simple (tmp_caps, "arm-afbc", G_TYPE_INT, 1, NULL);
 +    gst_caps_append (caps, tmp_caps);
 +  }
@@ -74,7 +78,7 @@ index 2f1aea3..281a28b 100644
  static GstCaps *
  gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
  {
-@@ -645,6 +679,8 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
+@@ -645,6 +683,8 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
      gst_structure_take_value (gst_caps_get_structure (caps, 1), "format",
          &dmabuf_list);
  
@@ -83,7 +87,7 @@ index 2f1aea3..281a28b 100644
      GST_DEBUG_OBJECT (sink, "display caps: %" GST_PTR_FORMAT, caps);
    }
  
-@@ -691,6 +727,8 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -691,6 +731,8 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
  {
    GstWaylandSink *sink;
    GstVideoFormat format;
@@ -92,7 +96,7 @@ index 2f1aea3..281a28b 100644
  
    sink = GST_WAYLAND_SINK (bsink);
  
-@@ -700,6 +738,23 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -700,6 +742,23 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
    if (!gst_video_info_from_caps (&sink->video_info, caps))
      goto invalid_format;
  
@@ -116,7 +120,7 @@ index 2f1aea3..281a28b 100644
    format = GST_VIDEO_INFO_FORMAT (&sink->video_info);
    sink->video_info_changed = TRUE;
  
-@@ -736,9 +791,17 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -736,9 +795,17 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    GstBufferPool *pool = NULL;
    gboolean need_pool;
    GstAllocator *alloc;
@@ -134,7 +138,7 @@ index 2f1aea3..281a28b 100644
    if (need_pool)
      pool = gst_wayland_create_pool (sink, caps);
  
-@@ -818,6 +881,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -818,6 +885,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
    GstWaylandSink *sink = GST_WAYLAND_SINK (vsink);
    GstBuffer *to_render;
    GstWlBuffer *wlbuffer;
@@ -142,7 +146,7 @@ index 2f1aea3..281a28b 100644
    GstVideoMeta *vmeta;
    GstVideoFormat format;
    GstVideoInfo old_vinfo;
-@@ -855,6 +919,23 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -855,6 +923,23 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
      }
    }
  
@@ -166,7 +170,7 @@ index 2f1aea3..281a28b 100644
    /* drop buffers until we get a frame callback */
    if (sink->redraw_pending) {
      GST_LOG_OBJECT (sink, "buffer %p dropped (redraw pending)", buffer);
-@@ -905,6 +986,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -905,6 +990,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
            &sink->video_info);
    }
  
@@ -176,7 +180,7 @@ index 2f1aea3..281a28b 100644
    if (!wbuf && gst_wl_display_check_format_for_shm (sink->display, format)) {
      if (gst_buffer_n_memory (buffer) == 1 && gst_is_fd_memory (mem))
        wbuf = gst_wl_shm_memory_construct_wl_buffer (mem, sink->display,
-@@ -1038,6 +1122,12 @@ no_wl_buffer:
+@@ -1038,6 +1126,12 @@ no_wl_buffer:
      ret = GST_FLOW_ERROR;
      goto done;
    }
@@ -244,7 +248,7 @@ index f2025a6..29c15f6 100644
    /* private */
    gboolean own_display;
 diff --git a/ext/wayland/wllinuxdmabuf.c b/ext/wayland/wllinuxdmabuf.c
-index bc1742c..145e5fb 100644
+index bc1742c..2243cc7 100644
 --- a/ext/wayland/wllinuxdmabuf.c
 +++ b/ext/wayland/wllinuxdmabuf.c
 @@ -46,6 +46,8 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
@@ -256,7 +260,7 @@ index bc1742c..145e5fb 100644
  
    g_return_val_if_fail (gst_wl_display_check_format_for_dmabuf (display,
            GST_VIDEO_INFO_FORMAT (info)), NULL);
-@@ -57,10 +59,46 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+@@ -57,10 +59,49 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
    height = GST_VIDEO_INFO_HEIGHT (info);
    nplanes = GST_VIDEO_INFO_N_PLANES (info);
  
@@ -273,15 +277,18 @@ index bc1742c..145e5fb 100644
        gst_wl_dmabuf_format_to_string (format));
  
 +  if (GST_VIDEO_INFO_IS_AFBC (info)) {
-+    /* Mali uses DRM_FORMAT_YUV420_(8|10)BIT instead */
++    /* Mali uses these formats instead */
 +    if (format == DRM_FORMAT_NV12) {
 +      format = DRM_FORMAT_YUV420_8BIT;
 +      nplanes = 1;
 +    } else if (format == DRM_FORMAT_NV15) {
 +      format = DRM_FORMAT_YUV420_10BIT;
 +      nplanes = 1;
++    } else if (format == DRM_FORMAT_NV16) {
++      format = DRM_FORMAT_YUYV;
++      nplanes = 1;
 +    } else {
-+      GST_ERROR_OBJECT (mem->allocator, "only support AFBC for NV12|NV12_10");
++      GST_ERROR_OBJECT (mem->allocator, "unsupported format for AFBC");
 +      data.wbuf = NULL;
 +      goto out;
 +    }
@@ -303,7 +310,7 @@ index bc1742c..145e5fb 100644
    /* Creation and configuration of planes  */
    params = zwp_linux_dmabuf_v1_create_params (display->dmabuf);
  
-@@ -74,7 +112,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+@@ -74,7 +115,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
        GstMemory *m = gst_buffer_peek_memory (buf, mem_idx);
        gint fd = gst_dmabuf_memory_get_fd (m);
        zwp_linux_buffer_params_v1_add (params, fd, i, m->offset + skip,
