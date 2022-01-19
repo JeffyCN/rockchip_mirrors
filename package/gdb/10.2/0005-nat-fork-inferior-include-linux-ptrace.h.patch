@@ -1,4 +1,4 @@
-From 887c667089e5417fdc7c5bbb364b027e86a7c113 Mon Sep 17 00:00:00 2001
+From c8454711eca2e79437e17ed1e1e68b48b4c8d927 Mon Sep 17 00:00:00 2001
 From: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
 Date: Sun, 24 Jun 2018 23:33:55 +0200
 Subject: [PATCH] nat/fork-inferior: include linux-ptrace.h
@@ -30,22 +30,24 @@ Fixes the following build issue:
            vfork
 
 Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
+[Romain: rebase on gdb 8.3]
+Signed-off-by: Romain Naour <romain.naour@gmail.com>
 ---
  gdb/nat/fork-inferior.c | 1 +
  1 file changed, 1 insertion(+)
 
 diff --git a/gdb/nat/fork-inferior.c b/gdb/nat/fork-inferior.c
-index 8b59387fa5..05167628a6 100644
+index 7ba0126871d..53e1ec72f09 100644
 --- a/gdb/nat/fork-inferior.c
 +++ b/gdb/nat/fork-inferior.c
-@@ -26,6 +26,7 @@
- #include "common-gdbthread.h"
- #include "signals-state-save-restore.h"
- #include "gdb_tilde_expand.h"
+@@ -27,6 +27,7 @@
+ #include "gdbsupport/pathstuff.h"
+ #include "gdbsupport/signals-state-save-restore.h"
+ #include "gdbsupport/gdb_tilde_expand.h"
 +#include "linux-ptrace.h"
  #include <vector>
  
  extern char **environ;
 -- 
-2.14.4
+2.29.2
 
