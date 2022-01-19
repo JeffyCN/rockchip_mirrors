@@ -1,7 +1,7 @@
-From d97777845446978dfaefe07e182a2d41831d0ace Mon Sep 17 00:00:00 2001
+From 3c2d97a62a970393dfe509a58229b843915a1937 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 8 Nov 2021 18:45:00 +0800
-Subject: [PATCH 73/78] waylandsink: Support frame-sync mode
+Subject: [PATCH 73/80] waylandsink: Support frame-sync mode
 
 Set env "WAYLANDSINK_SYNC_FRAME" to enable frame syncing.
 
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 10 insertions(+)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index b660a08..78f5a54 100644
+index b660a08d..9b59f7af 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -279,6 +279,7 @@ gst_wayland_sink_init (GstWaylandSink * sink)
@@ -39,21 +39,28 @@ index b660a08..78f5a54 100644
  
    if (sink->callback) {
      wl_callback_destroy (callback);
-@@ -1007,6 +1010,12 @@ render:
- 
-   if (buffer != to_render)
-     gst_buffer_unref (to_render);
+@@ -807,6 +810,11 @@ render_last_buffer (GstWaylandSink * sink, gboolean redraw)
+   }
+   sink->window->fill_mode = sink->fill_mode;
+   gst_wl_window_render (sink->window, wlbuffer, info);
 +
 +  if (g_getenv ("WAYLANDSINK_SYNC_FRAME")) {
 +    while (sink->redraw_pending)
 +      g_cond_wait (&sink->redraw_cond, &sink->render_lock);
 +  }
+ }
+ 
+ static void
+@@ -1007,6 +1015,7 @@ render:
+ 
+   if (buffer != to_render)
+     gst_buffer_unref (to_render);
 +
    goto done;
  
  no_window_size:
 diff --git a/ext/wayland/gstwaylandsink.h b/ext/wayland/gstwaylandsink.h
-index dc3a1d1..376e3a4 100644
+index dc3a1d1c..376e3a46 100644
 --- a/ext/wayland/gstwaylandsink.h
 +++ b/ext/wayland/gstwaylandsink.h
 @@ -71,6 +71,7 @@ struct _GstWaylandSink

@@ -1,7 +1,7 @@
-From aa7be12f135eb7050a51d3ed3333bc0f663cc29d Mon Sep 17 00:00:00 2001
+From 81ec16c16e40b50cc6ac327a9a1bca0a5e7bb6ab Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
-Subject: [PATCH 76/78] waylandsink: Support NV12_10LE40 and
+Subject: [PATCH 76/80] waylandsink: Support NV12_10LE40 and
  NV12|NV12_10LE40|NV16 (AFBC)
 
 Tested on RK356x with:
@@ -10,18 +10,18 @@ gst-play-1.0 video.mp4 --videosink=waylandsink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- ext/wayland/gstwaylandsink.c | 96 +++++++++++++++++++++++++++++++++++-
+ ext/wayland/gstwaylandsink.c | 97 +++++++++++++++++++++++++++++++++++-
  ext/wayland/wldisplay.c      | 19 ++++++-
  ext/wayland/wldisplay.h      |  2 +
- ext/wayland/wllinuxdmabuf.c  | 43 +++++++++++++++-
+ ext/wayland/wllinuxdmabuf.c  | 21 +++++++-
  ext/wayland/wlvideoformat.c  |  1 +
  ext/wayland/wlvideoformat.h  | 50 +++++++++++++++++++
  ext/wayland/wlwindow.c       | 26 ++++++----
  ext/wayland/wlwindow.h       |  2 +
- 8 files changed, 227 insertions(+), 12 deletions(-)
+ 8 files changed, 206 insertions(+), 12 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 2f1aea3..ea2779f 100644
+index 5f204b9a..61028bd4 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -77,7 +77,7 @@ GST_DEBUG_CATEGORY (gstwayland_debug);
@@ -138,7 +138,15 @@ index 2f1aea3..ea2779f 100644
    if (need_pool)
      pool = gst_wayland_create_pool (sink, caps);
  
-@@ -818,6 +885,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -749,6 +816,7 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+   alloc = gst_wl_shm_allocator_get ();
+   gst_query_add_allocation_param (query, alloc, NULL);
+   gst_query_add_allocation_meta (query, GST_VIDEO_META_API_TYPE, NULL);
++  gst_query_add_allocation_meta (query, GST_VIDEO_CROP_META_API_TYPE, NULL);
+   g_object_unref (alloc);
+ 
+   return TRUE;
+@@ -823,6 +891,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
    GstWaylandSink *sink = GST_WAYLAND_SINK (vsink);
    GstBuffer *to_render;
    GstWlBuffer *wlbuffer;
@@ -146,7 +154,7 @@ index 2f1aea3..ea2779f 100644
    GstVideoMeta *vmeta;
    GstVideoFormat format;
    GstVideoInfo old_vinfo;
-@@ -855,6 +923,23 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -860,6 +929,23 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
      }
    }
  
@@ -170,7 +178,7 @@ index 2f1aea3..ea2779f 100644
    /* drop buffers until we get a frame callback */
    if (sink->redraw_pending) {
      GST_LOG_OBJECT (sink, "buffer %p dropped (redraw pending)", buffer);
-@@ -905,6 +990,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -910,6 +996,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
            &sink->video_info);
    }
  
@@ -180,7 +188,7 @@ index 2f1aea3..ea2779f 100644
    if (!wbuf && gst_wl_display_check_format_for_shm (sink->display, format)) {
      if (gst_buffer_n_memory (buffer) == 1 && gst_is_fd_memory (mem))
        wbuf = gst_wl_shm_memory_construct_wl_buffer (mem, sink->display,
-@@ -1038,6 +1126,12 @@ no_wl_buffer:
+@@ -1038,6 +1127,12 @@ no_wl_buffer:
      ret = GST_FLOW_ERROR;
      goto done;
    }
@@ -194,7 +202,7 @@ index 2f1aea3..ea2779f 100644
    {
      GST_ERROR_OBJECT (sink, "failed to activate bufferpool.");
 diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
-index 01dc3c6..84d2b26 100644
+index 01dc3c6d..84d2b266 100644
 --- a/ext/wayland/wldisplay.c
 +++ b/ext/wayland/wldisplay.c
 @@ -145,10 +145,27 @@ dmabuf_format (void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
@@ -235,7 +243,7 @@ index 01dc3c6..84d2b26 100644
    }
  }
 diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
-index f2025a6..29c15f6 100644
+index f2025a6a..29c15f63 100644
 --- a/ext/wayland/wldisplay.h
 +++ b/ext/wayland/wldisplay.h
 @@ -62,6 +62,8 @@ struct _GstWlDisplay
@@ -248,31 +256,18 @@ index f2025a6..29c15f6 100644
    /* private */
    gboolean own_display;
 diff --git a/ext/wayland/wllinuxdmabuf.c b/ext/wayland/wllinuxdmabuf.c
-index bc1742c..2243cc7 100644
+index bc1742c7..964cedb3 100644
 --- a/ext/wayland/wllinuxdmabuf.c
 +++ b/ext/wayland/wllinuxdmabuf.c
-@@ -46,6 +46,8 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+@@ -46,6 +46,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
    guint nplanes, flags = 0;
    struct zwp_linux_buffer_params_v1 *params;
    ConstructBufferData data;
-+  GstVideoCropMeta *crop;
 +  guint64 modifier = GST_VIDEO_INFO_IS_AFBC (info) ? DRM_AFBC_MODIFIER : 0;
  
    g_return_val_if_fail (gst_wl_display_check_format_for_dmabuf (display,
            GST_VIDEO_INFO_FORMAT (info)), NULL);
-@@ -57,10 +59,49 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
-   height = GST_VIDEO_INFO_HEIGHT (info);
-   nplanes = GST_VIDEO_INFO_N_PLANES (info);
- 
-+  crop = gst_buffer_get_video_crop_meta (buf);
-+  if (crop) {
-+    int crop_height = crop->y + crop->height;
-+
-+    if (crop_height > height)
-+      height = crop_height;
-+  }
-+
-   GST_DEBUG_OBJECT (display, "Creating wl_buffer from DMABuf of size %"
+@@ -61,6 +62,24 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
        G_GSSIZE_FORMAT " (%d x %d), format %s", info->size, width, height,
        gst_wl_dmabuf_format_to_string (format));
  
@@ -292,25 +287,12 @@ index bc1742c..2243cc7 100644
 +      data.wbuf = NULL;
 +      goto out;
 +    }
-+
-+    /*
-+     * HACK:
-+     * When importing AFBC dma-bufs, mali would re-calculate the row stride
-+     * from width by itself. But the row stride aligning algorithms are
-+     * different between MPP and Mali:
-+     *
-+     * MPP uses round_up_64(round_up_64(width) * bpp / 8)
-+     * Mali uses round_up_64(width * bpp / 8)
-+     *
-+     * So let's fake a aligned width and force cropping to the real size later.
-+     */
-+    width = GST_ROUND_UP_64 (width);
 +  }
 +
    /* Creation and configuration of planes  */
    params = zwp_linux_dmabuf_v1_create_params (display->dmabuf);
  
-@@ -74,7 +115,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
+@@ -74,7 +93,7 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
        GstMemory *m = gst_buffer_peek_memory (buf, mem_idx);
        gint fd = gst_dmabuf_memory_get_fd (m);
        zwp_linux_buffer_params_v1_add (params, fd, i, m->offset + skip,
@@ -320,7 +302,7 @@ index bc1742c..2243cc7 100644
        GST_ERROR_OBJECT (mem->allocator, "memory does not seem to contain "
            "enough data for the specified format");
 diff --git a/ext/wayland/wlvideoformat.c b/ext/wayland/wlvideoformat.c
-index 68cec50..11ca051 100644
+index 68cec509..11ca051a 100644
 --- a/ext/wayland/wlvideoformat.c
 +++ b/ext/wayland/wlvideoformat.c
 @@ -56,6 +56,7 @@ static const wl_VideoFormat wl_formats[] = {
@@ -332,7 +314,7 @@ index 68cec50..11ca051 100644
    {WL_SHM_FORMAT_NV16, DRM_FORMAT_NV16, GST_VIDEO_FORMAT_NV16},
    {WL_SHM_FORMAT_NV61, DRM_FORMAT_NV61, GST_VIDEO_FORMAT_NV61},
 diff --git a/ext/wayland/wlvideoformat.h b/ext/wayland/wlvideoformat.h
-index 331f582..cebcd58 100644
+index 331f582b..cebcd586 100644
 --- a/ext/wayland/wlvideoformat.h
 +++ b/ext/wayland/wlvideoformat.h
 @@ -30,6 +30,56 @@
@@ -393,7 +375,7 @@ index 331f582..cebcd58 100644
  gint gst_video_format_to_wl_dmabuf_format (GstVideoFormat format);
  GstVideoFormat gst_wl_shm_format_to_video_format (enum wl_shm_format wl_format);
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index 91c8135..b72d173 100644
+index 91c8135d..b72d1738 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -456,6 +456,14 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
@@ -461,7 +443,7 @@ index 91c8135..b72d173 100644
  
    if (G_LIKELY (buffer)) {
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
-index 4932cdd..a12e0eb 100644
+index 4932cdd1..a12e0ebe 100644
 --- a/ext/wayland/wlwindow.h
 +++ b/ext/wayland/wlwindow.h
 @@ -74,6 +74,8 @@ struct _GstWlWindow
