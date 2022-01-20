@@ -53,22 +53,22 @@ void RK_ota_set_url(char *url, char *savepath) {
 bool is_sdboot = false;
 
 UPDATE_CMD update_cmd[] = {
-           {"bootloader" , false , false , 0 , 0 , 0 , "" , flash_bootloader} ,
-           {"parameter"  , false , false , 0 , 0 , 0 , "" , flash_parameter}  ,
-           {"uboot"      , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"trust"      , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"boot"       , false , true  , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"recovery"   , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"rootfs"     , false , true  , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"oem"        , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"uboot_a"    , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"uboot_b"    , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"boot_a"     , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"boot_b"     , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"system_a"   , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"system_b"   , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"misc"       , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
-           {"userdata"   , false , false , 0 , 0 , 0 , "" , flash_normal}     ,
+           {"bootloader" , false , false , 0 , 0 , 0 , "" , false, flash_bootloader} ,
+           {"parameter"  , false , false , 0 , 0 , 0 , "" , false, flash_parameter}  ,
+           {"uboot"      , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"trust"      , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"boot"       , false , true  , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"recovery"   , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"rootfs"     , false , true  , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"oem"        , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"uboot_a"    , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"uboot_b"    , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"boot_a"     , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"boot_b"     , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"system_a"   , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"system_b"   , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"misc"       , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+           {"userdata"   , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
 };
 
 bool RK_ota_set_partition(int partition) {
@@ -357,10 +357,12 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
                     continue;
                 }
                 // 校验分区
-                if (comparefile(update_cmd[i].dest_path, _url, update_cmd[i].flash_offset, update_cmd[i].offset, update_cmd[i].size))
-                {
+                if (!update_cmd[i].skip_verify &&
+                    comparefile(update_cmd[i].dest_path, _url,
+                                update_cmd[i].flash_offset,
+                                update_cmd[i].offset, update_cmd[i].size)) {
                     LOGI("check %s ok.\n", update_cmd[i].dest_path);
-                } else {
+                } else if (!update_cmd[i].skip_verify) {
                     LOGE("check %s failed.\n", update_cmd[i].dest_path);
                     cb(NULL, RK_UPGRADE_ERR);
                     return ;

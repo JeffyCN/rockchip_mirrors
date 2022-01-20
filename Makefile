@@ -38,9 +38,9 @@ endif
 CFLAGS += -I$(PROJECT_DIR) -I/usr/include -I/usr/include/libdrm/ -lc -DUSE_UPDATEENGINE=ON
 
 ifdef RecoveryNoUi
-CFLAGS += -lpthread
+CFLAGS += -lpthread -lbz2
 else
-CFLAGS += -lz -lpng -ldrm -lpthread -lcurl -lcrypto
+CFLAGS += -lz -lpng -ldrm -lpthread -lcurl -lcrypto -lbz2
 endif
 
 UPDATE_ENGINE_OBJ = mtdutils/mounts.o \
@@ -56,7 +56,8 @@ UPDATE_ENGINE_OBJ = mtdutils/mounts.o \
 	update_engine/rktools.o \
 	update_engine/rkboot.o \
 	update_engine/crc.o \
-	update_engine/update.o
+	update_engine/update.o \
+	update_engine/do_patch.o
 
 $(PROM): $(OBJ)
 	$(CC) -o $(PROM) $(OBJ) $(CFLAGS)

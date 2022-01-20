@@ -17,6 +17,7 @@ typedef struct {
     long long offset;
     long long flash_offset;
     char dest_path[100];
+    bool skip_verify;
     update_func cmd;
 }UPDATE_CMD, *PUPDATE_CMD;
 

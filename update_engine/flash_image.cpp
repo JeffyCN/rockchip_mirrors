@@ -183,14 +183,35 @@ static int block_write(char *src_path, long long offset, long long size, long lo
     return 0;
 }
 
+extern int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
+                          const char *blk_dev, const char *dst_file);
+
 extern bool is_sdboot;
 int flash_normal(char *src_path, void *pupdate_cmd) {
     LOGI("%s:%d start.\n", __func__, __LINE__);
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
     int ret = 0;
+
     if (is_sdboot || !isMtdDevice()) {
         //block
-        ret = block_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
+        char dst_file[256];
+
+        LOGI("%s:%d, diff check for %s\n", __func__, __LINE__, pcmd->name);
+        snprintf(dst_file, 256, "%s.tmp", src_path);
+        ret = do_patch_rkimg(src_path, pcmd->offset, pcmd->size,
+                             pcmd->dest_path, dst_file);
+        if (ret == 0) {
+            ret = block_write(src_path, pcmd->offset, pcmd->size,
+                              pcmd->flash_offset, pcmd->dest_path);
+        } else if(ret > 0) {
+            ret = block_write(dst_file, 0, ret,
+                              pcmd->flash_offset, pcmd->dest_path);
+            //TODO: do not skip diff image verify
+            pcmd->skip_verify = true;
+            unlink(dst_file);
+        } else {
+            return ret;
+        }
     } else {
         //mtd
         printf("pcmd->flash_offset = %lld.\n", pcmd->flash_offset);
