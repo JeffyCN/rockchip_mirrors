@@ -1,0 +1,7 @@
+#include "base.config"
+#include "rk3588_arm64.config"
+
+# BR2_PACKAGE_RKSCRIPT is not set
+BR2_ROOTFS_OVERLAY="board/rockchip/common/security-ramdisk-overlay/"
+BR2_PACKAGE_LUKSMETA=y
+BR2_PACKAGE_LVM2_STANDARD_INSTALL=y

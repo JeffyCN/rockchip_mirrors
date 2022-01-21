@@ -1,0 +1,38 @@
+#!/bin/sh
+# devtmpfs does not get automounted for initramfs
+/bin/mount -t devtmpfs devtmpfs /dev
+/bin/mount -t proc proc /proc
+/bin/mount -t sysfs sysfs /sys
+
+exec 0</dev/console
+exec 1>/dev/console
+exec 2>/dev/console
+
+# make sure /dev/ has mounted
+while [ ! -e /dev/mapper/control -o ! -e /proc/mounts ]
+do
+	usleep 10000
+	echo .
+done
+
+# MMC device assumed
+STORGE_DEV=`ls /dev/mmcblk[0-9] | head -n 1`
+if [ -z "$STORGE_DEV" ]; then
+	echo "No mmc device found"
+fi
+#	echo STORGE_DEV=${STORGE_DEV}
+
+INIT=`dmesg | grep "command line" | grep " init=" | sed "s/.* init=//" | cut -d " " -f 1`
+test -z "$INIT" && INIT=/init
+
+OFFSET=
+HASH=
+BLOCK=
+
+# echo "/usr/sbin/veritysetup --hash-offset=${OFFSET} create vroot ${STORGE_DEV}p${BLOCK} ${STORGE_DEV}p${BLOCK} ${HASH}"
+/usr/sbin/veritysetup --hash-offset=${OFFSET} create vroot ${STORGE_DEV}p${BLOCK} ${STORGE_DEV}p${BLOCK} ${HASH} > /dev/null 2>&1
+mount /dev/mapper/vroot /mnt
+
+# echo "exec busybox switch_root /mnt ${INIT}"
+# exec busybox switch_root /mnt ${INIT}
+exec /sbin/init "$@"
