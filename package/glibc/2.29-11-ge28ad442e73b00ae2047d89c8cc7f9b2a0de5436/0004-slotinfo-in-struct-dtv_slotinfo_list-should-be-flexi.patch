@@ -1,7 +1,7 @@
-From b3be1d07b4e3a095d437c9e056c12e424dba812c Mon Sep 17 00:00:00 2001
+From d14a7407d18e892da09a18773ecc3b8f91fe7d31 Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Tue, 12 Nov 2019 12:41:34 +0100
-Subject: [PATCH 02/18] slotinfo in struct dtv_slotinfo_list should be flexible
+Subject: [PATCH 04/20] slotinfo in struct dtv_slotinfo_list should be flexible
  array [BZ #25097]
 
 GCC 10 will warn about subscribing inner length zero arrays.  Use a GCC

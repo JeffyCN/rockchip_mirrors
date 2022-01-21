@@ -1,7 +1,7 @@
-From 5d16e3a82fd9d7966e33be46b80a807dce341db3 Mon Sep 17 00:00:00 2001
+From 589549d6199e465e3f8dd8b7686d469a283bc5ed Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Sat, 2 Nov 2019 20:04:02 +0100
-Subject: [PATCH 12/18] Introduce link_map_audit_state accessor function
+Subject: [PATCH 14/20] Introduce link_map_audit_state accessor function
 
 To improve GCC 10 compatibility, it is necessary to remove the l_audit
 zero-length array from the end of struct link_map.  In preparation of

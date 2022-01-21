@@ -1,7 +1,7 @@
-From ced443dae413aae905813a5f8192cf277b60fcfd Mon Sep 17 00:00:00 2001
+From 7ac41b760a68b2d5b38b90c1b082d9ed3c654100 Mon Sep 17 00:00:00 2001
 From: Joseph Myers <joseph@codesourcery.com>
 Date: Tue, 17 Mar 2020 22:57:42 +0000
-Subject: [PATCH 06/18] Fix build with GCC 10 when long double = double.
+Subject: [PATCH 08/20] Fix build with GCC 10 when long double = double.
 
 On platforms where long double has the same ABI as double, glibc
 defines long double functions as aliases for the corresponding double

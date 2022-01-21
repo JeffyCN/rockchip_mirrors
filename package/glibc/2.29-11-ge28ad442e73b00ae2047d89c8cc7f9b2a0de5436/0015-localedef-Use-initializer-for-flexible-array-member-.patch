@@ -1,7 +1,7 @@
-From 882a738ab3cd83502125fe0a287cedca9c0e963b Mon Sep 17 00:00:00 2001
+From c8e2e2366421c702a458c52594ac5c00904a70e4 Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Tue, 3 Sep 2019 14:01:39 +0200
-Subject: [PATCH 13/18] localedef: Use initializer for flexible array member
+Subject: [PATCH 15/20] localedef: Use initializer for flexible array member
  [BZ #24950]
 
 struct charseq used a zero-length array instead of a flexible array

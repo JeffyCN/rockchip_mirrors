@@ -1,7 +1,7 @@
-From 200691f8b9194f172c57de71a0a7eec9c018de7b Mon Sep 17 00:00:00 2001
+From 69b812c39c7d16f1c7cc4a1193dde0ec469d4492 Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Sat, 2 Nov 2019 21:55:35 +0100
-Subject: [PATCH 11/18] Properly initialize audit cookie for the dynamic loader
+Subject: [PATCH 13/20] Properly initialize audit cookie for the dynamic loader
  [BZ #25157]
 
 The l_audit array is indexed by audit module, not audit function.

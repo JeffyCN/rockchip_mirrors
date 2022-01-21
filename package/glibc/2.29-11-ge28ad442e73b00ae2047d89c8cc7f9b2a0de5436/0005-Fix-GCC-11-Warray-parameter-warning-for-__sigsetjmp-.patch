@@ -1,7 +1,7 @@
-From f6f7ba3ec91331df24d444ab89bca69b17c757b0 Mon Sep 17 00:00:00 2001
+From 60c4e072d48f48262a4a074beafb6b7e7d687b76 Mon Sep 17 00:00:00 2001
 From: Joseph Myers <joseph@codesourcery.com>
 Date: Mon, 5 Oct 2020 16:46:46 +0000
-Subject: [PATCH 03/18] Fix GCC 11 -Warray-parameter warning for __sigsetjmp
+Subject: [PATCH 05/20] Fix GCC 11 -Warray-parameter warning for __sigsetjmp
  (bug 26647)
 
 This patch fixes part of bug 26647 (-Werror=array-parameter error

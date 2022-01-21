@@ -1,7 +1,7 @@
-From 5c82d88262c4709833441e0e672ec58f7666341f Mon Sep 17 00:00:00 2001
+From 9f8a0bafefc580e29e5b26827e4c76fa4ab4bf61 Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Tue, 12 Feb 2019 13:36:56 +0100
-Subject: [PATCH 10/18] elf: Ignore LD_AUDIT interfaces if la_version returns 0
+Subject: [PATCH 12/20] elf: Ignore LD_AUDIT interfaces if la_version returns 0
  [BZ #24122]
 
 This change moves the audit module loading and early notification into

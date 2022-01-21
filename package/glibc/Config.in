@@ -1,5 +1,7 @@
 if BR2_TOOLCHAIN_BUILDROOT_GLIBC
 
+comment "Glibc Options"
+
 config BR2_PACKAGE_GLIBC
 	bool
 	default y
@@ -8,7 +10,23 @@ config BR2_PACKAGE_GLIBC
 	help
 	  https://www.gnu.org/software/libc/
 
-if BR2_PACKAGE_GLIBC
+choice
+        prompt "glibc version"
+        default BR2_PACKAGE_GLIBC_2_34
+
+config BR2_PACKAGE_GLIBC_2_34
+        bool "glibc 2.34"
+
+config BR2_PACKAGE_GLIBC_2_29
+        bool "glibc 2.29"
+
+endchoice
+
+config BR2_PACKAGE_GLIBC_UTILS
+	bool "Install glibc utilities"
+	help
+	  Enabling this option will compile and install the getconf,
+	  ldconfig, ldd and locale glibc utilities for the target.
 
 config BR2_PACKAGE_GLIBC_AUTO_KERNEL_VERSION
 	bool "auto detect header version"
@@ -20,6 +38,5 @@ config BR2_PACKAGE_GLIBC_GEN_LD_CACHE
 	select BR2_PACKAGE_HOST_QEMU
 	select BR2_PACKAGE_HOST_QEMU_LINUX_USER_MODE
 
-endif
+endif # BR2_TOOLCHAIN_BUILDROOT_GLIBC
 
-endif

@@ -1,7 +1,7 @@
-From c197fca162d9cfea8da9751409be51e570479f29 Mon Sep 17 00:00:00 2001
+From 79e8a4a33f68deb94a67b77c10b45ee4ef357ead Mon Sep 17 00:00:00 2001
 From: Martin Sebor <msebor@redhat.com>
 Date: Thu, 8 Oct 2020 12:53:09 -0600
-Subject: [PATCH 09/18] sunrpc: Adjust RPC function declarations to match Sun's
+Subject: [PATCH 11/20] sunrpc: Adjust RPC function declarations to match Sun's
  (bug 26686]
 
 Building Glibc with the latest GCC 11 shows a number of instances

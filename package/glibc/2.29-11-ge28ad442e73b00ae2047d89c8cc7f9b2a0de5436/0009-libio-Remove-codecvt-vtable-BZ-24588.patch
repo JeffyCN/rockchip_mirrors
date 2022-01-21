@@ -1,7 +1,7 @@
-From 0f3d4246289415b8ffe433f19f295a7a9ea9464b Mon Sep 17 00:00:00 2001
+From 3a20f314a68e5f265322ab1e26a03d729839c34a Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Mon, 20 May 2019 21:54:57 +0200
-Subject: [PATCH 07/18] libio: Remove codecvt vtable [BZ #24588]
+Subject: [PATCH 09/20] libio: Remove codecvt vtable [BZ #24588]
 
 The codecvt vtable is not a real vtable because it also contains the
 conversion state data.  Furthermore, wide stream support was added to

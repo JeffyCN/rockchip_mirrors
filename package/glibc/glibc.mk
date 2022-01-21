@@ -4,16 +4,14 @@
 #
 ################################################################################
 
-ifeq ($(BR2_arc),y)
-GLIBC_VERSION =  arc-2018.09-release
-GLIBC_SITE = $(call github,foss-for-synopsys-dwc-arc-processors,glibc,$(GLIBC_VERSION))
-else ifeq ($(BR2_RISCV_32),y)
-GLIBC_VERSION = 06983fe52cfe8e4779035c27e8cc5d2caab31531
-GLIBC_SITE = $(call github,riscv,riscv-glibc,$(GLIBC_VERSION))
-else
 # Generate version string using:
 #   git describe --match 'glibc-*' --abbrev=40 origin/release/MAJOR.MINOR/master | cut -d '-' -f 2-
+# When updating the version, please also update localedef
+ifeq ($(BR2_PACKAGE_GLIBC_2_29),y)
 GLIBC_VERSION = 2.29-11-ge28ad442e73b00ae2047d89c8cc7f9b2a0de5436
+else
+GLIBC_VERSION = 2.34-9-g9acab0bba6a5a57323b1f94bf95b21618a9e5aa4
+endif
 # Upstream doesn't officially provide an https download link.
 # There is one (https://sourceware.org/git/glibc.git) but it's not reliable,
 # sometimes the connection times out. So use an unofficial github mirror.
@@ -21,10 +19,10 @@ GLIBC_VERSION = 2.29-11-ge28ad442e73b00ae2047d89c8cc7f9b2a0de5436
 # *NEVER* decide on a version string by looking at the mirror.
 # Then check that the mirror has been synced already (happens once a day.)
 GLIBC_SITE = $(call github,bminor,glibc,$(GLIBC_VERSION))
-endif
 
 GLIBC_LICENSE = GPL-2.0+ (programs), LGPL-2.1+, BSD-3-Clause, MIT (library)
 GLIBC_LICENSE_FILES = COPYING COPYING.LIB LICENSES
+GLIBC_CPE_ID_VENDOR = gnu
 
 # glibc is part of the toolchain so disable the toolchain dependency
 GLIBC_ADD_TOOLCHAIN_DEPENDENCY = NO
@@ -59,6 +57,11 @@ ifeq ($(BR2_ENABLE_DEBUG),y)
 GLIBC_EXTRA_CFLAGS += -g
 endif
 
+# glibc explicitly requires compile barriers between files
+ifeq ($(BR2_TOOLCHAIN_GCC_AT_LEAST_4_7),y)
+GLIBC_EXTRA_CFLAGS += -fno-lto
+endif
+
 # The stubs.h header is not installed by install-headers, but is
 # needed for the gcc build. An empty stubs.h will work, as explained
 # in http://gcc.gnu.org/ml/gcc/2002-01/msg00900.html. The same trick
@@ -71,9 +74,18 @@ endef
 endif
 
 GLIBC_CONF_ENV = \
-	ac_cv_path_BASH_SHELL=/bin/bash \
+	ac_cv_path_BASH_SHELL=/bin/$(if $(BR2_PACKAGE_BASH),bash,sh) \
 	libc_cv_forced_unwind=yes \
 	libc_cv_ssp=no
+
+# POSIX shell does not support localization, so remove the corresponding
+# syntax from ldd if bash is not selected.
+ifeq ($(BR2_PACKAGE_BASH),)
+define GLIBC_LDD_NO_BASH
+	$(SED) 's/$$"/"/g' $(@D)/elf/ldd.bash.in
+endef
+GLIBC_POST_PATCH_HOOKS += GLIBC_LDD_NO_BASH
+endif
 
 # Override the default library locations of /lib64/<abi> and
 # /usr/lib64/<abi>/ for RISC-V.
@@ -123,12 +135,10 @@ define GLIBC_CONFIGURE_CMDS
 		--enable-shared \
 		$(if $(BR2_x86_64),--enable-lock-elision) \
 		--with-pkgversion="Buildroot" \
-		--without-cvs \
 		--disable-profile \
+		--disable-werror \
 		--without-gd \
-		--enable-obsolete-rpc \
 		--enable-kernel=$(GLIBC_KERNEL_HEADERS_VERSION) \
-		--disable-experimental-malloc \
 		--with-headers=$(STAGING_DIR)/usr/include)
 	$(GLIBC_ADD_MISSING_STUB_H)
 endef
@@ -147,10 +157,24 @@ ifeq ($(BR2_PACKAGE_GDB),y)
 GLIBC_LIBS_LIB += libthread_db.so.*
 endif
 
+ifeq ($(BR2_PACKAGE_GLIBC_UTILS),y)
+GLIBC_TARGET_UTILS_USR_BIN = posix/getconf elf/ldd
+GLIBC_TARGET_UTILS_SBIN = elf/ldconfig
+ifeq ($(BR2_SYSTEM_ENABLE_NLS),y)
+GLIBC_TARGET_UTILS_USR_BIN += locale/locale
+endif
+endif
+
 define GLIBC_INSTALL_TARGET_CMDS
 	for libpattern in $(GLIBC_LIBS_LIB); do \
 		$(call copy_toolchain_lib_root,$$libpattern) ; \
 	done
+	$(foreach util,$(GLIBC_TARGET_UTILS_USR_BIN), \
+		$(INSTALL) -D -m 0755 $(@D)/build/$(util) $(TARGET_DIR)/usr/bin/$(notdir $(util))
+	)
+	$(foreach util,$(GLIBC_TARGET_UTILS_SBIN), \
+		$(INSTALL) -D -m 0755 $(@D)/build/$(util) $(TARGET_DIR)/sbin/$(notdir $(util))
+	)
 endef
 
 ifeq ($(BR2_PACKAGE_GLIBC_GEN_LD_CACHE),y)

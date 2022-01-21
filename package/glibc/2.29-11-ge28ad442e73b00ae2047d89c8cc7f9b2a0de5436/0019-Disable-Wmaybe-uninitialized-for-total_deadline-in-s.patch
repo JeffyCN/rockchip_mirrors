@@ -1,7 +1,7 @@
-From ecc27b54d255132d57e777dbf978b620a140e16c Mon Sep 17 00:00:00 2001
+From 8291871c69c8c9180ebf8ca09a1494cc88356cd4 Mon Sep 17 00:00:00 2001
 From: Joseph Myers <joseph@codesourcery.com>
 Date: Wed, 2 Oct 2019 21:12:17 +0000
-Subject: [PATCH 17/18] Disable -Wmaybe-uninitialized for total_deadline in
+Subject: [PATCH 19/20] Disable -Wmaybe-uninitialized for total_deadline in
  sunrpc/clnt_udp.c.
 
 To work around <https://gcc.gnu.org/bugzilla/show_bug.cgi?id=91691>

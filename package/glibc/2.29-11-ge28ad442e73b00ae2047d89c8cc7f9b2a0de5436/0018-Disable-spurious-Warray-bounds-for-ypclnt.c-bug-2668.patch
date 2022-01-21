@@ -1,7 +1,7 @@
-From ec185e4b0af6de06c5ce3bb11d9c9e9af3dd8805 Mon Sep 17 00:00:00 2001
+From e49a53b0a4c8bceb5245824db5e8cfe94a482696 Mon Sep 17 00:00:00 2001
 From: Joseph Myers <joseph@codesourcery.com>
 Date: Fri, 30 Oct 2020 21:40:25 +0000
-Subject: [PATCH 16/18] Disable spurious -Warray-bounds for ypclnt.c (bug
+Subject: [PATCH 18/20] Disable spurious -Warray-bounds for ypclnt.c (bug
  26687)
 
 Included among the GCC 11 warnings listed in bug 26687, but not fixed

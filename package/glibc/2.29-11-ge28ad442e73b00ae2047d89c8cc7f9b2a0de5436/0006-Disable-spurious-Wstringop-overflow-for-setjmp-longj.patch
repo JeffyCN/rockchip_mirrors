@@ -1,7 +1,7 @@
-From 0c2b602bc88d769f1b9504a005934e71ba96d36b Mon Sep 17 00:00:00 2001
+From f77da60fdd333a08a160f2b4b98b11de8c457705 Mon Sep 17 00:00:00 2001
 From: Joseph Myers <joseph@codesourcery.com>
 Date: Fri, 30 Oct 2020 21:38:31 +0000
-Subject: [PATCH 04/18] Disable spurious -Wstringop-overflow for setjmp/longjmp
+Subject: [PATCH 06/20] Disable spurious -Wstringop-overflow for setjmp/longjmp
  (bug 26647)
 
 Building glibc with GCC 11 fails with (among other warnings) spurious

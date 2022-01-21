@@ -1,7 +1,7 @@
-From c6ee41f91f0e6968eb468a87a9b0fd5ff430540f Mon Sep 17 00:00:00 2001
+From 3e8f2ac3f53041b9a07387ad6e2036985647cfc3 Mon Sep 17 00:00:00 2001
 From: Alistair Francis <alistair.francis@wdc.com>
 Date: Tue, 24 Sep 2019 21:55:36 +0100
-Subject: [PATCH 18/18] inet/net-internal.h: Fix uninitalised clntudp_call()
+Subject: [PATCH 20/20] inet/net-internal.h: Fix uninitalised clntudp_call()
  variable
 
 The total_deadline variable inside the clntudp_call() function inside

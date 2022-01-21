@@ -1,7 +1,7 @@
-From ba6f91f05d757d547f9819da3280abb079a171ba Mon Sep 17 00:00:00 2001
+From e5831509adb779d110b33e7bcbee629883d322cc Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Thu, 7 Feb 2019 09:03:02 +0100
-Subject: [PATCH 01/18] array_length: Make usable as a constant expression
+Subject: [PATCH 02/20] array_length: Make usable as a constant expression
 
 Do not use a statement expression in array_length, so that
 array_length can be used at file scope and as a constant expression.

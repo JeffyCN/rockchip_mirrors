@@ -1,7 +1,7 @@
-From 699b657c4f7059b3bbf798253cec6e5a4697e678 Mon Sep 17 00:00:00 2001
+From 97f3d3590ff57926e8a165e8ab1d9e02f60b1109 Mon Sep 17 00:00:00 2001
 From: Florian Weimer <fweimer@redhat.com>
 Date: Sun, 3 Nov 2019 11:39:56 +0100
-Subject: [PATCH 08/18] Redefine _IO_iconv_t to store a single gconv step
+Subject: [PATCH 10/20] Redefine _IO_iconv_t to store a single gconv step
  pointer [BZ #25097]
 
 libio can only deal with gconv conversions which consist of a single

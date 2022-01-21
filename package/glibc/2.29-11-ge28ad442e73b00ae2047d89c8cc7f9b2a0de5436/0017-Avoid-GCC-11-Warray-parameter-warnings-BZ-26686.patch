@@ -1,7 +1,7 @@
-From 5847ce190b500927336337c1646cc041adca119e Mon Sep 17 00:00:00 2001
+From b30b595816c487c0eda7301599334346766b0332 Mon Sep 17 00:00:00 2001
 From: Martin Sebor <msebor@redhat.com>
 Date: Thu, 8 Oct 2020 12:46:03 -0600
-Subject: [PATCH 15/18] Avoid GCC 11 -Warray-parameter warnings [BZ #26686].
+Subject: [PATCH 17/20] Avoid GCC 11 -Warray-parameter warnings [BZ #26686].
 
 Building Glibc with the latest GCC 11 also shows a couple of instances
 of the new -Warray-parameter warning in the thread db APIs.
