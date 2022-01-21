@@ -1,4 +1,4 @@
-From 7d24eaf3d43274790a32892db5b4c6b94bca695c Mon Sep 17 00:00:00 2001
+From bad6a4f161df4b6ac6f9364f83e973ae324d1f66 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 14 Dec 2021 17:09:52 +0800
 Subject: [PATCH 12/12] Support builtin v4l plugins
@@ -165,7 +165,7 @@ index cce6de4..cc8c4f5 100644
  }
  #endif /* WITH_V4L_PLUGINS */
 diff --git a/lib/libv4l2/libv4l2.c b/lib/libv4l2/libv4l2.c
-index f949b5d..d42f4be 100644
+index f949b5d..1fdf3fe 100644
 --- a/lib/libv4l2/libv4l2.c
 +++ b/lib/libv4l2/libv4l2.c
 @@ -74,6 +74,8 @@
@@ -230,7 +230,7 @@ index f949b5d..d42f4be 100644
 +		      const struct libv4l_dev_ops **dev_ops_ret)
 +{
 +#ifdef HAVE_V4L_BUILTIN_PLUGINS
-+	plugin_lib_ret = NULL;
++	*plugin_lib_ret = NULL;
 +	v4l2_builtin_plugin_init(fd, plugin_priv_ret, dev_ops_ret);
 +	if (*dev_ops_ret)
 +		return;
