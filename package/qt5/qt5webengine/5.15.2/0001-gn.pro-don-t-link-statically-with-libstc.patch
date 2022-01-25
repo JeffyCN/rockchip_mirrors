@@ -1,4 +1,4 @@
-From 52dea831deebd6d8e8bafb6fa5f2852ab87cf462 Mon Sep 17 00:00:00 2001
+From 80fb37fc8c158b04b16c72f9b415b0efb62491c6 Mon Sep 17 00:00:00 2001
 From: Romain Naour <romain.naour@gmail.com>
 Date: Sat, 23 May 2020 19:01:19 +0200
 Subject: [PATCH 01/12] gn.pro: don't link statically with libstc++
@@ -33,7 +33,7 @@ Signed-off-by: Romain Naour <romain.naour@gmail.com>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/src/buildtools/gn.pro b/src/buildtools/gn.pro
-index 033202e6e..5dd8e2418 100644
+index 033202e6ea..5dd8e24187 100644
 --- a/src/buildtools/gn.pro
 +++ b/src/buildtools/gn.pro
 @@ -20,7 +20,8 @@ build_pass|!debug_and_release {

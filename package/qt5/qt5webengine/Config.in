@@ -10,10 +10,11 @@ config BR2_PACKAGE_QT5WEBENGINE_ARCH_SUPPORTS
 	depends on !BR2_BINFMT_FLAT # qt5base-icu
 	depends on BR2_USE_MMU # libglib2, qt5base-dbus
 
-comment "qt5webengine needs udev /dev management and a glibc toolchain w/ gcc >= 4.8, host gcc >= 4.8, threads, wchar"
+comment "qt5webengine needs udev /dev management and a glibc toolchain w/ gcc >= 4.9, host gcc >= 4.9, threads, wchar"
 	depends on BR2_PACKAGE_QT5WEBENGINE_ARCH_SUPPORTS
 	depends on !BR2_PACKAGE_HAS_UDEV || !BR2_TOOLCHAIN_USES_GLIBC || \
-		!BR2_HOST_GCC_AT_LEAST_4_8 || !BR2_TOOLCHAIN_GCC_AT_LEAST_4_8 || \
+		!BR2_TOOLCHAIN_GCC_AT_LEAST_4_9 || \
+		!BR2_HOST_GCC_AT_LEAST_4_9 || \
 		!BR2_TOOLCHAIN_HAS_THREADS || !BR2_USE_WCHAR
 
 comment "qt5webengine needs an OpenGL and EGL-capable backend"
@@ -24,8 +25,8 @@ config BR2_PACKAGE_QT5WEBENGINE
 	bool "qt5webengine"
 	depends on BR2_PACKAGE_QT5WEBENGINE_ARCH_SUPPORTS
 	depends on BR2_TOOLCHAIN_USES_GLIBC # execinfo.h, mallinfo
-	depends on BR2_HOST_GCC_AT_LEAST_4_8 # qt5base-icu
-	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_8 # qt5base-icu
+	depends on BR2_HOST_GCC_AT_LEAST_4_9 # qt5base-icu
+	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_9 # qt5base-icu
 	depends on BR2_TOOLCHAIN_HAS_THREADS # libglib2, libvpx, qt5base-dbus
 	depends on BR2_USE_WCHAR # libglib2
 	depends on BR2_PACKAGE_QT5_GL_AVAILABLE # qt5declarative, qt5base-eglfs
@@ -40,6 +41,7 @@ config BR2_PACKAGE_QT5WEBENGINE
 	select BR2_PACKAGE_LIBGLIB2
 	select BR2_PACKAGE_LIBNSS
 	select BR2_PACKAGE_LIBVPX
+	select BR2_PACKAGE_LIBXKBCOMMON
 	select BR2_PACKAGE_OPUS
 	select BR2_PACKAGE_WEBP
 	select BR2_PACKAGE_WEBP_MUX
@@ -54,6 +56,7 @@ config BR2_PACKAGE_QT5WEBENGINE
 	select BR2_PACKAGE_QT5DECLARATIVE_QUICK
 	select BR2_PACKAGE_QT5QUICKCONTROLS
 	select BR2_PACKAGE_QT5QUICKCONTROLS2
+	select BR2_PACKAGE_QT5SVG if BR2_PACKAGE_QT5BASE_EXAMPLES
 	select BR2_PACKAGE_QT5WEBCHANNEL
 	select BR2_PACKAGE_XLIB_LIBXCOMPOSITE if BR2_PACKAGE_QT5BASE_XCB
 	select BR2_PACKAGE_XLIB_LIBXCURSOR if BR2_PACKAGE_QT5BASE_XCB
@@ -75,34 +78,6 @@ config BR2_PACKAGE_QT5WEBENGINE
 	  https://doc.qt.io/qt-5/qtwebengine-index.html
 
 if BR2_PACKAGE_QT5WEBENGINE
-
-choice
-	prompt "Qt5WebEngine version"
-	default BR2_PACKAGE_QT5WEBENGINE_5_14 if BR2_PACKAGE_QT5_VERSION_5_14
-	default BR2_PACKAGE_QT5WEBENGINE_5_15 if BR2_PACKAGE_QT5_VERSION_5_15
-
-config BR2_PACKAGE_QT5WEBENGINE_5_14
-	bool "5.14"
-	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_9
-	depends on BR2_PACKAGE_QT5_VERSION_5_14
-	help
-	  This option builds QtWebEngine 5.14, which is licensed under
-	  (L)GPL-3.0+.
-
-config BR2_PACKAGE_QT5WEBENGINE_5_15
-	bool "5.15"
-	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_9
-	depends on BR2_PACKAGE_QT5_VERSION_5_15
-	help
-	  This option builds QtWebEngine 5.15, which is licensed under
-	  (L)GPL-3.0+.
-
-endchoice
-
-config BR2_PACKAGE_QT5WEBENGINE_VERSION
-	string
-	default "5.14.2"     if BR2_PACKAGE_QT5WEBENGINE_5_14
-	default "5.15.1"     if BR2_PACKAGE_QT5WEBENGINE_5_15
 
 config BR2_PACKAGE_QT5WEBENGINE_WEBRTC
 	bool "webrtc"

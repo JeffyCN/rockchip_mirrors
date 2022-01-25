@@ -1,7 +1,7 @@
-From bbbb573dbfb591e649d651acdc4d33a594ec6fe0 Mon Sep 17 00:00:00 2001
+From b919ed47b11528a640341e81ff6d9ad6c67f0f89 Mon Sep 17 00:00:00 2001
 From: David Faure <david.faure@kdab.com>
 Date: Wed, 15 Dec 2021 22:26:40 +0100
-Subject: [PATCH] Fix for non-constant SIGSTKSZ
+Subject: [PATCH 12/12] Fix for non-constant SIGSTKSZ
 
 On glibc > 2.33, `SIGSTKSZ` might not be constant (in which case
 it expands to a call to `sysconf` which returns a `long int`); see
@@ -21,7 +21,7 @@ Reviewed-by: Mark Mentovai <mark@chromium.org>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/3rdparty/chromium/third_party/breakpad/breakpad/src/client/linux/handler/exception_handler.cc b/src/3rdparty/chromium/third_party/breakpad/breakpad/src/client/linux/handler/exception_handler.cc
-index b895f6d7a..208713ab4 100644
+index b895f6d7ad..208713ab45 100644
 --- a/src/3rdparty/chromium/third_party/breakpad/breakpad/src/client/linux/handler/exception_handler.cc
 +++ b/src/3rdparty/chromium/third_party/breakpad/breakpad/src/client/linux/handler/exception_handler.cc
 @@ -138,7 +138,7 @@ void InstallAlternateStackLocked() {

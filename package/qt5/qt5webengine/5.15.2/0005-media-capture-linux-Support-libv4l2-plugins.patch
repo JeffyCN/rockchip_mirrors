@@ -1,19 +1,21 @@
-From d26103b5280a1ea61bd20ef1239f124edaf8f15a Mon Sep 17 00:00:00 2001
+From ec2aabb5641795a0d635c0e20a2836fa919d19d5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 1 Jul 2019 10:37:35 +0800
-Subject: [PATCH 5/9] media: capture: linux: Support libv4l2 plugins
+Subject: [PATCH 05/12] media: capture: linux: Support libv4l2 plugins
 
 Allow using libv4l2 plugins for linux v4l2 capture devices.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  src/3rdparty/chromium/media/capture/BUILD.gn  | 14 +++++
+ src/3rdparty/chromium/media/capture/args.gni  |  8 +++
  .../video/linux/v4l2_capture_device_impl.cc   | 53 ++++++++++++++++++-
  .../video/linux/v4l2_capture_device_impl.h    | 11 ++++
- 3 files changed, 77 insertions(+), 1 deletion(-)
+ 4 files changed, 85 insertions(+), 1 deletion(-)
+ create mode 100644 src/3rdparty/chromium/media/capture/args.gni
 
 diff --git a/src/3rdparty/chromium/media/capture/BUILD.gn b/src/3rdparty/chromium/media/capture/BUILD.gn
-index 5bdda82d4..972452845 100644
+index 0f253c9e85..6c0f7ea9cd 100644
 --- a/src/3rdparty/chromium/media/capture/BUILD.gn
 +++ b/src/3rdparty/chromium/media/capture/BUILD.gn
 @@ -2,6 +2,7 @@
@@ -24,7 +26,7 @@ index 5bdda82d4..972452845 100644
  import("//build/config/features.gni")
  import("//build/config/jumbo.gni")
  import("//media/media_options.gni")
-@@ -17,6 +18,14 @@ group("capture") {
+@@ -26,6 +27,14 @@ component("capture_switches") {
    ]
  }
  
@@ -39,7 +41,7 @@ index 5bdda82d4..972452845 100644
  # Things needed by //media/capture/mojom/video_capture_types.mojom.
  jumbo_component("capture_base") {
    defines = [ "CAPTURE_IMPLEMENTATION" ]
-@@ -237,6 +246,11 @@ jumbo_component("capture_lib") {
+@@ -245,6 +254,11 @@ jumbo_component("capture_lib") {
        "video/linux/video_capture_device_linux.cc",
        "video/linux/video_capture_device_linux.h",
      ]
@@ -51,8 +53,22 @@ index 5bdda82d4..972452845 100644
    }
  
    if (is_chromeos) {
+diff --git a/src/3rdparty/chromium/media/capture/args.gni b/src/3rdparty/chromium/media/capture/args.gni
+new file mode 100644
+index 0000000000..76e0bee30c
+--- /dev/null
++++ b/src/3rdparty/chromium/media/capture/args.gni
+@@ -0,0 +1,8 @@
++# Copyright 2016 The Chromium Authors. All rights reserved.
++# Use of this source code is governed by a BSD-style license that can be
++# found in the LICENSE file.
++
++declare_args() {
++  # Indicates if V4L plugin is used.
++  use_v4lplugin = false
++}
 diff --git a/src/3rdparty/chromium/media/capture/video/linux/v4l2_capture_device_impl.cc b/src/3rdparty/chromium/media/capture/video/linux/v4l2_capture_device_impl.cc
-index c9040f5de..54acdc95c 100644
+index c9040f5dee..54acdc95cd 100644
 --- a/src/3rdparty/chromium/media/capture/video/linux/v4l2_capture_device_impl.cc
 +++ b/src/3rdparty/chromium/media/capture/video/linux/v4l2_capture_device_impl.cc
 @@ -10,19 +10,62 @@
@@ -139,7 +155,7 @@ index c9040f5de..54acdc95c 100644
  }
  
 diff --git a/src/3rdparty/chromium/media/capture/video/linux/v4l2_capture_device_impl.h b/src/3rdparty/chromium/media/capture/video/linux/v4l2_capture_device_impl.h
-index 936c8b093..f96c2d434 100644
+index 936c8b0938..f96c2d4345 100644
 --- a/src/3rdparty/chromium/media/capture/video/linux/v4l2_capture_device_impl.h
 +++ b/src/3rdparty/chromium/media/capture/video/linux/v4l2_capture_device_impl.h
 @@ -8,6 +8,7 @@

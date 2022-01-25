@@ -17,6 +17,8 @@ WEBP_CONF_OPTS += \
 	--with-tiffincludedir=$(STAGING_DIR)/usr/include \
 	--with-tifflibdir=$(STAGING_DIR)/usr/lib
 
+HOST_WEBP_CONF_OPTS += --enable-libwebpdemux --enable-libwebpmux
+
 ifeq ($(BR2_PACKAGE_WEBP_DEMUX),y)
 WEBP_CONF_OPTS += --enable-libwebpdemux
 else
@@ -54,3 +56,4 @@ WEBP_DEPENDENCIES += $(if $(BR2_PACKAGE_JPEG),jpeg)
 WEBP_DEPENDENCIES += $(if $(BR2_PACKAGE_TIFF),tiff)
 
 $(eval $(autotools-package))
+$(eval $(host-autotools-package))

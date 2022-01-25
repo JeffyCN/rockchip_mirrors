@@ -1,7 +1,7 @@
-From e2e00fb74403ff8e6cca52d5306e5bebc2e7f45b Mon Sep 17 00:00:00 2001
+From 6224d20a6af0216c12bf269a7b9daeaac333decb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 27 Mar 2020 17:48:20 +0800
-Subject: [PATCH 09/12] cld3: Avoid unaligned accesses
+Subject: [PATCH 08/12] cld3: Avoid unaligned accesses
 
 Although the unaligned memory accesses are enabled, somehow i still hit
 the SIGBUS:
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 12 insertions(+)
 
 diff --git a/src/3rdparty/chromium/third_party/cld_3/src/src/script_span/port.h b/src/3rdparty/chromium/third_party/cld_3/src/src/script_span/port.h
-index 2b3bc515a..1d437babf 100644
+index 2b3bc515ae..1d437babf7 100644
 --- a/src/3rdparty/chromium/third_party/cld_3/src/src/script_span/port.h
 +++ b/src/3rdparty/chromium/third_party/cld_3/src/src/script_span/port.h
 @@ -78,11 +78,23 @@ namespace CLD2 {

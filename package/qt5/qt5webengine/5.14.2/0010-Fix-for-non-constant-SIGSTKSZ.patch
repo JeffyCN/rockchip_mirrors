@@ -1,7 +1,7 @@
 From 6f13dd4cba37156794cf9e71fa8b3c920e457cf9 Mon Sep 17 00:00:00 2001
 From: David Faure <david.faure@kdab.com>
 Date: Wed, 15 Dec 2021 22:26:40 +0100
-Subject: [PATCH] Fix for non-constant SIGSTKSZ
+Subject: [PATCH 10/10] Fix for non-constant SIGSTKSZ
 
 On glibc > 2.33, `SIGSTKSZ` might not be constant (in which case
 it expands to a call to `sysconf` which returns a `long int`); see

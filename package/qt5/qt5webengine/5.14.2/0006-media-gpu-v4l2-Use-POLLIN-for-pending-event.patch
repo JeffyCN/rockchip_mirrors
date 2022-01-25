@@ -1,7 +1,7 @@
-From e7887abba9c196899ddb1474e4b6ae8a67fee6fb Mon Sep 17 00:00:00 2001
+From ca123ac0295c6f6747959966dbdba27c3a7e900d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 10 Apr 2020 16:16:08 +0800
-Subject: [PATCH 7/9] media: gpu: v4l2: Use POLLIN for pending event
+Subject: [PATCH 06/10] media: gpu: v4l2: Use POLLIN for pending event
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/3rdparty/chromium/media/gpu/v4l2/generic_v4l2_device.cc b/src/3rdparty/chromium/media/gpu/v4l2/generic_v4l2_device.cc
-index 7981acfc8..f6cd1ef29 100644
+index 7981acfc89..f6cd1ef292 100644
 --- a/src/3rdparty/chromium/media/gpu/v4l2/generic_v4l2_device.cc
 +++ b/src/3rdparty/chromium/media/gpu/v4l2/generic_v4l2_device.cc
 @@ -90,7 +90,7 @@ bool GenericV4L2Device::Poll(bool poll_device, bool* event_pending) {
