@@ -233,6 +233,8 @@ $(BUILD_DIR)/%/.stamp_rsynced:
 	$(foreach hook,$($(PKG)_POST_RSYNC_HOOKS),$(call $(hook))$(sep))
 	@$(call step_end,rsync)
 	$(Q)touch $@
+	@test -d $(SRCDIR)/.git && (cd $(SRCDIR) && git status --ignored -s | \
+		grep "" && echo "WARN: $(SRCDIR) is dirty!") || true
 
 # Patch
 #
