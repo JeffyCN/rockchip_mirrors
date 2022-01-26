@@ -1,4 +1,4 @@
-From ac36af7d97d7920512068316fac6159aead97a01 Mon Sep 17 00:00:00 2001
+From ae50e875f4292c99b859cded1d036e401b6ddaec Mon Sep 17 00:00:00 2001
 From: Romain Naour <romain.naour@gmail.com>
 Date: Fri, 25 Dec 2015 11:38:13 +0100
 Subject: [PATCH] sh-conf
@@ -8,7 +8,7 @@ fix that up too.. now we're able to actually build a real toolchain for
 sh2a_nofpu- and other more ineptly named toolchains (and yes, there are more
 inept targets than that one, really. Go look, I promise).
 
-[Romain: rebase on top of 2.26]
+[Romain: rebase on top of 2.32]
 Signed-off-by: Romain Naour <romain.naour@gmail.com>
 [Thomas: rebase on top of 2.29, in which sh64 support was removed.]
 Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
@@ -18,10 +18,10 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@free-electrons.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/configure b/configure
-index 462ad053066..27cb5571d0d 100755
+index 54d0339ab9e..c2f51ffcebb 100755
 --- a/configure
 +++ b/configure
-@@ -3855,7 +3855,7 @@ case "${target}" in
+@@ -3937,7 +3937,7 @@ case "${target}" in
    nvptx*-*-*)
      noconfigdirs="$noconfigdirs target-libssp target-libstdc++-v3 target-libobjc"
      ;;
@@ -31,10 +31,10 @@ index 462ad053066..27cb5571d0d 100755
        sh*-*-elf)
           ;;
 diff --git a/configure.ac b/configure.ac
-index a638f694134..2fd7bce1576 100644
+index a910c4fd6ba..a93d93c81c3 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -1152,7 +1152,7 @@ case "${target}" in
+@@ -1178,7 +1178,7 @@ case "${target}" in
    nvptx*-*-*)
      noconfigdirs="$noconfigdirs target-libssp target-libstdc++-v3 target-libobjc"
      ;;
@@ -44,5 +44,5 @@ index a638f694134..2fd7bce1576 100644
        sh*-*-elf)
           ;;
 -- 
-2.14.4
+2.25.4
 
