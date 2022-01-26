@@ -380,6 +380,8 @@ $(BUILD_DIR)/%/.stamp_images_installed:
 
 # Install to target dir
 $(BUILD_DIR)/%/.stamp_target_installed:
+	$(Q)touch $($(PKG)_DIR)/.files_list.txt
+
 	@$(call step_start,install-target)
 	@$(call MESSAGE,"Installing to target")
 	$(foreach hook,$($(PKG)_PRE_INSTALL_TARGET_HOOKS),$(call $(hook))$(sep))
@@ -397,6 +399,11 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 	fi
 	@$(call step_end,install-target)
 	$(Q)touch $@
+
+	$(Q)cd $(TARGET_DIR); find . \( -type f -o -type l \) \
+		-cnewer $($(PKG)_DIR)/.files_list.txt | \
+		$(TAR) --no-recursion --ignore-failed-read \
+			-cf $($(PKG)_DIR)/$($(PKG)_BASENAME).tar -T -; true;
 
 # Final installation step, completed when all installation steps
 # (host, images, staging, target) have completed
