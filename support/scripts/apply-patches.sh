@@ -42,8 +42,9 @@ fi
 
 # Set directories from arguments, or use defaults.
 builddir=${1-.}
-patchdir=${2-../kernel-patches}
-shift 2
+[ -z "$1" ] || shift
+patchdir=$1
+[ -z "$1" ] || shift
 patchpattern=${@-*}
 
 # use a well defined sorting order
@@ -53,7 +54,7 @@ if [ ! -d "${builddir}" ] ; then
     echo "Aborting.  '${builddir}' is not a directory."
     exit 1
 fi
-if [ ! -d "${patchdir}" ] ; then
+if [ "${patchdir}" ] && [ ! -d "${patchdir}" ] ; then
     echo "Aborting.  '${patchdir}' is not a directory."
     exit 1
 fi
@@ -63,6 +64,36 @@ fi
 # about rejects in builddir.
 find ${builddir}/ '(' -name '*.rej' -o -name '.*.rej' ')' -print0 | \
     xargs -0 -r rm -f
+
+function generate_git {
+    [ "$BR2_GEN_GIT" ] || return 0
+
+    APPLIED_PATCH="$1"
+
+    cd "${builddir}"
+
+    if [ ! -d .git ]; then
+        git init
+        echo -e "*" >> .gitignore
+        git add -f .gitignore *
+        git commit --no-edit -m "init"
+    elif [ "$APPLIED_PATCH" ]; then
+        # Remove backup files
+        find . '(' -name '*.orig' -o -name '.*.orig' ')' -exec rm -f {} \;
+
+        git am "$APPLIED_PATCH" --exclude "*" ||
+            git commit --allow-empty --no-edit -m "$(basename "$APPLIED_PATCH")"
+
+        git add -f *
+        git commit --allow-empty --amend --no-edit
+        rm -rf .git/rebase-apply/
+    fi
+
+    # Wait for auto gc
+    while [ -f .git/gc.pid ]; do sleep 1;done
+
+    cd -
+}
 
 function apply_patch {
     path="${1%%/}"
@@ -119,6 +150,8 @@ function apply_patch {
         echo "Patch failed!  Please fix ${patch}!"
         exit 1
     fi
+
+    generate_git "${path}/$patch"
 }
 
 function scan_patchdir {
@@ -154,6 +187,9 @@ function scan_patchdir {
         done
     fi
 }
+
+generate_git
+[ "${patchdir}" ] || exit 0
 
 touch ${builddir}/.applied_patches_list
 scan_patchdir "$patchdir" "$patchpattern"
