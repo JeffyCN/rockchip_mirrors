@@ -62,16 +62,6 @@ define LIBZLIB_INSTALL_TARGET_CMDS
 	$(TARGET_MAKE_ENV) $(MAKE1) -C $(@D) DESTDIR=$(TARGET_DIR) LDCONFIG=true install
 endef
 
-# We don't care removing the .a from target, since it not used at link
-# time to build other packages, and it is anyway removed later before
-# assembling the filesystem images anyway.
-ifeq ($(BR2_SHARED_LIBS),y)
-define LIBZLIB_RM_STATIC_STAGING
-	rm -f $(STAGING_DIR)/usr/lib/libz.a
-endef
-LIBZLIB_POST_INSTALL_STAGING_HOOKS += LIBZLIB_RM_STATIC_STAGING
-endif
-
 define HOST_LIBZLIB_INSTALL_CMDS
 	$(HOST_MAKE_ENV) $(MAKE1) -C $(@D) LDCONFIG=true install
 endef
