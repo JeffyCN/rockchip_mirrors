@@ -490,4 +490,8 @@ else
 GST1_PLUGINS_GOOD_CONF_OPTS += -Dbz2=disabled
 endif
 
+ifeq ($(BR2_PACKAGE_ROCKCHIP_RGA),y)
+GST1_PLUGINS_GOOD_DEPENDENCIES += rockchip-rga
+endif
+
 $(eval $(meson-package))
