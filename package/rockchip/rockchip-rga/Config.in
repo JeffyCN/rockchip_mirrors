@@ -1,0 +1,5 @@
+config BR2_PACKAGE_ROCKCHIP_RGA
+	bool "rockchip-rga"
+	select BR2_PACKAGE_LIBDRM
+	help
+	  Rockchip RGA 2D accelerator userspace library.
