@@ -1,3 +1,6 @@
 #include "base.config"
 #include "base_extra.config"
 #include "rk3588_arm64.config"
+
+#include "gpu.config"
+#include "display.config"
