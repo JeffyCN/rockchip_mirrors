@@ -33,6 +33,7 @@ if BR2_PACKAGE_WESTON
 
 choice
 	prompt "default compositor"
+	default BR2_PACKAGE_WESTON_DEFAULT_DRM
 
 config BR2_PACKAGE_WESTON_DEFAULT_FBDEV
 	bool "fbdev"
@@ -40,11 +41,7 @@ config BR2_PACKAGE_WESTON_DEFAULT_FBDEV
 
 config BR2_PACKAGE_WESTON_DEFAULT_DRM
 	bool "drm"
-	depends on BR2_PACKAGE_MESA3D_OPENGL_EGL || BR2_PACKAGE_IMX_GPU_VIV_OUTPUT_WL
 	select BR2_PACKAGE_WESTON_DRM
-
-comment "drm backend needs mesa3d w/ EGL driver"
-	depends on !BR2_PACKAGE_MESA3D_OPENGL_EGL && !BR2_PACKAGE_IMX_GPU_VIV_OUTPUT_WL
 
 config BR2_PACKAGE_WESTON_DEFAULT_X11
 	bool "X11"
@@ -64,11 +61,6 @@ config BR2_PACKAGE_WESTON_DEFAULT_COMPOSITOR
 
 config BR2_PACKAGE_WESTON_DRM
 	bool "DRM compositor"
-	depends on BR2_PACKAGE_MESA3D_OPENGL_EGL || BR2_PACKAGE_IMX_GPU_VIV_OUTPUT_WL
-
-# Uses libgbm from mesa3d
-comment "DRM compositor needs an OpenGL EGL backend provided by mesa3d"
-	depends on !BR2_PACKAGE_MESA3D_OPENGL_EGL && !BR2_PACKAGE_IMX_GPU_VIV_OUTPUT_WL
 
 config BR2_PACKAGE_WESTON_FBDEV
 	bool "fbdev compositor"
@@ -163,5 +155,9 @@ comment "demo clients needs an OpenGL ES provider, an OpenEGL-capable Wayland ba
 	depends on !BR2_INSTALL_LIBSTDCPP || !BR2_TOOLCHAIN_HAS_THREADS || \
 		!BR2_USE_WCHAR || !BR2_PACKAGE_HAS_LIBGLES || \
 		!BR2_PACKAGE_HAS_LIBEGL_WAYLAND
+
+config BR2_PACKAGE_WESTON_DEFAULT_PIXMAN
+	bool "Use pixman-renderer by default"
+	default y if BR2_PACKAGE_MESA3D_OPENGL_EGL || !BR2_PACKAGE_HAS_LIBEGL
 
 endif

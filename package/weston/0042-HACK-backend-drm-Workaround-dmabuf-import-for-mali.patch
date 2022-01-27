@@ -1,0 +1,44 @@
+From d1fbcb892949c1197fd53459b6f86f7875afe1f2 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Mon, 26 Oct 2020 17:15:31 +0800
+Subject: [PATCH 42/60] HACK: backend-drm: Workaround dmabuf import for mali
+
+Tested on rk3399 with libmali-midgard-t86x-r18p0-wayland.so, the
+sprites works with waylandsink.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/fb.c | 10 +++++++++-
+ 1 file changed, 9 insertions(+), 1 deletion(-)
+
+diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
+index 8012278f..7015e1f4 100644
+--- a/libweston/backend-drm/fb.c
++++ b/libweston/backend-drm/fb.c
+@@ -275,7 +275,10 @@ drm_fb_get_from_dmabuf(struct linux_dmabuf_buffer *dmabuf,
+ 		fb->bo = gbm_bo_import(backend->gbm, GBM_BO_IMPORT_FD_MODIFIER,
+ 				       &import_mod,
+ 				       GBM_BO_USE_SCANOUT);
+-	} else {
++	}
++
++	if (!fb->bo) {
++		/* HACK: Fallback to the legacy FB-import */
+ 		fb->bo = gbm_bo_import(backend->gbm, GBM_BO_IMPORT_FD,
+ 				       &import_legacy,
+ 				       GBM_BO_USE_SCANOUT);
+@@ -316,6 +319,11 @@ drm_fb_get_from_dmabuf(struct linux_dmabuf_buffer *dmabuf,
+ 		union gbm_bo_handle handle;
+ 
+ 	        handle = gbm_bo_get_handle_for_plane(fb->bo, i);
++
++		/* HACK: Fallback to the legacy API */
++		if (handle.s32 == -1)
++			handle = gbm_bo_get_handle(fb->bo);
++
+ 		if (handle.s32 == -1)
+ 			goto err_free;
+ 		fb->handles[i] = handle.u32;
+-- 
+2.20.1
+

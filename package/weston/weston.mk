@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WESTON_VERSION = 9.0.0
+WESTON_VERSION = 9.0.91
 WESTON_SITE = https://wayland.freedesktop.org/releases
 WESTON_SOURCE = weston-$(WESTON_VERSION).tar.xz
 WESTON_LICENSE = MIT
@@ -19,12 +19,13 @@ WESTON_CONF_OPTS = \
 	-Dcolor-management-colord=false \
 	-Dremoting=false
 
+# HACK: Rockchip's BSP kernel is surely 3.8+, and we need extra simple-clients.
 # Uses VIDIOC_EXPBUF, only available from 3.8+
-ifeq ($(BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_8),y)
-WESTON_CONF_OPTS += -Dsimple-clients=dmabuf-v4l
-else
-WESTON_CONF_OPTS += -Dsimple-clients=
-endif
+# ifeq ($(BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_8),y)
+# WESTON_CONF_OPTS += -Dsimple-clients=dmabuf-v4l
+# else
+# WESTON_CONF_OPTS += -Dsimple-clients=
+# endif
 
 ifeq ($(BR2_PACKAGE_DBUS)$(BR2_PACKAGE_SYSTEMD),yy)
 WESTON_CONF_OPTS += -Dlauncher-logind=true
@@ -163,5 +164,38 @@ WESTON_DEPENDENCIES += pango
 else
 WESTON_CONF_OPTS += -Ddemo-clients=false
 endif
+
+ifeq ($(BR2_PACKAGE_ROCKCHIP_RGA),y)
+WESTON_DEPENDENCIES += rockchip-rga
+endif
+
+ifeq ($(BR2_PACKAGE_HAS_LIBEGL_WAYLAND)$(BR2_PACKAGE_HAS_LIBGLES),yy)
+WESTON_CONF_OPTS += -Dsimple-clients=all
+else
+WESTON_CONF_OPTS += -Dsimple-clients=
+endif
+
+ifeq ($(BR2_PACKAGE_WESTON_DEFAULT_PIXMAN),y)
+define WESTON_INSTALL_PIXMAN_INI
+        $(INSTALL) -D -m 0644 $(WESTON_PKGDIR)/pixman.ini \
+                $(TARGET_DIR)/etc/xdg/weston/weston.ini.d/01-pixman.ini
+endef
+
+WESTON_POST_INSTALL_TARGET_HOOKS += WESTON_INSTALL_PIXMAN_INI
+endif
+
+define WESTON_INSTALL_TARGET_ENV
+        $(INSTALL) -D -m 0644 $(WESTON_PKGDIR)/weston.sh \
+                $(TARGET_DIR)/etc/profile.d/weston.sh
+endef
+
+WESTON_POST_INSTALL_TARGET_HOOKS += WESTON_INSTALL_TARGET_ENV
+
+define WESTON_INSTALL_TARGET_SCRIPTS
+        $(INSTALL) -D -m 0755 $(WESTON_PKGDIR)/weston-calibration-helper.sh \
+                $(TARGET_DIR)/bin/weston-calibration-helper.sh
+endef
+
+WESTON_POST_INSTALL_TARGET_HOOKS += WESTON_INSTALL_TARGET_SCRIPTS
 
 $(eval $(meson-package))

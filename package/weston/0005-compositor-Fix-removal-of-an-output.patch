@@ -1,0 +1,35 @@
+From 17958b66c15929cec57d4940fa1c0f3baf665d8b Mon Sep 17 00:00:00 2001
+From: Marius Vlad <marius.vlad@collabora.com>
+Date: Thu, 2 Dec 2021 11:15:15 +0200
+Subject: [PATCH 05/60] compositor: Fix removal of an output
+
+This uses the more safer version of signal emission to avoid a potential
+crash when the output is destroyed that will follow a surface/view
+destruction for which it has a listener attached (to the output_destroy
+signal).
+
+Fixes: #734
+
+Signed-off-by: Marius Vlad <marius.vlad@collabora.com>
+---
+ libweston/compositor.c | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index c99aa293..fb3b7094 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -6414,8 +6414,8 @@ weston_compositor_remove_output(struct weston_output *output)
+ 	wl_list_insert(compositor->pending_output_list.prev, &output->link);
+ 	output->enabled = false;
+ 
+-	wl_signal_emit(&compositor->output_destroyed_signal, output);
+-	wl_signal_emit(&output->destroy_signal, output);
++	weston_signal_emit_mutable(&compositor->output_destroyed_signal, output);
++	weston_signal_emit_mutable(&output->destroy_signal, output);
+ 
+ 	wl_list_for_each(head, &output->head_list, output_link)
+ 		weston_head_remove_global(head);
+-- 
+2.20.1
+
