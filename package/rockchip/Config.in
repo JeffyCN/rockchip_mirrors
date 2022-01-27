@@ -31,6 +31,7 @@ config BR2_PACKAGE_RK3588
 endchoice
 
 menu "Rockchip BSP packages"
+	source "package/rockchip/rockchip-mali/Config.in"
 endmenu
 
 endif
