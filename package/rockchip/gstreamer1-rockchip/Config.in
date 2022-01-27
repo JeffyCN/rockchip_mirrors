@@ -1,5 +1,6 @@
 config BR2_PACKAGE_GSTREAMER1_ROCKCHIP
 	bool "Gstreamer Rockchip plugins"
-	select BR2_PACKAGE_GST1_PLUGINS_BASE
+	depends on BR2_PACKAGE_MPP
+	depends on BR2_PACKAGE_GST1_PLUGINS_BASE
 	help
           https://github.com/rockchip-linux/gstreamer-rockchip
