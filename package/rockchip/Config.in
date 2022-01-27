@@ -1,0 +1,36 @@
+menuconfig BR2_PACKAGE_ROCKCHIP
+	bool "Rockchip Platform"
+
+if BR2_PACKAGE_ROCKCHIP
+
+config BR2_PACKAGE_ROCKCHIP_HAS_ISP1
+	bool
+	help
+	  Has Rockchip ISP1
+
+config BR2_PACKAGE_ROCKCHIP_HAS_ISP2
+	bool
+	help
+	  Has Rockchip ISP2
+
+config BR2_PACKAGE_ROCKCHIP_HAS_ISP3
+	bool
+	help
+	  Has Rockchip ISP3
+
+choice
+	default BR2_PACKAGE_RK3588
+	prompt "Rockchip SoC"
+
+config BR2_PACKAGE_RK3588
+	bool "rk3588"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP3
+	help
+	  Rockchip's rk3588 SoC.
+
+endchoice
+
+menu "Rockchip BSP packages"
+endmenu
+
+endif
