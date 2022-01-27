@@ -87,9 +87,30 @@ define HOST_ANDROID_TOOLS_INSTALL_CMDS
 		$(INSTALL) -D -m 0755 $(@D)/$(t) $(HOST_DIR)/bin/$(notdir $(t))$(sep))
 endef
 
+ifeq ($(BR2_PACKAGE_ANDROID_TOOLS_AUTH_RSA),y)
+ADBD_RSA_KEY_FILEPATH = $(call qstrip,$(BR2_PACKAGE_ANDROID_TOOLS_AUTH_RSA_KEY_PATH))
+define ANDROID_TOOLS_INSTALL_RSAAUTH_ENV
+	echo "export ADBD_RSA_AUTH_ENABLE=1" > $(TARGET_DIR)/etc/profile.d/adbd.sh
+	echo "export ADBD_RSA_KEY_FILE=${ADBD_RSA_KEY_FILEPATH}" >> $(TARGET_DIR)/etc/profile.d/adbd.sh
+	$(INSTALL) -D -m 0644 $(HOME)/.android/adbkey.pub $(TARGET_DIR)/${ADBD_RSA_KEY_FILEPATH}
+endef
+endif
+
+ADBD_AUTH_PASSWORD = $(call qstrip,$(BR2_PACKAGE_ANDROID_TOOLS_AUTH_PASSWORD))
+ifneq ($(ADBD_AUTH_PASSWORD),)
+define ANDROID_TOOLS_INSTALL_AUTH
+	$(INSTALL) -D -m 0755 $(ANDROID_TOOLS_PKGDIR)/adb_auth.sh \
+		$(TARGET_DIR)/usr/bin/adb_auth.sh
+	sed -i "s/AUTH_PASSWORD/${ADBD_AUTH_PASSWORD}/g" \
+		$(TARGET_DIR)/usr/bin/adb_auth.sh
+endef
+endif
+
 define ANDROID_TOOLS_INSTALL_TARGET_CMDS
 	$(foreach t,$(ANDROID_TOOLS_TARGETS),\
 		$(INSTALL) -D -m 0755 $(@D)/build-$(t)/$(t) $(TARGET_DIR)/usr/bin/$(t)$(sep))
+	$(ANDROID_TOOLS_INSTALL_AUTH)
+	$(ANDROID_TOOLS_INSTALL_RSAAUTH_ENV)
 endef
 
 $(eval $(generic-package))
