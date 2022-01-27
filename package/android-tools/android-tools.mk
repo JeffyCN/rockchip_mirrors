@@ -14,6 +14,10 @@ ANDROID_TOOLS_LICENSE_FILES = debian/copyright
 ANDROID_TOOLS_DEPENDENCIES = host-pkgconf
 HOST_ANDROID_TOOLS_DEPENDENCIES = host-pkgconf
 
+ifeq ($(BR2_PACKAGE_ANDROID_TOOLS_STATIC),y)
+ANDROID_TOOLS_LDFLAGS = -static -ldl
+endif
+
 # Extract the Debian tarball inside the sources
 define ANDROID_TOOLS_DEBIAN_EXTRACT
 	$(call suitable-extractor,$(notdir $(ANDROID_TOOLS_EXTRA_DOWNLOADS))) \
@@ -78,7 +82,8 @@ endef
 define ANDROID_TOOLS_BUILD_CMDS
 	$(foreach t,$(ANDROID_TOOLS_TARGETS),\
 		mkdir -p $(@D)/build-$(t) && \
-		$(TARGET_MAKE_ENV) $(TARGET_CONFIGURE_OPTS) $(MAKE) SRCDIR=$(@D) \
+		$(TARGET_MAKE_ENV) $(TARGET_CONFIGURE_OPTS) \
+			LDFLAGS="$(ANDROID_TOOLS_LDFLAGS)" $(MAKE) SRCDIR=$(@D) \
 			-C $(@D)/build-$(t) -f $(@D)/debian/makefiles/$(t).mk$(sep))
 endef
 

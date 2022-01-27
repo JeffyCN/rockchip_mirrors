@@ -19,6 +19,10 @@ config BR2_PACKAGE_ANDROID_TOOLS
 
 if BR2_PACKAGE_ANDROID_TOOLS
 
+config BR2_PACKAGE_ANDROID_TOOLS_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
 # We need kernel headers that support the __SANE_USERSPACE_TYPES__
 # mechanism for 64 bits architectures, so that u64 gets defined as
 # "unsigned long long" and not "unsigned long". We know that >= 3.16
