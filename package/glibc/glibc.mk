@@ -130,7 +130,6 @@ define GLIBC_CONFIGURE_CMDS
 		--disable-werror \
 		--without-gd \
 		--enable-kernel=$(GLIBC_KERNEL_HEADERS_VERSION) \
-		--disable-experimental-malloc \
 		--with-headers=$(STAGING_DIR)/usr/include)
 	$(GLIBC_ADD_MISSING_STUB_H)
 endef
