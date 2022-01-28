@@ -32,6 +32,7 @@ endchoice
 
 menu "Rockchip BSP packages"
 	source "package/rockchip/gstreamer1-rockchip/Config.in"
+	source "package/rockchip/libv4l-rkmpp/Config.in"
 	source "package/rockchip/rockchip-rga/Config.in"
 	source "package/rockchip/rockchip-mali/Config.in"
 	source "package/rockchip/rockchip-mpp/Config.in"
