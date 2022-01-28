@@ -23,6 +23,16 @@ QT5WAYLAND_LICENSE_FILES = LICENSE.GPL2 LICENSE.GPL3 LICENSE.GPL3-EXCEPT LICENSE
 
 ifeq ($(BR2_PACKAGE_QT5WAYLAND_COMPOSITOR),y)
 QT5WAYLAND_CONF_OPTS += CONFIG+=wayland-compositor
+else
+QT5WAYLAND_CONFIG += --no-feature-wayland-server
 endif
+
+QT5WAYLAND_CONF_OPTS += -- $(QT5WAYLAND_CONFIG)
+
+define QT5WAYLAND_FORCE_XDG_SHELL
+	cd $(TARGET_DIR)/usr/lib/qt/plugins/wayland-shell-integration/ && \
+		ls | grep -wv libxdg-shell.so | xargs rm -rf
+endef
+QT5WAYLAND_POST_INSTALL_TARGET_HOOKS += QT5WAYLAND_FORCE_XDG_SHELL
 
 $(eval $(qmake-package))

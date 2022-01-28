@@ -29,10 +29,25 @@ endif
 
 QT5WEBENGINE_DEPENDENCIES += host-libpng host-libnss libnss
 
-QT5WEBENGINE_CONF_OPTS += WEBENGINE_CONFIG+=use_system_ffmpeg
+# Below host deps are needed by generate_colors_info tool
+QT5WEBENGINE_DEPENDENCIES += host-libpng host-webp
+
+ifeq ($(BR2_PACKAGE_QT5BASE_FONTCONFIG),y)
+QT5WEBENGINE_DEPENDENCIES += host-freetype
+endif
+
+ifeq ($(BR2_PACKAGE_QT5BASE_JPEG),y)
+QT5WEBENGINE_DEPENDENCIES += host-libjpeg
+endif
+
+QT5WEBENGINE_CONFIG += -ffmpeg
+
+ifeq ($(BR2_PACKAGE_QT5WEBENGINE_WEBRTC),y)
+QT5WEBENGINE_CONFIG += -webrtc
+endif
 
 ifeq ($(BR2_PACKAGE_QT5WEBENGINE_PROPRIETARY_CODECS),y)
-QT5WEBENGINE_CONF_OPTS += WEBENGINE_CONFIG+=use_proprietary_codecs
+QT5WEBENGINE_CONFIG += -proprietary-codecs
 endif
 
 ifeq ($(BR2_PACKAGE_QT5WEBENGINE_ALSA),y)
@@ -40,6 +55,8 @@ QT5WEBENGINE_DEPENDENCIES += alsa-lib
 else
 QT5WEBENGINE_CONF_OPTS += QT_CONFIG-=alsa
 endif
+
+QT5WEBENGINE_CONF_OPTS += -- $(QT5WEBENGINE_CONFIG)
 
 # QtWebengine's build system uses python, but only supports python2. We work
 # around this by forcing python2 early in the PATH, via a python->python2
@@ -62,5 +79,18 @@ QT5WEBENGINE_ENV += GN_PKG_CONFIG_HOST=$(@D)/host-bin/host-pkg-config
 
 QT5WEBENGINE_CONF_ENV = $(QT5WEBENGINE_ENV)
 QT5WEBENGINE_MAKE_ENV = $(QT5WEBENGINE_ENV)
+
+define QT5WEBENGINE_INSTALL_TARGET_ENV
+	$(INSTALL) -D -m 644 $(QT5WEBENGINE_PKGDIR)/qtwebengine.sh \
+		$(TARGET_DIR)/etc/profile.d/qtwebengine.sh
+endef
+QT5WEBENGINE_POST_INSTALL_TARGET_HOOKS += QT5WEBENGINE_INSTALL_TARGET_ENV
+
+ifeq ($(BR2_PACKAGE_LIBV4L_RKMPP),y)
+define QT5WEBENGINE_INSTALL_INIT_SYSV
+	$(INSTALL) -D -m 755 $(QT5WEBENGINE_PKGDIR)/S99qtwebengine.sh \
+		$(TARGET_DIR)/etc/init.d/S99qtwebengine.sh
+endef
+endif
 
 $(eval $(qmake-package))

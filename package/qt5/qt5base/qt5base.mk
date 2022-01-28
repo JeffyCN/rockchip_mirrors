@@ -11,6 +11,10 @@ QT5BASE_SOURCE = qtbase-$(QT5_SOURCE_TARBALL_PREFIX)-$(QT5BASE_VERSION).tar.xz
 QT5BASE_DEPENDENCIES = host-pkgconf pcre2 zlib
 QT5BASE_INSTALL_STAGING = YES
 
+# 0010-Avoid-processing-intensive-painting-of-high-number-o.patch
+# 0011-Improve-fix-for-avoiding-huge-number-of-tiny-dashes.patch
+QT5BASE_IGNORE_CVES += CVE-2021-38593
+
 # A few comments:
 #  * -no-pch to workaround the issue described at
 #     http://comments.gmane.org/gmane.comp.lib.qt.devel/5933.
@@ -43,6 +47,10 @@ QT5BASE_CFLAGS += -O0
 QT5BASE_CXXFLAGS += -O0
 endif
 
+ifeq ($(BR2_ARM_CPU_HAS_NEON),y)
+QT5BASE_CFLAGS += -mfpu=neon
+endif
+
 ifeq ($(BR2_X86_CPU_HAS_SSE2),)
 QT5BASE_CONFIGURE_OPTS += -no-sse2
 else ifeq ($(BR2_X86_CPU_HAS_SSE3),)
@@ -69,19 +77,9 @@ else
 QT5BASE_CONFIGURE_OPTS += -no-kms
 endif
 
-# Uses libgbm from mesa3d
-ifeq ($(BR2_PACKAGE_MESA3D_OPENGL_EGL),y)
+ifeq ($(BR2_PACKAGE_HAS_LIBGBM),y)
 QT5BASE_CONFIGURE_OPTS += -gbm
-QT5BASE_DEPENDENCIES += mesa3d
-else ifeq ($(BR2_PACKAGE_GCNANO_BINARIES),y)
-QT5BASE_CONFIGURE_OPTS += -gbm
-QT5BASE_DEPENDENCIES += gcnano-binaries
-else ifeq ($(BR2_PACKAGE_TI_SGX_UM),y)
-QT5BASE_CONFIGURE_OPTS += -gbm
-QT5BASE_DEPENDENCIES += ti-sgx-um
-else ifeq ($(BR2_PACKAGE_IMX_GPU_VIV_OUTPUT_WL),y)
-QT5BASE_CONFIGURE_OPTS += -gbm
-QT5BASE_DEPENDENCIES += imx-gpu-viv
+QT5BASE_DEPENDENCIES += libgbm
 else
 QT5BASE_CONFIGURE_OPTS += -no-gbm
 endif
@@ -251,6 +249,24 @@ QT5BASE_CONFIGURE_OPTS += -journald
 QT5BASE_DEPENDENCIES += systemd
 else
 QT5BASE_CONFIGURE_OPTS += -no-journald
+endif
+
+ifeq ($(BR2_PACKAGE_QT5BASE_USE_RGA),y)
+QT5BASE_CONFIGURE_OPTS += \
+	QMAKE_CXXFLAGS+=-DQT_USE_RGA QMAKE_LFLAGS+=-lrga
+QT5BASE_DEPENDENCIES += rockchip-rga
+endif
+
+ifeq ($(BR2_PACKAGE_QT5BASE_LINUXFB_RGB565),y)
+QT5BASE_CONFIGURE_OPTS += QMAKE_CXXFLAGS+=-DQT_FB_DRM_RGB565
+else ifeq ($(BR2_PACKAGE_QT5BASE_LINUXFB_RGB32),y)
+QT5BASE_CONFIGURE_OPTS += QMAKE_CXXFLAGS+=-DQT_FB_DRM_RGB32
+else ifeq ($(BR2_PACKAGE_QT5BASE_LINUXFB_ARGB32),y)
+QT5BASE_CONFIGURE_OPTS += QMAKE_CXXFLAGS+=-DQT_FB_DRM_ARGB32
+endif
+
+ifeq ($(BR2_PACKAGE_QT5BASE_LINUXFB_DIRECT_PAINTING),y)
+QT5BASE_CONFIGURE_OPTS += QMAKE_CXXFLAGS+=-DQT_FB_DIRECT_PAINTING
 endif
 
 ifeq ($(BR2_PACKAGE_QT5BASE_SYSLOG),y)

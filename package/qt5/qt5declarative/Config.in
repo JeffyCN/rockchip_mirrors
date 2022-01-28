@@ -18,4 +18,9 @@ config BR2_PACKAGE_QT5DECLARATIVE_QUICK
 	bool "quick module"
 	select BR2_PACKAGE_QT5BASE_OPENGL if BR2_PACKAGE_QT5_GL_AVAILABLE
 
+config BR2_PACKAGE_QT5DECLARATIVE_SOFTWARE_BACKEND
+	bool "software backend"
+	# Prefer software backend over mesa3d
+	default y if BR2_PACKAGE_MESA3D_OPENGL_ES
+
 endif

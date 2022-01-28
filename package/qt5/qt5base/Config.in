@@ -298,4 +298,40 @@ config BR2_PACKAGE_QT5BASE_TSLIB
 	help
 	  This options enables the Tslib plugin
 
+config BR2_PACKAGE_QT5BASE_USE_RGA
+	bool "Enable RGA"
+	depends on BR2_PACKAGE_ROCKCHIP_RGA
+	help
+	  This options enables the RGA rendering
+
+endif
+
+if BR2_PACKAGE_QT5BASE_LINUXFB
+
+if BR2_PACKAGE_LIBDRM
+
+choice
+	prompt "Pixel format of linuxfb drm screen"
+	default BR2_PACKAGE_QT5BASE_LINUXFB_RGB565
+	help
+	  Select pixel format of linuxfb drm screen
+
+config BR2_PACKAGE_QT5BASE_LINUXFB_RGB565
+	bool "rgb565"
+
+config BR2_PACKAGE_QT5BASE_LINUXFB_RGB32
+	bool "xrgb8888"
+
+config BR2_PACKAGE_QT5BASE_LINUXFB_ARGB32
+	bool "argb8888"
+
+endchoice
+
+endif
+
+config BR2_PACKAGE_QT5BASE_LINUXFB_DIRECT_PAINTING
+	bool "Enable linuxfb direct painting hacks"
+	help
+	  This options enables the linuxfb direct painting hacks
+
 endif
