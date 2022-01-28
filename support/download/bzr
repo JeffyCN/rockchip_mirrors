@@ -16,7 +16,8 @@ set -e
 #   BZR      : the bzr command to call
 
 
-quiet=
+# HACK: Avoid printing logs to output file
+quiet=-q
 while getopts "${BR_BACKEND_DL_GETOPTS}" OPT; do
     case "${OPT}" in
     q)  quiet=-q;;
