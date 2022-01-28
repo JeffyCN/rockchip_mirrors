@@ -1,7 +1,7 @@
-From cc0c0e4b13047c9af717294604bb6ffa8d7ffa3d Mon Sep 17 00:00:00 2001
+From b271c94ff831e76f439bba3654e7154709a465fc Mon Sep 17 00:00:00 2001
 From: Hans Verkuil <hverkuil-cisco@xs4all.nl>
 Date: Mon, 15 Mar 2021 08:13:14 +0100
-Subject: [PATCH 11/11] v4l2-tpg.patch: rename min/max defines to tpg_min/max
+Subject: [PATCH 7/8] v4l2-tpg.patch: rename min/max defines to tpg_min/max
 
 With gcc 11 the min/max defines clash with what gcc provides,
 so rename these defines. They are only used in the min3/max3
@@ -16,7 +16,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 4 insertions(+), 6 deletions(-)
 
 diff --git a/utils/common/v4l2-tpg.h b/utils/common/v4l2-tpg.h
-index c07c60aa9..a86ba02a0 100644
+index c07c60aa..a86ba02a 100644
 --- a/utils/common/v4l2-tpg.h
 +++ b/utils/common/v4l2-tpg.h
 @@ -26,12 +26,10 @@ typedef __s8 s8;

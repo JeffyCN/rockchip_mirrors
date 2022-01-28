@@ -1,7 +1,7 @@
-From ecbd146123c548152bdead7ed817801746bfdd6d Mon Sep 17 00:00:00 2001
+From e51f0a2230a8ee3f40612314ffbd2d0ca62643d4 Mon Sep 17 00:00:00 2001
 From: Hans Yang <yhx@rock-chips.com>
 Date: Fri, 18 Dec 2020 17:42:01 +0800
-Subject: [PATCH] video max frame change from 32 to 64
+Subject: [PATCH 6/8] video max frame change from 32 to 64
 
 Signed-off-by: Hans Yang <yhx@rock-chips.com>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Hans Yang <yhx@rock-chips.com>
  3 files changed, 3 insertions(+), 3 deletions(-)
 
 diff --git a/contrib/freebsd/include/linux/videodev2.h b/contrib/freebsd/include/linux/videodev2.h
-index 3559acc..8176647 100644
+index e9512ac2..4b36d011 100644
 --- a/contrib/freebsd/include/linux/videodev2.h
 +++ b/contrib/freebsd/include/linux/videodev2.h
 @@ -102,7 +102,7 @@ typedef int8_t __s8;
@@ -24,7 +24,7 @@ index 3559acc..8176647 100644
  
  /*
 diff --git a/include/linux/videodev2.h b/include/linux/videodev2.h
-index b0ad815..aeb483e 100644
+index fea0e6ad..adede520 100644
 --- a/include/linux/videodev2.h
 +++ b/include/linux/videodev2.h
 @@ -68,7 +68,7 @@
@@ -37,7 +37,7 @@ index b0ad815..aeb483e 100644
  
  /*
 diff --git a/lib/libv4l2/libv4l2-priv.h b/lib/libv4l2/libv4l2-priv.h
-index 30dd1bc..cce6de4 100644
+index 30dd1bc3..cce6de43 100644
 --- a/lib/libv4l2/libv4l2-priv.h
 +++ b/lib/libv4l2/libv4l2-priv.h
 @@ -29,7 +29,7 @@
@@ -50,5 +50,5 @@ index 30dd1bc..cce6de4 100644
  #define V4L2_IGNORE_FIRST_FRAME_ERRORS 3
  #define V4L2_DEFAULT_FPS 30
 -- 
-2.29.0
+2.20.1
 

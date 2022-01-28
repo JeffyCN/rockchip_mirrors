@@ -1,7 +1,7 @@
-From b50c21b261f1816f580e0374a4d9f8028bd520f2 Mon Sep 17 00:00:00 2001
+From 5da9cbfb8785bd8c91dc9320e404294857919f47 Mon Sep 17 00:00:00 2001
 From: "vicent.chi" <vicent.chi@rock-chips.com>
 Date: Thu, 31 Oct 2019 11:46:12 +0800
-Subject: [PATCH] libv4l: add V4L2_MEMORY_DMABUF memory support
+Subject: [PATCH 4/8] libv4l: add V4L2_MEMORY_DMABUF memory support
 
 Signed-off-by: vicent.chi <vicent.chi@rock-chips.com>
 ---
@@ -10,7 +10,7 @@ Signed-off-by: vicent.chi <vicent.chi@rock-chips.com>
  2 files changed, 22 insertions(+), 2 deletions(-)
 
 diff --git a/lib/libv4l2/libv4l2-priv.h b/lib/libv4l2/libv4l2-priv.h
-index 1924c91..30dd1bc 100644
+index 1924c91f..30dd1bc3 100644
 --- a/lib/libv4l2/libv4l2-priv.h
 +++ b/lib/libv4l2/libv4l2-priv.h
 @@ -104,6 +104,7 @@ struct v4l2_dev_info {
@@ -22,7 +22,7 @@ index 1924c91..30dd1bc 100644
  
  /* From v4l2-plugin.c */
 diff --git a/lib/libv4l2/libv4l2.c b/lib/libv4l2/libv4l2.c
-index 21e6f05..f949b5d 100644
+index 0c02bec3..0b178889 100644
 --- a/lib/libv4l2/libv4l2.c
 +++ b/lib/libv4l2/libv4l2.c
 @@ -543,7 +543,7 @@ static int v4l2_deactivate_read_stream(int index)
@@ -89,5 +89,5 @@ index 21e6f05..f949b5d 100644
  			/* Check if the mmap data matches our answer to QUERY_BUF. If it doesn't,
  			   let the kernel handle it (to allow for mmap-based non capture use) */
 -- 
-2.7.4
+2.20.1
 

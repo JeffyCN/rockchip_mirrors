@@ -35,11 +35,6 @@ config BR2_PACKAGE_LIBV4L_UTILS
 	  - rds-ctl
 	  - qv4l2 (if Qt is enabled)
 
-config BR2_PACKAGE_LIBV4L_QV4L2
-	bool "qv4l2 tool"
-	help
-	  qv4l2 is a gui tool based on Qt
-
 config BR2_PACKAGE_LIBV4L_BUILTIN_PLUGINS
 	bool "builtin plugins"
 	help
