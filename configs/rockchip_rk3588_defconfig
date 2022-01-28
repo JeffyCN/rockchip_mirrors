@@ -8,5 +8,6 @@
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
 
+#include "qt.config"
 #include "gpu.config"
 #include "display.config"
