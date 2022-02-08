@@ -11,3 +11,5 @@
 #include "qt.config"
 #include "gpu.config"
 #include "display.config"
+
+#include "network.config"
