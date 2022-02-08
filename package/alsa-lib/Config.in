@@ -20,6 +20,10 @@ menuconfig BR2_PACKAGE_ALSA_LIB
 
 if BR2_PACKAGE_ALSA_LIB
 
+config BR2_PACKAGE_ALSA_LIB_VERSIONED
+	bool "Enable alsa lib API version"
+	default n
+
 config BR2_PACKAGE_ALSA_LIB_PYTHON
 	bool "Python support for alsa-lib"
 	depends on BR2_PACKAGE_PYTHON || BR2_PACKAGE_PYTHON3
