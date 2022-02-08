@@ -16,3 +16,4 @@
 #include "display.config"
 
 #include "network.config"
+#include "chromium.config"
