@@ -40,4 +40,8 @@ menu "Rockchip BSP packages"
 	source "package/rockchip/rockchip-mpp/Config.in"
 endmenu
 
+menu "Rockchip Qt demos"
+	source "package/rockchip/apps/Config.in"
+endmenu
+
 endif
