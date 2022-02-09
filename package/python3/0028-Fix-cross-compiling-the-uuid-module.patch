@@ -1,4 +1,4 @@
-From 28008e1e4f0349241d22aace3c54f7e9425c6c1f Mon Sep 17 00:00:00 2001
+From d7b90b157eddefbd0ed59e35c90b083c0c03b644 Mon Sep 17 00:00:00 2001
 From: Adam Duskett <aduskett@gmail.com>
 Date: Fri, 20 Jul 2018 10:17:39 -0400
 Subject: [PATCH] Fix cross compiling the uuid module
@@ -20,19 +20,24 @@ Signed-off-by: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
  1 file changed, 2 insertions(+), 1 deletion(-)
 
 diff --git a/setup.py b/setup.py
-index a7f2e23d87..b0274a3f67 100644
+index 3d0c74bb7f..c7be85f352 100644
 --- a/setup.py
 +++ b/setup.py
-@@ -1674,7 +1674,8 @@ class PyBuildExt(build_ext):
+@@ -1866,10 +1866,10 @@ class PyBuildExt(build_ext):
  
      def detect_uuid(self):
          # Build the _uuid module if possible
--        uuid_incs = find_file("uuid.h", self.inc_dirs, ["/usr/include/uuid"])
-+        uuid_incs = find_file("uuid.h", self.inc_dirs,
-+                              [os.path.join(inc_dir, 'uuid') for inc_dir in self.inc_dirs])
-         if uuid_incs is not None:
-             if self.compiler.find_library_file(self.lib_dirs, 'uuid'):
-                 uuid_libs = ['uuid']
+-        uuid_h = sysconfig.get_config_var("HAVE_UUID_H")
+-        uuid_uuid_h = sysconfig.get_config_var("HAVE_UUID_UUID_H")
+-        if uuid_h or uuid_uuid_h:
+-            if sysconfig.get_config_var("HAVE_LIBUUID"):
++        uuid_h = find_file("uuid.h", self.inc_dirs,
++                               [os.path.join(inc_dir, 'uuid') for inc_dir in self.inc_dirs])
++        if uuid_h is not None:
++            if self.compiler.find_library_file(self.lib_dirs, 'uuid'):
+                 uuid_libs = ["uuid"]
+             else:
+                 uuid_libs = []
 -- 
-2.20.1
+2.25.1
 
