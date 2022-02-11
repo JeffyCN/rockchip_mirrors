@@ -128,4 +128,11 @@ endef
 OPENSSH_POST_INSTALL_TARGET_HOOKS += OPENSSH_INSTALL_KEY_UTILS
 endif
 
+ifeq ($(BR2_PACKAGE_OPENSSH_GEN_KEYS),y)
+define OPENSSH_GEN_KEYS
+	ssh-keygen -A -f $(TARGET_DIR)/
+endef
+OPENSSH_POST_INSTALL_TARGET_HOOKS += OPENSSH_GEN_KEYS
+endif
+
 $(eval $(autotools-package))

@@ -31,4 +31,7 @@ config BR2_PACKAGE_OPENSSH_KEY_UTILS
 	help
 	  Key utilities: ssh-keygen, ssh-keyscan.
 
+config BR2_PACKAGE_OPENSSH_GEN_KEYS
+	bool "generate keys"
+
 endif
