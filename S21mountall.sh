@@ -445,7 +445,7 @@ do_part()
 			FSGROUP=ntfs
 			FSCK_CONFIG=BR2_PACKAGE_NTFS_3G_NTFSPROGS
 			;;
-		ubifs)
+		ubi|ubifs)
 			FSGROUP=ubifs
 			# No fsck for ubifs
 			unset FSCK_CONFIG
