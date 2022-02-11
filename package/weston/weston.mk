@@ -40,5 +40,5 @@ WESTON_POST_INSTALL_TARGET_HOOKS += WESTON_INSTALL_TARGET_SCRIPTS
 ifeq ($(BR2_PACKAGE_WESTON_8),y)
 include $(pkgdir)/weston-8.inc
 else
-include $(pkgdir)/weston-9.inc
+include $(pkgdir)/weston-10.inc
 endif
