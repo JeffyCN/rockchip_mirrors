@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WESTON_VERSION = 9.0.91
+WESTON_VERSION = 10.0.0
 WESTON_SITE = https://wayland.freedesktop.org/releases
 WESTON_SOURCE = weston-$(WESTON_VERSION).tar.xz
 WESTON_LICENSE = MIT
@@ -19,14 +19,6 @@ WESTON_CONF_OPTS = \
 	-Dcolor-management-colord=false \
 	-Dremoting=false
 
-# HACK: Rockchip's BSP kernel is surely 3.8+, and we need extra simple-clients.
-# Uses VIDIOC_EXPBUF, only available from 3.8+
-# ifeq ($(BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_8),y)
-# WESTON_CONF_OPTS += -Dsimple-clients=dmabuf-v4l
-# else
-# WESTON_CONF_OPTS += -Dsimple-clients=
-# endif
-
 ifeq ($(BR2_PACKAGE_DBUS)$(BR2_PACKAGE_SYSTEMD),yy)
 WESTON_CONF_OPTS += -Dlauncher-logind=true
 WESTON_DEPENDENCIES += dbus systemd
@@ -39,20 +31,6 @@ WESTON_CONF_OPTS += -Dimage-webp=true
 WESTON_DEPENDENCIES += webp
 else
 WESTON_CONF_OPTS += -Dimage-webp=false
-endif
-
-# weston-launch must be u+s root in order to work properly
-ifeq ($(BR2_PACKAGE_LINUX_PAM),y)
-define WESTON_PERMISSIONS
-	/usr/bin/weston-launch f 4755 0 0 - - - - -
-endef
-define WESTON_USERS
-	- - weston-launch -1 - - - - Weston launcher group
-endef
-WESTON_CONF_OPTS += -Dweston-launch=true
-WESTON_DEPENDENCIES += linux-pam
-else
-WESTON_CONF_OPTS += -Dweston-launch=false
 endif
 
 ifeq ($(BR2_PACKAGE_HAS_LIBEGL_WAYLAND)$(BR2_PACKAGE_HAS_LIBGLES),yy)
@@ -75,12 +53,6 @@ WESTON_DEPENDENCIES += freerdp
 WESTON_CONF_OPTS += -Dbackend-rdp=true
 else
 WESTON_CONF_OPTS += -Dbackend-rdp=false
-endif
-
-ifeq ($(BR2_PACKAGE_WESTON_FBDEV),y)
-WESTON_CONF_OPTS += -Dbackend-fbdev=true
-else
-WESTON_CONF_OPTS += -Dbackend-fbdev=false
 endif
 
 ifeq ($(BR2_PACKAGE_WESTON_DRM),y)
