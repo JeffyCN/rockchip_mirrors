@@ -755,11 +755,6 @@ endif
 		echo "PRETTY_NAME=\"Buildroot $(BR2_VERSION)\"" \
 	) >  $(TARGET_DIR)/usr/lib/os-release
 	ln -sf ../usr/lib/os-release $(TARGET_DIR)/etc
-	( \
-		echo "RK_MODEL=$(RK_MODEL)"; \
-		echo "RK_VERSION=$(RK_VERSION)"; \
-		echo "RK_OTA_HOST=$(RK_OTA_HOST)"; \
-	) >  $(TARGET_DIR)/etc/version
 
 	@$(call MESSAGE,"Sanitizing RPATH in target tree")
 	$(TOPDIR)/support/scripts/fix-rpath target
