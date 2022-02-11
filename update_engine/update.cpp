@@ -235,7 +235,7 @@ static int ota_recovery_cmds (long long flash_offset, const char *dest_path)
 
     LOGI("[%s:%d] parameter flash offset %#llx dest path %s\n", __func__, __LINE__, flash_offset, dest_path);
     memset(data_buf, 0, sizeof(data_buf)/sizeof(data_buf[0]));
-    int fd = open(CMD4RECOVERY_FILENAME, O_CREAT|O_RDWR|O_SYNC|O_APPEND);
+    int fd = open(CMD4RECOVERY_FILENAME, O_CREAT|O_RDWR|O_SYNC|O_APPEND, 0644);
     if (fd < 0) {
         LOGE("[%s-%d] error opening %s.\n", __func__, __LINE__,  CMD4RECOVERY_FILENAME);
         return -1;
