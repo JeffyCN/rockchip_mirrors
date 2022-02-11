@@ -1,0 +1,5 @@
+#include "base.config"
+#include "base_extra.config"
+#include "recovery.config"
+#include "rk3588_arm64.config"
+BR2_ROOTFS_OVERLAY="board/rockchip/rk3588/fs-overlay-recovery/"
