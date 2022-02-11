@@ -39,4 +39,8 @@ config BR2_PACKAGE_OPENSSH_SANDBOX
 
 	  This is normally preferable, but may cause seccomp problems
 	  for certain combinations of C libraries and kernel versions.
+
+config BR2_PACKAGE_OPENSSH_GEN_KEYS
+	bool "generate keys"
+
 endif
