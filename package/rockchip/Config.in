@@ -40,6 +40,7 @@ menu "Rockchip BSP packages"
 	source "package/rockchip/rockchip-rga/Config.in"
 	source "package/rockchip/rockchip-mali/Config.in"
 	source "package/rockchip/rockchip-mpp/Config.in"
+	source "package/rockchip/rockchip-test/Config.in"
 endmenu
 
 menu "Rockchip Qt demos"
