@@ -17,3 +17,6 @@
 
 #include "network.config"
 #include "chromium.config"
+
+#include "test.config"
+#include "benchmark.config"
