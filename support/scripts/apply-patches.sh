@@ -128,6 +128,9 @@ function apply_patch {
             git add -f .gitignore *
             git commit --no-edit -m "init"
         fi
+
+        # Wait for auto gc
+        while [ -f .git/gc.pid ]; do sleep 1;done
     fi
 
     ${uncomp} "${path}/$patch" | patch -g0 -p1 -E -d "${builddir}" -t -N $silent
