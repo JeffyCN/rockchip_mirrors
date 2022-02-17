@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 device_1=$1
 device_2=$2

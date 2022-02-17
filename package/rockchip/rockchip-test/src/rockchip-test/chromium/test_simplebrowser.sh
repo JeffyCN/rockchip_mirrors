@@ -9,6 +9,6 @@ then
 	#./simplebrowser https://www.baidu.com
 	#./simplebrowser "file:///oem/SampleVideo_1280x720_5mb.mp4"
 else
-	echo "Please sure the config/rockchip_xxxx_defconfig include "chromium.config"........"
+	echo "Please sure the config/rockchip_xxx_defconfig include "qtwebengine.config"........"
 fi
 echo "the governor is performance for now, please restart it........"

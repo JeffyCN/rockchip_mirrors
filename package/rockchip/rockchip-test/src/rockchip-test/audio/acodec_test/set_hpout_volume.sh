@@ -1,15 +1,13 @@
-#!/bin/sh
+#!/bin/bash
 
 v=$1
 
-echo "Set HPOUT volume, range 0->30"
+echo "Set HPOUT volume, range 0->33"
 
 if [ ! -n "$v" ] ; then
 	echo "please enter a volume"
 else
 	echo "set volume: $v"
-	tinymix set "DAC HPOUT Left Volume" $v
-	tinymix set "DAC HPOUT Right Volume" $v
-	tinymix get "DAC HPOUT Left Volume"
-	tinymix get "DAC HPOUT Right Volume"
+	amixer set "Output 1" $v
+	amixer get "Output 1"
 fi

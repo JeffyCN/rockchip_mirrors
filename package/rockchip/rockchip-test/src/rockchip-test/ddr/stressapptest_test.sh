@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 DDR_DIR=/rockchip-test/ddr
 RESULT_DIR=/data/cfg/rockchip-test

@@ -1,10 +1,10 @@
-#!/bin/sh
+#!/bin/bash
 
 #echo "Input process name first"
 #read pname
 
-echo "Stop tinycap process"
-pname=tinycap
+echo "Stop arecord process"
+pname=arecord
 
 PID=$(ps -e|grep $pname|head -1|awk '{printf $1}')
 

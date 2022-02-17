@@ -1,11 +1,11 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Loop playback $1"
 
 while [ true ]
 do
-	tinyplay $1 -r 44100 &
+	aplay $1 -r 44100 &
 	sleep 2
-	/data/stop_tinyplay.sh
+	/data/stop_aplay.sh
 	sleep 2
 done;

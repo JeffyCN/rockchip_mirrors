@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 device_1=$1
 device_2=$2
@@ -6,28 +6,18 @@ device_2=$2
 prepare_adc_gains()
 {
 	adc_mic_gain=$1
-	adc_mic_gain_idx=0		# 0dB index
 
-	if [ $adc_mic_gain -eq 20 ]; then
-		adc_mic_gain_idx=3	# 20dB index
-	fi
-
-	echo "Prepare ADC MIC GAINs with $adc_mic_gain dB index: $adc_mic_gain_idx"
-	tinymix set "ADC MIC Group 0 Left Volume" $adc_mic_gain_idx
-	tinymix set "ADC MIC Group 0 Right Volume" $adc_mic_gain_idx
-	tinymix set "ADC MIC Group 1 Left Volume" $adc_mic_gain_idx
-	tinymix set "ADC MIC Group 1 Right Volume" $adc_mic_gain_idx
-	tinymix set "ADC MIC Group 2 Left Volume" $adc_mic_gain_idx
-	tinymix set "ADC MIC Group 2 Right Volume" $adc_mic_gain_idx
-	tinymix set "ADC MIC Group 3 Left Volume" $adc_mic_gain_idx
-	tinymix set "ADC MIC Group 3 Right Volume" $adc_mic_gain_idx
+	echo "Prepare ADC MIC GAINs with $adc_mic_gain dB"
+	# PGA gain
+	amixer set "Left Channel" $adc_mic_gain
+	amixer set "Right Channel" $adc_mic_gain
 }
 
 test_loopback()
 {
-	PATH_CAPTURE=/mnt/sdcard/cap_files
+	# PATH_CAPTURE=/mnt/sdcard/cap_files
 	# PATH_CAPTURE=/media/usb0/cap_files
-	# PATH_CAPTURE=/tmp/cap_files
+	PATH_CAPTURE=/tmp/cap_files
 	play_device="default"
 	capt_device="default"
 	fs=16000
@@ -35,8 +25,7 @@ test_loopback()
 	capt_ch=2
 	capt_seconds=60			# capture once per 1min
 	capt_minutes=60			# capture minutes
-	mic_gains=0			# only 0dB or 20dB
-	switch_gain_count=10
+	switch_gain_count=8
 	play_seconds=2
 	play_start_doze=0.3
 	play_stop_doze=1
@@ -72,11 +61,8 @@ test_loopback()
 		# start doze
 		sleep $play_start_doze
 
-		let "temp=($capt_cnt-1)/$switch_gain_count%2"
-
-		if [ $temp -eq 1 ]; then
-			capt_gain=20
-		fi
+		let "temp=($capt_cnt-1)/($capt_count/$switch_gain_count)"
+		let "capt_gain=$temp%(switch_gain_count+1)*3" # step 3dB
 
 		DUMP_FILE=$(printf 'loopback_fs%d_format_%s_ch%d_mic%ddb_%04d.wav' $fs $capt_bits $capt_ch $capt_gain $capt_cnt)
 		echo "temp: $temp, capt_gain: $capt_gain DUMP_FILE: $DUMP_FILE"

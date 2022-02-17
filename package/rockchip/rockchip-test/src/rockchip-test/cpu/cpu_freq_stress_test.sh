@@ -24,9 +24,6 @@ cpu_cnt=`cat /proc/cpuinfo | grep processor | sort | uniq | wc -l`
 
 stressapptest -s $1 --pause_delay 10 --pause_duration 1 -W --stop_on_errors -M 128&
 
-cd /sys/devices/system/cpu/cpu0/cpufreq
-unset FREQS
-read -a FREQS < scaling_available_frequencies
 RANDOM=$$$(date +%s)
 time_cnt=0
 
@@ -36,12 +33,16 @@ while true; do
     echo "======TEST SUCCESSFUL, QUIT====="
     exit 0
   fi
-  echo userspace > /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor
-  FREQ=${FREQS[$RANDOM % ${#FREQS[@]} ]}
-  echo Set ${FREQ}
-  echo ${FREQ} > /sys/devices/system/cpu/cpu0/cpufreq/scaling_setspeed
-  cur_freq=`cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq`
-  echo Get "***$cur_freq***"
+  for d in /sys/devices/system/cpu/cpufreq/*; do
+    echo userspace > $d/scaling_governor
+
+    read -a FREQS < $d/scaling_available_frequencies
+    FREQ=${FREQS[$RANDOM % ${#FREQS[@]} ]}
+    echo Set $d freq to ${FREQ}
+    echo ${FREQ} > $d/scaling_setspeed
+    cur_freq=`cat $d/scaling_cur_freq`
+    echo Get "***$d freq $cur_freq***"
+  done
   sleep $2
   let "time_cnt=$time_cnt+$2"
 done

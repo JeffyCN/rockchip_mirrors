@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 WAVS_PATH=$1
 ERR_CNT=0
@@ -26,10 +26,10 @@ check_prepare()
 		echo "PREFIX_LOG is empty"
 	fi
 
-	rm $TMP_STAT_LOG
-	rm $TMP_STATS_LOG
-	rm $STAT_LOG
-	rm $STATS_LOG
+	rm $TMP_STAT_LOG -f
+	rm $TMP_STATS_LOG -f
+	rm $STAT_LOG -f
+	rm $STATS_LOG -f
 
 	echo "there is no error on test loopback" > $RESULT_LOG
 }

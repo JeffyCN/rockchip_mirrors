@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 io -4 0xff560054 0x40
 io -4 0xff560094 0x40

@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 ### file: rockchip-test.sh
 ### function: ddr cpu gpio flash bt audio recovery s2r sdio/pcie(wifi)
-###           ethernet reboot ddrfreq npu camera video
+###           ethernet reboot ddrfreq npu camera video and so on.
 
 moudle_env()
 {
@@ -10,13 +10,13 @@ moudle_env()
 
 module_choice()
 {
-    echo "*****************************************************"
-    echo "***                                               ***"
-    echo "***        ********************                   ***"
-    echo "***       *ROCKCHIPS TEST TOOLS*                  ***"
-    echo "***        *                  *                   ***"
-    echo "***        ********************                   ***"
-    echo "***                                               ***"
+    echo "******************************************************"
+    echo "***                                                ***"
+    echo "***          *****************************         ***"
+    echo "***          *    ROCKCHIPS TEST TOOLS   *         ***"
+    echo "***          *  V1.0 updated on 20220218 *         ***"
+    echo "***          *****************************         ***"
+    echo "***                                                ***"
     echo "*****************************************************"
 
 
@@ -47,22 +47,22 @@ module_choice()
 
 npu_stress_test()
 {
-    sh /rockchip-test/npu/npu_test.sh
+    bash /rockchip-test/npu/npu_test.sh
 }
 
 npu2_stress_test()
 {
-    sh /rockchip-test/npu2/npu_test.sh
+    bash /rockchip-test/npu2/npu_test.sh
 }
 
 ddr_test()
 {
-    sh /rockchip-test/ddr/ddr_test.sh
+    bash /rockchip-test/ddr/ddr_test.sh
 }
 
 cpufreq_test()
 {
-    sh /rockchip-test/cpu/cpufreq_test.sh
+    bash /rockchip-test/cpu/cpufreq_test.sh
 }
 
 flash_stress_test()
@@ -72,41 +72,41 @@ flash_stress_test()
 
 recovery_test()
 {
-    sh /rockchip-test/recovery_test/auto_reboot.sh
+    bash /rockchip-test/recovery_test/recovery_test.sh
 }
 
 suspend_resume_test()
 {
-    sh /rockchip-test/suspend_resume/suspend_resume.sh
+    bash /rockchip-test/suspend_resume/suspend_resume.sh
 }
 
 wifi_test()
 {
-    sh /rockchip-test/wifi/wifi_test.sh
+    bash /rockchip-test/wifi/wifi_test.sh
 }
 
 ethernet_test()
 {
-    sh /test_plan/ethernet/eth_test.sh
+    bash /test_plan/ethernet/eth_test.sh
 }
 
 bluetooth_test()
 {
-    sh /rockchip-test/bluetooth/bt_onoff.sh &
+    bash /rockchip-test/bluetooth/bt_onoff.sh &
 }
 
 audio_test()
 {
-    sh /rockchip-test/audio/audio_functions_test.sh
+    bash /rockchip-test/audio/audio_functions_test.sh
 }
 
 auto_reboot_test()
 {
-    fcnt=/data/config/rockchip-test/reboot_cnt;
+    fcnt=/userdata/cfg/rockchip/reboot_cnt;
     if [ -e "$fcnt" ]; then
 	rm -f $fcnt;
     fi
-    sh /rockchip-test/auto_reboot/auto_reboot.sh
+    bash /rockchip-test/auto_reboot/auto_reboot.sh
 }
 
 ddr_freq_scaling_test()
@@ -116,22 +116,22 @@ ddr_freq_scaling_test()
 
 camera_test()
 {
-    sh /rockchip-test/camera/camera_test.sh
+    bash /rockchip-test/camera/camera_test.sh
 }
 
 video_test()
 {
-    sh /rockchip-test/video/video_test.sh
+    bash /rockchip-test/video/video_test.sh
 }
 
 gpu_test()
 {
-    sh /rockchip-test/gpu/gpu_test.sh
+    bash /rockchip-test/gpu/gpu_test.sh
 }
 
 chromium_test()
 {
-    sh /rockchip-test/chromium/chromium_test.sh
+    bash /rockchip-test/chromium/chromium_test.sh
 }
 
 power_lost_test()
@@ -140,7 +140,7 @@ power_lost_test()
         if [ -e "$fcnt" ]; then
                 rm -f $fcnt;
         fi
-        sh /rockchip-test/flash_test/power_lost_test.sh &
+        bash /rockchip-test/flash_test/power_lost_test.sh &
 }
 
 module_test()

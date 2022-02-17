@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 DIR_DDR=/rockchip-test/ddr
 

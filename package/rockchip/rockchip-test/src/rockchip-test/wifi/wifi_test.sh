@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 DIR_WIFI=/rockchip-test/wifi
 RESULT_DIR=/data/cfg/rockchip-test/wifi

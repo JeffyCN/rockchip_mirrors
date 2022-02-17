@@ -1,6 +1,6 @@
-#!/bin/sh
+#!/bin/bash
 
-RESULT_DIR=/data/cfg/rockchip-test/
+RESULT_DIR=/userdata/cfg/rockchip-test/
 RESULT_LOG=${RESULT_DIR}/suspend_resume.log
 SUSPEND_MAX=20
 SUSPEND_MIN=5
