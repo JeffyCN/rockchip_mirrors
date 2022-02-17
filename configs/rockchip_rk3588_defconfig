@@ -2,6 +2,8 @@
 #include "base_extra.config"
 #include "rk3588_arm64.config"
 
+#include "debug.config"
+
 #include "audio.config"
 #include "audio_gst.config"
 #include "camera.config"
