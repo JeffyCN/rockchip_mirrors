@@ -12,12 +12,14 @@ WESTON_LICENSE_FILES = COPYING
 WESTON_CPE_ID_VENDOR = wayland
 
 WESTON_DEPENDENCIES = host-pkgconf wayland wayland-protocols \
-	libxkbcommon pixman libpng jpeg udev cairo libinput libdrm
+	libxkbcommon pixman libpng udev cairo libinput libdrm
 
 WESTON_CONF_OPTS = \
 	-Dbackend-headless=false \
 	-Dcolor-management-colord=false \
-	-Dremoting=false
+	-Ddoc=false \
+	-Dremoting=false \
+	-Dtools=calibrator,debug,info,terminal,touch-calibrator
 
 ifeq ($(BR2_PACKAGE_DBUS)$(BR2_PACKAGE_SYSTEMD),yy)
 WESTON_CONF_OPTS += -Dlauncher-logind=true
@@ -26,11 +28,32 @@ else
 WESTON_CONF_OPTS += -Dlauncher-logind=false
 endif
 
+ifeq ($(BR2_PACKAGE_JPEG),y)
+WESTON_CONF_OPTS += -Dimage-jpeg=true
+WESTON_DEPENDENCIES += jpeg
+else
+WESTON_CONF_OPTS += -Dimage-jpeg=false
+endif
+
 ifeq ($(BR2_PACKAGE_WEBP),y)
 WESTON_CONF_OPTS += -Dimage-webp=true
 WESTON_DEPENDENCIES += webp
 else
 WESTON_CONF_OPTS += -Dimage-webp=false
+endif
+
+# weston-launch must be u+s root in order to work properly
+ifeq ($(BR2_PACKAGE_LINUX_PAM),y)
+define WESTON_PERMISSIONS
+	/usr/bin/weston-launch f 4755 0 0 - - - - -
+endef
+define WESTON_USERS
+	- - weston-launch -1 - - - - Weston launcher group
+endef
+WESTON_CONF_OPTS += -Ddeprecated-weston-launch=true
+WESTON_DEPENDENCIES += linux-pam
+else
+WESTON_CONF_OPTS += -Ddeprecated-weston-launch=false
 endif
 
 ifeq ($(BR2_PACKAGE_HAS_LIBEGL_WAYLAND)$(BR2_PACKAGE_HAS_LIBGLES),yy)
@@ -55,10 +78,28 @@ else
 WESTON_CONF_OPTS += -Dbackend-rdp=false
 endif
 
+ifeq ($(BR2_PACKAGE_WESTON_FBDEV),y)
+WESTON_CONF_OPTS += -Ddeprecated-backend-fbdev=true
+else
+WESTON_CONF_OPTS += -Ddeprecated-backend-fbdev=false
+endif
+
 ifeq ($(BR2_PACKAGE_WESTON_DRM),y)
 WESTON_CONF_OPTS += -Dbackend-drm=true
 else
 WESTON_CONF_OPTS += -Dbackend-drm=false
+endif
+
+ifeq ($(BR2_PACKAGE_WESTON_HEADLESS),y)
+WESTON_CONF_OPTS += -Dbackend-headless=true
+else
+WESTON_CONF_OPTS += -Dbackend-headless=false
+endif
+
+ifeq ($(BR2_PACKAGE_WESTON_WAYLAND),y)
+WESTON_CONF_OPTS += -Dbackend-wayland=true
+else
+WESTON_CONF_OPTS += -Dbackend-wayland=false
 endif
 
 ifeq ($(BR2_PACKAGE_WESTON_X11),y)
