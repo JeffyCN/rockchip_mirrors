@@ -1042,7 +1042,7 @@ endef
 $(eval $(foreach d,$(call reverse,$(TOPDIR) $(BR2_EXTERNAL_DIRS)),$(call percent_defconfig,$(d))$(sep)))
 
 CFG_ := $(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig)
-savedefconfig: $(BUILD_DIR)/buildroot-config/conf prepare-kconfig
+savedefconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
 	grep "#include" $(CFG_) > $(CFG_).split || true
 
 	@$(COMMON_CONFIG_ENV) $< --savedefconfig=$(CFG_) $(CONFIG_CONFIG_IN)
