@@ -30,7 +30,19 @@ config BR2_PACKAGE_RK3588
 
 endchoice
 
+# Camera Engine packages
+config BR2_PACKAGE_CAMERA_ENGINE
+    bool "Rockchip Camera Engine For ISP"
+    depends on BR2_PACKAGE_ROCKCHIP_HAS_ISP1 || BR2_PACKAGE_ROCKCHIP_HAS_ISP2 || BR2_PACKAGE_ROCKCHIP_HAS_ISP3
+    select BR2_PACKAGE_CAMERA_ENGINE_RKISP if BR2_PACKAGE_ROCKCHIP_HAS_ISP1
+    select BR2_PACKAGE_CAMERA_ENGINE_RKAIQ if BR2_PACKAGE_ROCKCHIP_HAS_ISP2
+    select BR2_PACKAGE_CAMERA_ENGINE_RKAIQ if BR2_PACKAGE_ROCKCHIP_HAS_ISP3
+    help
+        Depend on Chip Type, there are different camera_engine packages.
+        Enable this config to choose camera_engine package by chip automatically.
+
 menu "Rockchip BSP packages"
+	source "package/rockchip/camera-engine-rkaiq/Config.in"
 	source "package/rockchip/gstreamer1-rockchip/Config.in"
 	source "package/rockchip/libv4l-rkmpp/Config.in"
 	source "package/rockchip/recovery/Config.in"
