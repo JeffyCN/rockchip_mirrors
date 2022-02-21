@@ -1,4 +1,4 @@
-From 95a704be36e9eadfa8b068b5df5d60cf4ac83365 Mon Sep 17 00:00:00 2001
+From 5794fa218c37fb6771a1f7c77c908f3c43ea5617 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Feb 2019 17:06:58 +0800
 Subject: [PATCH 10/56] HACK: xdg-shell: Support setting window position
@@ -11,9 +11,9 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  include/libweston-desktop/libweston-desktop.h |  3 +++
  include/libweston/libweston.h                 |  2 ++
  libweston-desktop/surface.c                   | 10 ++++++++++
- libweston-desktop/xdg-shell.c                 |  6 ++++++
+ libweston-desktop/xdg-shell.c                 | 10 ++++++++++
  libweston/compositor.c                        |  2 ++
- 6 files changed, 29 insertions(+)
+ 6 files changed, 33 insertions(+)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
 index 442a625f..9a774797 100644
@@ -81,16 +81,20 @@ index 433f08ae..21ff080d 100644
  weston_desktop_surface_set_title(struct weston_desktop_surface *surface,
  				 const char *title)
 diff --git a/libweston-desktop/xdg-shell.c b/libweston-desktop/xdg-shell.c
-index d1fc2ec1..3fdde705 100644
+index d1fc2ec1..6c541a89 100644
 --- a/libweston-desktop/xdg-shell.c
 +++ b/libweston-desktop/xdg-shell.c
-@@ -1155,6 +1155,12 @@ weston_desktop_xdg_surface_protocol_set_window_geometry(struct wl_client *wl_cli
+@@ -1155,6 +1155,16 @@ weston_desktop_xdg_surface_protocol_set_window_geometry(struct wl_client *wl_cli
  	struct weston_desktop_xdg_surface *surface =
  		weston_desktop_surface_get_implementation_data(dsurface);
  
 +	/* HACK: For setting window position */
 +	if (!width && !height) {
-+		weston_desktop_surface_set_position(dsurface, x, y);
++		struct weston_desktop_xdg_toplevel *toplevel =
++			weston_desktop_surface_get_implementation_data(dsurface);
++		if (!toplevel->current.state.fullscreen &&
++		    !toplevel->current.state.maximized)
++			weston_desktop_surface_set_position(dsurface, x, y);
 +		return;
 +	}
 +
