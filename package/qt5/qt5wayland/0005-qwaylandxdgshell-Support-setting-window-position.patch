@@ -30,7 +30,7 @@ index b6d23ac..692e799 100644
 +
 +        // Also avoid initial position (0,0).
 +        // What if we do want to be at (0,0)?
-+        if (0 && m_position == position)
++        if (m_position == position)
 +            return;
 +        m_position = position;
 +
