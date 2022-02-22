@@ -1,0 +1,31 @@
+From dcb38768f837703b72f0d9ac0a6e1c05434b85cd Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Tue, 22 Feb 2022 09:51:29 +0800
+Subject: [PATCH 57/57] HACK: compositor: Re-build view list when framing an
+ unassigned surface
+
+To avoid skipping repaint for unassigned surface and delaying the frame
+callback.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/compositor.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index f8d3e3a6..594ae49f 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -3325,6 +3325,9 @@ surface_frame(struct wl_client *client,
+ 				       destroy_frame_callback);
+ 
+ 	wl_list_insert(surface->pending.frame_callback_list.prev, &cb->link);
++
++	if (!surface->output_mask)
++		weston_compositor_build_view_list(surface->compositor);
+ }
+ 
+ static void
+-- 
+2.20.1
+
