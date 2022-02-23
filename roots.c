@@ -111,76 +111,42 @@ void load_volume_table() {
 	}
 
 	char buffer[1024];
+	char file_system[1024];
+	char mount_point[1024];
+	char fs_type[1024];
+	char option[1024];
+	char dump[1024];
+	char pass[1024];
+	char device[1024];
 	int i;
 	while (fgets(buffer, sizeof(buffer)-1, fstab)) {
-		for (i = 0; buffer[i] && isspace(buffer[i]); ++i);
-		if (buffer[i] == '\0' || buffer[i] == '#') continue;
-		char* original = strdup(buffer);
-		char *file_system = original;
-
-		char* mount_point = strstr(original+i, "\t");
-		if(!mount_point) {
-			free(original);
-			break;
-		}
-		*mount_point = 0;
-		for(mount_point++; *mount_point == '\t' || *mount_point == ' ' || *mount_point == '\n'; mount_point++);
-		char* fs_type = strstr(mount_point, "\t");
-		if(!fs_type) {
-			free(original);
-			break;
-		}
-		*fs_type = 0;
-
-		for(fs_type++; *fs_type == '\t' || *fs_type == ' ' || *fs_type == '\n'; fs_type++);
-		char* option = strstr(fs_type, "\t");
-		if(!option) {
-			free(original);
-			break;
-		}
-		*option = 0;
-
-		for(option++; *option == '\t' || *option == ' ' || *option == '\n'; option++);
-		char* dump = strstr(option, "\t");
-		if(!dump) {
-			free(original);
-			break;
-		}
-		*dump = 0;
-
-		for(dump++; *dump == '\t' || *dump == ' ' || *dump == '\n'; dump++);
-		char* pass = strstr(dump, "\t");
-		if(!pass) {
-			free(original);
-			break;
-		}
-		*pass = 0;
-
-		for(pass++; *pass == '\t' || *pass == ' ' || *pass == '\n'; pass++);
-		char* nextline = strstr(pass, "\n");
-		if(!nextline) {
-			free(original);
-			break;
-		}
-		*nextline = 0;
+		i = sscanf(buffer, "%s %s %s %s %s %s", file_system,
+			   mount_point, fs_type, option, dump, pass);
+		if (file_system[0] == '#') continue;
 		//printf("load_volume_table file_system:%s, mount_point:%s, fs_type:%s, option:%s, dump:%s, pass:%s\n", file_system, mount_point, fs_type, option, dump, pass);
-		if (file_system && mount_point && fs_type && option && dump && pass) {
+		/* HACK: Convert PARTLABEL to "by-name" symlink */
+		if (file_system == strstr(file_system, "PARTLABEL="))
+			snprintf(device, sizeof(device), "/dev/block/by-name/%s",
+				 file_system + strlen("PARTLABEL="));
+		else
+			strcpy(device, file_system);
+
+		if (i == 6) {
 			while (num_volumes >= alloc) {
 				alloc *= 2;
 				device_volumes = realloc(device_volumes, alloc*sizeof(Volume));
 			}
 			device_volumes[num_volumes].mount_point = strdup(mount_point);
 			device_volumes[num_volumes].fs_type = strdup(fs_type);
-			device_volumes[num_volumes].option = option ? strdup(option) : NULL;
-			device_volumes[num_volumes].dump = dump ? strdup(dump) : NULL;
-			device_volumes[num_volumes].pass = pass ? strdup(pass) : NULL;
-			device_volumes[num_volumes].device = strdup(file_system);;
+			device_volumes[num_volumes].option = strdup(option);
+			device_volumes[num_volumes].dump = strdup(dump);
+			device_volumes[num_volumes].pass = strdup(pass);
+			device_volumes[num_volumes].device = strdup(device);;
 			device_volumes[num_volumes].device2 = NULL;
 			++num_volumes;
 		} else {
-			LOGE("skipping malformed recovery.fstab line: %s\n", original);
+			LOGE("skipping malformed recovery.fstab line: %s\n", buffer);
 		}
-		free(original);
 	}
 
 	fclose(fstab);
