@@ -32,13 +32,12 @@ module_choice()
     echo "ethernet test:        9"
     echo "auto reboot test:     10"
     echo "ddr freq scaling test 11"
-    echo "npu test              12"
-    echo "npu2 test             13 (rk356x or rk3588)"
-    echo "camera test           14 (use rkisp_demo)"
-    echo "video test            15 (use gstreamer-wayland and app_demo)"
-    echo "gpu test              16 (use glmark2)"
-    echo "chromium test         17 (chromium with video hardware acceleration)"
-    echo "nand power lost test: 18"
+    echo "npu2 test             12 (rk3588)"
+    echo "camera test           13 (use rkisp_demo)"
+    echo "video test            14 (use gstreamer-wayland and app_demo)"
+    echo "gpu test              15 (use glmark2)"
+    echo "chromium test         16 (chromium with video hardware acceleration)"
+    echo "nand power lost test: 17"
     echo "*****************************************************"
 
     echo  "please input your test moudle: "
@@ -180,24 +179,21 @@ module_test()
 	    ddr_freq_scaling_test
 	    ;;
 	12)
-	    npu_stress_test
-	    ;;
-	13)
 	    npu2_stress_test
 	    ;;
-	14)
+	13)
 	    camera_test
 	    ;;
-	15)
+	14)
 	    video_test
 	    ;;
-	16)
+	15)
 	    gpu_test
 	    ;;
-	17)
+	16)
 	    chromium_test
 	    ;;
-	18)
+	17)
 	    power_lost_test
 	    ;;
     esac
