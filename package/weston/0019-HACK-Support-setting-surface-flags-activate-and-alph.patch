@@ -1,7 +1,7 @@
-From cc9f6733775d7f4adb6f33bc35e4b3b1e25fb51c Mon Sep 17 00:00:00 2001
+From ab9eb9c25305f33c07688265c220dc24ee9ebf69 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 08:55:42 +0800
-Subject: [PATCH 19/53] HACK: Support setting surface flags activate and alpha
+Subject: [PATCH 19/55] HACK: Support setting surface flags activate and alpha
 
 Support setting surface flags activate and alpha through app_id or
 title, for example:
@@ -12,16 +12,16 @@ xdg_toplevel_set_app_id("attrs=alpha:0.5")
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- desktop-shell/shell.c         |  19 ++++
+ desktop-shell/shell.c         |  21 ++++
  desktop-shell/shell.h         |   2 +
  include/libweston/libweston.h |  13 +++
  libweston-desktop/surface.c   | 193 ++++++++++++++++++++++++++++++++++
  libweston/compositor.c        |  10 +-
  libweston/input.c             |   3 +
- 6 files changed, 239 insertions(+), 1 deletion(-)
+ 6 files changed, 241 insertions(+), 1 deletion(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 780acf1..288d237 100644
+index 780acf1..a733b9d 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -1887,6 +1887,11 @@ shell_surface_update_layer(struct shell_surface *shsurf)
@@ -65,7 +65,16 @@ index 780acf1..288d237 100644
  
  	wl_array_for_each(ws, &shell->workspaces.array)
  		func(shell, &(*ws)->layer, data);
-@@ -5196,6 +5209,8 @@ wet_shell_init(struct weston_compositor *ec,
+@@ -5041,6 +5054,8 @@ shell_destroy(struct wl_listener *listener, void *data)
+ 		workspace_destroy(*ws);
+ 	wl_array_release(&shell->workspaces.array);
+ 
++	desktop_shell_destroy_views_on_layer(&shell->bottom_layer);
++	desktop_shell_destroy_views_on_layer(&shell->top_layer);
+ 	desktop_shell_destroy_views_on_layer(&shell->panel_layer);
+ 	desktop_shell_destroy_views_on_layer(&shell->background_layer);
+ 	desktop_shell_destroy_views_on_layer(&shell->lock_layer);
+@@ -5196,6 +5211,8 @@ wet_shell_init(struct weston_compositor *ec,
  	weston_layer_init(&shell->background_layer, ec);
  	weston_layer_init(&shell->lock_layer, ec);
  	weston_layer_init(&shell->input_panel_layer, ec);
@@ -74,7 +83,7 @@ index 780acf1..288d237 100644
  
  	weston_layer_set_position(&shell->fullscreen_layer,
  				  WESTON_LAYER_POSITION_FULLSCREEN);
-@@ -5203,6 +5218,10 @@ wet_shell_init(struct weston_compositor *ec,
+@@ -5203,6 +5220,10 @@ wet_shell_init(struct weston_compositor *ec,
  				  WESTON_LAYER_POSITION_UI);
  	weston_layer_set_position(&shell->background_layer,
  				  WESTON_LAYER_POSITION_BACKGROUND);
@@ -347,7 +356,7 @@ index 21ff080..e86ef52 100644
  	if (tmp == NULL)
  		return;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 6db4b75..984ec8b 100644
+index 5a08719..f58dcc7 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -418,7 +418,7 @@ weston_view_create(struct weston_surface *surface)
