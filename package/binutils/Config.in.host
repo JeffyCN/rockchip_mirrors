@@ -5,6 +5,10 @@ config BR2_PACKAGE_HOST_BINUTILS_SUPPORTS_CFI
 	default y
 	depends on !BR2_microblaze
 
+config BR2_PACKAGE_BINUTILS_ENABLE_GOLD
+	bool "enable gold linker"
+	default y if BR2_PACKAGE_ROCKCHIP_MALI
+
 choice
 	prompt "Binutils Version"
 	default BR2_BINUTILS_VERSION_2_36_X if !BR2_arc && !BR2_csky

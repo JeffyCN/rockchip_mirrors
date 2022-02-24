@@ -34,6 +34,11 @@ QT5BASE_CONFIGURE_OPTS += \
 	-shared \
 	-no-feature-relocatable
 
+ifeq ($(BR2_PACKAGE_BINUTILS_ENABLE_GOLD),y)
+QT5BASE_CONFIGURE_OPTS += \
+	-linker gold
+endif
+
 # starting from version 5.9.0, -optimize-debug is enabled by default
 # for debug builds and it overrides -O* with -Og which is not what we
 # want.
