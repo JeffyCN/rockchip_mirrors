@@ -35,14 +35,14 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  .../gpu_video_decode_accelerator_factory.h    |  2 +
  src/3rdparty/chromium/media/gpu/v4l2/BUILD.gn | 47 +++++++++--------
  .../media/gpu/v4l2/generic_v4l2_device.cc     |  4 ++
- .../chromium/media/gpu/v4l2/v4l2_device.cc    | 50 +++++++++++++++++++
+ .../chromium/media/gpu/v4l2/v4l2_device.cc    | 52 +++++++++++++++++++
  .../chromium/media/gpu/v4l2/v4l2_device.h     |  6 +++
  .../gpu/v4l2/v4l2_video_decode_accelerator.cc |  3 ++
  .../mojo/services/gpu_mojo_media_client.cc    |  4 +-
- 13 files changed, 116 insertions(+), 26 deletions(-)
+ 13 files changed, 118 insertions(+), 26 deletions(-)
 
 diff --git a/src/3rdparty/chromium/components/chromeos_camera/gpu_mjpeg_decode_accelerator_factory.cc b/src/3rdparty/chromium/components/chromeos_camera/gpu_mjpeg_decode_accelerator_factory.cc
-index 6f319e8890..4f8f0b7d00 100644
+index 6f319e88..4f8f0b7d 100644
 --- a/src/3rdparty/chromium/components/chromeos_camera/gpu_mjpeg_decode_accelerator_factory.cc
 +++ b/src/3rdparty/chromium/components/chromeos_camera/gpu_mjpeg_decode_accelerator_factory.cc
 @@ -13,7 +13,8 @@
@@ -56,7 +56,7 @@ index 6f319e8890..4f8f0b7d00 100644
  #endif
  
 diff --git a/src/3rdparty/chromium/media/gpu/BUILD.gn b/src/3rdparty/chromium/media/gpu/BUILD.gn
-index 0c0c3e810a..dd14a2a917 100644
+index 0c0c3e81..dd14a2a9 100644
 --- a/src/3rdparty/chromium/media/gpu/BUILD.gn
 +++ b/src/3rdparty/chromium/media/gpu/BUILD.gn
 @@ -18,6 +18,7 @@ buildflag_header("buildflags") {
@@ -68,7 +68,7 @@ index 0c0c3e810a..dd14a2a917 100644
  }
  
 diff --git a/src/3rdparty/chromium/media/gpu/args.gni b/src/3rdparty/chromium/media/gpu/args.gni
-index 2a87b9980f..60f39fe253 100644
+index 2a87b998..60f39fe2 100644
 --- a/src/3rdparty/chromium/media/gpu/args.gni
 +++ b/src/3rdparty/chromium/media/gpu/args.gni
 @@ -14,6 +14,10 @@ declare_args() {
@@ -83,7 +83,7 @@ index 2a87b9980f..60f39fe253 100644
    # is typically the case on x86-based ChromeOS devices.
    use_vaapi = false
 diff --git a/src/3rdparty/chromium/media/gpu/chromeos/chromeos_video_decoder_factory.cc b/src/3rdparty/chromium/media/gpu/chromeos/chromeos_video_decoder_factory.cc
-index b0c1595e6b..cfa9299f53 100644
+index b0c1595e..cfa9299f 100644
 --- a/src/3rdparty/chromium/media/gpu/chromeos/chromeos_video_decoder_factory.cc
 +++ b/src/3rdparty/chromium/media/gpu/chromeos/chromeos_video_decoder_factory.cc
 @@ -17,7 +17,7 @@
@@ -114,7 +114,7 @@ index b0c1595e6b..cfa9299f53 100644
    supported_configs.insert(supported_configs.end(), configs.begin(),
                             configs.end());
 diff --git a/src/3rdparty/chromium/media/gpu/chromeos/fourcc.cc b/src/3rdparty/chromium/media/gpu/chromeos/fourcc.cc
-index e8d514df9f..243b75b284 100644
+index e8d514df..243b75b2 100644
 --- a/src/3rdparty/chromium/media/gpu/chromeos/fourcc.cc
 +++ b/src/3rdparty/chromium/media/gpu/chromeos/fourcc.cc
 @@ -16,6 +16,10 @@
@@ -129,7 +129,7 @@ index e8d514df9f..243b75b284 100644
  
  Fourcc::Fourcc(Fourcc::Value fourcc) : value_(fourcc) {}
 diff --git a/src/3rdparty/chromium/media/gpu/gpu_video_decode_accelerator_factory.cc b/src/3rdparty/chromium/media/gpu/gpu_video_decode_accelerator_factory.cc
-index 3d519b99de..cb44aecb1d 100644
+index 3d519b99..cb44aecb 100644
 --- a/src/3rdparty/chromium/media/gpu/gpu_video_decode_accelerator_factory.cc
 +++ b/src/3rdparty/chromium/media/gpu/gpu_video_decode_accelerator_factory.cc
 @@ -26,7 +26,9 @@
@@ -183,7 +183,7 @@ index 3d519b99de..cb44aecb1d 100644
  #if BUILDFLAG(USE_VAAPI)
  std::unique_ptr<VideoDecodeAccelerator>
 diff --git a/src/3rdparty/chromium/media/gpu/gpu_video_decode_accelerator_factory.h b/src/3rdparty/chromium/media/gpu/gpu_video_decode_accelerator_factory.h
-index 74f10ebeb8..e779ef50fc 100644
+index 74f10ebe..e779ef50 100644
 --- a/src/3rdparty/chromium/media/gpu/gpu_video_decode_accelerator_factory.h
 +++ b/src/3rdparty/chromium/media/gpu/gpu_video_decode_accelerator_factory.h
 @@ -111,11 +111,13 @@ class MEDIA_GPU_EXPORT GpuVideoDecodeAcceleratorFactory {
@@ -201,7 +201,7 @@ index 74f10ebeb8..e779ef50fc 100644
    std::unique_ptr<VideoDecodeAccelerator> CreateVaapiVDA(
        const gpu::GpuDriverBugWorkarounds& workarounds,
 diff --git a/src/3rdparty/chromium/media/gpu/v4l2/BUILD.gn b/src/3rdparty/chromium/media/gpu/v4l2/BUILD.gn
-index 51814e1986..7c0087e612 100644
+index 51814e19..7c0087e6 100644
 --- a/src/3rdparty/chromium/media/gpu/v4l2/BUILD.gn
 +++ b/src/3rdparty/chromium/media/gpu/v4l2/BUILD.gn
 @@ -26,43 +26,48 @@ source_set("v4l2") {
@@ -275,7 +275,7 @@ index 51814e1986..7c0087e612 100644
      "EGL",
      "GLESv2",
 diff --git a/src/3rdparty/chromium/media/gpu/v4l2/generic_v4l2_device.cc b/src/3rdparty/chromium/media/gpu/v4l2/generic_v4l2_device.cc
-index 6742dc14cb..f0f103458b 100644
+index 6742dc14..f0f10345 100644
 --- a/src/3rdparty/chromium/media/gpu/v4l2/generic_v4l2_device.cc
 +++ b/src/3rdparty/chromium/media/gpu/v4l2/generic_v4l2_device.cc
 @@ -415,7 +415,11 @@ bool GenericV4L2Device::OpenDevicePath(const std::string& path, Type type) {
@@ -291,10 +291,20 @@ index 6742dc14cb..f0f103458b 100644
            -1) {
      DVLOGF(3) << "Using libv4l2 for " << path;
 diff --git a/src/3rdparty/chromium/media/gpu/v4l2/v4l2_device.cc b/src/3rdparty/chromium/media/gpu/v4l2/v4l2_device.cc
-index ee5c4430e7..84555622a0 100644
+index ee5c4430..c4a5f9fc 100644
 --- a/src/3rdparty/chromium/media/gpu/v4l2/v4l2_device.cc
 +++ b/src/3rdparty/chromium/media/gpu/v4l2/v4l2_device.cc
-@@ -835,10 +835,12 @@ V4L2Queue::V4L2Queue(scoped_refptr<V4L2Device> dev,
+@@ -701,7 +701,9 @@ void V4L2WritableBufferRef::SetConfigStore(uint32_t config_store) {
+   DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
+   DCHECK(buffer_data_);
+ 
++#if !BUILDFLAG(USE_LINUX_V4L2)
+   buffer_data_->v4l2_buffer_.config_store = config_store;
++#endif
+ }
+ 
+ V4L2ReadableBuffer::V4L2ReadableBuffer(const struct v4l2_buffer& v4l2_buffer,
+@@ -835,10 +837,12 @@ V4L2Queue::V4L2Queue(scoped_refptr<V4L2Device> dev,
      return;
    }
  
@@ -307,7 +317,7 @@ index ee5c4430e7..84555622a0 100644
  }
  
  V4L2Queue::~V4L2Queue() {
-@@ -1242,20 +1244,32 @@ scoped_refptr<V4L2Device> V4L2Device::Create() {
+@@ -1242,20 +1246,32 @@ scoped_refptr<V4L2Device> V4L2Device::Create() {
  uint32_t V4L2Device::VideoCodecProfileToV4L2PixFmt(VideoCodecProfile profile,
                                                     bool slice_based) {
    if (profile >= H264PROFILE_MIN && profile <= H264PROFILE_MAX) {
@@ -340,7 +350,7 @@ index ee5c4430e7..84555622a0 100644
    } else {
      LOG(ERROR) << "Unknown profile: " << GetProfileName(profile);
      return 0;
-@@ -1279,6 +1293,7 @@ VideoCodecProfile V4L2Device::V4L2ProfileToVideoCodecProfile(VideoCodec codec,
+@@ -1279,6 +1295,7 @@ VideoCodecProfile V4L2Device::V4L2ProfileToVideoCodecProfile(VideoCodec codec,
            return H264PROFILE_HIGH;
        }
        break;
@@ -348,7 +358,7 @@ index ee5c4430e7..84555622a0 100644
      case kCodecVP8:
        switch (profile) {
          case V4L2_MPEG_VIDEO_VP8_PROFILE_0:
-@@ -1300,6 +1315,7 @@ VideoCodecProfile V4L2Device::V4L2ProfileToVideoCodecProfile(VideoCodec codec,
+@@ -1300,6 +1317,7 @@ VideoCodecProfile V4L2Device::V4L2ProfileToVideoCodecProfile(VideoCodec codec,
            return VP9PROFILE_PROFILE3;
        }
        break;
@@ -356,7 +366,7 @@ index ee5c4430e7..84555622a0 100644
      default:
        VLOGF(2) << "Unknown codec: " << codec;
    }
-@@ -1318,12 +1334,14 @@ std::vector<VideoCodecProfile> V4L2Device::V4L2PixFmtToVideoCodecProfiles(
+@@ -1318,12 +1336,14 @@ std::vector<VideoCodecProfile> V4L2Device::V4L2PixFmtToVideoCodecProfiles(
        case kCodecH264:
          query_id = V4L2_CID_MPEG_VIDEO_H264_PROFILE;
          break;
@@ -371,7 +381,7 @@ index ee5c4430e7..84555622a0 100644
        default:
          return false;
      }
-@@ -1351,7 +1369,9 @@ std::vector<VideoCodecProfile> V4L2Device::V4L2PixFmtToVideoCodecProfiles(
+@@ -1351,7 +1371,9 @@ std::vector<VideoCodecProfile> V4L2Device::V4L2PixFmtToVideoCodecProfiles(
    std::vector<VideoCodecProfile> profiles;
    switch (pix_fmt) {
      case V4L2_PIX_FMT_H264:
@@ -381,7 +391,7 @@ index ee5c4430e7..84555622a0 100644
        if (!get_supported_profiles(kCodecH264, &profiles)) {
          DLOG(WARNING) << "Driver doesn't support QUERY H264 profiles, "
                        << "use default values, Base, Main, High";
-@@ -1363,11 +1383,15 @@ std::vector<VideoCodecProfile> V4L2Device::V4L2PixFmtToVideoCodecProfiles(
+@@ -1363,11 +1385,15 @@ std::vector<VideoCodecProfile> V4L2Device::V4L2PixFmtToVideoCodecProfiles(
        }
        break;
      case V4L2_PIX_FMT_VP8:
@@ -397,7 +407,7 @@ index ee5c4430e7..84555622a0 100644
        if (!get_supported_profiles(kCodecVP9, &profiles)) {
          DLOG(WARNING) << "Driver doesn't support QUERY VP9 profiles, "
                        << "use default values, Profile0";
-@@ -1402,6 +1426,12 @@ uint32_t V4L2Device::V4L2PixFmtToDrmFormat(uint32_t format) {
+@@ -1402,6 +1428,12 @@ uint32_t V4L2Device::V4L2PixFmtToDrmFormat(uint32_t format) {
      case V4L2_PIX_FMT_RGB32:
        return DRM_FORMAT_ARGB8888;
  
@@ -410,7 +420,7 @@ index ee5c4430e7..84555622a0 100644
      default:
        DVLOGF(1) << "Unrecognized format " << FourccToString(format);
        return 0;
-@@ -2037,6 +2067,7 @@ bool V4L2Request::ApplyCtrls(struct v4l2_ext_controls* ctrls) {
+@@ -2037,6 +2069,7 @@ bool V4L2Request::ApplyCtrls(struct v4l2_ext_controls* ctrls) {
    DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
    DCHECK_NE(ctrls, nullptr);
  
@@ -418,7 +428,7 @@ index ee5c4430e7..84555622a0 100644
    if (!request_fd_.is_valid()) {
      VPLOGF(1) << "Invalid request";
      return false;
-@@ -2046,12 +2077,16 @@ bool V4L2Request::ApplyCtrls(struct v4l2_ext_controls* ctrls) {
+@@ -2046,12 +2079,16 @@ bool V4L2Request::ApplyCtrls(struct v4l2_ext_controls* ctrls) {
    ctrls->request_fd = request_fd_.get();
  
    return true;
@@ -435,7 +445,7 @@ index ee5c4430e7..84555622a0 100644
    if (!request_fd_.is_valid()) {
      VPLOGF(1) << "Invalid request";
      return false;
-@@ -2061,6 +2096,9 @@ bool V4L2Request::ApplyQueueBuffer(struct v4l2_buffer* buffer) {
+@@ -2061,6 +2098,9 @@ bool V4L2Request::ApplyQueueBuffer(struct v4l2_buffer* buffer) {
    buffer->request_fd = request_fd_.get();
  
    return true;
@@ -445,7 +455,7 @@ index ee5c4430e7..84555622a0 100644
  }
  
  bool V4L2Request::Submit() {
-@@ -2071,7 +2109,11 @@ bool V4L2Request::Submit() {
+@@ -2071,7 +2111,11 @@ bool V4L2Request::Submit() {
      return false;
    }
  
@@ -457,7 +467,7 @@ index ee5c4430e7..84555622a0 100644
  }
  
  bool V4L2Request::IsCompleted() {
-@@ -2114,6 +2156,7 @@ bool V4L2Request::Reset() {
+@@ -2114,6 +2158,7 @@ bool V4L2Request::Reset() {
      return false;
    }
  
@@ -465,7 +475,7 @@ index ee5c4430e7..84555622a0 100644
    // Reinit the request to make sure we can use it for a new submission.
    if (HANDLE_EINTR(ioctl(request_fd_.get(), MEDIA_REQUEST_IOC_REINIT)) < 0) {
      VPLOGF(1) << "Failed to reinit request.";
-@@ -2121,6 +2164,9 @@ bool V4L2Request::Reset() {
+@@ -2121,6 +2166,9 @@ bool V4L2Request::Reset() {
    }
  
    return true;
@@ -475,7 +485,7 @@ index ee5c4430e7..84555622a0 100644
  }
  
  V4L2RequestRefBase::V4L2RequestRefBase(V4L2RequestRefBase&& req_base) {
-@@ -2195,6 +2241,7 @@ V4L2RequestsQueue::~V4L2RequestsQueue() {
+@@ -2195,6 +2243,7 @@ V4L2RequestsQueue::~V4L2RequestsQueue() {
  base::Optional<base::ScopedFD> V4L2RequestsQueue::CreateRequestFD() {
    DCHECK_CALLED_ON_VALID_SEQUENCE(sequence_checker_);
  
@@ -483,7 +493,7 @@ index ee5c4430e7..84555622a0 100644
    int request_fd;
    int ret = HANDLE_EINTR(
          ioctl(media_fd_.get(), MEDIA_IOC_REQUEST_ALLOC, &request_fd));
-@@ -2204,6 +2251,9 @@ base::Optional<base::ScopedFD> V4L2RequestsQueue::CreateRequestFD() {
+@@ -2204,6 +2253,9 @@ base::Optional<base::ScopedFD> V4L2RequestsQueue::CreateRequestFD() {
    }
  
    return base::ScopedFD(request_fd);
@@ -494,7 +504,7 @@ index ee5c4430e7..84555622a0 100644
  
  base::Optional<V4L2RequestRef> V4L2RequestsQueue::GetFreeRequest() {
 diff --git a/src/3rdparty/chromium/media/gpu/v4l2/v4l2_device.h b/src/3rdparty/chromium/media/gpu/v4l2/v4l2_device.h
-index 346ec0c949..7ab77f4630 100644
+index 346ec0c9..7ab77f46 100644
 --- a/src/3rdparty/chromium/media/gpu/v4l2/v4l2_device.h
 +++ b/src/3rdparty/chromium/media/gpu/v4l2/v4l2_device.h
 @@ -40,6 +40,12 @@
@@ -511,7 +521,7 @@ index 346ec0c949..7ab77f4630 100644
  #define V4L2_CID_JPEG_LUMA_QUANTIZATION (V4L2_CID_JPEG_CLASS_BASE + 5)
  #endif
 diff --git a/src/3rdparty/chromium/media/gpu/v4l2/v4l2_video_decode_accelerator.cc b/src/3rdparty/chromium/media/gpu/v4l2/v4l2_video_decode_accelerator.cc
-index 7147d9f81f..454bda078d 100644
+index 7147d9f8..454bda07 100644
 --- a/src/3rdparty/chromium/media/gpu/v4l2/v4l2_video_decode_accelerator.cc
 +++ b/src/3rdparty/chromium/media/gpu/v4l2/v4l2_video_decode_accelerator.cc
 @@ -31,6 +31,7 @@
@@ -534,7 +544,7 @@ index 7147d9f81f..454bda078d 100644
    output_mode_ = config.output_mode;
  
 diff --git a/src/3rdparty/chromium/media/mojo/services/gpu_mojo_media_client.cc b/src/3rdparty/chromium/media/mojo/services/gpu_mojo_media_client.cc
-index 5074b4350a..f5a1ecfedf 100644
+index 5074b435..f5a1ecfe 100644
 --- a/src/3rdparty/chromium/media/mojo/services/gpu_mojo_media_client.cc
 +++ b/src/3rdparty/chromium/media/mojo/services/gpu_mojo_media_client.cc
 @@ -167,7 +167,8 @@ GpuMojoMediaClient::GetSupportedVideoDecoderConfigs() {
