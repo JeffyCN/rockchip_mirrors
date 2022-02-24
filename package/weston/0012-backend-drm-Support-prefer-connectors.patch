@@ -1,7 +1,7 @@
-From b100cf3e7f313c35a09f53f968d835493c01df82 Mon Sep 17 00:00:00 2001
+From 822ee341b523da3d613e4fd00dca20211781a50c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
-Subject: [PATCH 12/54] backend-drm: Support prefer connectors
+Subject: [PATCH 12/55] backend-drm: Support prefer connectors
 
 Using internal connector as main output by default.
 
@@ -19,10 +19,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  desktop-shell/shell.c                |  24 ++-
  libweston/backend-drm/drm-internal.h |  18 ++
- libweston/backend-drm/drm.c          | 270 ++++++++++++++++++++++-----
+ libweston/backend-drm/drm.c          | 271 ++++++++++++++++++++++-----
  libweston/backend-drm/kms.c          |  42 ++++-
  libweston/compositor.c               |  40 +++-
- 5 files changed, 338 insertions(+), 56 deletions(-)
+ 5 files changed, 339 insertions(+), 56 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
 index 2ded336..6641f9e 100644
@@ -144,7 +144,7 @@ index 55e9414..27da16f 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 86b2a0b..ccf9159 100644
+index 86b2a0b..f132344 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -68,6 +68,48 @@
@@ -523,7 +523,15 @@ index 86b2a0b..ccf9159 100644
  	}
  
  	udev_device_unref(event);
-@@ -2623,6 +2775,10 @@ session_notify(struct wl_listener *listener, void *data)
+@@ -2573,6 +2725,7 @@ drm_destroy(struct weston_compositor *ec)
+ 
+ 	udev_input_destroy(&b->input);
+ 
++	wl_event_source_remove(b->hotplug_timer);
+ 	wl_event_source_remove(b->udev_drm_source);
+ 	wl_event_source_remove(b->drm_source);
+ 
+@@ -2623,6 +2776,10 @@ session_notify(struct wl_listener *listener, void *data)
  		weston_compositor_wake(compositor);
  		weston_compositor_damage_all(compositor);
  		b->state_invalid = true;
@@ -534,7 +542,7 @@ index 86b2a0b..ccf9159 100644
  		udev_input_enable(&b->input);
  	} else {
  		weston_log("deactivating session\n");
-@@ -2983,6 +3139,14 @@ recorder_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+@@ -2983,6 +3140,14 @@ recorder_binding(struct weston_keyboard *keyboard, const struct timespec *time,
  }
  #endif
  
@@ -549,7 +557,7 @@ index 86b2a0b..ccf9159 100644
  
  static const struct weston_drm_output_api api = {
  	drm_output_set_mode,
-@@ -3001,6 +3165,7 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3001,6 +3166,7 @@ drm_backend_create(struct weston_compositor *compositor,
  	const char *session_seat;
  	struct weston_drm_format_array *scanout_formats;
  	drmModeRes *res;
@@ -557,7 +565,7 @@ index 86b2a0b..ccf9159 100644
  	int ret;
  
  	session_seat = getenv("XDG_SEAT");
-@@ -3016,6 +3181,16 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3016,6 +3182,16 @@ drm_backend_create(struct weston_compositor *compositor,
  	if (b == NULL)
  		return NULL;
  
@@ -574,7 +582,7 @@ index 86b2a0b..ccf9159 100644
  	b->state_invalid = true;
  	b->drm.fd = -1;
  
-@@ -3111,7 +3286,7 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3111,7 +3287,7 @@ drm_backend_create(struct weston_compositor *compositor,
  	}
  
  	wl_list_init(&b->writeback_connector_list);
@@ -583,13 +591,10 @@ index 86b2a0b..ccf9159 100644
  		weston_log("Failed to create heads for %s\n", b->drm.filename);
  		goto err_udev_input;
  	}
-@@ -3150,6 +3325,13 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3150,6 +3326,10 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	udev_device_unref(drm_device);
  
-+	b->hotplug_timer =
-+		wl_event_loop_add_timer(loop, hotplug_timer_handler, b);
-+
 +	b->output_create_listener.notify = output_create_notify;
 +	wl_signal_add(&b->compositor->output_created_signal,
 +		      &b->output_create_listener);
@@ -597,6 +602,16 @@ index 86b2a0b..ccf9159 100644
  	weston_compositor_add_debug_binding(compositor, KEY_O,
  					    planes_binding, b);
  	weston_compositor_add_debug_binding(compositor, KEY_C,
+@@ -3211,6 +3391,9 @@ drm_backend_create(struct weston_compositor *compositor,
+ 		goto err_udev_monitor;
+ 	}
+ 
++	b->hotplug_timer =
++		wl_event_loop_add_timer(loop, hotplug_timer_handler, b);
++
+ 	return b;
+ 
+ err_udev_monitor:
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
 index 35113d5..4426af4 100644
 --- a/libweston/backend-drm/kms.c
@@ -705,7 +720,7 @@ index 35113d5..4426af4 100644
  
  	return 0;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 3ee8327..b3d38e6 100644
+index 7652f9d..facc10b 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -157,6 +157,25 @@ weston_paint_node_destroy(struct weston_paint_node *pnode)

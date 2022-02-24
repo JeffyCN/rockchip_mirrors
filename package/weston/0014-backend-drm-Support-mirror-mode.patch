@@ -1,7 +1,7 @@
-From e6307c7ed58dfcf8cb9bc9424934b9cd423b2000 Mon Sep 17 00:00:00 2001
+From 4de55fea8bb9d075548d51d044f4dce0644f1329 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 14/54] backend-drm: Support mirror mode
+Subject: [PATCH 14/55] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -98,7 +98,7 @@ index ce74316..897c5c7 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index d85e1a2..686b23b 100644
+index 136afce..6896922 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -66,6 +66,11 @@
@@ -530,7 +530,7 @@ index d85e1a2..686b23b 100644
  	free(output);
  }
  
-@@ -3207,6 +3514,12 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3208,6 +3515,12 @@ drm_backend_create(struct weston_compositor *compositor,
  	if (buf)
  		sscanf(buf, "%dx%d", &b->virtual_width, &b->virtual_height);
  
@@ -605,7 +605,7 @@ index 72e4db9..dc6d6d4 100644
  		state = drm_output_propose_state(output_base, pending_state, mode);
  		if (!state) {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index b3d38e6..ce66449 100644
+index facc10b..380a378 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1411,7 +1411,7 @@ weston_view_assign_output(struct weston_view *ev)
