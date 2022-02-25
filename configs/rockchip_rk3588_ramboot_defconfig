@@ -5,3 +5,7 @@
 BR2_ROOTFS_OVERLAY="board/rockchip/common/security-ramdisk-overlay/"
 BR2_PACKAGE_LUKSMETA=y
 BR2_PACKAGE_LVM2_STANDARD_INSTALL=y
+BR2_PACKAGE_TEE_USER_APP=y
+BR2_PACKAGE_TEE_USER_APP_COMPILE_CMD="6432"
+BR2_PACKAGE_TEE_USER_APP_TEE_VERSION="v2"
+BR2_PACKAGE_TEE_USER_APP_EXTRA_TOOLCHAIN="$(TOPDIR)/../prebuilts/gcc/linux-x86/arm/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf/bin/arm-none-linux-gnueabihf-"
