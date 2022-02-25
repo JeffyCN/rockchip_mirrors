@@ -3,6 +3,7 @@
 /bin/mount -t devtmpfs devtmpfs /dev
 /bin/mount -t proc proc /proc
 /bin/mount -t sysfs sysfs /sys
+/bin/mount -t tmpfs tmpfs /tmp
 
 exec 0</dev/console
 exec 1>/dev/console
@@ -28,9 +29,19 @@ test -z "$INIT" && INIT=/init
 OFFSET=
 HASH=
 BLOCK=
+CIPHER=
+ENC_EN=
 
-# echo "/usr/sbin/veritysetup --hash-offset=${OFFSET} create vroot ${STORGE_DEV}p${BLOCK} ${STORGE_DEV}p${BLOCK} ${HASH}"
-/usr/sbin/veritysetup --hash-offset=${OFFSET} create vroot ${STORGE_DEV}p${BLOCK} ${STORGE_DEV}p${BLOCK} ${HASH} > /dev/null 2>&1
+if [ "${ENC_EN}" = "true" ]; then
+	/usr/bin/tee-supplicant &
+	/usr/bin/keybox_app
+	KEY=`cat /tmp/syspw`
+	dmsetup create vroot --table "0 ${OFFSET} crypt ${CIPHER} ${KEY} 0 ${STORGE_DEV}p${BLOCK} 0 1 allow_discards"
+	echo None > /tmp/syspw
+else
+	# echo "/usr/sbin/veritysetup --hash-offset=${OFFSET} create vroot ${STORGE_DEV}p${BLOCK} ${STORGE_DEV}p${BLOCK} ${HASH}"
+	/usr/sbin/veritysetup --hash-offset=${OFFSET} create vroot ${STORGE_DEV}p${BLOCK} ${STORGE_DEV}p${BLOCK} ${HASH} > /dev/null 2>&1
+fi
 mount /dev/mapper/vroot /mnt
 
 # echo "exec busybox switch_root /mnt ${INIT}"
