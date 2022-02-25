@@ -234,6 +234,7 @@ menu "Rockchip BSP packages"
 	source "package/rockchip/rkipc/Config.in"
 	source "package/rockchip/rkfsmk/Config.in"
 	source "package/rockchip/slt_gpu_light/Config.in"
+	source "package/rockchip/tee-user-app/Config.in"
 endmenu
 
 endif
