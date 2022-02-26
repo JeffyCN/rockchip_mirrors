@@ -5,7 +5,7 @@
 ################################################################################
 
 ROCKCHIP_MPP_SITE = $(TOPDIR)/../external/mpp
-ROCKCHIP_MPP_VERSION = release
+ROCKCHIP_MPP_VERSION = develop
 ROCKCHIP_MPP_SITE_METHOD = local
 
 ROCKCHIP_MALI_LICENSE = ROCKCHIP
