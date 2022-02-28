@@ -124,6 +124,10 @@ void display() {
     LOGI("--misc=update          Recovery mode: Setting the partition to be upgraded.\n");
     LOGI("--misc=display         Display misc info.\n");
     LOGI("--misc=wipe_userdata   Format data partition.\n");
+    LOGI("--misc_custom= < op >  Operation on misc for custom cmdline");
+    LOGI("        op:     read   Read custom cmdline to /tmp/custom_cmdline");
+    LOGI("                write  Write /tmp/custom_cmdline to custom area");
+    LOGI("                clean  clean custom area");
     LOGI("--update               Upgrade mode.\n");
     LOGI("--partition=0x3FFC00   Set the partition to be upgraded.(NOTICE: OTA not support upgrade loader and parameter)\n");
     LOGI("                       0x3FFC00: 0011 1111 1111 1100 0000 0000.\n");
@@ -158,6 +162,7 @@ static const struct option engine_options[] = {
   { "image_url", required_argument, NULL, 'i' + 'u'},
   { "check", required_argument, NULL, 'c' },
   { "misc", required_argument, NULL, 'm' },
+  { "misc_custom", required_argument, NULL, 'd' },
   { "partition", required_argument, NULL, 'p' },
   { "reboot", no_argument, NULL, 'r' },
   { "help", no_argument, NULL, 'h' },
@@ -174,6 +179,7 @@ int main(int argc, char *argv[]) {
     char *misc_func = NULL;
     char *save_path = NULL;
     char *partition = NULL;
+    char *custom_define = NULL;
     bool is_update = false;
     bool is_reboot = false;
     int pipefd = -1;
@@ -190,6 +196,7 @@ int main(int argc, char *argv[]) {
         case 'i' + 'u': image_url = optarg; continue;
         case 'p' + 'f': pipefd = atoi(optarg); continue;
         case 'h': display(); break;
+        case 'd': custom_define = optarg; continue;
         case '?':
             LOGE("Invalid command argument\n");
             continue;
@@ -251,6 +258,21 @@ int main(int argc, char *argv[]) {
             LOGE("unknow misc cmdline : %s.\n", misc_func);
             return 0;
         }
+    } else if (custom_define != NULL) {
+        if (strcmp(custom_define, "read") == 0) {
+            if (readCustomMiscCmdline())
+                return -1;
+        } else if (strcmp(custom_define, "write") == 0) {
+            if (writeCustomMiscCmdline())
+                return -1;
+        } else if (strcmp(custom_define, "clean") == 0) {
+            if (cleanCustomMiscCmdline())
+                return -1;
+        } else {
+                LOGI("Not supported\n");
+                return m_status;
+        }
+        m_status = RK_UPGRADE_FINISHED;
     }
 
     if (is_reboot && (m_status == RK_UPGRADE_FINISHED)) {

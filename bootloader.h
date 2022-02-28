@@ -20,6 +20,7 @@
 static const int BOOTLOADER_MESSAGE_OFFSET_IN_MISC = 16 * 1024;
 #define MISC_OFFSET 2048    //A,B 结构体在偏移2K 的位置
 #define MISC_OFFSET_CMDLINE 6144    //擦除命令，在偏移4K 的位置，配合挂载脚本使用
+#define MISC_OFFSET_CUSTOM (10 * 1024) //CUSTOM, 8K (10K), length 1K
 
 #define MISC_PAGES_AB 2         // A,B 结构体存在 2 PAGE内
 #define MISC_COMMAND_PAGE_AB 1  // A,B 结构体存在 1 PAGE处，即2k
@@ -132,6 +133,9 @@ int readMisc(struct AvbABData *info);
 void display(struct AvbABData info);
 void miscDisplay() ;
 int wipe_userdata(int auto_reboot);
+int writeCustomMiscCmdline(void);
+int readCustomMiscCmdline(void);
+int cleanCustomMiscCmdline(void);
 
 //bool wipe_userdata(bool auto_reboot);
 

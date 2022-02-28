@@ -16,6 +16,8 @@
 
 #include "../bootloader.h"
 #include "stdlib.h"
+#include <stdint.h>
+#include <fcntl.h>
 
 extern "C" {
     #include "../mtdutils/mtdutils.h"
@@ -34,6 +36,7 @@ extern "C" {
 #include <unistd.h>
 #include <sys/reboot.h>
 
+static char custom_cmdline_path[] = "/tmp/custom_cmdline";
 // ------------------------------------
 // for misc partitions on block devices
 // ------------------------------------
@@ -421,6 +424,119 @@ int wipe_userdata(int auto_reboot) {
         reboot(RB_AUTOBOOT);
     }
     return 0;
+}
+
+/* CustomCmdline struct = len + data */
+static int writeCustomMisc(char *cmdline, int size) {
+	return writeMisc(cmdline, MISC_OFFSET_CUSTOM, size);
+}
+
+static int readCustomMisc(char *cmdline, int size) {
+	return readMisc(cmdline, MISC_OFFSET_CUSTOM, size);
+}
+
+int readCustomMiscCmdline(void)
+{
+	uint16_t len;
+	uint8_t *buf;
+	int fd, ret = 0;
+
+	fd = open(custom_cmdline_path, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+	if (fd == -1) {
+		LOGE("ERROR: Can't open %s\n", custom_cmdline_path);
+		return -1;
+	}
+
+	readCustomMisc((char *)&len, 2);
+	if (len > 1022) {
+		LOGE("ERROR: cmdline is too bigger than 1K (%d)\n", len);
+		ret = -1;
+		goto out;
+	}
+
+	if (!len) {
+		LOGE("ERROR: len is 0\n");
+		ret = -1;
+		goto out;
+	}
+
+	buf = (uint8_t *)malloc(len + 2);
+	if (!buf) {
+		LOGE("ERROR: failed to malloc buf for cmdline\n");
+		ret = -1;
+		goto out;
+	}
+
+	readCustomMisc((char *)buf, len + 2);
+
+	ftruncate(fd, 0);
+	lseek(fd, 0, SEEK_SET);
+	ret = write(fd, &buf[2], len);
+	if (ret == len) {
+		ret = 0;
+	} else {
+		LOGE("ERROR: failed to write %s (%d)\n", custom_cmdline_path, ret);
+		ret = -1;
+	}
+
+	free(buf);
+out:
+	close(fd);
+	return ret;
+}
+
+int writeCustomMiscCmdline(void)
+{
+	uint16_t len;
+	uint8_t *buf;
+	int fd, ret = 0;
+
+	fd = open(custom_cmdline_path, O_RDONLY);
+	if (fd == -1) {
+		LOGE("ERROR: Can't open %s\n", custom_cmdline_path);
+		return -1;
+	}
+
+	lseek(fd, 0, SEEK_SET);
+	ret = read(fd, (uint8_t *)&len, 2);
+	if (ret != 2) {
+		printf("ERROR: failed to read %s\n", custom_cmdline_path);
+		ret = -1;
+		goto out;
+	}
+
+	printf("len = %d\n", len);
+	buf = (uint8_t *)malloc(len + 2);
+	if (!buf) {
+		LOGE("ERROR: failed to malloc buf for cmdline\n");
+		ret = -1;
+		goto out;
+	}
+
+	memcpy(buf, &len, 2);
+	ret = read(fd, &buf[2], len);
+	if (ret == len) {
+		ret = 0;
+	} else {
+		LOGE("ERROR: failed to read %s\n", custom_cmdline_path);
+		ret = -1;
+		goto out1;
+	}
+
+	writeCustomMisc((char *)buf, len + 2);
+out1:
+	free(buf);
+out:
+	close(fd);
+	return ret;
+}
+
+int cleanCustomMiscCmdline(void)
+{
+	uint8_t buf[1024];
+
+	memset(buf, 0, 1024);
+	return writeCustomMisc((char *)buf, 1024);
 }
 
 /*
