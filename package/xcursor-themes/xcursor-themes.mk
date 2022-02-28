@@ -17,7 +17,7 @@ XCURSOR_THEMES_DEPENDENCIES = host-xapp_xcursorgen
 ifneq ($(BR2_PACKAGE_XORG7),)
 XCURSOR_THEMES_DEPENDENCIES += xlib_libXcursor
 else
-XCURSOR_THEMES_CONF_OPTS += --with-cursordir=/usr/share/cursors/
+XCURSOR_THEMES_CONF_OPTS += --with-cursordir=/usr/share/icons/
 endif
 
 $(eval $(autotools-package))
