@@ -196,8 +196,10 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    cmd_pipe = fdopen(pipefd, "wb");
-    setlinebuf(cmd_pipe);
+    if (pipefd != -1) {
+        cmd_pipe = fdopen(pipefd, "wb");
+        setlinebuf(cmd_pipe);
+    }
 
     if (is_update) {
         if (is_sdboot) {
