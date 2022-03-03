@@ -1,7 +1,7 @@
-From 1dcf977d3c1898e550eff251953357c79babee32 Mon Sep 17 00:00:00 2001
+From 723b392c454adb041cf28b8d989b913667da6d7f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 6 Dec 2018 18:53:05 +0800
-Subject: [PATCH 09/53] HACK: gl-renderer: Workaround dmabuf import/attach for
+Subject: [PATCH 09/55] HACK: gl-renderer: Workaround dmabuf import/attach for
  old mali
 
 Tested on px3se with libmali-utgard-400-r7p0-r3p0-wayland.so, the
@@ -27,7 +27,7 @@ index 72101b4..e7e1693 100644
  
  static inline struct gl_renderer *
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 7231f73..c7111b2 100644
+index 7231f73..053fd52 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2257,6 +2257,14 @@ import_simple_dmabuf(struct gl_renderer *gr,
@@ -107,34 +107,34 @@ index 7231f73..c7111b2 100644
  	else if ((dmabuf = linux_dmabuf_buffer_get(buffer->resource)))
  		gl_renderer_attach_dmabuf(es, buffer, dmabuf);
  	else {
-@@ -3271,7 +3290,7 @@ log_egl_info(EGLDisplay egldpy)
+@@ -3253,7 +3272,7 @@ gl_renderer_log_extensions(const char *name, const char *extensions)
  }
  
  static void
--log_gl_info(void)
-+log_gl_info(struct gl_renderer *gr)
+-log_egl_info(EGLDisplay egldpy)
++log_egl_info(struct gl_renderer *gr, EGLDisplay egldpy)
  {
  	const char *str;
  
-@@ -3287,6 +3306,9 @@ log_gl_info(void)
- 	str = (char *)glGetString(GL_RENDERER);
- 	weston_log("GL renderer: %s\n", str ? str : "(null)");
+@@ -3263,6 +3282,9 @@ log_egl_info(EGLDisplay egldpy)
+ 	str = eglQueryString(egldpy, EGL_VENDOR);
+ 	weston_log("EGL vendor: %s\n", str ? str : "(null)");
  
-+	if (strstr(str, "mali") || strstr(str, "Mali"))
++	if (!strcmp(str, "ARM"))
 +		gr->is_mali_egl = 1;
 +
- 	str = (char *)glGetString(GL_EXTENSIONS);
- 	gl_renderer_log_extensions("GL extensions", str ? str : "(null)");
- }
-@@ -3911,7 +3933,7 @@ gl_renderer_setup(struct weston_compositor *ec, EGLSurface egl_surface)
- 	}
+ 	str = eglQueryString(egldpy, EGL_CLIENT_APIS);
+ 	weston_log("EGL client APIs: %s\n", str ? str : "(null)");
  
- 	gr->gl_version = get_gl_version();
--	log_gl_info();
-+	log_gl_info(gr);
+@@ -3681,7 +3703,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
  
- 	gr->image_target_texture_2d =
- 		(void *) eglGetProcAddress("glEGLImageTargetTexture2DOES");
+ 	weston_drm_format_array_init(&gr->supported_formats);
+ 
+-	log_egl_info(gr->egl_display);
++	log_egl_info(gr, gr->egl_display);
+ 
+ 	ec->renderer = &gr->base;
+ 
 -- 
 2.20.1
 
