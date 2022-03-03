@@ -6,7 +6,7 @@ HIGH_LEVEL="3.3V" # get from chip trm
 LOW_LEVEL="1.8V"  # get from chip trm
 
 TOOL_HEXDUMP="NO"
-VERSION="V1.0.0"
+VERSION="V1.0.1"
 program_name="$0"
 
 function help_msg()
@@ -139,6 +139,29 @@ function list_iodomain_rk3308_rk3308b_rk3308bs()
 	fi
 }
 
+function list_iodomain_rk3326_rk3326s()
+{
+	iodomain0_val=`get_reg 0xFF140180`
+	iodomain1_val=`get_reg 0xFF010100`
+
+	pmuio2_vsel=$(( 0x1 << 15 ))
+	pmuio1_vsel=$(( 0x1 << 14 ))
+
+	vccio5_vsel=$(( 0x1 << 6 ))
+	vccio4_vsel=$(( 0x1 << 5 ))
+	vccio3_vsel=$(( 0x1 << 4 ))
+	vccio2_vsel=$(( 0x1 << 3 ))
+	vccio1_vsel=$(( 0x1 << 2 ))
+
+	print_val $(( $iodomain1_val & $pmuio2_vsel )) "pmuio2_vsel:"
+	print_val $(( $iodomain1_val & $pmuio1_vsel )) "pmuio1_vsel:"
+	print_val $(( $iodomain0_val & $vccio5_vsel )) "vccio5_vsel:"
+	print_val $(( $iodomain0_val & $vccio4_vsel )) "vccio4_vsel:"
+	print_val $(( $iodomain0_val & $vccio3_vsel )) "vccio3_vsel:"
+	print_val $(( $iodomain0_val & $vccio2_vsel )) "vccio2_vsel:"
+	print_val $(( $iodomain0_val & $vccio1_vsel )) "vccio1_vsel:"
+}
+
 function list_iodomain_rk3566_rk3568()
 {
 	iodomain0_val=`get_reg 0xFDC20140`
@@ -191,6 +214,19 @@ function chk_rk3308_rk3308b_rk3308bs()
 	return 1
 }
 
+function chk_rk3326_rk3326s()
+{
+	nvem_path="/sys/bus/nvmem/devices/rockchip-otp0/nvmem"
+	iff=`hexdump -C $nvem_path | grep -Ew "00000000  52 4b 33 26"`
+	if [ -n "$iff" ]; then
+		CHIP_ID=rk3326
+		HIGH_LEVEL="3.3V"
+		LOW_LEVEL="1.8V"
+		return 0
+	fi
+	return 1
+}
+
 function chk_rk3566_rk3568()
 {
 	nvem_path="/sys/bus/nvmem/devices/rockchip-otp0/nvmem"
@@ -214,6 +250,10 @@ function get_chip_id()
 			return 0
 		fi
 		chk_rk3308_rk3308b_rk3308bs
+		if [ $? -eq 0 ];then
+			return 0
+		fi
+		chk_rk3326_rk3326s
 		if [ $? -eq 0 ];then
 			return 0
 		fi
@@ -261,6 +301,24 @@ function get_chip_id()
 				return 0
 			fi
 			;;
+		rk3326|RK3326)
+		chip_id=`io -4 -r 0XFF140800 | grep -w 00003326`
+			if [ $? -eq 0 -a -n "$chip_id" ]; then
+				CHIP_ID=$1
+				HIGH_LEVEL="3.3V"
+				LOW_LEVEL="1.8V"
+				return 0
+			fi
+			;;
+		rk3326s|RK3326S)
+		chip_id=`io -4 -r 0XFF140800 | grep -w 00003326`
+			if [ $? -eq 0 -a -n "$chip_id" ]; then
+				CHIP_ID=$1
+				HIGH_LEVEL="3.3V"
+				LOW_LEVEL="1.8V"
+				return 0
+			fi
+			;;
 		rk3566|rk3568|RK3566|RK3568)
 			chip_id=`io -4 -r 0XFDC60800 | grep -w 00003566`
 			if [ $? -eq 0 -a -n "$chip_id" ]; then
@@ -297,6 +355,9 @@ function get_iodomain_val()
 			;;
 		rk3308bs|rk3308b|rk3308|RK3308BS|RK3308B|RK3308)
 			list_iodomain_rk3308_rk3308b_rk3308bs
+			;;
+		rk3326|rk3326s|RK3326|RK3326)
+			list_iodomain_rk3326_rk3326s
 			;;
 		rk3566|rk3568|rk356x|RK3566|RK3568|RK356X)
 			echo_msg "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
