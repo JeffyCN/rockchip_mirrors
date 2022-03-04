@@ -32,7 +32,7 @@ config BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE
           Rockchip sensor fake camera IQ xml file.
 
 config BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_RKISP_DEMO
-	depends on BR2_PACKAGE_LINUX_RGA
+	depends on BR2_PACKAGE_ROCKCHIP_RGA
 	bool "Build rkisp_demo"
 	default n
 	help
