@@ -430,6 +430,13 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
     processvalue = 100;
     cb(NULL, RK_UPGRADE_FINISHED);
     print_cb((char *)"updateEngine upgrade OK!\n");
+
+    /* We're successful upgraded, Remove the done_file(see flash_image.cpp) if exist. */
+    {
+        char done_file[256];
+        snprintf(done_file, 256, "%s.done", _url);
+        unlink(done_file);
+    }
 }
 
 int RK_ota_get_progress() {

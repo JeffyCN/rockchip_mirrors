@@ -63,6 +63,7 @@ static off_t offtin(u_char *buf)
 /* Return:
  * -1 patching error,
  *  0 not a diff img,
+ * >0 the new image size
  * dst_file size if patch successfully
  */
 int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
@@ -102,7 +103,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 	off_t ctrl[3];
 	off_t lenread;
 	off_t i;
-	struct stat old_stat;
+	struct stat old_stat, dst_stat;
 
 	if ((fd_img = open(img, O_RDONLY, 0)) < 0) {
 		printf("open %s failed\n", img);
@@ -132,6 +133,18 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 		if (token[j] == NULL)
 			break;
 	}
+	name = token[TID_NAME];
+	md5sum = token[TID_MD5SUM];
+
+	/* When unexpected reboot during patching/writing happened,
+	 * if dst_file is in correct state, then old image may already broken
+	 */
+	if (stat(dst_file, &dst_stat) == 0 &&
+	    compareMd5sum(dst_file, (u_char *)md5sum, 0, dst_stat.st_size)) {
+		printf("Recovery from unecptected reboot successfully.");
+		return dst_stat.st_size;
+	}
+	/* If dst_file exist but md5sum is wrong, old image file is clean, hopefully */
 
 	//check tail magic, return 0 if not exist
 	if (j == 0 || strncmp(MAGIC_TAIL, token[TID_HEAD], strlen(MAGIC_TAIL)) != 0) {
@@ -150,8 +163,6 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 		printf("Bad Tail header of bsdiff patch\n");
 		return -1;
 	}
-	name = token[TID_NAME];
-	md5sum = token[TID_MD5SUM];
 
 	//TODO: check dst_file dir size, return -1 if space too small.
 
@@ -327,6 +338,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 
 	munmap(new_ptr, newsize);
 	munmap(old, oldsize);
+	sync();
 
 	//check md5sum
 	if (!compareMd5sum(dst_file, (u_char *)md5sum, 0, newsize))

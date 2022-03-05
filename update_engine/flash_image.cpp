@@ -195,23 +195,87 @@ int flash_normal(char *src_path, void *pupdate_cmd) {
     if (is_sdboot || !isMtdDevice()) {
         //block
         char dst_file[256];
+        /* record the already upgraded img name,
+         * so it can continue on upgrading after unexpected shutdown/reboot
+         */
+        char done_file[256];
+        /* The pattern writes to done_file, e.g.
+         *  >uboot<
+         *  >boot<
+         *  >rootfs<
+         */
+        char pattern[64];
+        int fd;
+        off_t size, len;
+        char buf[512];
+        struct stat dst_stat;
 
         LOGI("%s:%d, diff check for %s\n", __func__, __LINE__, pcmd->name);
-        snprintf(dst_file, 256, "%s.tmp", src_path);
+        snprintf(dst_file, 256, "%s.%s", src_path, pcmd->name);
+        snprintf(done_file, 256, "%s.done", src_path);
+        if ((fd = open(done_file, O_RDWR | O_CREAT | O_DSYNC, 0)) < 0 ||
+            (size = lseek(fd, 0, SEEK_END) < 0) ||
+            (lseek(fd, 0, SEEK_SET) < 0)) {
+            LOGE("open %s failed, upgrading abort!\n", done_file);
+            return -1;
+        }
+        memset(buf, 0, 512);
+        len = 0;
+        while (size > 0 && len != size) {
+            ssize_t val;
+            if ((val = read(fd, buf + len, size - len)) < 0) {
+                close(fd);
+                LOGE("read %s failed: %s\n", done_file, strerror(errno));
+                return val;
+            }
+            len += val;
+        }
+        snprintf(pattern, 64, ">%s<", pcmd->name);
+        /* If this partition already upgraded,
+         * the old image (in flash) could be broken,
+         * it's fine to skip it.
+         */
+        if (strstr(buf, pattern) != NULL) {
+            close(fd);
+            return 0;
+        }
+        /* Otherwise, we shall look inside to make sure:
+         * do_patch_rkimg() can generate a corrent new image even if
+         * machine could lost-power/crash during upgrading
+         * By doing this, do_patch_rkimg() will checking:
+         *   - if dst_file already exist
+         *     - md5sum is correct, then we may reboot during writing-to-flash
+         *       >>  do not do patch again.
+         *     - md5sum is wrong, then we may reboot during do_patch_rkimg()
+         *       >>  the old image (in flash) good enough as is, do patch again.
+         *   - if dst_file is not exist
+         *     - this is normal case, we're safe to continue
+         */
+        if (stat(dst_file, &dst_stat) == 0)
+            LOGI("file %s exist for <%s>, unexpected detected, trying to continue\n",
+                 dst_file, pcmd->name);
         ret = do_patch_rkimg(src_path, pcmd->offset, pcmd->size,
                              pcmd->dest_path, dst_file);
         if (ret == 0) {
             ret = block_write(src_path, pcmd->offset, pcmd->size,
                               pcmd->flash_offset, pcmd->dest_path);
-        } else if(ret > 0) {
+        } else if (ret > 0) {
             ret = block_write(dst_file, 0, ret,
                               pcmd->flash_offset, pcmd->dest_path);
             //TODO: do not skip diff image verify
             pcmd->skip_verify = true;
-            unlink(dst_file);
         } else {
             return ret;
         }
+
+        lseek(fd, 0, SEEK_END);
+        write(fd, pattern, strlen(pattern));
+        close(fd);
+
+        sync();
+        /* Make sure that dst file written to flash before unlink it */
+        unlink(dst_file);
+        sync();
     } else {
         //mtd
         printf("pcmd->flash_offset = %lld.\n", pcmd->flash_offset);
