@@ -1,7 +1,7 @@
-From 910f9a7281f5d4f7d367e59c81d7c027b3146703 Mon Sep 17 00:00:00 2001
+From 522d9401b5654b2f9c084413c97bb24944d63a87 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 22 Feb 2022 09:51:29 +0800
-Subject: [PATCH 54/54] HACK: compositor: Re-build view list when framing an
+Subject: [PATCH 53/56] HACK: compositor: Re-build view list when framing an
  unassigned surface
 
 To avoid skipping repaint for unassigned surface and delaying the frame
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 2a802bc..6b08e05 100644
+index 0188e2d..bc018f0 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3603,6 +3603,9 @@ surface_frame(struct wl_client *client,

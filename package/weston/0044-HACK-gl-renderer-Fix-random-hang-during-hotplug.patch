@@ -1,7 +1,7 @@
-From 54996baa4d20d555b898518bdf9be1b51ba29dee Mon Sep 17 00:00:00 2001
+From 684ea18aa8b0f65ca2643f4c114a336f89351897 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 19 Apr 2021 09:40:10 +0800
-Subject: [PATCH 45/54] HACK: gl-renderer: Fix random hang during hotplug
+Subject: [PATCH 44/56] HACK: gl-renderer: Fix random hang during hotplug
 
 Try to bind to a valid output before attaching buffers for mali.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 622dc80..a664de9 100644
+index df7ba72..0328c91 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -1907,6 +1907,7 @@ gl_renderer_flush_damage(struct weston_surface *surface)
