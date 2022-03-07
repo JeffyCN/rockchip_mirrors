@@ -147,7 +147,7 @@ define pkg_size_after
 		$($(PKG)_DIR)/.files-list$(2).before \
 		$($(PKG)_DIR)/.files-list$(2).after \
 		| sed -r -e 's/^[^,]+/$($(PKG)_NAME)/' \
-		> $($(PKG)_DIR)/.files-list$(2).txt
+		> $($(PKG)_DIR)/.files-list$(2).txt 2>/dev/null
 	rm -f $($(PKG)_DIR)/.files-list$(2).before
 	rm -f $($(PKG)_DIR)/.files-list$(2).after
 endef
@@ -382,7 +382,7 @@ $(BUILD_DIR)/%/.stamp_images_installed:
 
 # Install to target dir
 $(BUILD_DIR)/%/.stamp_target_installed:
-	$(Q)touch $($(PKG)_DIR)/.files_list.txt
+	$(Q)touch $($(PKG)_DIR)/.stamp_installed
 
 	@$(call step_start,install-target)
 	@$(call MESSAGE,"Installing to target")
@@ -403,7 +403,8 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 	$(Q)touch $@
 
 	$(Q)cd $(TARGET_DIR); find . \( -type f -o -type l \) \
-		-cnewer $($(PKG)_DIR)/.files_list.txt | \
+		-cnewer $($(PKG)_DIR)/.stamp_installed | \
+		tee $($(PKG)_DIR)/.files-list-target.txt | \
 		$(TAR) --no-recursion --ignore-failed-read \
 			-cf $($(PKG)_DIR)/$($(PKG)_BASENAME).tar -T -; true;
 
