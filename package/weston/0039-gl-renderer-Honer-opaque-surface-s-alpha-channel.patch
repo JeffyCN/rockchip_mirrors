@@ -1,7 +1,7 @@
-From e17a5819768026c4c7380bb6ecab7789c055f2de Mon Sep 17 00:00:00 2001
+From caf69babc6a3fd4db8a1cd61e2aabc2d90cbb9c1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Mar 2021 03:09:33 +0800
-Subject: [PATCH 40/53] gl-renderer: Honer opaque surface's alpha channel
+Subject: [PATCH 39/56] gl-renderer: Honer opaque surface's alpha channel
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index c50bd64..622dc80 100644
+index b62f481..df7ba72 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -1169,6 +1169,7 @@ draw_paint_node(struct weston_paint_node *pnode,

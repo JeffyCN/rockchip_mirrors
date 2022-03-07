@@ -1,7 +1,7 @@
-From 2b37c3849dd2478b5d6e626c6da961bc7f443d99 Mon Sep 17 00:00:00 2001
+From 1916a28e4886d62a04e9a1279222eca545e844ac Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 26 Oct 2020 17:50:06 +0800
-Subject: [PATCH 36/53] HACK: backend-drm: Workaround atomic flip for BSP 4.4
+Subject: [PATCH 35/56] HACK: backend-drm: Workaround atomic flip for BSP 4.4
  kernel
 
 The Rockchip BSP 4.4 kernel might generate unexpected flip events
