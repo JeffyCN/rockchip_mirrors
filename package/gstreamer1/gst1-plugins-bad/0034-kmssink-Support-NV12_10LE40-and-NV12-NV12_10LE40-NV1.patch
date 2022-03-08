@@ -1,7 +1,7 @@
-From e88a8b479bac44a89f29254af7275d238726fcf0 Mon Sep 17 00:00:00 2001
+From 22c482e1a3c1a262763ea79641f9120efe3701c3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 21 Apr 2021 04:44:38 +0800
-Subject: [PATCH 38/43] kmssink: Support NV12_10LE40 and NV12|NV12_10LE40|NV16
+Subject: [PATCH 34/40] kmssink: Support NV12_10LE40 and NV12|NV12_10LE40|NV16
  (AFBC)
 
 Support using NV12_10LE40 and ARM AFBC compressed format.
@@ -100,7 +100,7 @@ index 2ae22fc..6fe6a07 100644
      GST_ERROR_OBJECT (alloc, "Failed to bind to framebuffer: %s (%d)",
          g_strerror (errno), errno);
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 6fdf06f..8aa8295 100644
+index 19f265f..0510ec1 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -519,6 +519,84 @@ modesetting_failed:
@@ -296,7 +296,7 @@ index 6fdf06f..8aa8295 100644
    GST_TRACE_OBJECT (self,
        "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
        result.x, result.y, result.w, result.h, src.x, src.y, src.w, src.h);
-@@ -1852,6 +1976,9 @@ gst_kms_sink_drain (GstKMSSink * self)
+@@ -1850,6 +1974,9 @@ gst_kms_sink_drain (GstKMSSink * self)
  
      dumb_buf = gst_kms_sink_copy_to_dumb_buffer (self, &self->last_vinfo,
          parent_meta->buffer);

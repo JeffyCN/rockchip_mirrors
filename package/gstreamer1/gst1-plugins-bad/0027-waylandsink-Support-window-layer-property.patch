@@ -1,7 +1,7 @@
-From 96ac8598ed64a431f15d7f335d00ace13df1b343 Mon Sep 17 00:00:00 2001
+From 78bb6f7be0a7aaea03c41ab45783ec4bfb622e32 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Mar 2021 10:15:51 +0800
-Subject: [PATCH 31/41] waylandsink: Support window layer property
+Subject: [PATCH 27/40] waylandsink: Support window layer property
 
 Support setting top|normal|bottom window layer.
 
@@ -141,7 +141,7 @@ index 194e5bc..c5fdd50 100644
    gchar *display_name;
  
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index 9e4f4f5..014883d 100644
+index c70ca33..66924a5 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -236,6 +236,42 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)

@@ -1,7 +1,7 @@
-From e5340548bb1f5211ec4683d994e38e4d3d080d6c Mon Sep 17 00:00:00 2001
+From 70c75ee31e8e40cec54cbceb35a37f3f8b635859 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 19 Jan 2022 16:37:40 +0800
-Subject: [PATCH 43/43] kmssink: Support ignoring aspect ratio
+Subject: [PATCH 39/40] kmssink: Support ignoring aspect ratio
 
 Set "force-aspect-ratio" property to false to ignore aspect ratio.
 
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 19 insertions(+), 1 deletion(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 8aa8295..f8382a9 100644
+index 0510ec1..bbd2640 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -96,6 +96,7 @@ enum
@@ -42,7 +42,7 @@ index 8aa8295..f8382a9 100644
    if (crop) {
      src.w = crop->width;
      src.h = crop->height;
-@@ -2059,6 +2063,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
+@@ -2057,6 +2061,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
  
        break;
      }
@@ -52,7 +52,7 @@ index 8aa8295..f8382a9 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_N, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -2112,6 +2119,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
+@@ -2110,6 +2117,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
      case PROP_PLANE_PROPS:
        gst_value_set_structure (value, sink->plane_props);
        break;
@@ -62,7 +62,7 @@ index 8aa8295..f8382a9 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -2142,6 +2152,7 @@ gst_kms_sink_init (GstKMSSink * sink)
+@@ -2140,6 +2150,7 @@ gst_kms_sink_init (GstKMSSink * sink)
    sink->plane_id = -1;
    sink->saved_zpos = -1;
    sink->can_scale = TRUE;
@@ -70,7 +70,7 @@ index 8aa8295..f8382a9 100644
    gst_poll_fd_init (&sink->pollfd);
    sink->poll = gst_poll_new (TRUE);
    gst_video_info_init (&sink->vinfo);
-@@ -2311,6 +2322,11 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+@@ -2309,6 +2320,11 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
        "Additional properties for the plane",
        GST_TYPE_STRUCTURE, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  

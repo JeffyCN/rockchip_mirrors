@@ -1,7 +1,7 @@
-From 6c59caee43385e5a415db97e170d509c483d7032 Mon Sep 17 00:00:00 2001
+From cfba8065fe351a84017bad7a922f7b73501dc8eb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 22 Dec 2021 16:04:46 +0800
-Subject: [PATCH 40/43] waylandsink: Use the correct video info to access
+Subject: [PATCH 36/40] waylandsink: Use the correct video info to access
  allocated buffer
 
 The video info might changed after pool activated.

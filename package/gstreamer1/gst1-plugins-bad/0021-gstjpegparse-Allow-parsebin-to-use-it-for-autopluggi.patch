@@ -1,7 +1,7 @@
-From 61b00398a78c91150ee285aa886ca249b63d8996 Mon Sep 17 00:00:00 2001
+From b1c17a28ebfd04403371156e6837b8f7b7667a03 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 17 Nov 2020 11:51:40 +0800
-Subject: [PATCH 22/41] gstjpegparse: Allow parsebin to use it for autoplugging
+Subject: [PATCH 21/40] gstjpegparse: Allow parsebin to use it for autoplugging
 
 Add "Codec" to Klass and increase rank.
 

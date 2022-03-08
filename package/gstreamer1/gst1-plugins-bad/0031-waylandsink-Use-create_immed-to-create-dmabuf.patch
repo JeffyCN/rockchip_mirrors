@@ -1,7 +1,7 @@
-From 44821a9e0195f8c6e366e66c6bafcde8987b3c62 Mon Sep 17 00:00:00 2001
+From 2ab391b795bc474f51d344f5a65411c224f168e1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 8 Jun 2021 09:09:38 +0800
-Subject: [PATCH 35/41] waylandsink: Use create_immed to create dmabuf
+Subject: [PATCH 31/40] waylandsink: Use create_immed to create dmabuf
 
 The async creation has lots of issues when the device overloaded.
 
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 5 insertions(+), 57 deletions(-)
 
 diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
-index 6cbdc0c..01dc3c6 100644
+index 0bb9dc7..b02334d 100644
 --- a/ext/wayland/wldisplay.c
 +++ b/ext/wayland/wldisplay.c
-@@ -239,7 +239,7 @@ registry_handle_global (void *data, struct wl_registry *registry,
+@@ -235,7 +235,7 @@ registry_handle_global (void *data, struct wl_registry *registry,
          wl_registry_bind (registry, id, &wp_viewporter_interface, 1);
    } else if (g_strcmp0 (interface, "zwp_linux_dmabuf_v1") == 0) {
      self->dmabuf =

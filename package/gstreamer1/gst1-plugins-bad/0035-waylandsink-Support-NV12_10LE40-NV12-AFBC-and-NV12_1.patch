@@ -1,7 +1,7 @@
-From 594272431bc2e981a6be8ace46a600a5f9c0bed1 Mon Sep 17 00:00:00 2001
+From 6e489297e5e280a0b531e84766d60a55e7a44e82 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
-Subject: [PATCH 39/44] waylandsink: Support NV12_10LE40 NV12(AFBC) and
+Subject: [PATCH 35/40] waylandsink: Support NV12_10LE40 NV12(AFBC) and
  NV12_10(AFBC)
 
 Tested on RK356x with:
@@ -191,7 +191,7 @@ index e4617b2..1e67bac 100644
    {
      GST_ERROR_OBJECT (sink, "failed to activate bufferpool.");
 diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
-index 01dc3c6..e154bd5 100644
+index b02334d..07cd1b6 100644
 --- a/ext/wayland/wldisplay.c
 +++ b/ext/wayland/wldisplay.c
 @@ -145,10 +145,27 @@ dmabuf_format (void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
@@ -222,7 +222,7 @@ index 01dc3c6..e154bd5 100644
  };
  
  gboolean
-@@ -239,7 +256,7 @@ registry_handle_global (void *data, struct wl_registry *registry,
+@@ -235,7 +252,7 @@ registry_handle_global (void *data, struct wl_registry *registry,
          wl_registry_bind (registry, id, &wp_viewporter_interface, 1);
    } else if (g_strcmp0 (interface, "zwp_linux_dmabuf_v1") == 0) {
      self->dmabuf =
@@ -367,7 +367,7 @@ index 331f582..ddfb1e0 100644
  gint gst_video_format_to_wl_dmabuf_format (GstVideoFormat format);
  GstVideoFormat gst_wl_shm_format_to_video_format (enum wl_shm_format wl_format);
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index 1e57ae3..7c3f91b 100644
+index 9388f75..bb82d43 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -462,6 +462,14 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)

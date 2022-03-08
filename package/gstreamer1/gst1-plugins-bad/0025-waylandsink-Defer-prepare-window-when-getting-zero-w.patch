@@ -1,7 +1,7 @@
-From f45170aae65f691e6d4dd69955d0a21fed72fddf Mon Sep 17 00:00:00 2001
+From 7281d057006dfa25af171ed6540b1a0ce14ecbb6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 19 Jan 2021 11:16:36 +0800
-Subject: [PATCH 28/41] waylandsink: Defer prepare window when getting zero
+Subject: [PATCH 25/40] waylandsink: Defer prepare window when getting zero
  window handle
 
 The window might not ready when we requesting it.

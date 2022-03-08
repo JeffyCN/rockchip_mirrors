@@ -1,7 +1,7 @@
-From 262b77036730217ac0e146927eaf38a6449f1f38 Mon Sep 17 00:00:00 2001
+From 8bd59175594c332bbc3bae45b4a30fd7f00b8c4d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 26 Mar 2019 17:33:37 +0800
-Subject: [PATCH 34/41] HACK: kmssink: Open drm devnode directly
+Subject: [PATCH 30/40] HACK: kmssink: Open drm devnode directly
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 5354a94..4b36c35 100644
+index 24eb9f2..19f265f 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -56,6 +56,7 @@

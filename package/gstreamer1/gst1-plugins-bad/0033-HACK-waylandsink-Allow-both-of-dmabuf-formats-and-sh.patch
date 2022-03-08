@@ -1,7 +1,7 @@
-From 9a2586527c8827119697d48412d0a60e009b591d Mon Sep 17 00:00:00 2001
+From 422df7fba1a2d99e730fbf0317be362f1638ea8b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 9 Dec 2021 14:25:41 +0800
-Subject: [PATCH 37/41] HACK: waylandsink: Allow both of dmabuf formats and shm
+Subject: [PATCH 33/40] HACK: waylandsink: Allow both of dmabuf formats and shm
  formats
 
 For the plugins which provide dmabuf without
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 2 insertions(+), 13 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 896e2e8..73893b3 100644
+index 3bb786a..e4617b2 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -700,7 +700,6 @@ static gboolean
