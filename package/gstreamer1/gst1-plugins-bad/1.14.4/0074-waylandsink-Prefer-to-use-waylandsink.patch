@@ -1,0 +1,28 @@
+From d829ecd7b69df1290d3443d119edc4cdc0652d01 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Mon, 27 Dec 2021 21:37:06 +0800
+Subject: [PATCH 74/77] waylandsink: Prefer to use waylandsink
+
+Increase rank to primary.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ ext/wayland/gstwaylandsink.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 7c0995bd..25b27073 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -1314,7 +1314,7 @@ plugin_init (GstPlugin * plugin)
+ 
+   gst_wl_shm_allocator_register ();
+ 
+-  return gst_element_register (plugin, "waylandsink", GST_RANK_MARGINAL,
++  return gst_element_register (plugin, "waylandsink", GST_RANK_PRIMARY,
+       GST_TYPE_WAYLAND_SINK);
+ }
+ 
+-- 
+2.20.1
+
