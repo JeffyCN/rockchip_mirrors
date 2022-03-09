@@ -1,7 +1,7 @@
-From 21674ebf448d38ea910debd8b01d7d7d53099730 Mon Sep 17 00:00:00 2001
+From a1fce8ca1dede92be693fe4e358c43b107b71362 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 11:23:36 +0800
-Subject: [PATCH 05/56] backend-drm: Bind Nth primary plane to Nth crtc
+Subject: [PATCH 05/57] backend-drm: Bind Nth primary plane to Nth crtc
 
 The vop2 allows primary planes to bind with random crtc, but we need to
 use the same pair as the driver registered when using drm legacy API.
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 4278770..7af707d 100644
+index 4278770..9014ee0 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -842,10 +842,26 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
@@ -38,7 +38,7 @@ index 4278770..7af707d 100644
 +		 * https://lore.kernel.org/dri-devel/20200807090706.GA2352366@phenom.ffwll.local/
 +		 */
 +		if (!b->atomic_modeset && type == WDRM_PLANE_TYPE_PRIMARY &&
-+		    num_primary != output->crtc->pipe)
++		    num_primary - 1 != output->crtc->pipe)
 +			continue;
  
  		if (plane->type != type)

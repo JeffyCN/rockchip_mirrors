@@ -1,7 +1,7 @@
-From a4c7a51c1dec74670be732d0d89c925d48596713 Mon Sep 17 00:00:00 2001
+From 804cb548380b9865940eac69bc6298224a3936f9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 26/56] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 26/57] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -60,7 +60,7 @@ index 4311218..a591e49 100644
  
  struct drm_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index fc41b16..d189bf7 100644
+index 13f6ec7..ae87b7e 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -209,8 +209,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -94,7 +94,7 @@ index fc41b16..d189bf7 100644
  		weston_output_finish_frame(output_base, NULL,
  					   WP_PRESENTATION_FEEDBACK_INVALID);
 @@ -1249,7 +1261,7 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
- 		    num_primary != output->crtc->pipe)
+ 		    num_primary - 1 != output->crtc->pipe)
  			continue;
  
 -		if (plane->type != type)
