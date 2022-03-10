@@ -72,12 +72,8 @@ endif
 # since Flags might contain commas the arguments are passed indirectly by
 # variable name (stripped to deal with whitespaces).
 # Arguments are variable containing cflags, cxxflags, ldflags, fcflags
-define PKG_MESON_CROSSCONFIG_SED
-        -e "s%@TARGET_CC@%$(TARGET_CC)%g" \
-        -e "s%@TARGET_CXX@%$(TARGET_CXX)%g" \
-        -e "s%@TARGET_AR@%$(TARGET_AR)%g" \
+define PKG_MESON_CROSSCONFIG_SED_COMMON
         -e "s%@TARGET_FC@%$(TARGET_FC)%g" \
-        -e "s%@TARGET_STRIP@%$(TARGET_STRIP)%g" \
         -e "s%@TARGET_ARCH@%$(PKG_MESON_TARGET_CPU_FAMILY)%g" \
         -e "s%@TARGET_CPU@%$(GCC_TARGET_CPU)%g" \
         -e "s%@TARGET_ENDIAN@%$(call qstrip,$(call LOWERCASE,$(BR2_ENDIAN)))%g" \
@@ -91,6 +87,22 @@ define PKG_MESON_CROSSCONFIG_SED
         -e "s%@STAGING_DIR@%$(STAGING_DIR)%g" \
         -e "s%@STATIC@%$(if $(BR2_STATIC_LIBS),true,false)%g" \
         $(TOPDIR)/support/misc/cross-compilation.conf.in
+endef
+
+define PKG_MESON_CROSSCONFIG_SED
+        -e "s%@TARGET_CC@%$(TARGET_CC)%g" \
+        -e "s%@TARGET_CXX@%$(TARGET_CXX)%g" \
+        -e "s%@TARGET_AR@%$(TARGET_AR)%g" \
+        -e "s%@TARGET_STRIP@%$(TARGET_STRIP)%g" \
+	$(call PKG_MESON_CROSSCONFIG_SED_COMMON,$(1),$(2),$(3),$(4))
+endef
+
+define PKG_MESON_CROSSCONFIG_SED_CUSTOM
+        -e "s%@TARGET_CC@%$($(1))%g" \
+        -e "s%@TARGET_CXX@%$($(2))%g" \
+        -e "s%@TARGET_AR@%$($(3))%g" \
+        -e "s%@TARGET_STRIP@%$($(4))%g" \
+	$(call PKG_MESON_CROSSCONFIG_SED_COMMON,$(5),$(6),$(7),$(8))
 endef
 
 ################################################################################
@@ -117,9 +129,34 @@ define inner-meson-package
 ifndef $(2)_CONFIGURE_CMDS
 ifeq ($(4),target)
 
-$(2)_CFLAGS ?= $$(TARGET_CFLAGS)
-$(2)_LDFLAGS ?= $$(TARGET_LDFLAGS)
-$(2)_CXXFLAGS ?= $$(TARGET_CXXFLAGS)
+$(2)_CFLAGS ?= $(TARGET_CFLAGS)
+$(2)_LDFLAGS ?= $(TARGET_LDFLAGS)
+$(2)_CXXFLAGS ?= $(TARGET_CXXFLAGS)
+
+ifneq ($(BR2_TOOLCHAIN_PREFER_CLANG):$$($(2)_USE_CLANG),:)
+ifeq ($$($(2)_DISALLOW_CLANG),)
+$(2)_DEPENDENCIES += host-clang host-llvm
+
+$(2)_CC ?= $(HOST_DIR)/bin/clang
+$(2)_CXX ?= $(HOST_DIR)/bin/clang++
+$(2)_AR ?= $(HOST_DIR)/bin/llvm-ar
+
+ifeq ($(BR2_STRIP_strip),y)
+$(2)_STRIP ?= $(HOST_DIR)/bin/llvm-strip
+endif
+
+$(2)_COMMON_FLAGS = --sysroot=$(STAGING_DIR)
+
+$(2)_CFLAGS += --sysroot=$(STAGING_DIR)
+$(2)_LDFLAGS += --sysroot=$(STAGING_DIR)
+$(2)_CXXFLAGS += --sysroot=$(STAGING_DIR)
+endif
+endif
+
+$(2)_CC ?= $(TARGET_CC)
+$(2)_CXX ?= $(TARGET_CXX)
+$(2)_AR ?= $(TARGET_AR)
+$(2)_STRIP ?= $(TARGET_STRIP)
 
 # Configure package for target
 #
@@ -129,7 +166,7 @@ define $(2)_CONFIGURE_CMDS
 	mkdir -p $$($$(PKG)_SRCDIR)/build
 	sed -e "/^\[binaries\]$$$$/s:$$$$:$$(foreach x,$$($(2)_MESON_EXTRA_BINARIES),\n$$(x)):" \
 	    -e "/^\[properties\]$$$$/s:$$$$:$$(foreach x,$$($(2)_MESON_EXTRA_PROPERTIES),\n$$(x)):" \
-	    $$(call PKG_MESON_CROSSCONFIG_SED,$(2)_CFLAGS,$(2)_CXXFLAGS,$(2)_LDFLAGS,$(2)_FCFLAGS) \
+	    $$(call PKG_MESON_CROSSCONFIG_SED_CUSTOM,$(2)_CC,$(2)_CXX,$(2)_AR,$(2)_STRIP,$(2)_CFLAGS,$(2)_CXXFLAGS,$(2)_LDFLAGS,$(2)_FCFLAGS) \
 	    > $$($$(PKG)_SRCDIR)/build/cross-compilation.conf
 	PATH=$$(BR_PATH) \
 	CC_FOR_BUILD="$$(HOSTCC)" \
