@@ -6,6 +6,11 @@ config BR2_TOOLCHAIN
 	bool
 	default y
 
+config BR2_TOOLCHAIN_PREFER_CLANG
+	bool "Prefer to use clang"
+	help
+	  Prefer to use clang when available.
+
 # Should be selected for glibc or eglibc
 config BR2_TOOLCHAIN_USES_GLIBC
 	bool
