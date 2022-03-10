@@ -57,9 +57,34 @@ $(2)_NINJA_ENV		?=
 ifndef $(2)_CONFIGURE_CMDS
 ifeq ($(4),target)
 
-$(2)_CFLAGS ?= $$(TARGET_CFLAGS)
-$(2)_LDFLAGS ?= $$(TARGET_LDFLAGS)
-$(2)_CXXFLAGS ?= $$(TARGET_CXXFLAGS)
+$(2)_CFLAGS ?= $(TARGET_CFLAGS)
+$(2)_LDFLAGS ?= $(TARGET_LDFLAGS)
+$(2)_CXXFLAGS ?= $(TARGET_CXXFLAGS)
+
+ifneq ($(BR2_TOOLCHAIN_PREFER_CLANG):$$($(2)_USE_CLANG),:)
+ifeq ($$($(2)_DISALLOW_CLANG),)
+$(2)_DEPENDENCIES += host-clang host-llvm
+
+$(2)_CC ?= $(HOST_DIR)/bin/clang
+$(2)_CXX ?= $(HOST_DIR)/bin/clang++
+$(2)_AR ?= $(HOST_DIR)/bin/llvm-ar
+
+ifeq ($(BR2_STRIP_strip),y)
+$(2)_STRIP ?= $(HOST_DIR)/bin/llvm-strip
+endif
+
+$(2)_COMMON_FLAGS = --sysroot=$(STAGING_DIR)
+
+$(2)_CFLAGS += --sysroot=$(STAGING_DIR)
+$(2)_LDFLAGS += --sysroot=$(STAGING_DIR)
+$(2)_CXXFLAGS += --sysroot=$(STAGING_DIR)
+endif
+endif
+
+$(2)_CC ?= $(TARGET_CC)
+$(2)_CXX ?= $(TARGET_CXX)
+$(2)_AR ?= $(TARGET_AR)
+$(2)_STRIP ?= $(TARGET_STRIP)
 
 # Configure package for target
 #
@@ -71,6 +96,10 @@ define $(2)_CONFIGURE_CMDS
 	    -e 's%@TARGET_ARCH@%$$(HOST_MESON_TARGET_CPU_FAMILY)%g' \
 	    -e 's%@TARGET_CPU@%$$(HOST_MESON_TARGET_CPU)%g' \
 	    -e 's%@TARGET_ENDIAN@%$$(HOST_MESON_TARGET_ENDIAN)%g' \
+	    -e 's%@TARGET_CC@%$$($(2)_CC)%g' \
+	    -e 's%@TARGET_CXX@%$$($(2)_CXX)%g' \
+	    -e 's%@TARGET_AR@%$$($(2)_AR)%g' \
+	    -e 's%@TARGET_STRIP@%$$($(2)_STRIP)%g' \
 	    -e "s%@TARGET_CFLAGS@%$$(call make-sq-comma-list,$$($(2)_CFLAGS))%g" \
 	    -e "s%@TARGET_LDFLAGS@%$$(call make-sq-comma-list,$$($(2)_LDFLAGS))%g" \
 	    -e "s%@TARGET_CXXFLAGS@%$$(call make-sq-comma-list,$$($(2)_CXXFLAGS))%g" \
@@ -197,6 +226,10 @@ define PKG_MESON_INSTALL_CROSS_CONF
 	    -e 's%@TARGET_ARCH@%$(HOST_MESON_TARGET_CPU_FAMILY)%g' \
 	    -e 's%@TARGET_CPU@%$(HOST_MESON_TARGET_CPU)%g' \
 	    -e 's%@TARGET_ENDIAN@%$(HOST_MESON_TARGET_ENDIAN)%g' \
+	    -e 's%@TARGET_CC@%$$(TARGET_CC)%g' \
+	    -e 's%@TARGET_CXX@%$$(TARGET_CXX)%g' \
+	    -e 's%@TARGET_AR@%$$(TARGET_AR)%g' \
+	    -e 's%@TARGET_STRIP@%$$(TARGET_STRIP)%g' \
 	    -e "s%@TARGET_CFLAGS@%$(call make-sq-comma-list,$(TARGET_CFLAGS))@PKG_TARGET_CFLAGS@%g" \
 	    -e "s%@TARGET_LDFLAGS@%$(call make-sq-comma-list,$(TARGET_LDFLAGS))@PKG_TARGET_CFLAGS@%g" \
 	    -e "s%@TARGET_CXXFLAGS@%$(call make-sq-comma-list,$(TARGET_CXXFLAGS))@PKG_TARGET_CFLAGS@%g" \
