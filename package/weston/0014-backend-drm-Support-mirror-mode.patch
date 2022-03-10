@@ -1,7 +1,7 @@
-From 2e883f985347d206d5aabfc23ecd917c3da85dbb Mon Sep 17 00:00:00 2001
+From f73a6bd1930b79ccc77f6fa1acb743e15befc32f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 14/56] backend-drm: Support mirror mode
+Subject: [PATCH 14/57] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -17,8 +17,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/backend-drm/state-propose.c |  22 +-
  libweston/compositor.c                |   2 +-
  libweston/input.c                     |   7 +
- meson.build                           |   8 +
- 10 files changed, 380 insertions(+), 18 deletions(-)
+ meson.build                           |   5 +
+ 10 files changed, 377 insertions(+), 18 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
 index 6641f9e..15cf7db 100644
@@ -98,7 +98,7 @@ index ce74316..897c5c7 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 9d6ce3e..ced2d18 100644
+index 19560c5..b0396a9 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -66,6 +66,11 @@
@@ -643,17 +643,14 @@ index 6fb4bed..ec7e416 100644
  						   x, y, NULL))
  			return;
 diff --git a/meson.build b/meson.build
-index 7b80214..64ca95a 100644
+index 7b80214..f8ac557 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -145,6 +145,14 @@ if get_option('deprecated-wl-shell')
+@@ -145,6 +145,11 @@ if get_option('deprecated-wl-shell')
  	config_h.set('HAVE_DEPRECATED_WL_SHELL', '1')
  endif
  
-+dep_rga = cc.find_library('rga', required : false)
-+if dep_rga.found() and not cc.has_header_symbol('rga/RgaApi.h', 'c_RkRgaInit')
-+	dep_rga = unneeded_dep
-+endif
++dep_rga = dependency('librga', required: false)
 +if dep_rga.found()
 +	config_h.set('HAVE_RGA', '1')
 +endif
