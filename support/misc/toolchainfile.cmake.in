@@ -8,11 +8,11 @@
 # and store it in RELOCATED_HOST_DIR.
 # All the other variables that need to refer to HOST_DIR will use the
 # RELOCATED_HOST_DIR variable.
-string(REPLACE "/share/buildroot" "" RELOCATED_HOST_DIR ${CMAKE_CURRENT_LIST_DIR})
+string(REPLACE "/share/buildroot" "" RELOCATED_HOST_DIR @@RELOCATED_HOST_DIR@@)
 
 # Point cmake to the location where we have our custom modules,
 # so that it can find our custom platform description.
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
+list(APPEND CMAKE_MODULE_PATH @@RELOCATED_HOST_DIR@@)
 
 set(CMAKE_SYSTEM_NAME Buildroot)
 set(CMAKE_SYSTEM_VERSION 1)
@@ -71,3 +71,13 @@ if(@@TOOLCHAIN_HAS_FORTRAN@@)
   set(CMAKE_Fortran_FLAGS "@@TARGET_FCFLAGS@@" CACHE STRING "Buildroot FCFLAGS")
   set(CMAKE_Fortran_COMPILER "${RELOCATED_HOST_DIR}/@@TARGET_FC@@")
 endif()
+
+set(CMAKE_AR "${RELOCATED_HOST_DIR}/@@TARGET_AR@@")
+set(CMAKE_AS "${RELOCATED_HOST_DIR}/@@TARGET_AS@@")
+set(CMAKE_LINKER "${RELOCATED_HOST_DIR}/@@TARGET_LD@@")
+set(CMAKE_NM "${RELOCATED_HOST_DIR}/@@TARGET_NM@@")
+set(CMAKE_RANLIB "${RELOCATED_HOST_DIR}/@@TARGET_RANLIB@@")
+set(CMAKE_READELF "${RELOCATED_HOST_DIR}/@@TARGET_READELF@@")
+set(CMAKE_STRIP "${RELOCATED_HOST_DIR}/@@TARGET_STRIP@@")
+set(CMAKE_OBJCOPY "${RELOCATED_HOST_DIR}/@@TARGET_OBJCOPY@@")
+set(CMAKE_OBJDUMP "${RELOCATED_HOST_DIR}/@@TARGET_OBJDUMP@@")

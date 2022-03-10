@@ -77,6 +77,36 @@ endif
 ifndef $(2)_CONFIGURE_CMDS
 ifeq ($(4),target)
 
+ifneq ($(BR2_TOOLCHAIN_PREFER_CLANG):$$($(2)_USE_CLANG),:)
+ifeq ($$($(2)_DISALLOW_CLANG),)
+$(2)_DEPENDENCIES += host-clang host-lld host-llvm
+
+$(2)_CC ?= bin/clang
+$(2)_CXX ?= bin/clang++
+$(2)_AR ?= bin/llvm-ar
+$(2)_AS ?= bin/llvm-as
+$(2)_LD ?= bin/llvm-link
+$(2)_NM ?= bin/llvm-nm
+$(2)_RANLIB ?= bin/llvm-ranlib
+$(2)_READELF ?= bin/llvm-readelf
+$(2)_STRIP ?= bin/llvm-strip
+$(2)_OBJCOPY ?= bin/llvm-objcopy
+$(2)_OBJDUMP ?= bin/llvm-objdump
+endif
+endif
+
+$(2)_CC ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_CC)))
+$(2)_CXX ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_CXX)))
+$(2)_AR ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_AR)))
+$(2)_AS ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_AS)))
+$(2)_LD ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_LD)))
+$(2)_NM ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_NM)))
+$(2)_RANLIB ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_RANLIB)))
+$(2)_READELF ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_READELF)))
+$(2)_STRIP ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_STRIP)))
+$(2)_OBJCOPY ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_OBJCOPY)))
+$(2)_OBJDUMP ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_OBJDUMP)))
+
 # Configure package for target
 #
 # - We are passing BUILD_SHARED_LIBS because it is documented as a
@@ -90,9 +120,34 @@ define $(2)_CONFIGURE_CMDS
 	(mkdir -p $$($$(PKG)_BUILDDIR) && \
 	cd $$($$(PKG)_BUILDDIR) && \
 	rm -f CMakeCache.txt && \
+	sed \
+		-e 's#@@STAGING_SUBDIR@@#$(call qstrip,$(STAGING_SUBDIR))#' \
+		-e 's#@@RELOCATED_HOST_DIR@@#$(call qstrip,$(HOST_DIR)/share/buildroot/)#' \
+		-e 's#@@TARGET_CFLAGS@@#$(call qstrip,$(TARGET_CFLAGS))#' \
+		-e 's#@@TARGET_CXXFLAGS@@#$(call qstrip,$(TARGET_CXXFLAGS))#' \
+		-e 's#@@TARGET_FCFLAGS@@#$(call qstrip,$(TARGET_FCFLAGS))#' \
+		-e 's#@@TARGET_LDFLAGS@@#$(call qstrip,$(TARGET_LDFLAGS))#' \
+		-e 's#@@TARGET_CC@@#$$($(2)_CC)#' \
+		-e 's#@@TARGET_CXX@@#$$($(2)_CXX)#' \
+		-e 's#@@TARGET_AR@@#$$($(2)_AR)#' \
+		-e 's#@@TARGET_AS@@#$$($(2)_AS)#' \
+		-e 's#@@TARGET_LD@@#$$($(2)_LD)#' \
+		-e 's#@@TARGET_NM@@#$$($(2)_NM)#' \
+		-e 's#@@TARGET_RANLIB@@#$$($(2)_RANLIB)#' \
+		-e 's#@@TARGET_READELF@@#$$($(2)_READELF)#' \
+		-e 's#@@TARGET_STRIP@@#$$($(2)_STRIP)#' \
+		-e 's#@@TARGET_OBJCOPY@@#$$($(2)_OBJCOPY)#' \
+		-e 's#@@TARGET_OBJDUMP@@#$$($(2)_OBJDUMP)#' \
+		-e 's#@@TARGET_FC@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_FC)))#' \
+		-e 's#@@CMAKE_SYSTEM_PROCESSOR@@#$(call qstrip,$(CMAKE_SYSTEM_PROCESSOR))#' \
+		-e 's#@@TOOLCHAIN_HAS_CXX@@#$(if $(BR2_INSTALL_LIBSTDCPP),1,0)#' \
+		-e 's#@@TOOLCHAIN_HAS_FORTRAN@@#$(if $(BR2_TOOLCHAIN_HAS_FORTRAN),1,0)#' \
+		-e 's#@@CMAKE_BUILD_TYPE@@#$(if $(BR2_ENABLE_RUNTIME_DEBUG),Debug,Release)#' \
+		$(TOPDIR)/support/misc/toolchainfile.cmake.in \
+		> $$($$(PKG)_BUILDDIR)/toolchainfile.cmake && \
 	PATH=$$(BR_PATH) \
 	$$($$(PKG)_CONF_ENV) $$(BR2_CMAKE) $$($$(PKG)_SRCDIR) \
-		-DCMAKE_TOOLCHAIN_FILE="$$(HOST_DIR)/share/buildroot/toolchainfile.cmake" \
+		-DCMAKE_TOOLCHAIN_FILE="$$($$(PKG)_BUILDDIR)/toolchainfile.cmake" \
 		-DCMAKE_INSTALL_PREFIX="/usr" \
 		-DCMAKE_COLOR_MAKEFILE=OFF \
 		-DBUILD_DOC=OFF \
@@ -256,12 +311,24 @@ define TOOLCHAIN_CMAKE_INSTALL_FILES
 	@mkdir -p $(HOST_DIR)/share/buildroot
 	sed \
 		-e 's#@@STAGING_SUBDIR@@#$(call qstrip,$(STAGING_SUBDIR))#' \
+		-e 's#@@RELOCATED_HOST_DIR@@#$${CMAKE_CURRENT_LIST_DIR}#' \
 		-e 's#@@TARGET_CFLAGS@@#$(call qstrip,$(TARGET_CFLAGS))#' \
 		-e 's#@@TARGET_CXXFLAGS@@#$(call qstrip,$(TARGET_CXXFLAGS))#' \
 		-e 's#@@TARGET_FCFLAGS@@#$(call qstrip,$(TARGET_FCFLAGS))#' \
 		-e 's#@@TARGET_LDFLAGS@@#$(call qstrip,$(TARGET_LDFLAGS))#' \
 		-e 's#@@TARGET_CC@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_CC)))#' \
 		-e 's#@@TARGET_CXX@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_CXX)))#' \
+		-e 's#@@TARGET_CC@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_CC)))#' \
+		-e 's#@@TARGET_CXX@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_CXX)))#' \
+		-e 's#@@TARGET_AR@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_AR)))#' \
+		-e 's#@@TARGET_AS@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_AS)))#' \
+		-e 's#@@TARGET_LD@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_LD)))#' \
+		-e 's#@@TARGET_NM@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_NM)))#' \
+		-e 's#@@TARGET_RANLIB@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_RANLIB)))#' \
+		-e 's#@@TARGET_READELF@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_READELF)))#' \
+		-e 's#@@TARGET_STRIP@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_STRIP)))#' \
+		-e 's#@@TARGET_OBJCOPY@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_OBJCOPY)))#' \
+		-e 's#@@TARGET_OBJDUMP@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_OBJDUMP)))#' \
 		-e 's#@@TARGET_FC@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_FC)))#' \
 		-e 's#@@CMAKE_SYSTEM_PROCESSOR@@#$(call qstrip,$(CMAKE_SYSTEM_PROCESSOR))#' \
 		-e 's#@@TOOLCHAIN_HAS_CXX@@#$(if $(BR2_INSTALL_LIBSTDCPP),1,0)#' \
