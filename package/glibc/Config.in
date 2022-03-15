@@ -19,8 +19,8 @@ config BR2_PACKAGE_GLIBC_AUTO_KERNEL_VERSION
 config BR2_PACKAGE_GLIBC_GEN_LD_CACHE
 	bool "glibc gen ld.so.cache"
 	default y
-	select BR2_PACKAGE_HOST_QEMU
-	select BR2_PACKAGE_HOST_QEMU_LINUX_USER_MODE
+	depends on BR2_PACKAGE_HOST_QEMU
+	depends on BR2_PACKAGE_HOST_QEMU_LINUX_USER_MODE
 
 config BR2_PACKAGE_GLIBC_UTILS
 	bool "Install glibc utilities"
