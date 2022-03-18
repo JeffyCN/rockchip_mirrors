@@ -32,6 +32,13 @@ config BR2_PACKAGE_QT5TOOLS_QDOC_TOOL
 	help
 	  This option enables the qdoc host tool.
 
+config BR2_PACKAGE_QT5TOOLS_DESIGNER
+	bool "designer"
+	select BR2_PACKAGE_QT5BASE_GUI
+	select BR2_PACKAGE_QT5BASE_WIDGETS
+	help
+	  Compile and install the designer program.
+
 config BR2_PACKAGE_QT5TOOLS_PIXELTOOL
 	bool "pixeltool"
 	select BR2_PACKAGE_QT5BASE_GUI
