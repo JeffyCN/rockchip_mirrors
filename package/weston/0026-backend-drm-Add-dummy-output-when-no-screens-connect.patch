@@ -1,4 +1,4 @@
-From 804cb548380b9865940eac69bc6298224a3936f9 Mon Sep 17 00:00:00 2001
+From 16ea62936147274362708d5d7cbd21df3d9ab292 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
 Subject: [PATCH 26/57] backend-drm: Add dummy output when no screens connected
@@ -7,14 +7,14 @@ Some clients are not expecting no screens, add a dummy output for them.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- desktop-shell/shell.c                |   4 -
+ desktop-shell/shell.c                |   7 +-
  libweston/backend-drm/drm-internal.h |   6 +
  libweston/backend-drm/drm.c          | 216 ++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          |   3 +
- 4 files changed, 222 insertions(+), 7 deletions(-)
+ 4 files changed, 225 insertions(+), 7 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index a733b9d..7c0cb1b 100644
+index a733b9d..3d3e702 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4750,10 +4750,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
@@ -28,6 +28,16 @@ index a733b9d..7c0cb1b 100644
  }
  
  void
+@@ -4885,6 +4881,9 @@ handle_output_resized(struct wl_listener *listener, void *data)
+ 	struct weston_output *output = (struct weston_output *)data;
+ 	struct shell_output *sh_output = find_shell_output_from_weston_output(shell, output);
+ 
++	if (!sh_output)
++		return;
++
+ 	if (shell->lock_surface)
+ 		shell->lock_surface->committed(shell->lock_surface, 0, 0);
+ 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
 index 4311218..a591e49 100644
 --- a/libweston/backend-drm/drm-internal.h
