@@ -21,6 +21,12 @@ endif
 QT5TOOLS_LICENSE = GPL-2.0+ or LGPL-3.0, GPL-3.0 with exception(tools), GFDL-1.3 (docs)
 QT5TOOLS_LICENSE_FILES = LICENSE.GPL2 LICENSE.GPL3 LICENSE.GPL3-EXCEPT LICENSE.LGPL3 LICENSE.FDL
 
+define QT5TOOLS_FIXUP_DESIGNER
+	sed -i "s/qtBuildPart(tools)/qtConfig(process)/" \
+		$(@D)/src/designer/src/uitools/uitools.pro
+endef
+QT5TOOLS_PRE_CONFIGURE_HOOKS += QT5TOOLS_FIXUP_DESIGNER
+
 QT5TOOLS_BUILD_DIRS_$(BR2_PACKAGE_QT5TOOLS_LINGUIST_TOOLS) += \
 	linguist/lconvert linguist/lrelease linguist/lupdate
 QT5TOOLS_INSTALL_STAGING_DIR_$(BR2_PACKAGE_QT5TOOLS_LINGUIST_TOOLS) += \
@@ -31,6 +37,20 @@ QT5TOOLS_BUILD_DIRS_y += qdoc
 QT5TOOLS_INSTALL_STAGING_DIR_y += qdoc
 QT5TOOLS_DEPENDENCIES += host-clang
 endif
+
+QT5TOOLS_BUILD_DIRS_$(BR2_PACKAGE_QT5TOOLS_DESIGNER) += \
+	designer/src/lib \
+	designer/src/components \
+	designer/src/designer
+
+QT5TOOLS_INSTALL_STAGING_DIR_$(BR2_PACKAGE_QT5TOOLS_DESIGNER) += \
+	designer/src/lib \
+	designer/src/components \
+
+QT5TOOLS_INSTALL_TARGET_DIR_$(BR2_PACKAGE_QT5TOOLS_DESIGNER) += \
+	designer/src/lib \
+	designer/src/components \
+	designer/src/designer
 
 QT5TOOLS_BUILD_DIRS_$(BR2_PACKAGE_QT5TOOLS_PIXELTOOL) += pixeltool
 QT5TOOLS_INSTALL_TARGET_$(BR2_PACKAGE_QT5TOOLS_PIXELTOOL) += pixeltool
@@ -59,6 +79,10 @@ endef
 define QT5TOOLS_INSTALL_TARGET_CMDS
 	$(foreach p,$(QT5TOOLS_INSTALL_TARGET_y), \
 		$(INSTALL) -D -m0755 $(@D)/bin/$(p) $(TARGET_DIR)/usr/bin/$(p)$(sep))
+	$(foreach p,$(QT5TOOLS_INSTALL_TARGET_DIR_y), \
+		$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/src/$(p) \
+		INSTALL_ROOT=$(@D)/tmp-target-install install$(sep))
+	rsync -arv $(@D)/tmp-target-install$(STAGING_DIR)/ $(TARGET_DIR)/
 endef
 
 $(eval $(qmake-package))
