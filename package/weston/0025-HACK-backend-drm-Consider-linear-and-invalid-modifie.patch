@@ -1,22 +1,22 @@
-From 024f34a2449f97c6dbbfcafb56da511e0ab9adf2 Mon Sep 17 00:00:00 2001
+From 87972f5283566877c51b77be89c1008ac85adc3a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
-Subject: [PATCH 25/55] HACK: backend-drm: Consider linear and invalid modifier
+Subject: [PATCH 25/58] HACK: backend-drm: Consider linear and invalid modifier
  are the same
 
 That is true with Rockchip BSP drivers and packages.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- clients/simple-dmabuf-egl.c         |  8 +++--
- libweston/backend-drm/drm-gbm.c     |  3 +-
- libweston/backend-drm/drm-virtual.c |  8 +----
- libweston/backend-drm/fb.c          | 45 ++++++++++++++++-------------
+ clients/simple-dmabuf-egl.c         |  8 ++++++--
+ libweston/backend-drm/drm-gbm.c     |  3 ++-
+ libweston/backend-drm/drm-virtual.c |  8 +-------
+ libweston/backend-drm/fb.c          | 10 ++++++----
  libweston/backend-drm/kms.c         |  2 +-
- libweston/linux-dmabuf.h            |  4 +++
- libweston/pixman-renderer.c         |  4 +--
- libweston/renderer-gl/gl-renderer.c |  8 ++---
- 8 files changed, 45 insertions(+), 37 deletions(-)
+ libweston/linux-dmabuf.h            |  4 ++++
+ libweston/pixman-renderer.c         |  4 ++--
+ libweston/renderer-gl/gl-renderer.c |  8 ++++----
+ 8 files changed, 26 insertions(+), 21 deletions(-)
 
 diff --git a/clients/simple-dmabuf-egl.c b/clients/simple-dmabuf-egl.c
 index 33df4cf..535daf0 100644
@@ -85,7 +85,7 @@ index 597e71c..20f6809 100644
  	if (weston_drm_format_add_modifier(fmt, mod) < 0)
  		goto err;
 diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
-index ffe2cc5..af4c7f9 100644
+index ffe2cc5..4474e0c 100644
 --- a/libweston/backend-drm/fb.c
 +++ b/libweston/backend-drm/fb.c
 @@ -77,7 +77,7 @@ drm_fb_addfb(struct drm_backend *b, struct drm_fb *fb)
@@ -106,58 +106,23 @@ index ffe2cc5..af4c7f9 100644
  	fb->handles[0] = create_arg.handle;
  	fb->strides[0] = create_arg.pitch;
  	fb->num_planes = 1;
-@@ -236,20 +236,13 @@ drm_fb_get_from_dmabuf(struct linux_dmabuf_buffer *dmabuf,
- 		.num_fds = dmabuf->attributes.n_planes,
+@@ -237,6 +237,7 @@ drm_fb_get_from_dmabuf(struct linux_dmabuf_buffer *dmabuf,
  		.modifier = dmabuf->attributes.modifier[0],
  	};
--
--	/* We should not import to KMS a buffer that has been allocated using no
--	 * modifiers. Usually drivers use linear layouts to allocate with no
--	 * modifiers, but this is not a rule. The driver could use, for
--	 * instance, a tiling layout under the hood - and both Weston and the
--	 * KMS driver can't know. So giving the buffer to KMS is not safe, as
--	 * not knowing its layout can result in garbage being displayed. In
--	 * short, importing a buffer to KMS requires explicit modifiers. */
--	if (dmabuf->attributes.modifier[0] == DRM_FORMAT_MOD_INVALID) {
--		if (try_view_on_plane_failure_reasons)
--			*try_view_on_plane_failure_reasons |=
--				FAILURE_REASONS_DMABUF_MODIFIER_INVALID;
--		return NULL;
--	}
-+	struct gbm_import_fd_data import_legacy = {
-+		.width = dmabuf->attributes.width,
-+		.height = dmabuf->attributes.height,
-+		.format = dmabuf->attributes.format,
-+		.stride = dmabuf->attributes.stride[0],
-+		.fd = dmabuf->attributes.fd[0],
-+	};
+ 
++#if 0
+ 	/* We should not import to KMS a buffer that has been allocated using no
+ 	 * modifiers. Usually drivers use linear layouts to allocate with no
+ 	 * modifiers, but this is not a rule. The driver could use, for
+@@ -250,6 +251,7 @@ drm_fb_get_from_dmabuf(struct linux_dmabuf_buffer *dmabuf,
+ 				FAILURE_REASONS_DMABUF_MODIFIER_INVALID;
+ 		return NULL;
+ 	}
++#endif
  
  	/* XXX: TODO:
  	 *
-@@ -274,8 +267,20 @@ drm_fb_get_from_dmabuf(struct linux_dmabuf_buffer *dmabuf,
- 	ARRAY_COPY(import_mod.strides, dmabuf->attributes.stride);
- 	ARRAY_COPY(import_mod.offsets, dmabuf->attributes.offset);
- 
--	fb->bo = gbm_bo_import(backend->gbm, GBM_BO_IMPORT_FD_MODIFIER,
--			       &import_mod, GBM_BO_USE_SCANOUT);
-+	/* The legacy FD-import path does not allow us to supply modifiers,
-+	 * multiple planes, or buffer offsets. */
-+	if (DRM_MOD_VALID(dmabuf->attributes.modifier[0]) ||
-+	    dmabuf->attributes.n_planes > 1 ||
-+	    dmabuf->attributes.offset[0] > 0) {
-+		fb->bo = gbm_bo_import(backend->gbm, GBM_BO_IMPORT_FD_MODIFIER,
-+				       &import_mod,
-+				       GBM_BO_USE_SCANOUT);
-+	} else {
-+		fb->bo = gbm_bo_import(backend->gbm, GBM_BO_IMPORT_FD,
-+				       &import_legacy,
-+				       GBM_BO_USE_SCANOUT);
-+	}
-+
- 	if (!fb->bo)
- 		goto err_free;
- 
-@@ -371,7 +376,7 @@ drm_fb_get_from_bo(struct gbm_bo *bo, struct drm_backend *backend,
+@@ -371,7 +373,7 @@ drm_fb_get_from_bo(struct gbm_bo *bo, struct drm_backend *backend,
  	fb->num_planes = 1;
  	fb->strides[0] = gbm_bo_get_stride(bo);
  	fb->handles[0] = gbm_bo_get_handle(bo).u32;
@@ -166,7 +131,7 @@ index ffe2cc5..af4c7f9 100644
  #endif
  
  	if (!fb->format) {
-@@ -478,7 +483,7 @@ drm_fb_compatible_with_plane(struct drm_fb *fb, struct drm_plane *plane)
+@@ -478,7 +480,7 @@ drm_fb_compatible_with_plane(struct drm_fb *fb, struct drm_plane *plane)
  		 * wl_drm is being used for scanout. Mesa is the only user we
  		 * care in this case (even though recent versions are also using
  		 * dmabufs), and it should know better what works or not. */
