@@ -79,6 +79,7 @@ endef
 define QT5TOOLS_INSTALL_TARGET_CMDS
 	$(foreach p,$(QT5TOOLS_INSTALL_TARGET_y), \
 		$(INSTALL) -D -m0755 $(@D)/bin/$(p) $(TARGET_DIR)/usr/bin/$(p)$(sep))
+	$(INSTALL) -m 0755 -d $(@D)/tmp-target-install$(STAGING_DIR)/
 	$(foreach p,$(QT5TOOLS_INSTALL_TARGET_DIR_y), \
 		$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/src/$(p) \
 		INSTALL_ROOT=$(@D)/tmp-target-install install$(sep))
