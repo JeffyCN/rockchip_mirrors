@@ -10,9 +10,7 @@ define GSTREAMER1_INSTALL_TARGET_ENV
 endef
 GSTREAMER1_POST_INSTALL_TARGET_HOOKS += GSTREAMER1_INSTALL_TARGET_ENV
 
-ifeq ($(BR2_PACKAGE_GSTREAMER1_14),y)
-include $(pkgdir)/1_14.inc
-else ifeq ($(BR2_PACKAGE_GSTREAMER1_18),y)
+ifeq ($(BR2_PACKAGE_GSTREAMER1_18),y)
 include $(pkgdir)/1_18.inc
 else ifeq ($(BR2_PACKAGE_GSTREAMER1_20),y)
 include $(pkgdir)/1_20.inc

@@ -20,11 +20,6 @@ choice
 	prompt "Gstreamer version"
 	default BR2_PACKAGE_GSTREAMER1_20
 
-config BR2_PACKAGE_GSTREAMER1_14
-	bool "gstreamer-1.14"
-	help
-	  This option builds gstreamer-1.14
-
 config BR2_PACKAGE_GSTREAMER1_18
 	bool "gstreamer-1.18"
 	help
