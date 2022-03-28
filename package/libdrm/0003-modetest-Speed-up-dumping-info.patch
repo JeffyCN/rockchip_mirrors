@@ -1,7 +1,7 @@
-From 0ae71dbc98d071aa99e7aae277ea75b69aed9940 Mon Sep 17 00:00:00 2001
+From fdf99a630a4ba9fe37f075d951f81eeff302354d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 15 Dec 2018 12:20:01 +0800
-Subject: [PATCH 3/3] modetest: Speed up dumping info
+Subject: [PATCH 3/5] modetest: Speed up dumping info
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 21 insertions(+), 7 deletions(-)
 
 diff --git a/tests/modetest/modetest.c b/tests/modetest/modetest.c
-index 5fd22f7..fa8e6d3 100644
+index 5fd22f7..b774188 100644
 --- a/tests/modetest/modetest.c
 +++ b/tests/modetest/modetest.c
 @@ -50,6 +50,7 @@
@@ -132,7 +132,7 @@ index 5fd22f7..fa8e6d3 100644
  
 -	dev.fd = util_open(device, module);
 +	dump_only = !count && !plane_count && !prop_count;
-+	if (dump_only && !device)
++	if (dump_only && !device && !module)
 +		dev.fd = open("/dev/dri/card0", O_RDWR);
 +	else
 +		dev.fd = util_open(device, module);
