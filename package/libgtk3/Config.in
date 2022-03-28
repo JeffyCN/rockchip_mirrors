@@ -9,7 +9,7 @@ comment "libgtk3 needs a toolchain w/ wchar, threads, C++, gcc >= 4.8"
 comment "libgtk3 needs an OpenGL or an OpenGL-EGL/wayland backend"
 	depends on BR2_USE_MMU
 	depends on BR2_TOOLCHAIN_HAS_SYNC_4
-	depends on !BR2_PACKAGE_HAS_LIBEGL_WAYLAND && \
+	depends on !BR2_PACKAGE_HAS_LIBEGL && \
 		!BR2_PACKAGE_HAS_LIBGL
 
 config BR2_PACKAGE_LIBGTK3
@@ -62,8 +62,8 @@ config BR2_PACKAGE_LIBGTK3_BROADWAY
 	  Then open a web browser at address http://192.168.0.1:8080.
 	  Javascript and web sockets should be enabled.
 
-comment "Wayland GDK backend needs an OpenGL EGL backend provided by mesa3d w/ headers >= 3.17"
-	depends on !BR2_PACKAGE_MESA3D_OPENGL_EGL || \
+comment "Wayland GDK backend needs an OpenGL EGL backend w/ headers >= 3.17"
+	depends on !BR2_PACKAGE_HAS_LIBEGL_WAYLAND || \
 		!BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_17
 
 config BR2_PACKAGE_LIBGTK3_WAYLAND

@@ -198,5 +198,15 @@ define LIBGTK3_UPDATE_ICON_CACHE
 endef
 LIBGTK3_TARGET_FINALIZE_HOOKS += LIBGTK3_UPDATE_ICON_CACHE
 
+ifneq ($(BR2_PACKAGE_HAS_LIBEGL),)
+define LIBGTK3_GDK_GL_GLES
+	echo "export GDK_GL=gles" > $(@D)/gdk.sh
+	$(INSTALL) -D -m 0644 $(@D)/gdk.sh \
+		$(TARGET_DIR)/etc/profile.d/gdk.sh
+endef
+
+LIBGTK3_POST_INSTALL_TARGET_HOOKS += LIBGTK3_GDK_GL_GLES
+endif
+
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))
