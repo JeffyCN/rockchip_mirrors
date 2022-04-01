@@ -13,8 +13,6 @@
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
 
-#include "qt.config"
-#include "qt_app.config"
 #include "gpu.config"
 #include "weston.config"
 
