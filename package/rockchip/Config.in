@@ -22,11 +22,23 @@ choice
 	default BR2_PACKAGE_RK3588
 	prompt "Rockchip SoC"
 
+config BR2_PACKAGE_RK3399
+	bool "rk3399 chip"
+	select BR2_ROCKCHIP_HAS_ISP1
+	help
+	  Use Rockchip's rk3399 SoC
+
+config BR2_PACKAGE_RK356X
+	bool "rk356x chip"
+	select BR2_ROCKCHIP_HAS_ISP2
+	help
+	  Use Rockchip's rk356x SoC
+
 config BR2_PACKAGE_RK3588
 	bool "rk3588"
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP3
 	help
-	  Rockchip's rk3588 SoC.
+	  Use Rockchip's rk3588 SoC
 
 endchoice
 
@@ -43,6 +55,7 @@ config BR2_PACKAGE_CAMERA_ENGINE
 
 menu "Rockchip BSP packages"
 	source "package/rockchip/camera-engine-rkaiq/Config.in"
+	source "package/rockchip/camera-engine-rkisp/Config.in"
 	source "package/rockchip/gstreamer1-rockchip/Config.in"
 	source "package/rockchip/libv4l-rkmpp/Config.in"
 	source "package/rockchip/recovery/Config.in"
