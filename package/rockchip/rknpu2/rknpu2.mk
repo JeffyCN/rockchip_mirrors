@@ -17,6 +17,10 @@ else
 NPU_PLATFORM_ARCH = aarch64
 endif
 
+ifeq ($(BR2_PACKAGE_RK356X),y)
+NPU_PLATFORM_INFO = RK356X
+endif
+
 ifeq ($(BR2_PACKAGE_RK3588), y)
 NPU_PLATFORM_INFO = RK3588
 endif
