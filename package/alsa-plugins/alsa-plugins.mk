@@ -29,8 +29,8 @@ ALSA_PLUGINS_CONF_OPTS += --enable-pulseaudio
 ALSA_PLUGINS_DEPENDENCIES += pulseaudio
 
 define ALSA_PLUGINS_DEFAULT_PULSEAUDIO
-	cd $(TARGET_DIR)/usr/share/alsa/alsa.conf.d && \
-		mv 99-pulseaudio-default.conf.example 99-pulseaudio-default.conf
+	cd $(TARGET_DIR) && \
+		cp etc/alsa/conf.d/99-pulseaudio-default.conf.example usr/share/alsa/alsa.conf.d/99-pulseaudio-default.conf
 endef
 ALSA_PLUGINS_POST_INSTALL_TARGET_HOOKS += ALSA_PLUGINS_DEFAULT_PULSEAUDIO
 
