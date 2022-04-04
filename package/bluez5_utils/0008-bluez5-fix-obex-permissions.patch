@@ -1,7 +1,7 @@
-From 4dec0f48c00624ad6445fe6f63ab66fbc26d0dbf Mon Sep 17 00:00:00 2001
+From baef74c1d678460676bd78e1109f70c070dfc32f Mon Sep 17 00:00:00 2001
 From: Yao Xiao <xiaoyao@rock-chips.com>
 Date: Tue, 6 Aug 2019 06:28:47 +0000
-Subject: [PATCH 1/1] bluez5: fix obex permissions
+Subject: [PATCH 08/19] bluez5: fix obex permissions
 
 Signed-off-by: Yao Xiao <xiaoyao@rock-chips.com>
 ---
@@ -25,5 +25,5 @@ index 0c0b221..8aa6ac1 100644
      <allow send_interface="org.bluez.MediaPlayer1"/>
      <allow send_interface="org.bluez.Profile1"/>
 -- 
-2.7.4
+2.20.1
 

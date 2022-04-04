@@ -1,12 +1,12 @@
-From 0dbde847438a59a65fe7c20e75c1a5e653832238 Mon Sep 17 00:00:00 2001
+From 2adf71eaeec389498ea01115897c3b123b682eed Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Tue, 7 Aug 2018 16:58:12 +0800
-Subject: [PATCH] Adapt to base and dueros ble wifi config
+Subject: [PATCH 05/19] Adapt to base and dueros ble wifi config
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
  src/main.c           |  40 +++-
- tools/gatt-service.c | 553 +++++++++++++++++++++++++++++++++++++++++++++------
+ tools/gatt-service.c | 553 ++++++++++++++++++++++++++++++++++++++-----
  2 files changed, 527 insertions(+), 66 deletions(-)
 
 diff --git a/src/main.c b/src/main.c
@@ -761,5 +761,5 @@ index 2ce8a1f..3cce6e2 100644
  
  	g_source_remove(signal);
 -- 
-2.7.4
+2.20.1
 

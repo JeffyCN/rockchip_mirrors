@@ -1,7 +1,7 @@
-From 1fa821275eea8a57707045d9154cd0401b67e988 Mon Sep 17 00:00:00 2001
+From 27f1c8f5fa1ed00025bc24d06ee94a4f14480cad Mon Sep 17 00:00:00 2001
 From: Fabrice Fontaine <fontaine.fabrice@gmail.com>
 Date: Sun, 12 Sep 2021 22:48:39 +0200
-Subject: [PATCH] media: Fix build with glibc >= 2.34
+Subject: [PATCH 03/19] media: Fix build with glibc >= 2.34
 
 pause() is defined in glibc since the very early times; it appears in
 upstream commit 28f540f45bba (initial import) in 1995 [0].
@@ -56,12 +56,12 @@ Fix obexd/client/sync.c too.
 (cherry picked from commit 415af69b25d5ddcf007f167dc1689ef96a3566ca)
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- obexd/client/sync.c    | 4 ++--
+ obexd/client/sync.c    | 6 +++---
  profiles/audio/media.c | 4 ++--
- 2 files changed, 4 insertions(+), 4 deletions(-)
+ 2 files changed, 5 insertions(+), 5 deletions(-)
 
 diff --git a/obexd/client/sync.c b/obexd/client/sync.c
-index 548c318c3..fd07cccaf 100644
+index 548c318..5fed6c4 100644
 --- a/obexd/client/sync.c
 +++ b/obexd/client/sync.c
 @@ -222,7 +222,7 @@ static void sync_remove(struct obc_session *session)
@@ -82,8 +82,15 @@ index 548c318c3..fd07cccaf 100644
  	if (err < 0) {
  		dbus_connection_unref(conn);
  		conn = NULL;
+@@ -258,5 +258,5 @@ void sync_exit(void)
+ 	dbus_connection_unref(conn);
+ 	conn = NULL;
+ 
+-	obc_driver_unregister(&sync);
++	obc_driver_unregister(&obc_driver_sync);
+ }
 diff --git a/profiles/audio/media.c b/profiles/audio/media.c
-index 23d15611b..7cbfa7a6a 100644
+index 23d1561..7cbfa7a 100644
 --- a/profiles/audio/media.c
 +++ b/profiles/audio/media.c
 @@ -1238,7 +1238,7 @@ static bool stop(void *user_data)

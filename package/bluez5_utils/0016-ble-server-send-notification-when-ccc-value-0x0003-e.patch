@@ -1,8 +1,8 @@
-From 2d49cfc425c18e2e0cd868ad33e4bc14733b75a1 Mon Sep 17 00:00:00 2001
+From 8cf947019ea45c355e26d21b8db7f3c55b982b1a Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Tue, 7 Apr 2020 10:31:47 +0800
-Subject: [PATCH] ble server send notification when ccc value = 0x0003(enable
- notifications and indications)
+Subject: [PATCH 16/19] ble server send notification when ccc value =
+ 0x0003(enable notifications and indications)
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -58,5 +58,5 @@ index af89dc3..7534b39 100644
  	if (chrc->notify_io) {
  		__sync_fetch_and_add(&chrc->ntfy_cnt, 1);
 -- 
-2.25.0
+2.20.1
 

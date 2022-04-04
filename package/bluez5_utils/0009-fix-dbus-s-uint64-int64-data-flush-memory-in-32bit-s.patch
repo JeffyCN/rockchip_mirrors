@@ -1,7 +1,8 @@
-From 542a954eb02669a8db065c6f757905564922ce20 Mon Sep 17 00:00:00 2001
+From 188ca5cf33d1905c08a8403691c9be714c360ede Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Thu, 26 Sep 2019 06:28:35 +0000
-Subject: [PATCH] fix dbus's uint64/int64 data flush memory in 32bit system
+Subject: [PATCH 09/19] fix dbus's uint64/int64 data flush memory in 32bit
+ system
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -42,5 +43,5 @@ index dd5d2eb..9dda0f5 100644
  		DBusMessageIter iter_sub, base_sub;
  		char *sig;
 -- 
-2.7.4
+2.20.1
 

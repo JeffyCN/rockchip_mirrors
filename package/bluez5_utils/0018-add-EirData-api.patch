@@ -1,7 +1,7 @@
-From bc772a97b2f21609aa857ca509818ea9a3fb85ee Mon Sep 17 00:00:00 2001
+From b6be7aac6982e870fefae7db2aa497d3d0af8b7d Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Wed, 8 Jul 2020 14:55:07 +0800
-Subject: [PATCH] add EirData api
+Subject: [PATCH 18/19] add EirData api
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -113,5 +113,5 @@ index 06b1004..1f1d7fb 100644
  uint8_t btd_device_get_bdaddr_type(struct btd_device *dev);
  bool device_is_retrying(struct btd_device *device);
 -- 
-2.26.1
+2.20.1
 

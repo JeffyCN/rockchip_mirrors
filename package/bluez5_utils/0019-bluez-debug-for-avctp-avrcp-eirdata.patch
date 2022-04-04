@@ -1,7 +1,7 @@
-From b394f9c82374a098b791dec8aef46d53ccefe0b5 Mon Sep 17 00:00:00 2001
+From 7a9e2b31e4435ff21a86d723b474c6b99bc19ae1 Mon Sep 17 00:00:00 2001
 From: XiaoYao <xiaoyao@rock-chips.com>
 Date: Tue, 14 Sep 2021 17:12:08 +0800
-Subject: [PATCH 1/1] bluez: debug for avctp/avrcp/eirdata
+Subject: [PATCH 19/19] bluez: debug for avctp/avrcp/eirdata
 
 ---
  profiles/audio/avctp.c |  6 ++++++
@@ -74,5 +74,5 @@ index 61f3c41..4e4f68f 100644
  
  bool device_is_connectable(struct btd_device *device)
 -- 
-2.17.1
+2.20.1
 

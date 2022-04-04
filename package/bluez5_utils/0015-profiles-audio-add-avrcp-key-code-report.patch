@@ -1,7 +1,7 @@
-From 01f4a2711633226b0fa3a2b9833b6bb94efc08df Mon Sep 17 00:00:00 2001
+From 7c90092b2eab3d430686dd791875adc1d0c3d1a0 Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Tue, 24 Mar 2020 19:42:23 +0800
-Subject: [PATCH] profiles audio add avrcp key code report
+Subject: [PATCH 15/19] profiles audio add avrcp key code report
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -265,5 +265,5 @@ index 70c89b6..bd260a2 100644
  								uint64_t uid);
  
 -- 
-2.25.0
+2.20.1
 

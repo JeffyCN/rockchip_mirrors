@@ -1,7 +1,7 @@
-From 32f48573a43d011a52bb9fbde5005ea05f1982bf Mon Sep 17 00:00:00 2001
+From dbf1fa43a9563e45814c819ff0ef6a292f23058f Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Thu, 31 Oct 2019 11:10:28 +0800
-Subject: [PATCH] hostname: Fix unexpected name class changed issue
+Subject: [PATCH 11/19] hostname: Fix unexpected name class changed issue
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -33,5 +33,5 @@ index 4f9dfe6..c885714 100644
  	hostname_client = g_dbus_client_new(conn, "org.freedesktop.hostname1",
  						"/org/freedesktop/hostname1");
 -- 
-2.7.4
+2.20.1
 

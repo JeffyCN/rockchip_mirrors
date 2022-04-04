@@ -1,7 +1,7 @@
-From 544b5feb210ca65a181610f5b90218e2dde20ddf Mon Sep 17 00:00:00 2001
+From b0d7f02dcc0cc34c7023bee943b594f12810bcba Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Mon, 23 Dec 2019 16:14:10 +0800
-Subject: [PATCH] Policy: enable AutoEnable
+Subject: [PATCH 12/19] Policy: enable AutoEnable
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -47,5 +47,5 @@ index cbae32e..ee4a1c5 100644
 -#AutoEnable=false
 +AutoEnable=true
 -- 
-2.7.4
+2.20.1
 

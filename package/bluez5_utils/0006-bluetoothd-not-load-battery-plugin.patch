@@ -1,7 +1,7 @@
-From c94fe9571ffa0f5a2e07390a9e42f7b9c3fb8391 Mon Sep 17 00:00:00 2001
+From 9595e45d2e9c94c026cdb89c9eaef0e82fc0dce5 Mon Sep 17 00:00:00 2001
 From: XINHUANG LI <buluess.li@rock-chips.com>
 Date: Fri, 7 Sep 2018 17:11:25 +0800
-Subject: [PATCH] bluetoothd: not load battery plugin
+Subject: [PATCH 06/19] bluetoothd: not load battery plugin
 
 ---
  src/plugin.c | 5 +++++
@@ -24,5 +24,5 @@ index 39310a7..0176ae1 100644
  
  	plugin = g_try_new0(struct bluetooth_plugin, 1);
 -- 
-1.9.1
+2.20.1
 

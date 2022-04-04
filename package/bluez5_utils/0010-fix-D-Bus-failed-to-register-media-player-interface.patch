@@ -1,18 +1,18 @@
-From 3ce08c2f7974c1b2d43ff7cc1becf49af76e7e43 Mon Sep 17 00:00:00 2001
+From 9e6f44eba9f5e5717eb7deba8c76c096a98d6dc0 Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Tue, 8 Oct 2019 12:43:32 +0800
-Subject: [PATCH] fix D-Bus failed to register media player interface
+Subject: [PATCH 10/19] fix D-Bus failed to register media player interface
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
- profiles/audio/avrcp.c | 45 ++++++++++++++++++++++++++++++++++++++++++---
+ profiles/audio/avrcp.c | 45 +++++++++++++++++++++++++++++++++++++++---
  1 file changed, 42 insertions(+), 3 deletions(-)
 
 diff --git a/profiles/audio/avrcp.c b/profiles/audio/avrcp.c
-index 692f175..56dc45c 100644
+index d0f7f0c..729f586 100644
 --- a/profiles/audio/avrcp.c
 +++ b/profiles/audio/avrcp.c
-@@ -3327,6 +3327,35 @@ static const struct media_player_callback ct_cbs = {
+@@ -3335,6 +3335,35 @@ static const struct media_player_callback ct_cbs = {
  	.get_play_status = ct_get_play_status,
  };
  
@@ -48,7 +48,7 @@ index 692f175..56dc45c 100644
  static struct avrcp_player *create_ct_player(struct avrcp *session,
  								uint16_t id)
  {
-@@ -3334,12 +3363,18 @@ static struct avrcp_player *create_ct_player(struct avrcp *session,
+@@ -3342,12 +3371,18 @@ static struct avrcp_player *create_ct_player(struct avrcp *session,
  	struct media_player *mp;
  	const char *path;
  
@@ -69,7 +69,7 @@ index 692f175..56dc45c 100644
  	mp = media_player_controller_create(path, id);
  	if (mp == NULL)
  		return NULL;
-@@ -3366,12 +3401,16 @@ static struct avrcp_player *find_ct_player(struct avrcp *session, uint16_t id)
+@@ -3374,12 +3409,16 @@ static struct avrcp_player *find_ct_player(struct avrcp *session, uint16_t id)
  		struct avrcp_player *player = l->data;
  
  		if (player->id == 0) {
@@ -88,5 +88,5 @@ index 692f175..56dc45c 100644
  
  	return NULL;
 -- 
-2.7.4
+2.20.1
 

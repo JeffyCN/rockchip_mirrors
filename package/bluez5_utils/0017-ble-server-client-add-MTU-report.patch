@@ -1,7 +1,7 @@
-From 82f74c02ab307a385d82d90f3223e8d9470f8ea4 Mon Sep 17 00:00:00 2001
+From 9ebf60f579c8ceda84ce027aa2a3f736f74826dc Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Fri, 17 Apr 2020 16:59:30 +0800
-Subject: [PATCH] ble server/client add MTU report
+Subject: [PATCH 17/19] ble server/client add MTU report
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -234,5 +234,5 @@ index d5d2093..937e5ef 100644
 +bool bt_gatt_server_set_mtu_cb(struct bt_gatt_server *server,
 +					bt_gatt_server_mtu_func_t callback, void *user_data);
 -- 
-2.25.0
+2.20.1
 

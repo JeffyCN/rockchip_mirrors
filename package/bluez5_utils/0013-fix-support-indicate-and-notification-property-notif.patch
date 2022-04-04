@@ -1,8 +1,8 @@
-From 672fc81b40ddae54867a05b0ae44bd379fc39112 Mon Sep 17 00:00:00 2001
+From 524a39a5e52ac284818900053802ab40f2a507b1 Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Fri, 27 Dec 2019 15:18:22 +0800
-Subject: [PATCH] fix support indicate and notification property, notification
- is not available
+Subject: [PATCH 13/19] fix support indicate and notification property,
+ notification is not available
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -52,5 +52,5 @@ index 99c8ea2..af89dc3 100644
  	return;
  
 -- 
-2.7.4
+2.20.1
 

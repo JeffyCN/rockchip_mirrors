@@ -1,7 +1,7 @@
-From 17b0c8af91d461000607564ad880e2d8295c0655 Mon Sep 17 00:00:00 2001
+From a093eb49330b772b192323ce172f49c94654c76f Mon Sep 17 00:00:00 2001
 From: ctf <ctf@rock-chips.com>
 Date: Mon, 23 Dec 2019 16:16:24 +0800
-Subject: [PATCH] not load hog plugin
+Subject: [PATCH 14/19] not load hog plugin
 
 Signed-off-by: ctf <ctf@rock-chips.com>
 ---
@@ -28,5 +28,5 @@ index 0176ae1..eb9def1
  
  	plugin = g_try_new0(struct bluetooth_plugin, 1);
 -- 
-2.7.4
+2.20.1
 
