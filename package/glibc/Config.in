@@ -28,10 +28,6 @@ config BR2_PACKAGE_GLIBC_UTILS
 	  Enabling this option will compile and install the getconf,
 	  ldconfig, ldd and locale glibc utilities for the target.
 
-config BR2_PACKAGE_GLIBC_AUTO_KERNEL_VERSION
-	bool "auto detect header version"
-	default y
-
 config BR2_PACKAGE_GLIBC_GEN_LD_CACHE
 	bool "glibc gen ld.so.cache"
 	default y

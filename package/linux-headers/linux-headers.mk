@@ -7,9 +7,11 @@
 # This package is used to provide Linux kernel headers for the
 # internal toolchain backend.
 
+ifeq ($(BR2_PACKAGE_LINUX_HEADERS_AUTO_VERSION),y)
 # Get real Linux headers version from Makefile's VERSION and PATCHLEVEL
 LINUX_HEADERS_VERSION_REAL = \
 	`grep -o "[0-9]*" -m 2 $(LINUX_HEADERS_DIR)/Makefile|paste -sd.`
+endif
 
 # Set variables depending on whether we are using headers from a kernel
 # build or a standalone header package.
@@ -157,7 +159,7 @@ define LINUX_HEADERS_INSTALL_STAGING_CMDS
 			headers_install)
 endef
 
-ifneq ($(BR2_PACKAGE_GLIBC_AUTO_KERNEL_VERSION),y)
+ifneq ($(BR2_PACKAGE_LINUX_HEADERS_AUTO_VERSION),y)
 ifeq ($(BR2_KERNEL_HEADERS_VERSION)$(BR2_KERNEL_HEADERS_AS_KERNEL)$(BR2_KERNEL_HEADERS_CUSTOM_TARBALL)$(BR2_KERNEL_HEADERS_CUSTOM_GIT)$(BR2_KERNEL_HEADERS_CUSTOM_LOCAL),y)
 # In this case, we must always do a 'loose' test, because they are all
 # custom versions which may be later than what we know right now.
