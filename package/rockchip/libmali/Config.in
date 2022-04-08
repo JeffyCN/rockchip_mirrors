@@ -44,6 +44,7 @@ choice
 	prompt "display platform"
 	default BR2_PACKAGE_LIBMALI_WAYLAND if BR2_PACKAGE_WAYLAND
 	default BR2_PACKAGE_LIBMALI_X11 if BR2_PACKAGE_XORG7
+	default BR2_PACKAGE_LIBMALI_GBM
 
 config BR2_PACKAGE_LIBMALI_ONLY_CL
 	bool "OpenCL only"
