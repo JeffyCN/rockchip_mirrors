@@ -16,7 +16,7 @@
 #include "qt.config"
 #include "qt_app.config"
 #include "gpu.config"
-#include "display.config"
+#include "weston.config"
 
 #include "network.config"
 #include "wifi.config"

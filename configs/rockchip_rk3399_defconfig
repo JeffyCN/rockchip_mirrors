@@ -13,7 +13,7 @@
 #include "video_gst_rtsp.config"
 
 #include "gpu.config"
-#include "display.config"
+#include "weston.config"
 
 #include "network.config"
 #include "wifi.config"
