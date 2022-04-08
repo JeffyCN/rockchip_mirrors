@@ -9,7 +9,7 @@
 #include "camera.config"
 #include "camera_gst.config"
 #include "qt.config"
-#include "display.config"
+#include "weston.config"
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "audio.config"

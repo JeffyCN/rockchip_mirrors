@@ -6,7 +6,7 @@
 # // #include "camera_gst.config"
 #include "debug.config"
 #include "debug2.config"
-# //#include "display.config"
+# //#include "weston.config"
 #include "gpu_dummy.config"
 #include "network.config"
 #include "ntfs.config"

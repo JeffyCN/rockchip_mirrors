@@ -2,7 +2,7 @@
 #include "base.config"
 #include "base_extra.config"
 #include "gpu.config"
-#include "display.config"
+#include "weston.config"
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "audio.config"

@@ -7,7 +7,7 @@
 #include "network.config"
 #include "bt.config"
 #include "video_mpp.config"
-#include "display.config"
+#include "weston.config"
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
