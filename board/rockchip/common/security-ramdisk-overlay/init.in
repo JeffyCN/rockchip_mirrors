@@ -72,6 +72,13 @@ else
 fi
 mount /dev/mapper/vroot /mnt
 
+LABLE=$(dumpe2fs -h /dev/mapper/vroot | grep name | xargs -n 1 | tail -1)
+
+if [ "$LABLE" != "rootfs" ]; then
+	mount -o remount,rw /mnt
+	resize2fs /dev/mapper/vroot && tune2fs /dev/mapper/vroot -L rootfs
+fi
+
 if [ -e "/mnt/init" ]; then
 	INIT=/init
 else
