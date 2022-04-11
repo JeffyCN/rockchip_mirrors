@@ -17,7 +17,8 @@ define QLAUNCHER_INSTALL_TARGET_CMDS
 endef
 
 define QLAUNCHER_INSTALL_INIT_SYSV
-	$(INSTALL) -D -m 0755 $(@D)/S50launcher	$(TARGET_DIR)/etc/init.d/
+$(INSTALL) -D -m 755 $(QLAUNCHER_PKGDIR)/S50launcher \
+	$(TARGET_DIR)/etc/init.d/S50launcher
 endef
 
 $(eval $(qmake-package))
