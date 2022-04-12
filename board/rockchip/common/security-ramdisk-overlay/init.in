@@ -15,6 +15,11 @@ BLOCK_TYPE_SUPPORTED="
 mmcblk
 flash"
 
+MSG_OUTPUT=/dev/null
+DEBUG() {
+	echo $1 > $MSG_OUTPUT
+}
+
 check_device_is_supported() {
 	TARGET_DEV=NONE
 	for i in $BLOCK_TYPE_SUPPORTED
@@ -25,6 +30,10 @@ check_device_is_supported() {
 		fi
 	done
 }
+
+DEBUG "--------------------------"
+DEBUG "Debug For Security Ramboot"
+DEBUG "--------------------------"
 
 # make sure /dev/ has mounted
 while [ ! -e /dev/mapper/control -o ! -e /proc/mounts ]
@@ -56,6 +65,8 @@ OFFSET=
 if [ -z "$OFFSET" ]; then
 	OFFSET=$(cat ${TARGET_DEV}/size)
 fi
+
+DEBUG "OFFSET is ${OFFSET}"
 
 HASH=
 CIPHER=
