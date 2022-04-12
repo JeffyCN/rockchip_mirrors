@@ -10,6 +10,8 @@ exec 0</dev/console
 exec 1>/dev/console
 exec 2>/dev/console
 
+SLOT_SUFIX=
+SYSTEM_NAME=rootfs
 BLOCK_PATH=/sys/class/block
 BLOCK_TYPE_SUPPORTED="
 mmcblk
@@ -42,6 +44,13 @@ do
 	echo .
 done
 
+# check a/b system
+if [ ! -z "$(cat /proc/cmdline | grep android_slotsufix)" ]; then
+	SLOT_SUFIX=$(cat /proc/cmdline | sed "s#.*android_slotsufix=##" | cut -d ' ' -f 1)
+	SYSTEM_NAME=system
+fi
+
+DEBUG "system name is ${SYSTEM_NAME}${SLOT_SUFIX}"
 # make sure BLOCK has get from dev (sometimes uevent delay to send)
 while [ -z "${BLOCK}" ]
 do
@@ -51,7 +60,7 @@ do
 	check_device_is_supported $dev
 	if [ "$TARGET_DEV" != "NONE" ]; then
 		PARTNAME=$(cat ${TARGET_DEV}/uevent | grep PARTNAME | sed "s#.*PARTNAME=##")
-		if [ "$PARTNAME" == "rootfs" ]; then
+		if [ "$PARTNAME" == "${SYSTEM_NAME}${SLOT_SUFIX}" ]; then
 			BLOCK=/dev/$(basename $TARGET_DEV)
 			break
 		fi
