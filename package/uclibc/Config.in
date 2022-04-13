@@ -7,6 +7,11 @@ config BR2_PACKAGE_UCLIBC
 	default y
 	select BR2_PACKAGE_LINUX_HEADERS
 
+config BR2_UCLIBC_USE_GLIBC_NEON
+	bool "use glibc-neon"
+	depends on BR2_arm && BR2_ARM_CPU_HAS_NEON
+	default y
+
 config BR2_UCLIBC_CONFIG
 	string "uClibc configuration file to use?"
 	default "package/uclibc/uClibc-ng.config"
