@@ -5,7 +5,7 @@
 ################################################################################
 
 YAVTA_VERSION = 82ff2efdb9787737b9f21b6f4759f077c827b238
-YAVTA_SITE = git://git.ideasonboard.org/yavta.git
+YAVTA_SITE = https://git.ideasonboard.org/yavta.git
 YAVTA_LICENSE = GPL-2.0+
 YAVTA_LICENSE_FILES = COPYING.GPL
 

@@ -5,7 +5,7 @@
 ################################################################################
 
 DROPWATCH_VERSION = 7c33d8a8ed105b07a46b55d71d93b36ed34c16db
-DROPWATCH_SITE = git://git.infradead.org/users/nhorman/dropwatch.git
+DROPWATCH_SITE = https://git.infradead.org/users/nhorman/dropwatch.git
 DROPWATCH_DEPENDENCIES = binutils libnl readline host-pkgconf \
 	$(TARGET_NLS_DEPENDENCIES)
 DROPWATCH_LICENSE = GPL-2.0
