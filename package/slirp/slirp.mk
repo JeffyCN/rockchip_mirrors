@@ -8,7 +8,7 @@
 # Also, there's no tag, so we use a random SHA1 (master's HEAD
 # of today)
 SLIRP_VERSION = 8c2da74c1385242f20799fec8c04f8378edc6550
-SLIRP_SITE = https://anongit.freedesktop.org/spice/slirp
+SLIRP_SITE = git://anongit.freedesktop.org/spice/slirp
 SLIRP_LICENSE = BSD-4-Clause, BSD-2-Clause
 # Note: The license file 'COPYRIGHT' is missing from the sources,
 # although some files refer to it.

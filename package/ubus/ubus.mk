@@ -5,7 +5,7 @@
 ################################################################################
 
 UBUS_VERSION = 34c6e818e431cc53478a0f7c7c1eca07d194d692
-UBUS_SITE = https://git.openwrt.org/project/ubus.git
+UBUS_SITE = git://git.openwrt.org/project/ubus.git
 
 UBUS_LICENSE = LGPL-2.1
 UBUS_LICENSE_FILES = ubusd_acl.h

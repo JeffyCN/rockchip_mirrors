@@ -5,7 +5,7 @@
 ################################################################################
 
 LIBCAMERA_VERSION = 72278369b30af757c8ab756cc6c9cadcf15684d5
-LIBCAMERA_SITE = https://linuxtv.org/libcamera.git
+LIBCAMERA_SITE = git://linuxtv.org/libcamera.git
 LIBCAMERA_LICENSE = GPL-2.0+ (programs), LGPL-2.1+ (library)
 LIBCAMERA_LICENSE_FILES = \
 	licenses/apache-2.0.txt \
