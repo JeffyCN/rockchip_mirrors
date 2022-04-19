@@ -298,4 +298,5 @@ source "package/rockchip/lvgl/Config.in"
 source "package/rockchip/cvr_app/Config.in"
 source "package/rockchip/rkipc/Config.in"
 source "package/rockchip/rkfsmk/Config.in"
+source "package/rockchip/slt_gpu_light/Config.in"
 endif
