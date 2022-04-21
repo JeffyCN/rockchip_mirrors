@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/bash -e
 
 if [ -z "${BASH_SOURCE}" ];then
 	echo Not in bash, switching to it...
@@ -58,14 +58,13 @@ function lunch_rockchip()
 
 	CONFIG=${TARGET_OUTPUT_DIR}/.config
 	cp ${CONFIG}{,.new}
-	[ -f ${CONFIG}.old ] || return 0
-	mv ${CONFIG}{.old,} &>/dev/null
+	mv ${CONFIG}{.old,} &>/dev/null || return 0
 
 	make -C ${BUILDROOT_DIR} O="$TARGET_OUTPUT_DIR" olddefconfig &>/dev/null
 
 	if ! diff ${CONFIG}{,.new}; then
 		read -t 10 -p "Found old config, override it? (y/n):" YES
-		[ "$YES" != "n" ] && cp ${CONFIG}{.new,}
+		[ "$YES" = "n" ] || cp ${CONFIG}{.new,}
 	fi
 }
 
