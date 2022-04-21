@@ -77,9 +77,6 @@ function main()
 	TOP_DIR=$(dirname ${BUILDROOT_DIR})
 	echo Top of tree: ${TOP_DIR}
 
-	# Set croot alias
-	alias croot="cd ${TOP_DIR}"
-
 	RK_DEFCONFIG_ARRAY=(
 		$(cd ${BUILDROOT_DIR}/configs/; ls rockchip_* | \
 			sed "s/_defconfig$//" | grep "$1" | sort)
@@ -110,6 +107,12 @@ function main()
 	source ${TOP_DIR}/device/rockchip/.BoardConfig.mk
 
 	lunch_rockchip
+
+	# Set alias
+	alias croot="cd ${TOP_DIR}"
+	alias broot="cd ${BUILDROOT_DIR}"
+	alias bpkg="cd ${BUILDROOT_DIR}/package"
+	alias bout="cd ${TARGET_OUTPUT_DIR}"
 }
 
 if [ "${BASH_SOURCE}" == "$0" ];then
