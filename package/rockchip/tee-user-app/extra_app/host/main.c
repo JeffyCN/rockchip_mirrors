@@ -329,7 +329,7 @@ int main(int argc, char *argv[])
 	int status;
 
 	/* check run under pid 1(init) */
-	if (getppid() != 1) {
+	if ((getppid() != 1) || (argc > 1)) {
 		return process_recovery(argc, argv);
 	}
 
