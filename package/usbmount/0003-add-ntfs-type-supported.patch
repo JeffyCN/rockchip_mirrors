@@ -1,0 +1,25 @@
+From f50f55653cca8b30b50f80fcb2b9cfa7d7d78759 Mon Sep 17 00:00:00 2001
+From: Zain Wang <wzz@rock-chips.com>
+Date: Fri, 22 Apr 2022 10:35:20 +0800
+Subject: [PATCH] add ntfs type supported
+
+---
+ usbmount.conf | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/usbmount.conf b/usbmount.conf
+index 97f7ccc..191f6d6 100644
+--- a/usbmount.conf
++++ b/usbmount.conf
+@@ -14,7 +14,7 @@ MOUNTPOINTS="/media/usb0 /media/usb1 /media/usb2 /media/usb3
+ 
+ # Filesystem types: removable storage devices are only mounted if they
+ # contain a filesystem type which is in this list.
+-FILESYSTEMS="vfat ext2 ext3 ext4 hfsplus"
++FILESYSTEMS="vfat ext2 ext3 ext4 hfsplus ntfs"
+ 
+ #############################################################################
+ # WARNING!                                                                  #
+-- 
+2.25.1
+
