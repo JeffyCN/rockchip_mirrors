@@ -5,7 +5,8 @@
 #include "ubifs.config"
 #include "camera.config"
 BR2_ROOTFS_OVERLAY="board/rockchip/rv1126_rv1109/fs-overlay-spi-nand-uvc/"
-BR2_ROOTFS_POST_BUILD_SCRIPT="board/rockchip/rv1126_rv1109/pack-uvc-oem.sh"
+BR2_ROOTFS_POST_BUILD_SCRIPT="../device/rockchip/common/post-build.sh board/rockchip/rv1126_rv1109/pack-uvc-oem.sh"
+BR2_ROOTFS_POST_SCRIPT_ARGS="$(BR2_DEFCONFIG)"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="gc4c33_PCORW0009A_40IRC-4M.xml"
 BR2_PACKAGE_UVC_APP=y
 BR2_PACKAGE_UAC_APP=y

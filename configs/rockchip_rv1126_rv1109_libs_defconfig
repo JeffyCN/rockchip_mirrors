@@ -4,7 +4,8 @@
 #include "camera.config"
 BR2_INIT_NONE=y
 BR2_SYSTEM_BIN_SH_NONE=y
-BR2_ROOTFS_POST_BUILD_SCRIPT="board/rockchip/rv1126_rv1109/post-script-bsp.sh"
+BR2_ROOTFS_POST_BUILD_SCRIPT="../device/rockchip/common/post-build.sh board/rockchip/rv1126_rv1109/post-script-bsp.sh"
+BR2_ROOTFS_POST_SCRIPT_ARGS="$(BR2_DEFCONFIG)"
 # BR2_PACKAGE_BUSYBOX is not set
 BR2_PACKAGE_ROCKCHIP=y
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="os04a10_CMK-OT1607-FV1_M12-40IRC-4MP-F16.xml"

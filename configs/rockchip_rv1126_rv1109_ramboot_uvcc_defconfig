@@ -4,7 +4,8 @@
 #include "camera.config"
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
 BR2_ROOTFS_OVERLAY="board/rockchip/rv1126_rv1109/fs-overlay-ramboot-uvc/"
-BR2_ROOTFS_POST_BUILD_SCRIPT="board/rockchip/rv1126_rv1109/post-build-ramboot.sh"
+BR2_ROOTFS_POST_BUILD_SCRIPT="../device/rockchip/common/post-build.sh board/rockchip/rv1126_rv1109/post-build-ramboot.sh"
+BR2_ROOTFS_POST_SCRIPT_ARGS="$(BR2_DEFCONFIG)"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="os04a10_CMK-OT1607-FV1_M12-40IRC-4MP-F16.xml"
 BR2_PACKAGE_UVC_APP=y
 BR2_PACKAGE_RKMEDIA_V4L2_CAPTURE=y
