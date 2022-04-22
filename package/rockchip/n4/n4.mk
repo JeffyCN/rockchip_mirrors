@@ -24,4 +24,8 @@ define N4_INSTALL_TARGET_CMDS
 $(TARGET_MAKE_ENV) DESTDIR=$(TARGET_DIR) ninja $($(PKG)_NINJA_OPTS) -C $($(PKG)_BUILDDIR) install
 endef
 
+define N4_INSTALL_INIT_SYSV
+	$(INSTALL) -D -m 755 $(N4_PKGDIR)/S51n4 $(TARGET_DIR)/etc/init.d/S51n4
+endef
+
 $(eval $(cmake-package))
