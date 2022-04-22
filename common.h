@@ -20,6 +20,9 @@
 #include <stdio.h>
 #include <stdbool.h>
 
+#define MISC_PARTITION_NAME_BLOCK "/dev/block/by-name/misc"
+#define MISC_PARTITION_NAME_MTD "misc"
+
 // Initialize the graphics system.
 void ui_init();
 

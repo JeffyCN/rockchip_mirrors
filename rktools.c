@@ -136,11 +136,8 @@ static void wait_for_device(const char* fn) {
 }
 
 void setFlashPoint(){
-    Volume* v = volume_for_path("/misc");
-    if (strcmp(v->fs_type, "emmc") == 0) {
-        //wait for devices ready
-        wait_for_device(v->device);
-    }
+    if (!isMtdDevice())
+        wait_for_device(MISC_PARTITION_NAME_BLOCK);
 
     init_sd_emmc_point();
     setenv(EMMC_POINT_NAME, result_point[MMC], 1);
