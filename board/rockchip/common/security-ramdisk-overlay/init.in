@@ -87,31 +87,38 @@ DEBUG "OFFSET is ${OFFSET}"
 HASH=
 CIPHER=
 ENC_EN=
+FORCE_KEY_WRITE=false
 
 if [ "${ENC_EN}" = "true" ]; then
 	/usr/bin/tee-supplicant &
 	/usr/bin/keybox_app
-	if [ "$?" != 0 ]; then
+	if [ "$?" != 0 ] || [ "$FORCE_KEY_WRITE" = "true" ]; then
 		DEBUG "BAD KEY FETCH -> try to find misc"
 		MISC_BLOCK=$(find_raw_partition "misc")
 		DEBUG "find misc -> $MISC_BLOCK"
 		ln -s /dev/$MISC_BLOCK /dev/block/by-name/misc
 		/usr/bin/updateEngine --misc_custom read
 		if [ "$?" != 0 ]; then
-			DEBUG "Can't fetch key from misc, reboot !!!"
-			reboot loader &
-			while true
-			do
-				sleep 1
-				killall -15 reboot
-			done
-			exit 0
+			if [ "$FORCE_KEY_WRITE" != "true" ]; then
+				DEBUG "Can't fetch key from misc, reboot !!!"
+				reboot loader &
+				while true
+				do
+					sleep 1
+					killall -15 reboot
+				done
+				exit 0
+			fi
+		else
+			mv /tmp/custom_cmdline /tmp/syspw
+			/usr/bin/updateEngine --misc_custom clean
+			/usr/bin/keybox_app write
+			echo None > /tmp/syspw
 		fi
-		mv /tmp/custom_cmdline /tmp/syspw
-		/usr/bin/updateEngine --misc_custom clean
-		/usr/bin/keybox_app write
+		/usr/bin/keybox_app
 	fi
 	KEY=`cat /tmp/syspw`
+	DEBUG "key=$KEY"
 	dmsetup create vroot --table "0 ${OFFSET} crypt ${CIPHER} ${KEY} 0 /dev/block/by-name/system 0 1 allow_discards"
 	echo None > /tmp/syspw
 else
