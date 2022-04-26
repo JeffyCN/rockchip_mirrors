@@ -7,7 +7,6 @@ config BR2_PACKAGE_HOST_BINUTILS_SUPPORTS_CFI
 
 config BR2_PACKAGE_BINUTILS_ENABLE_GOLD
 	bool "enable gold linker"
-	default y if BR2_PACKAGE_LIBMALI
 
 choice
 	prompt "Binutils Version"

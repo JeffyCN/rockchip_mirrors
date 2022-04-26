@@ -12,8 +12,8 @@ QT5DECLARATIVE_INSTALL_STAGING = YES
 QT5DECLARATIVE_LICENSE = GPL-2.0+ or LGPL-3.0, GPL-3.0 with exception(tools), GFDL-1.3 (docs)
 QT5DECLARATIVE_LICENSE_FILES = LICENSE.GPL2 LICENSE.GPL3 LICENSE.GPL3-EXCEPT LICENSE.LGPL3 LICENSE.FDL
 
-# Use software backend by default when libmali not enabled
-ifneq ($(BR2_PACKAGE_LIBMALI),y)
+# Use software backend by default when rockchip-mali not enabled
+ifneq ($(BR2_PACKAGE_ROCKCHIP_MALI),y)
 define QT5DECLARATIVE_INSTALL_TARGET_ENV
 	echo "export QT_QUICK_BACKEND=software" > \
 		$(TARGET_DIR)/etc/profile.d/qtdeclarative.sh
