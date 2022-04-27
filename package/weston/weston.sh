@@ -11,14 +11,25 @@ export WESTON_DISABLE_ATOMIC=1
 # Enable black background for fullscreen views
 # export WESTON_FULLSCREEN_BLACK_BACKGROUND=1
 
+# Allow disabling unused CRTCs
+# WESTON_DRM_MASTER=1
+
 # Primary screen
 # export WESTON_DRM_PRIMARY=eDP-1
 
-# Disable internal screens when any external screen connected
-# export WESTON_DRM_PREFER_EXTERNAL=1
+# Single screen
+# export WESTON_DRM_SINGLE_HEAD=1
 
-# Prefer using external screen as primary screen
-# export WESTON_DRM_PREFER_EXTERNAL_DUAL=1
+# Fallback to any available connector
+# export WESTON_DRM_HEAD_FALLBACK=1
+
+# Connector selecting mode:
+# default|primary|internal|external|external-dual
+# export WESTON_DRM_HEAD_MODE=external-dual
+
+# Screens layout direction
+# horizontal|vertical|same-as
+# export WESTON_OUTPUT_FLOW=vertical
 
 # Virtual display size
 # export WESTON_DRM_VIRTUAL_SIZE=1024x768
