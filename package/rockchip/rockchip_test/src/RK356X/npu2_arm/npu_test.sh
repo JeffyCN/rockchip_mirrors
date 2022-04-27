@@ -22,17 +22,17 @@ read -t 30 NPU_CHOICE
 
 npu_stress_test()
 {
-	sh ${DIR_NPU}/npu_stress_test.sh
+	bash ${DIR_NPU}/npu_stress_test.sh
 }
 
 npu_scale_frequency_test()
 {
-	sh ${DIR_NPU}/npu_freq_scaling.sh
+	bash ${DIR_NPU}/npu_freq_scaling.sh 86400 2
 }
 
 rknn_demo_test()
 {
-	sh ${DIR_NPU}/rknn_demo.sh
+	bash ${DIR_NPU}/rknn_demo.sh
 }
 
 case ${NPU_CHOICE} in
