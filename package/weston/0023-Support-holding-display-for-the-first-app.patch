@@ -1,7 +1,7 @@
-From 9142dcd022cb676d36c1fce9584332632c977bfa Mon Sep 17 00:00:00 2001
+From 36fc01f85f846bbd1b90ff0acf7d99aa8281682b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 10:20:40 +0800
-Subject: [PATCH 23/60] Support holding display for the first app
+Subject: [PATCH 23/61] Support holding display for the first app
 
 Use '-w' or '--warm-up' to enable it.
 
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 36 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 47bf540..c4d255b 100644
+index a4f679a0..128016b3 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -679,6 +679,7 @@ usage(int error_code)
@@ -24,7 +24,7 @@ index 47bf540..c4d255b 100644
  		"  -h, --help\t\tThis help message\n\n");
  
  #if defined(BUILD_DRM_COMPOSITOR)
-@@ -3322,6 +3323,8 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3336,6 +3337,8 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  	bool wait_for_debugger = false;
  	struct wl_protocol_logger *protologger = NULL;
  
@@ -33,7 +33,7 @@ index 47bf540..c4d255b 100644
  	const struct weston_option core_options[] = {
  		{ WESTON_OPTION_STRING, "backend", 'B', &backend },
  		{ WESTON_OPTION_STRING, "shell", 0, &shell },
-@@ -3340,6 +3343,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3354,6 +3357,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  		{ WESTON_OPTION_BOOLEAN, "debug", 0, &debug_protocol },
  		{ WESTON_OPTION_STRING, "logger-scopes", 'l', &log_scopes },
  		{ WESTON_OPTION_STRING, "flight-rec-scopes", 'f', &flight_rec_scopes },
@@ -41,7 +41,7 @@ index 47bf540..c4d255b 100644
  	};
  
  	wl_list_init(&wet.layoutput_list);
-@@ -3514,6 +3518,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3528,6 +3532,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  	wet.compositor->idle_time = idle_time;
  	wet.compositor->default_pointer_grab = NULL;
  	wet.compositor->exit = handle_exit;
@@ -50,10 +50,10 @@ index 47bf540..c4d255b 100644
  	weston_compositor_log_capabilities(wet.compositor);
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 9e2963b..cf702b6 100644
+index f883e0eb..93c320ce 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
-@@ -1199,6 +1199,8 @@ struct weston_compositor {
+@@ -1202,6 +1202,8 @@ struct weston_compositor {
  	struct content_protection *content_protection;
  
  	enum weston_output_flow output_flow;
@@ -63,7 +63,7 @@ index 9e2963b..cf702b6 100644
  
  struct weston_buffer {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 3299951..7e0674f 100644
+index ef2260a3..f31dc79e 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -176,6 +176,24 @@ weston_compositor_is_static_layer(struct weston_layer *layer)

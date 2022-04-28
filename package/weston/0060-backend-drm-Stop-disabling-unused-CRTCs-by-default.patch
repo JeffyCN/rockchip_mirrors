@@ -1,7 +1,7 @@
-From 716c649b5f47a1bdae1c56edbe334e7a90ada486 Mon Sep 17 00:00:00 2001
+From 0fcc4bb1268f813a1f79698aa30f2636919b509c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 15:17:39 +0800
-Subject: [PATCH 60/60] backend-drm: Stop disabling unused CRTCs by default
+Subject: [PATCH 60/61] backend-drm: Stop disabling unused CRTCs by default
 
 So that we can launch multiple weston instances for different monitors.
 
@@ -15,10 +15,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 8 insertions(+), 3 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 2e72610..b6e6392 100644
+index e68728a5..0c1861bc 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -340,6 +340,7 @@ struct drm_backend {
+@@ -339,6 +339,7 @@ struct drm_backend {
  
  	int64_t last_resize_ms;
  
@@ -27,10 +27,10 @@ index 2e72610..b6e6392 100644
  	bool head_fallback;
  	drm_head_match_t *head_matches;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 460a2dd..ee7478e 100644
+index 81974101..e151117c 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -4014,6 +4014,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4070,6 +4070,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	if (b == NULL)
  		return NULL;
  
@@ -42,7 +42,7 @@ index 460a2dd..ee7478e 100644
  	if (buf && buf[0] == '1')
  		b->single_head = true;
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 82247fb..37da3f6 100644
+index 82247fb8..37da3f66 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1190,7 +1190,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
