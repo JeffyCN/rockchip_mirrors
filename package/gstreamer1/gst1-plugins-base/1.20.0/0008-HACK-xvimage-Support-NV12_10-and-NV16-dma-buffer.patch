@@ -1,7 +1,7 @@
-From a0bfe9e0ae865ca6d6047a4113ed2da40f3a833b Mon Sep 17 00:00:00 2001
+From 9489c4087ceaa39a55a914ecefd09c0aa22e87cb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 14 Dec 2021 11:45:02 +0800
-Subject: [PATCH 10/10] HACK: xvimage: Support NV12_10 and NV16 dma buffer
+Subject: [PATCH 08/12] HACK: xvimage: Support NV12_10 and NV16 dma buffer
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 56 insertions(+), 1 deletion(-)
 
 diff --git a/sys/xvimage/xvcontext.c b/sys/xvimage/xvcontext.c
-index 1bcf149..f0e1737 100644
+index 7376c3432..fe92cffa1 100644
 --- a/sys/xvimage/xvcontext.c
 +++ b/sys/xvimage/xvcontext.c
 @@ -152,7 +152,7 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
@@ -23,15 +23,15 @@ index 1bcf149..f0e1737 100644
      XvAttribute *const attr = XvQueryPortAttributes (context->disp,
          context->xv_port_id, &count);
      static const char autopaint[] = "XV_AUTOPAINT_COLORKEY";
-@@ -160,6 +160,7 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
-     static const char colorkey[] = "XV_COLORKEY";
+@@ -161,6 +161,7 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
      static const char iturbt709[] = "XV_ITURBT_709";
+     static const char *xv_colorspace = "XV_COLORSPACE";
      static const char dma_client_id[] = XV_DMA_CLIENT_PROP;
 +    static const char dma_drm_fourcc[] = XV_DMA_DRM_FOURCC_PROP;
  
      GST_DEBUG ("Checking %d Xv port attributes", count);
  
-@@ -243,6 +244,9 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
+@@ -248,6 +249,9 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
              config->dma_client_id);
          todo--;
          context->have_dma_client = TRUE;
@@ -41,7 +41,7 @@ index 1bcf149..f0e1737 100644
        }
      }
  
-@@ -357,6 +361,24 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
+@@ -362,6 +366,24 @@ gst_xvcontext_get_xv_support (GstXvContext * context,
    if (gst_caps_is_empty (caps))
      goto no_caps;
  
@@ -66,7 +66,7 @@ index 1bcf149..f0e1737 100644
    return caps;
  
    /* ERRORS */
-@@ -894,6 +916,10 @@ gst_xvcontext_get_format_from_info (GstXvContext * context, GstVideoInfo * info)
+@@ -900,6 +922,10 @@ gst_xvcontext_get_format_from_info (GstXvContext * context,
  {
    GList *list = NULL;
  
@@ -78,7 +78,7 @@ index 1bcf149..f0e1737 100644
  
    while (list) {
 diff --git a/sys/xvimage/xvcontext.h b/sys/xvimage/xvcontext.h
-index 166e79f..67cac4f 100644
+index 920f914ec..cce80bcf6 100644
 --- a/sys/xvimage/xvcontext.h
 +++ b/sys/xvimage/xvcontext.h
 @@ -42,11 +42,18 @@
@@ -100,9 +100,9 @@ index 166e79f..67cac4f 100644
  G_BEGIN_DECLS
  
  typedef struct _GstXvContextConfig GstXvContextConfig;
-@@ -168,6 +175,9 @@ struct _GstXvContext
-   gboolean have_double_buffer;
+@@ -169,6 +176,9 @@ struct _GstXvContext
    gboolean have_iturbt709;
+   gboolean have_xvcolorspace;
    gboolean have_dma_client;
 +  gboolean have_dma_drm_fourcc;
 +
@@ -111,10 +111,10 @@ index 166e79f..67cac4f 100644
    GList *formats_list;
  
 diff --git a/sys/xvimage/xvimagesink.c b/sys/xvimage/xvimagesink.c
-index de2b1d6..4e348d2 100644
+index e11a4baab..687e80737 100644
 --- a/sys/xvimage/xvimagesink.c
 +++ b/sys/xvimage/xvimagesink.c
-@@ -314,6 +314,11 @@ gst_xv_image_sink_send_dma_params (GstXvImageSink * xvimagesink,
+@@ -323,6 +323,11 @@ gst_xv_image_sink_send_dma_params (GstXvImageSink * xvimagesink,
    } else {
      error = TRUE;
    }
@@ -126,7 +126,7 @@ index de2b1d6..4e348d2 100644
    g_mutex_unlock (&context->lock);
  
    if (error == TRUE) {
-@@ -996,6 +1001,20 @@ gst_xv_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
+@@ -1002,6 +1007,20 @@ gst_xv_image_sink_setcaps (GstBaseSink * bsink, GstCaps * caps)
      gst_object_unref (oldpool);
    }
  
