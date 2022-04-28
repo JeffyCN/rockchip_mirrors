@@ -1,7 +1,7 @@
-From 357afb4a04ca81f2e33f59ad5a54eeff72a3f5c5 Mon Sep 17 00:00:00 2001
+From 5b4d4d801903a6d1741148c99edef8dbba84cfeb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 2 Jul 2020 14:58:49 +0800
-Subject: [PATCH 06/54] HACK: backend-drm: Avoid random crash when suspending
+Subject: [PATCH 06/53] HACK: backend-drm: Avoid random crash when suspending
 
 Skip the repaint_status check since the weston_output_finish_frame()
 could also be called when turning off dpms.

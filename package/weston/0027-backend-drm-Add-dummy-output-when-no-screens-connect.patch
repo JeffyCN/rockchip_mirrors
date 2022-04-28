@@ -1,20 +1,20 @@
-From bc9a4cb4e48b870b870210771cb93f39d7b478d5 Mon Sep 17 00:00:00 2001
+From 487ee50c2c5631536a7772fdc984eeedf1f0996b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 27/60] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 27/61] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  desktop-shell/shell.c                |   7 +-
- libweston/backend-drm/drm-internal.h |   6 +
+ libweston/backend-drm/drm-internal.h |   5 +
  libweston/backend-drm/drm.c          | 216 ++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          |   3 +
- 4 files changed, 225 insertions(+), 7 deletions(-)
+ 4 files changed, 224 insertions(+), 7 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index a1826f2..500b970 100644
+index a1826f23..500b970d 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4761,10 +4761,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
@@ -39,18 +39,10 @@ index a1826f2..500b970 100644
  		shell->lock_surface->committed(shell->lock_surface, 0, 0);
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index cd2613b..ca583fb 100644
+index ed1e0aa6..42da77ff 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -113,6 +113,7 @@
- /* Min duration between drm outputs update requests, to avoid glith */
- #define DRM_MIN_UPDATE_MS	1000
- #define DRM_UPDATE_FREEZE_MS	60
-+#define DRM_RESIZE_FREEZE_MS	600
- 
- #define WESTON_DRM_CONFIG_FILE	"/tmp/.weston_drm.conf"
- #define DRM_CONFIG_UPDATE_MS	100
-@@ -337,6 +338,8 @@ struct drm_backend {
+@@ -337,6 +337,8 @@ struct drm_backend {
  	bool pending_update;
  	int64_t last_update_ms;
  
@@ -59,7 +51,7 @@ index cd2613b..ca583fb 100644
  	bool single_head;
  	bool head_fallback;
  	drm_head_match_t *head_matches;
-@@ -350,6 +353,9 @@ struct drm_backend {
+@@ -350,6 +352,9 @@ struct drm_backend {
  
  	struct wl_event_source *config_timer;
  	struct stat config_stat;
@@ -70,7 +62,7 @@ index cd2613b..ca583fb 100644
  
  struct drm_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index aa94a09..be14730 100644
+index 8e410904..ebc83a14 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -209,8 +209,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -94,7 +86,7 @@ index aa94a09..be14730 100644
  
  	if (now_ms < b->last_update_ms + DRM_UPDATE_FREEZE_MS ||
 +	    now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS ||
- 	    now_ms < output->last_rotate_ms + DRM_ROTATE_FREEZE_MS) {
+ 	    now_ms < output->last_resize_ms + DRM_RESIZE_FREEZE_MS) {
 +		/* Resize fullscreen/maxmium views(not always success) */
 +		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
 +			wl_signal_emit(&b->compositor->output_resized_signal,
@@ -192,7 +184,7 @@ index aa94a09..be14730 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->config_timer);
-@@ -3651,6 +3682,178 @@ config_timer_handler(void *data)
+@@ -3707,6 +3738,178 @@ config_timer_handler(void *data)
  	return 0;
  }
  
@@ -371,7 +363,7 @@ index aa94a09..be14730 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3882,12 +4085,19 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3938,12 +4141,19 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  
@@ -392,7 +384,7 @@ index aa94a09..be14730 100644
  
  	/* 'compute' faked zpos values in case HW doesn't expose any */
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 4b5ba42..a3c55bd 100644
+index 4b5ba42b..a3c55bd3 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1170,6 +1170,9 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
