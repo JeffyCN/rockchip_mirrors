@@ -1,4 +1,5 @@
 export GST_DEBUG_NO_COLOR=1
+export GST_INSPECT_NO_COLORS=1
 
 # Skip vstride aligning, which is not required when using RKVENC.
 # export GST_MPP_ENC_UNALIGNED_VSTRIDE=1
