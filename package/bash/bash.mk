@@ -68,4 +68,10 @@ define BASH_ADD_MKSH_TO_SHELLS
 endef
 BASH_TARGET_FINALIZE_HOOKS += BASH_ADD_MKSH_TO_SHELLS
 
+define BASH_INSTALL_TARGET_ENV
+	$(INSTALL) -D -m 0644 $(BASH_PKGDIR)/bash.bashrc \
+		$(TARGET_DIR)/etc/bash.bashrc
+endef
+BASH_POST_INSTALL_TARGET_HOOKS += BASH_INSTALL_TARGET_ENV
+
 $(eval $(autotools-package))
