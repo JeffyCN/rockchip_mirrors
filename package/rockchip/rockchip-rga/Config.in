@@ -3,3 +3,10 @@ config BR2_PACKAGE_ROCKCHIP_RGA
 	select BR2_PACKAGE_LIBDRM
 	help
 	  Rockchip RGA 2D accelerator userspace library.
+
+if BR2_PACKAGE_ROCKCHIP_RGA
+config BR2_PREFER_ROCKCHIP_RGA
+	bool "prefer using rockchip-rga"
+	help
+	  Prefer using rockchip-rga when available.
+endif
