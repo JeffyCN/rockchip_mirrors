@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-ifeq ($(BR2_PACKAGE_LINUX_RGA),y)
-GST1_PLUGINS_GOOD_DEPENDENCIES += linux-rga
+ifeq ($(BR2_PACKAGE_ROCKCHIP_RGA),y)
+GST1_PLUGINS_GOOD_DEPENDENCIES += rockchip-rga
 endif
 
 ifeq ($(BR2_PACKAGE_GSTREAMER1_18),y)
