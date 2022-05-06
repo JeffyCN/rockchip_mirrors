@@ -16,7 +16,7 @@ EPTZ_DEMO_DEPENDENCIES += rockx
 EPTZ_DEMO_CONF_OPTS += "-DROCKX=ON" "-DROCKX_HEADER_DIR=$(STAGING_DIR)/usr/include/rockx"
 endif
 
-EPTZ_DEMO_DEPENDENCIES += rkmedia sdl2 sdl2_gfx sdl2_ttf uvc_app linux-rga
+EPTZ_DEMO_DEPENDENCIES += rkmedia sdl2 sdl2_gfx sdl2_ttf uvc_app rockchip-rga
 EPTZ_DEMO_CONF_OPTS += "-DRKNPU_HEADER_DIR=$(RKNPU_BUILDDIR)/rknn/include"
 
 $(eval $(cmake-package))

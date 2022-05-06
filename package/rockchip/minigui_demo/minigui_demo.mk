@@ -5,7 +5,7 @@ MINIGUI_DEMO_SITE_METHOD = local
 MINIGUI_DEMO_LICENSE = Apache V2.0
 MINIGUI_DEMO_LICENSE_FILES = NOTICE
 
-MINIGUI_DEMO_DEPENDENCIES = minigui linux-rga jpeg libpng freetype
+MINIGUI_DEMO_DEPENDENCIES = minigui rockchip-rga jpeg libpng freetype
 
 define MINIGUI_DEMO_BUILD_CMDS
 	$(MAKE) -C $(@D) CC="$(TARGET_CC)" CXX="$(TARGET_CXX)"

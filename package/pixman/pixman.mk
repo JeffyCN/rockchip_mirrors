@@ -15,8 +15,8 @@ PIXMAN_INSTALL_STAGING = YES
 PIXMAN_DEPENDENCIES = host-pkgconf
 HOST_PIXMAN_DEPENDENCIES = host-pkgconf
 
-ifeq ($(BR2_PACKAGE_LINUX_RGA),y)
-PIXMAN_DEPENDENCIES += linux-rga
+ifeq ($(BR2_PACKAGE_ROCKCHIP_RGA),y)
+PIXMAN_DEPENDENCIES += rockchip-rga
 define PIXMAN_INSTALL_TARGET_ENV
 	echo "export PIXMAN_USE_RGA=1" > $(@D)/pixman.sh
 	$(INSTALL) -D -m 0644 $(@D)/pixman.sh \

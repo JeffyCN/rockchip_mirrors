@@ -119,9 +119,9 @@ else
 FFMPEG_CONF_OPTS += --disable-swscale
 endif
 
-ifeq ($(BR2_PACKAGE_LINUX_RGA),y)
+ifeq ($(BR2_PACKAGE_ROCKCHIP_RGA),y)
 FFMPEG_CONF_OPTS += --enable-librga
-FFMPEG_DEPENDENCIES += linux-rga
+FFMPEG_DEPENDENCIES += rockchip-rga
 else
 FFMPEG_CONF_OPTS += --disable-librga
 endif

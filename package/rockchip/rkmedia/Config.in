@@ -99,7 +99,7 @@ endif #BR2_PACKAGE_RKMEDIA_AUDIO_CODEC
 
 config BR2_PACKAGE_RKMEDIA_RKRGA
     bool "rkrga"
-    select BR2_PACKAGE_LINUX_RGA
+    select BR2_PACKAGE_ROCKCHIP_RGA
     help
       wrapped function of librga
 

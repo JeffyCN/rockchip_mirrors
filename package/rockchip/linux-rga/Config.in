@@ -1,5 +1,0 @@
-config BR2_PACKAGE_LINUX_RGA
-	bool "Rockchip RGA lib for linux"
-	select BR2_PACKAGE_LIBDRM
-	help
-	  Rockchip RGA lib for linux.

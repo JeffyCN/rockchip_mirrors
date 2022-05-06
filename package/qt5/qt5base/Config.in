@@ -300,7 +300,7 @@ config BR2_PACKAGE_QT5BASE_TSLIB
 
 config BR2_PACKAGE_QT5BASE_USE_RGA
 	bool "Enable RGA"
-	depends on BR2_PACKAGE_LINUX_RGA
+	depends on BR2_PACKAGE_ROCKCHIP_RGA
 	help
 	  This options enables the RGA rendering
 

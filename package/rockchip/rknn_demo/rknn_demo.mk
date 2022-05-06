@@ -7,7 +7,7 @@
 RKNN_DEMO_VERSION = 1.0.0
 RKNN_DEMO_SITE = $(TOPDIR)/../external/rknn_demo
 RKNN_DEMO_SITE_METHOD = local
-RKNN_DEMO_DEPENDENCIES = jpeg libpng libv4l linux-rga minigui camera_engine_rkisp libdrm mpp uvc_app
+RKNN_DEMO_DEPENDENCIES = jpeg libpng libv4l rockchip-rga minigui camera_engine_rkisp libdrm mpp uvc_app
 
 ifeq ($(BR2_PACKAGE_RK1808),y)
 	RKNN_DEMO_CONF_OPTS += -DNEED_RKNNAPI=0

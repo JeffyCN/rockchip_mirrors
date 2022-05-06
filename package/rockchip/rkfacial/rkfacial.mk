@@ -2,7 +2,7 @@ ifeq ($(BR2_PACKAGE_RKFACIAL), y)
     RKFACIAL_SITE = $(TOPDIR)/../external/rkfacial
     RKFACIAL_SITE_METHOD = local
     RKFACIAL_INSTALL_STAGING = YES
-    RKFACIAL_DEPENDENCIES = rockface libdrm linux-rga sqlite alsa-lib mpp jpeg jpeg-turbo
+    RKFACIAL_DEPENDENCIES = rockface libdrm rockchip-rga sqlite alsa-lib mpp jpeg jpeg-turbo
 ifeq ($(BR2_PACKAGE_RK1806),y)
     RKFACIAL_DEPENDENCIES += camera_engine_rkisp
     RKFACIAL_CONF_OPTS += "-DCAMERA_ENGINE_RKISP=y"

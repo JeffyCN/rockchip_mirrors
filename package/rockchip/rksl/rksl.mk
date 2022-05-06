@@ -2,7 +2,7 @@ ifeq ($(BR2_PACKAGE_RKSL), y)
     RKSL_SITE = $(TOPDIR)/../app/rksl
     RKSL_SITE_METHOD = local
     RKSL_INSTALL_STAGING = YES
-    RKSL_DEPENDENCIES = libdrm linux-rga uvc_app rockface
+    RKSL_DEPENDENCIES = libdrm rockchip-rga uvc_app rockface
 
 ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKISP),y)
     RKSL_DEPENDENCIES += camera_engine_rkisp

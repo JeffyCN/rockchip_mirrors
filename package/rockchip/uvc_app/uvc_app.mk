@@ -28,7 +28,7 @@ ifeq ($(BR2_PACKAGE_ROCKIT), y)
 endif
 
 ifeq ($(BR2_PACKAGE_ROCKX),y)
-    UVC_APP_DEPENDENCIES += rockx linux-rga
+    UVC_APP_DEPENDENCIES += rockx rockchip-rga
     UVC_APP_CONF_OPTS += "-DEPTZ_SUPPORT=ON" "-DROCKX_HEADER_DIR=$(STAGING_DIR)/usr/include/rockx"
 endif
 
