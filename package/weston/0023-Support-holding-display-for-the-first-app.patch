@@ -1,4 +1,4 @@
-From 36fc01f85f846bbd1b90ff0acf7d99aa8281682b Mon Sep 17 00:00:00 2001
+From a703e9399ec15a223f4392eaddaef9be35e405a3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 10:20:40 +0800
 Subject: [PATCH 23/61] Support holding display for the first app
@@ -50,13 +50,13 @@ index a4f679a0..128016b3 100644
  	weston_compositor_log_capabilities(wet.compositor);
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index f883e0eb..93c320ce 100644
+index 6bd7a050..39e58c63 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
-@@ -1202,6 +1202,8 @@ struct weston_compositor {
- 	struct content_protection *content_protection;
+@@ -1203,6 +1203,8 @@ struct weston_compositor {
  
  	enum weston_output_flow output_flow;
+ 	struct weston_output *prefer_output;
 +
 +	bool warm_up;
  };
