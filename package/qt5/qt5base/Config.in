@@ -204,6 +204,7 @@ config BR2_PACKAGE_QT5BASE_EGLFS
 	bool "eglfs support"
 	depends on BR2_PACKAGE_HAS_LIBEGL
 	depends on BR2_PACKAGE_QT5_GL_AVAILABLE
+	default y if !BR2_PACKAGE_WAYLAND
 	select BR2_PACKAGE_QT5BASE_OPENGL
 
 comment "eglfs backend available if OpenGL and EGL are enabled"
