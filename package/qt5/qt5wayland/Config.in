@@ -1,6 +1,7 @@
 config BR2_PACKAGE_QT5WAYLAND
 	bool "qt5wayland"
-	select BR2_PACKAGE_WAYLAND
+	depends on BR2_PACKAGE_WAYLAND
+	default y
 	help
 	  Qt is a cross-platform application and UI framework for
 	  developers using C++.
