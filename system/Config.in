@@ -335,7 +335,8 @@ config BR2_TARGET_SERIAL_SHELL_NONE
 endchoice
 
 menuconfig BR2_TARGET_GENERIC_GETTY
-	bool
+	bool "Run a getty (login prompt) after boot"
+	depends on BR2_TARGET_SERIAL_SHELL_GETTY
 
 if BR2_TARGET_GENERIC_GETTY
 config BR2_TARGET_GENERIC_GETTY_PORT
