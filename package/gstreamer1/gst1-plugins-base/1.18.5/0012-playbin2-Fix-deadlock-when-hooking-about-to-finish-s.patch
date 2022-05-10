@@ -1,7 +1,7 @@
-From 233a559827f5f96662e271249a3fefd0d45a6bb7 Mon Sep 17 00:00:00 2001
+From aaa1defea79628abe341c4c6faf12120f9096a78 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 26 Nov 2021 17:41:47 +0800
-Subject: [PATCH 13/13] playbin2: Fix deadlock when hooking about-to-finish
+Subject: [PATCH 12/12] playbin2: Fix deadlock when hooking about-to-finish
  signal
 
 The playbin2 will deactivate old group in drain_cb() for that, which
