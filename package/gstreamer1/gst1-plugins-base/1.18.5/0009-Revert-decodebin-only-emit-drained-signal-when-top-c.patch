@@ -1,7 +1,7 @@
-From eb98b914f53b11819968a8b4b62bffbe483955bb Mon Sep 17 00:00:00 2001
+From e66584cbc230db8cc2fec246b5bfdaa52fbfd466 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 28 Apr 2022 17:31:28 +0800
-Subject: [PATCH 10/13] Revert "decodebin: only emit 'drained' signal when top
+Subject: [PATCH 09/12] Revert "decodebin: only emit 'drained' signal when top
  chain is drained"
 
 This reverts commit e945b3706c86aa13d05d195a1170e6277a247548.
