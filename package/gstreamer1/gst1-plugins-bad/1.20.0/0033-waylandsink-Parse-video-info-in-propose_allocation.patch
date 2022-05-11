@@ -1,0 +1,47 @@
+From fb82d5248a703492a471ffb580b3dbdc2e9fe819 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Wed, 11 May 2022 18:12:39 +0800
+Subject: [PATCH 33/33] waylandsink: Parse video info in propose_allocation()
+
+In some cases it would be called before set_caps().
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ ext/wayland/gstwaylandsink.c | 14 ++++++++++++++
+ 1 file changed, 14 insertions(+)
+
+diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
+index 9256b02..9582e2f 100644
+--- a/ext/wayland/gstwaylandsink.c
++++ b/ext/wayland/gstwaylandsink.c
+@@ -800,6 +800,10 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+   gint value;
+ 
+   gst_query_parse_allocation (query, &caps, &need_pool);
++  if (!caps)
++    goto no_caps;
++  if (!gst_video_info_from_caps (&sink->video_info, caps))
++    goto invalid_caps;
+ 
+   s = gst_caps_get_structure (caps, 0);
+   if (gst_structure_get_int (s, "arm-afbc", &value) && value) {
+@@ -821,6 +825,16 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+   g_object_unref (alloc);
+ 
+   return TRUE;
++no_caps:
++  {
++    GST_DEBUG_OBJECT (bsink, "no caps specified");
++    return FALSE;
++  }
++invalid_caps:
++  {
++    GST_DEBUG_OBJECT (bsink, "invalid caps specified");
++    return FALSE;
++  }
+ }
+ 
+ static void
+-- 
+2.20.1
+
