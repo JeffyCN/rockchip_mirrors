@@ -75,4 +75,12 @@ endef
 RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_IO_DOMAIN_SCRIPT
 endif
 
+ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
+define RKSCRIPT_INSTALL_TARGET_UDEV_RULES
+	$(INSTALL) -m 0644 -D $(RKSCRIPT_PKGDIR)/88-rockchip-camera.rules \
+		$(TARGET_DIR)/lib/udev/rules.d/88-rockchip-camera.rules
+endef
+RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_UDEV_RULES
+endif
+
 $(eval $(generic-package))
