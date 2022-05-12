@@ -1,4 +1,4 @@
-From 5b38890278ea489445e849ec08bb18714c6101de Mon Sep 17 00:00:00 2001
+From ad33d0a0e64815fa93fc0d2ae1d50781f261228f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
 Subject: [PATCH 28/62] backend-drm: Add dummy output when no screens connected
@@ -7,12 +7,28 @@ Some clients are not expecting no screens, add a dummy output for them.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
+ compositor/main.c                    |   3 +
  desktop-shell/shell.c                |   7 +-
  libweston/backend-drm/drm-internal.h |   5 +
  libweston/backend-drm/drm.c          | 218 ++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          |   3 +
- 4 files changed, 226 insertions(+), 7 deletions(-)
+ libweston/compositor.c               |   3 +
+ 6 files changed, 232 insertions(+), 7 deletions(-)
 
+diff --git a/compositor/main.c b/compositor/main.c
+index 128016b3..38244041 100644
+--- a/compositor/main.c
++++ b/compositor/main.c
+@@ -2337,6 +2337,9 @@ drm_heads_changed(struct wl_listener *listener, void *arg)
+ 	 * output.
+ 	 */
+ 	while ((head = weston_compositor_iterate_heads(compositor, head))) {
++		if (!strcasecmp(weston_head_get_name(head), "dummy"))
++			continue;
++
+ 		drm_head_update_output_section(head);
+ 
+ 		connected = weston_head_is_connected(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
 index 0e274359..bbd1c1c5 100644
 --- a/desktop-shell/shell.c
@@ -399,6 +415,20 @@ index 4b5ba42b..a3c55bd3 100644
  			connector_id = head->connector.connector_id;
  
  			drm_debug(b, "\t\t[atomic] disabling inactive head %s\n",
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index 02df20c4..d9911993 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -6442,6 +6442,9 @@ weston_output_set_color_transforms(struct weston_output *output)
+ 	struct weston_color_transform *sRGB_to_blend = NULL;
+ 	bool ok;
+ 
++	if (!cm)
++		return false;
++
+ 	ok = cm->get_output_color_transform(cm, output, &blend_to_output);
+ 	ok = ok && cm->get_sRGB_to_output_color_transform(cm, output,
+ 							  &sRGB_to_output);
 -- 
 2.20.1
 
