@@ -40,8 +40,6 @@ GLMARK2_DEPENDENCIES += libgl wayland wayland-protocols
 GLMARK2_FLAVORS += wayland-gl
 endif
 
-GLMARK2_CONF_OPTS += \
-	--prefix=/usr \
-	--with-flavors=$(subst $(space),$(comma),$(GLMARK2_FLAVORS))
+GLMARK2_CONF_OPTS += -Dflavors=$(subst $(space),$(comma),$(GLMARK2_FLAVORS))
 
-$(eval $(waf-package))
+$(eval $(meson-package))
