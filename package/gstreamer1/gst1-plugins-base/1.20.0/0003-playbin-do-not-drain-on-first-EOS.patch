@@ -1,7 +1,7 @@
-From 82d425dd18b0e2f21cae7666b938ab2244cebb51 Mon Sep 17 00:00:00 2001
+From 1cf2184975956aeab8986a566181c5cf04814d7b Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Cerveau?= <scerveau@collabora.com>
 Date: Mon, 9 Aug 2021 18:02:57 +0200
-Subject: [PATCH 10/11] playbin: do not drain on first EOS
+Subject: [PATCH 03/11] playbin: do not drain on first EOS
 
 In a case of audio/video media, the decodebin
 should wait for each branch to be on EOS before
@@ -119,10 +119,10 @@ index 1a37434fe..e0b2a5d21 100644
  
  static void
 diff --git a/gst/playback/gstplaybin2.c b/gst/playback/gstplaybin2.c
-index 7c0a04486..540ee3a49 100644
+index 3a441afa0..a6679a2d2 100644
 --- a/gst/playback/gstplaybin2.c
 +++ b/gst/playback/gstplaybin2.c
-@@ -338,6 +338,7 @@ struct _GstSourceGroup
+@@ -337,6 +337,7 @@ struct _GstSourceGroup
    gulong notify_source_id;
    gulong source_setup_id;
    gulong drained_id;
@@ -130,7 +130,7 @@ index 7c0a04486..540ee3a49 100644
    gulong autoplug_factories_id;
    gulong autoplug_select_id;
    gulong autoplug_continue_id;
-@@ -3959,6 +3960,30 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
+@@ -3952,6 +3953,30 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
    group->pending_about_to_finish = TRUE;
  }
  
@@ -161,7 +161,7 @@ index 7c0a04486..540ee3a49 100644
  /* Like gst_element_factory_can_sink_any_caps() but doesn't
   * allow ANY caps on the sinkpad template */
  static gboolean
-@@ -5452,6 +5477,10 @@ activate_group (GstPlayBin * playbin, GstSourceGroup * group, GstState target)
+@@ -5421,6 +5446,10 @@ activate_group (GstPlayBin * playbin, GstSourceGroup * group, GstState target)
    group->drained_id =
        g_signal_connect (uridecodebin, "drained", G_CALLBACK (drained_cb),
        group);
@@ -172,7 +172,7 @@ index 7c0a04486..540ee3a49 100644
  
    /* will be called when a new media type is found. We return a list of decoders
     * including sinks for decodebin to try */
-@@ -5625,6 +5654,7 @@ error_cleanup:
+@@ -5594,6 +5623,7 @@ error_cleanup:
        REMOVE_SIGNAL (group->uridecodebin, group->notify_source_id);
        REMOVE_SIGNAL (group->uridecodebin, group->source_setup_id);
        REMOVE_SIGNAL (group->uridecodebin, group->drained_id);
@@ -180,7 +180,7 @@ index 7c0a04486..540ee3a49 100644
        REMOVE_SIGNAL (group->uridecodebin, group->autoplug_factories_id);
        REMOVE_SIGNAL (group->uridecodebin, group->autoplug_select_id);
        REMOVE_SIGNAL (group->uridecodebin, group->autoplug_continue_id);
-@@ -5714,6 +5744,7 @@ deactivate_group (GstPlayBin * playbin, GstSourceGroup * group)
+@@ -5683,6 +5713,7 @@ deactivate_group (GstPlayBin * playbin, GstSourceGroup * group)
      REMOVE_SIGNAL (group->uridecodebin, group->notify_source_id);
      REMOVE_SIGNAL (group->uridecodebin, group->source_setup_id);
      REMOVE_SIGNAL (group->uridecodebin, group->drained_id);

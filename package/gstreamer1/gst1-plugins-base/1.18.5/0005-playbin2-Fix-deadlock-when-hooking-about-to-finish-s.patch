@@ -1,7 +1,7 @@
-From 9435f16f3db567d25885c06e62c83a0e82dce889 Mon Sep 17 00:00:00 2001
+From 15e9b97768e8fa72fdd734e3f9f2822df8887991 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 26 Nov 2021 17:41:47 +0800
-Subject: [PATCH 11/11] playbin2: Fix deadlock when hooking about-to-finish
+Subject: [PATCH 05/13] playbin2: Fix deadlock when hooking about-to-finish
  signal
 
 The playbin2 will deactivate old group in drain_cb() for that, which
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 21 insertions(+)
 
 diff --git a/gst/playback/gstplaybin2.c b/gst/playback/gstplaybin2.c
-index 540ee3a49..b0879dbd3 100644
+index db8ffd142..fe0abb620 100644
 --- a/gst/playback/gstplaybin2.c
 +++ b/gst/playback/gstplaybin2.c
-@@ -390,6 +390,11 @@ G_STMT_START {                                          \
+@@ -388,6 +388,11 @@ G_STMT_START {                                          \
  #define GST_PLAY_BIN_SHUTDOWN_UNLOCK(bin)         \
    GST_PLAY_BIN_DYN_UNLOCK (bin);                  \
  
@@ -29,7 +29,7 @@ index 540ee3a49..b0879dbd3 100644
  /**
   * GstPlayBin:
   *
-@@ -432,6 +437,9 @@ struct _GstPlayBin
+@@ -430,6 +435,9 @@ struct _GstPlayBin
    gint shutdown;
    gboolean async_pending;       /* async-start has been emitted */
  
@@ -39,7 +39,7 @@ index 540ee3a49..b0879dbd3 100644
    GMutex elements_lock;
    guint32 elements_cookie;
    GList *elements;              /* factories we can use for selecting elements */
-@@ -1541,6 +1549,7 @@ gst_play_bin_init (GstPlayBin * playbin)
+@@ -1552,6 +1560,7 @@ gst_play_bin_init (GstPlayBin * playbin)
  {
    g_rec_mutex_init (&playbin->lock);
    g_mutex_init (&playbin->dyn_lock);
@@ -47,7 +47,7 @@ index 540ee3a49..b0879dbd3 100644
  
    /* assume we can create an input-selector */
    playbin->have_selector = TRUE;
-@@ -1640,6 +1649,7 @@ gst_play_bin_finalize (GObject * object)
+@@ -1648,6 +1657,7 @@ gst_play_bin_finalize (GObject * object)
    g_list_free_full (playbin->contexts, (GDestroyNotify) gst_context_unref);
  
    g_rec_mutex_clear (&playbin->lock);
@@ -55,7 +55,7 @@ index 540ee3a49..b0879dbd3 100644
    g_mutex_clear (&playbin->dyn_lock);
    g_mutex_clear (&playbin->elements_lock);
  
-@@ -3139,7 +3149,14 @@ combiner_active_pad_changed (GObject * combiner, GParamSpec * pspec,
+@@ -3147,7 +3157,14 @@ combiner_active_pad_changed (GObject * combiner, GParamSpec * pspec,
    GstSourceCombine *combine = NULL;
    int i;
  
@@ -70,7 +70,7 @@ index 540ee3a49..b0879dbd3 100644
    group = get_group (playbin);
  
    for (i = 0; i < PLAYBIN_STREAM_LAST; i++) {
-@@ -3956,7 +3973,11 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
+@@ -3963,7 +3980,11 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
  
    /* now activate the next group. If the app did not set a uri, this will
     * fail and we can do EOS */

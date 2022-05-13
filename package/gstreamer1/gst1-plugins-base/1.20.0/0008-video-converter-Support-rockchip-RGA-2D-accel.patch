@@ -1,7 +1,7 @@
-From 638403da84dcbe2595cb424b94b4510b19693b9f Mon Sep 17 00:00:00 2001
+From 2b722b1aa7aca5d323e59b9c6161dd1282cbcf88 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 31 Oct 2019 18:45:19 +0800
-Subject: [PATCH 4/9] video-converter: Support rockchip RGA 2D accel
+Subject: [PATCH 08/11] video-converter: Support rockchip RGA 2D accel
 
 Disabled by default, set env GST_VIDEO_CONVERT_USE_RGA=1 to enable.
 
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 184 insertions(+), 1 deletion(-)
 
 diff --git a/gst-libs/gst/video/meson.build b/gst-libs/gst/video/meson.build
-index c0abb22..3999a98 100644
+index c0abb22e5..3999a98a8 100644
 --- a/gst-libs/gst/video/meson.build
 +++ b/gst-libs/gst/video/meson.build
 @@ -111,7 +111,7 @@ gstvideo_h = video_enums[1]
@@ -26,7 +26,7 @@ index c0abb22..3999a98 100644
    gstvideo_deps += [orc_dep]
    orc_h = custom_target(orcsrc + '.h',
 diff --git a/gst-libs/gst/video/video-converter.c b/gst-libs/gst/video/video-converter.c
-index 50bb7d6..a40a5e3 100644
+index 50bb7d60f..a40a5e330 100644
 --- a/gst-libs/gst/video/video-converter.c
 +++ b/gst-libs/gst/video/video-converter.c
 @@ -38,6 +38,11 @@
@@ -238,7 +238,7 @@ index 50bb7d6..a40a5e3 100644
    for (i = 0; i < n_planes; i++) {
      if (convert->fconvert[i])
 diff --git a/meson.build b/meson.build
-index 5ad1ab3..de8284f 100644
+index 5ad1ab3ad..de8284fd1 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -292,6 +292,9 @@ if get_option('default_library') == 'static'

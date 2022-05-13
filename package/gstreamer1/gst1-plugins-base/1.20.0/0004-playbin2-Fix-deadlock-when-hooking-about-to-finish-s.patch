@@ -1,7 +1,7 @@
-From aaa1defea79628abe341c4c6faf12120f9096a78 Mon Sep 17 00:00:00 2001
+From 9b96fbaa4a6df9839624cf46bfeef4abed9954fb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 26 Nov 2021 17:41:47 +0800
-Subject: [PATCH 12/12] playbin2: Fix deadlock when hooking about-to-finish
+Subject: [PATCH 04/11] playbin2: Fix deadlock when hooking about-to-finish
  signal
 
 The playbin2 will deactivate old group in drain_cb() for that, which
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 21 insertions(+)
 
 diff --git a/gst/playback/gstplaybin2.c b/gst/playback/gstplaybin2.c
-index a83b3bd..f3f7fd5 100644
+index a6679a2d2..f71b97752 100644
 --- a/gst/playback/gstplaybin2.c
 +++ b/gst/playback/gstplaybin2.c
 @@ -389,6 +389,11 @@ G_STMT_START {                                          \
@@ -39,7 +39,7 @@ index a83b3bd..f3f7fd5 100644
    GMutex elements_lock;
    guint32 elements_cookie;
    GList *elements;              /* factories we can use for selecting elements */
-@@ -1556,6 +1564,7 @@ gst_play_bin_init (GstPlayBin * playbin)
+@@ -1537,6 +1545,7 @@ gst_play_bin_init (GstPlayBin * playbin)
  {
    g_rec_mutex_init (&playbin->lock);
    g_mutex_init (&playbin->dyn_lock);
@@ -47,7 +47,7 @@ index a83b3bd..f3f7fd5 100644
  
    /* assume we can create an input-selector */
    playbin->have_selector = TRUE;
-@@ -1655,6 +1664,7 @@ gst_play_bin_finalize (GObject * object)
+@@ -1633,6 +1642,7 @@ gst_play_bin_finalize (GObject * object)
    g_list_free_full (playbin->contexts, (GDestroyNotify) gst_context_unref);
  
    g_rec_mutex_clear (&playbin->lock);
@@ -55,7 +55,7 @@ index a83b3bd..f3f7fd5 100644
    g_mutex_clear (&playbin->dyn_lock);
    g_mutex_clear (&playbin->elements_lock);
  
-@@ -3154,7 +3164,14 @@ combiner_active_pad_changed (GObject * combiner, GParamSpec * pspec,
+@@ -3132,7 +3142,14 @@ combiner_active_pad_changed (GObject * combiner, GParamSpec * pspec,
    GstSourceCombine *combine = NULL;
    int i;
  
@@ -70,7 +70,7 @@ index a83b3bd..f3f7fd5 100644
    group = get_group (playbin);
  
    for (i = 0; i < PLAYBIN_STREAM_LAST; i++) {
-@@ -3970,7 +3987,11 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
+@@ -3949,7 +3966,11 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
  
    /* now activate the next group. If the app did not set a uri, this will
     * fail and we can do EOS */
