@@ -1,4 +1,4 @@
-From f079c8dee6a280937d849e94636f21951d38cd1e Mon Sep 17 00:00:00 2001
+From 7ac9f2423950e62d5885abeab9fdcccbbb4ce26b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 16/62] backend-drm: Support controlling output dynamically
@@ -617,7 +617,7 @@ index e7bbfa53..ff7421da 100644
  			if (!backend->aspect_ratio_supported ||
  			    aspect_ratio == drm_mode->base.aspect_ratio)
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index ea5b5802..a916e98b 100644
+index 1db5fb79..67b5fb74 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3003,6 +3003,11 @@ weston_output_repaint(struct weston_output *output, void *repaint_data)
@@ -681,16 +681,16 @@ index ea5b5802..a916e98b 100644
  		if (compositor->backend->repaint_flush)
  			ret = compositor->backend->repaint_flush(compositor,
  							 repaint_data);
-@@ -6109,7 +6121,7 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
+@@ -6122,7 +6134,7 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
+ 		wl_list_for_each(head, &output->head_list, output_link)
+ 			weston_head_update_global(head);
  
- 	next_x = next_y = 0;
- 	wl_list_for_each(output, &compositor->output_list, link) {
 -		if (!weston_output_valid(output))
 +		if (!weston_output_valid(output) || output->fixed_position)
  			continue;
  
  		x = next_x;
-@@ -6556,6 +6568,9 @@ weston_output_set_transform(struct weston_output *output,
+@@ -6569,6 +6581,9 @@ weston_output_set_transform(struct weston_output *output,
  
  	weston_compositor_reflow_outputs(output->compositor);
  
@@ -700,7 +700,7 @@ index ea5b5802..a916e98b 100644
  	/* Notify clients of the change for output transform. */
  	wl_list_for_each(head, &output->head_list, output_link) {
  		wl_resource_for_each(resource, &head->resource_list) {
-@@ -6779,11 +6794,8 @@ weston_output_create_heads_string(struct weston_output *output)
+@@ -6792,11 +6807,8 @@ weston_output_create_heads_string(struct weston_output *output)
  WL_EXPORT int
  weston_output_enable(struct weston_output *output)
  {
@@ -712,7 +712,7 @@ index ea5b5802..a916e98b 100644
  
  	if (output->enabled) {
  		weston_log("Error: attempt to enable an enabled output '%s'\n",
-@@ -6808,20 +6820,17 @@ weston_output_enable(struct weston_output *output)
+@@ -6821,20 +6833,17 @@ weston_output_enable(struct weston_output *output)
  		assert(head->model);
  	}
  
@@ -738,7 +738,7 @@ index ea5b5802..a916e98b 100644
  	output->dirty = 1;
  	output->original_scale = output->scale;
  
-@@ -6831,8 +6840,7 @@ weston_output_enable(struct weston_output *output)
+@@ -6844,8 +6853,7 @@ weston_output_enable(struct weston_output *output)
  	weston_output_transform_scale_init(output, output->transform, output->scale);
  	weston_output_init_zoom(output);
  
@@ -748,7 +748,7 @@ index ea5b5802..a916e98b 100644
  
  	wl_list_init(&output->animation_list);
  	wl_list_init(&output->feedback_list);
-@@ -6859,6 +6867,8 @@ weston_output_enable(struct weston_output *output)
+@@ -6872,6 +6880,8 @@ weston_output_enable(struct weston_output *output)
  		   output->name, head_names);
  	free(head_names);
  
