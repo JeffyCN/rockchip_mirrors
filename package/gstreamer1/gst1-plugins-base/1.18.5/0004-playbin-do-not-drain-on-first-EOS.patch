@@ -1,7 +1,7 @@
-From d3adfa2bf09c1b7171bf326ed82b6092b85a3580 Mon Sep 17 00:00:00 2001
+From 883abdb1153f443057daff7e9eb1d52c1103b882 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Cerveau?= <scerveau@collabora.com>
 Date: Mon, 9 Aug 2021 18:02:57 +0200
-Subject: [PATCH 11/12] playbin: do not drain on first EOS
+Subject: [PATCH 04/13] playbin: do not drain on first EOS
 
 In a case of audio/video media, the decodebin
 should wait for each branch to be on EOS before
@@ -22,7 +22,7 @@ of EOS is equal to active pads (active combiners).
  3 files changed, 100 insertions(+)
 
 diff --git a/gst/playback/gstdecodebin2.c b/gst/playback/gstdecodebin2.c
-index 24fa8a4..57f1084 100644
+index 24fa8a4da..57f108484 100644
 --- a/gst/playback/gstdecodebin2.c
 +++ b/gst/playback/gstdecodebin2.c
 @@ -163,6 +163,9 @@ struct _GstDecodeBin
@@ -119,10 +119,10 @@ index 24fa8a4..57f1084 100644
  
  static void
 diff --git a/gst/playback/gstplaybin2.c b/gst/playback/gstplaybin2.c
-index ca4c1d0..a83b3bd 100644
+index 473be21e6..db8ffd142 100644
 --- a/gst/playback/gstplaybin2.c
 +++ b/gst/playback/gstplaybin2.c
-@@ -337,6 +337,7 @@ struct _GstSourceGroup
+@@ -336,6 +336,7 @@ struct _GstSourceGroup
    gulong no_more_pads_id;
    gulong notify_source_id;
    gulong drained_id;
@@ -130,7 +130,7 @@ index ca4c1d0..a83b3bd 100644
    gulong autoplug_factories_id;
    gulong autoplug_select_id;
    gulong autoplug_continue_id;
-@@ -3973,6 +3974,30 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
+@@ -3966,6 +3967,30 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
    group->pending_about_to_finish = TRUE;
  }
  
@@ -161,7 +161,7 @@ index ca4c1d0..a83b3bd 100644
  /* Like gst_element_factory_can_sink_any_caps() but doesn't
   * allow ANY caps on the sinkpad template */
  static gboolean
-@@ -5459,6 +5484,10 @@ activate_group (GstPlayBin * playbin, GstSourceGroup * group, GstState target)
+@@ -5428,6 +5453,10 @@ activate_group (GstPlayBin * playbin, GstSourceGroup * group, GstState target)
    group->drained_id =
        g_signal_connect (uridecodebin, "drained", G_CALLBACK (drained_cb),
        group);
@@ -172,7 +172,7 @@ index ca4c1d0..a83b3bd 100644
  
    /* will be called when a new media type is found. We return a list of decoders
     * including sinks for decodebin to try */
-@@ -5631,6 +5660,7 @@ error_cleanup:
+@@ -5600,6 +5629,7 @@ error_cleanup:
        REMOVE_SIGNAL (group->uridecodebin, group->no_more_pads_id);
        REMOVE_SIGNAL (group->uridecodebin, group->notify_source_id);
        REMOVE_SIGNAL (group->uridecodebin, group->drained_id);
@@ -180,7 +180,7 @@ index ca4c1d0..a83b3bd 100644
        REMOVE_SIGNAL (group->uridecodebin, group->autoplug_factories_id);
        REMOVE_SIGNAL (group->uridecodebin, group->autoplug_select_id);
        REMOVE_SIGNAL (group->uridecodebin, group->autoplug_continue_id);
-@@ -5719,6 +5749,7 @@ deactivate_group (GstPlayBin * playbin, GstSourceGroup * group)
+@@ -5688,6 +5718,7 @@ deactivate_group (GstPlayBin * playbin, GstSourceGroup * group)
      REMOVE_SIGNAL (group->uridecodebin, group->no_more_pads_id);
      REMOVE_SIGNAL (group->uridecodebin, group->notify_source_id);
      REMOVE_SIGNAL (group->uridecodebin, group->drained_id);
@@ -189,7 +189,7 @@ index ca4c1d0..a83b3bd 100644
      REMOVE_SIGNAL (group->uridecodebin, group->autoplug_select_id);
      REMOVE_SIGNAL (group->uridecodebin, group->autoplug_continue_id);
 diff --git a/gst/playback/gsturidecodebin.c b/gst/playback/gsturidecodebin.c
-index f4d9f59..6d289d9 100644
+index f4d9f59c0..6d289d998 100644
 --- a/gst/playback/gsturidecodebin.c
 +++ b/gst/playback/gsturidecodebin.c
 @@ -147,6 +147,8 @@ struct _GstURIDecodeBinClass

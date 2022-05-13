@@ -1,7 +1,7 @@
-From db846cded6b5e911969c903c4e23fc67a211a226 Mon Sep 17 00:00:00 2001
+From adfded94b863dbbcba7a69b9625b554e4c77c4e7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 17 Sep 2021 13:20:24 +0800
-Subject: [PATCH 08/10] videoconvert: Support preferred formats
+Subject: [PATCH 13/13] videoconvert: Support preferred formats
 
 Set env "GST_VIDEO_CONVERT_PREFERRED_FORMAT" to specify preferred
 formats, for example:
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 22 insertions(+)
 
 diff --git a/gst/videoconvert/gstvideoconvert.c b/gst/videoconvert/gstvideoconvert.c
-index 4adc430..9b185dd 100644
+index 4adc430c9..9b185dd00 100644
 --- a/gst/videoconvert/gstvideoconvert.c
 +++ b/gst/videoconvert/gstvideoconvert.c
 @@ -259,6 +259,28 @@ score_value (GstBaseTransform * base, const GstVideoFormatInfo * in_info,
