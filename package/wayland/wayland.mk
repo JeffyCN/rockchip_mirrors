@@ -17,6 +17,10 @@ HOST_WAYLAND_DEPENDENCIES = host-pkgconf host-expat host-libffi host-libxml2
 WAYLAND_CONF_OPTS = -Dtests=false -Ddocumentation=false
 HOST_WAYLAND_CONF_OPTS = -Dtests=false -Ddocumentation=false
 
+ifeq ($(BR2_PACKAGE_WAYLAND_INSTALL_WAYLAND_EGL),)
+WAYLAND_CONF_OPTS += -Degl=false
+endif
+
 # Remove the DTD from the target, it's not needed at runtime
 define WAYLAND_TARGET_CLEANUP
 	rm -rf $(TARGET_DIR)/usr/share/wayland
