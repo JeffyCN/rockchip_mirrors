@@ -28,7 +28,14 @@ define ROCKCHIP_MPP_LINK_GIT
 	rm -rf $(@D)/.git
 	ln -s $(SRCDIR)/.git $(@D)/
 endef
-
 ROCKCHIP_MPP_POST_RSYNC_HOOKS += ROCKCHIP_MPP_LINK_GIT
+
+define ROCKCHIP_MPP_REMOVE_NOISY_LOGS
+	sed -i -e "/pp_enable %d/d" \
+		$(@D)/mpp/hal/vpu/jpegd/hal_jpegd_vdpu2.c || true
+	sed -i -e "/reg size mismatch wr/i    if (0)" \
+		$(@D)/osal/driver/vcodec_service.c || true
+endef
+ROCKCHIP_MPP_POST_RSYNC_HOOKS += ROCKCHIP_MPP_REMOVE_NOISY_LOGS
 
 $(eval $(cmake-package))
