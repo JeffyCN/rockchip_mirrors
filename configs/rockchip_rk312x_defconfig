@@ -12,8 +12,6 @@
 #include "wifi.config"
 #include "network.config"
 #include "bt.config"
-#include "qt.config"
-#include "qt_app.config"
 BR2_TARGET_GENERIC_HOSTNAME="rk312x"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK312X Buildroot"
 BR2_PACKAGE_RKWIFIBT_AP6212A1=y

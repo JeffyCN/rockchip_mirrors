@@ -15,7 +15,6 @@
 #include "audio_gst.config"
 #include "camera.config"
 #include "camera_gst.config"
-#include "qt.config"
 BR2_ROOTFS_OVERLAY="board/rockchip/rk1808/fs-overlay-64/"
 BR2_TARGET_GENERIC_HOSTNAME="rk1808"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK1808 Buildroot"

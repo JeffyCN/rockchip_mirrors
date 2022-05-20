@@ -16,8 +16,6 @@
 #include "wifi.config"
 #include "network.config"
 #include "bt.config"
-#include "qt.config"
-#include "qt_app.config"
 #include "ntfs.config"
 #include "rknn_demo.conf"
 BR2_ROOTFS_OVERLAY="board/rockchip/rk3399pro/fs-overlay-64/"

@@ -12,8 +12,6 @@
 #include "gpu.config"
 #include "network.config"
 #include "ntfs.config"
-#include "qt.config"
-#include "qt_app.config"
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"

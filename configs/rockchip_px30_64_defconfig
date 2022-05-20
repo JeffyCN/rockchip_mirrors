@@ -15,8 +15,6 @@
 #include "wifi.config"
 #include "network.config"
 #include "bt.config"
-#include "qt.config"
-#include "qt_app.config"
 BR2_CCACHE=y
 BR2_TARGET_GENERIC_HOSTNAME="px30_64"
 BR2_TARGET_GENERIC_ISSUE="Welcome to PX30 Buildroot"

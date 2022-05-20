@@ -16,8 +16,6 @@
 #include "wifi.config"
 #include "network.config"
 #include "bt.config"
-#include "qt.config"
-#include "qt_app.config"
 #include "ntfs.config"
 BR2_TARGET_GENERIC_GETTY_PORT="ttyFIQ0"
 BR2_TARGET_GENERIC_GETTY_BAUDRATE_1500000=y
