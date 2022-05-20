@@ -30,7 +30,7 @@ menu "adk setting options"
         config BR2_PACKAGE_ADK_RKMEDIA_H264_ENCODE
             bool "h264 encoder options"
             default n
-            select BR2_PACKAGE_MPP
+            select BR2_PACKAGE_ROCKCHIP_MPP
             select BR2_PACKAGE_RKMEDIA_MPP
             select BR2_PACKAGE_RKMEDIA_MPP_ENCODER
 

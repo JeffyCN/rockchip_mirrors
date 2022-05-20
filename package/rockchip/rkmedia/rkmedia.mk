@@ -32,7 +32,7 @@ RKMEDIA_DEPENDENCIES += libion
 endif
 
 ifeq ($(BR2_PACKAGE_RKMEDIA_MPP),y)
-RKMEDIA_DEPENDENCIES += mpp
+RKMEDIA_DEPENDENCIES += rockchip-mpp
 RKMEDIA_CONF_OPTS += -DRKMPP=ON \
 	-DRKMPP_HEADER_DIR=$(STAGING_DIR)/usr/include/rockchip \
 	-DRKMPP_LIB_NAME=rockchip_mpp

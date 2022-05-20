@@ -24,8 +24,8 @@ config BR2_PACKAGE_DRM_DISPLAY_OUTPUT
 
 config BR2_PACKAGE_RKMEDIA_MPP
     bool "rk mpp wrapper"
-    select BR2_PACKAGE_MPP
-    select BR2_PACKAGE_MPP_ALLOCATOR_DRM
+    select BR2_PACKAGE_ROCKCHIP_MPP
+    select BR2_PACKAGE_ROCKCHIP_MPP_ALLOCATOR_DRM
     help
       wrapped function of rk mpp
 

@@ -288,12 +288,12 @@ else
 FFMPEG_CONF_OPTS += --disable-vdpau
 endif
 
-ifeq ($(BR2_PACKAGE_MPP),y)
+ifeq ($(BR2_PACKAGE_ROCKCHIP_MPP),y)
 ifeq ($(BR2_PACKAGE_RV1108),y)
-FFMPEG_DEPENDENCIES += mpp libion
+FFMPEG_DEPENDENCIES += rockchip-mpp libion
 FFMPEG_CONF_OPTS += --enable-rkmpp --extra-cflags="-D CONFIG_ION"
 else
-FFMPEG_DEPENDENCIES += mpp libdrm
+FFMPEG_DEPENDENCIES += rockchip-mpp libdrm
 FFMPEG_CONF_OPTS += --enable-rkmpp --enable-libdrm
 endif
 # --disable-v4l2-m2m seems no effect, disable each v4l2m2m

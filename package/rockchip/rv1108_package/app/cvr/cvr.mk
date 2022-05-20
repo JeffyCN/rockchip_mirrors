@@ -4,7 +4,7 @@ CVR_INSTALL_STAGING = YES
 
 # add dependencies
 CVR_DEPENDENCIES = rkcamera messenger process_units libpng rv1108_minigui \
-				   hal rknr mpp rkmedia adk
+				   hal rknr rockchip-mpp rkmedia adk
 
 CVR_CONF_OPTS += -DUI_RESOLUTION=$(call qstrip,$(RK_UI_RESOLUTION))
 
