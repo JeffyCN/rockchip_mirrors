@@ -1,8 +1,8 @@
-From 307bc02e379e63aa9b7a3d21bbcd9c84d34c600f Mon Sep 17 00:00:00 2001
+From 93ac853387996cdb5dd44d3db02a0fd7f58e7e57 Mon Sep 17 00:00:00 2001
 From: Eirik Aavitsland <eirik.aavitsland@qt.io>
 Date: Tue, 13 Apr 2021 14:23:45 +0200
-Subject: [PATCH] Avoid processing-intensive painting of high number of tiny
- dashes
+Subject: [PATCH 10/31] Avoid processing-intensive painting of high number of
+ tiny dashes
 
 When stroking a dashed path, an unnecessary amount of processing would
 be spent if there is a huge number of dashes visible, e.g. because of
@@ -50,7 +50,7 @@ Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
  create mode 100644 tests/auto/other/lancelot/scripts/tinydashes.qps
 
 diff --git a/src/gui/painting/qpaintengineex.cpp b/src/gui/painting/qpaintengineex.cpp
-index 5d8f89eadd..55fdb0c2a0 100644
+index 5d8f89ea..55fdb0c2 100644
 --- a/src/gui/painting/qpaintengineex.cpp
 +++ b/src/gui/painting/qpaintengineex.cpp
 @@ -385,7 +385,7 @@ QPainterState *QPaintEngineEx::createState(QPainterState *orig) const
@@ -120,7 +120,7 @@ index 5d8f89eadd..55fdb0c2a0 100644
          d->stroker.setForceOpen(path.hasExplicitOpen());
 diff --git a/tests/auto/other/lancelot/scripts/tinydashes.qps b/tests/auto/other/lancelot/scripts/tinydashes.qps
 new file mode 100644
-index 0000000000..d41ced7f5f
+index 00000000..d41ced7f
 --- /dev/null
 +++ b/tests/auto/other/lancelot/scripts/tinydashes.qps
 @@ -0,0 +1,34 @@
@@ -159,5 +159,5 @@ index 0000000000..d41ced7f5f
 +drawPath bigpath
 +restore
 -- 
-2.34.1
+2.20.1
 

@@ -1,6 +1,5 @@
 config BR2_PACKAGE_QT5MQTT
 	bool "qt5mqtt"
-	depends on BR2_PACKAGE_QT5_VERSION_5_15
 	help
 	  Qt is a cross-platform application and UI framework for
 	  developers using C++.

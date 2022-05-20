@@ -1,7 +1,7 @@
-From 3b1a60f651776a7b2d155803b07a52a9e27bdf78 Mon Sep 17 00:00:00 2001
+From 8bd31495fe1dbad8345c90b2f9e993cbed561aba Mon Sep 17 00:00:00 2001
 From: Eirik Aavitsland <eirik.aavitsland@qt.io>
 Date: Fri, 30 Jul 2021 13:03:49 +0200
-Subject: [PATCH] Refix for avoiding huge number of tiny dashes
+Subject: [PATCH 12/31] Refix for avoiding huge number of tiny dashes
 
 Previous fix hit too widely so some valid horizontal and vertical
 lines were affected; the root problem being that such lines have an
@@ -20,7 +20,7 @@ Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
  2 files changed, 35 insertions(+), 4 deletions(-)
 
 diff --git a/src/gui/painting/qpaintengineex.cpp b/src/gui/painting/qpaintengineex.cpp
-index 19e4b23423..9fe510827a 100644
+index 19e4b234..9fe51082 100644
 --- a/src/gui/painting/qpaintengineex.cpp
 +++ b/src/gui/painting/qpaintengineex.cpp
 @@ -415,18 +415,18 @@ void QPaintEngineEx::stroke(const QVectorPath &path, const QPen &inPen)
@@ -47,7 +47,7 @@ index 19e4b23423..9fe510827a 100644
              pen.setStyle(Qt::SolidLine);
              QColor color(pen.color());
 diff --git a/tests/auto/gui/painting/qpainter/tst_qpainter.cpp b/tests/auto/gui/painting/qpainter/tst_qpainter.cpp
-index 42e98ce363..d7c3f95f1d 100644
+index 42e98ce3..d7c3f95f 100644
 --- a/tests/auto/gui/painting/qpainter/tst_qpainter.cpp
 +++ b/tests/auto/gui/painting/qpainter/tst_qpainter.cpp
 @@ -308,6 +308,7 @@ private slots:
@@ -96,5 +96,5 @@ index 42e98ce363..d7c3f95f1d 100644
  
  #include "tst_qpainter.moc"
 -- 
-2.34.1
+2.20.1
 

@@ -4,15 +4,9 @@
 #
 ################################################################################
 
-ifeq ($(BR2_PACKAGE_QT5_VERSION_5_15),y)
 QT5_VERSION_MAJOR = 5.15
 QT5_VERSION = $(QT5_VERSION_MAJOR).2
 QT5_SOURCE_TARBALL_PREFIX = everywhere-src
-else ifeq ($(BR2_PACKAGE_QT5_VERSION_5_14),y)
-QT5_VERSION_MAJOR = 5.14
-QT5_VERSION = $(QT5_VERSION_MAJOR).2
-QT5_SOURCE_TARBALL_PREFIX = everywhere-src
-endif
 QT5_SITE = https://download.qt.io/archive/qt/$(QT5_VERSION_MAJOR)/$(QT5_VERSION)/submodules
 
 include $(sort $(wildcard package/qt5/*/*.mk))

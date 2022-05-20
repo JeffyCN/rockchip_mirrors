@@ -1,7 +1,7 @@
-From 856d11f695fb6effe26a359f9ad0efdf24067085 Mon Sep 17 00:00:00 2001
+From 518712c73f03bad9d4402726ee5cfed83028139d Mon Sep 17 00:00:00 2001
 From: Eirik Aavitsland <eirik.aavitsland@qt.io>
 Date: Fri, 23 Jul 2021 15:53:56 +0200
-Subject: [PATCH] Improve fix for avoiding huge number of tiny dashes
+Subject: [PATCH 11/31] Improve fix for avoiding huge number of tiny dashes
 MIME-Version: 1.0
 Content-Type: text/plain; charset=UTF-8
 Content-Transfer-Encoding: 8bit
@@ -20,7 +20,7 @@ Signed-off-by: Quentin Schulz <quentin.schulz@theobroma-systems.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/gui/painting/qpaintengineex.cpp b/src/gui/painting/qpaintengineex.cpp
-index 55fdb0c2a0..19e4b23423 100644
+index 55fdb0c2..19e4b234 100644
 --- a/src/gui/painting/qpaintengineex.cpp
 +++ b/src/gui/painting/qpaintengineex.cpp
 @@ -426,7 +426,7 @@ void QPaintEngineEx::stroke(const QVectorPath &path, const QPen &inPen)
@@ -33,5 +33,5 @@ index 55fdb0c2a0..19e4b23423 100644
              pen.setStyle(Qt::SolidLine);
              QColor color(pen.color());
 -- 
-2.34.1
+2.20.1
 

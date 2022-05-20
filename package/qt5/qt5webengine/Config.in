@@ -75,7 +75,7 @@ config BR2_PACKAGE_QT5WEBENGINE
 	  be made fully editable by the user through the use of the
 	  contenteditable attribute on HTML elements.
 
-	  https://doc.qt.io/qt-5/qtwebengine-index.html
+	  http://doc.qt.io/qt-5/qtwebengine-index.html
 
 if BR2_PACKAGE_QT5WEBENGINE
 
