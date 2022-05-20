@@ -1,4 +1,4 @@
-From b73e81578393d4231ac80a3a80bbb35043e10f8f Mon Sep 17 00:00:00 2001
+From 766309301fd0ac4611de036081bdb0b1b802b0dc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 06:32:34 +0800
 Subject: [PATCH 14/17] HACK: gstreamer: Support LastFrame flush mode
@@ -56,10 +56,10 @@ index cc0681b..b0a37f8 100755
          m_renderer->stopRenderer();
  
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index 50dfde3..a41d666 100644
+index 431d8cc..d4e1a18 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
-@@ -699,6 +699,10 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -700,6 +700,10 @@ void QGstreamerVideoOverlay::updateIsActive()
  
      bool newIsActive = (state == GST_STATE_PLAYING || (state == GST_STATE_PAUSED && showPreroll));
  
@@ -71,7 +71,7 @@ index 50dfde3..a41d666 100644
          m_isActive = newIsActive;
          emit activeChanged();
 diff --git a/src/gsttools/qgstreamervideooverlay_p.h b/src/gsttools/qgstreamervideooverlay_p.h
-index c71124e..8799ae7 100644
+index 32b3d93..5628862 100644
 --- a/src/gsttools/qgstreamervideooverlay_p.h
 +++ b/src/gsttools/qgstreamervideooverlay_p.h
 @@ -100,6 +100,9 @@ public:
@@ -84,9 +84,9 @@ index c71124e..8799ae7 100644
  Q_SIGNALS:
      void nativeVideoSizeChanged();
      void activeChanged();
-@@ -122,6 +125,8 @@ private:
+@@ -121,6 +124,8 @@ private:
+     QGstreamerSinkProperties *m_sinkProperties = nullptr;
      WId m_windowId = 0;
-     QWindow *m_window = nullptr;
      QRect m_rect;
 +
 +    Qt::FlushMode m_flushMode = Qt::EmptyFrame;

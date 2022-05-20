@@ -1,17 +1,17 @@
-From 388587ae18e31405e9aa3de1d32be7464c4ff2a4 Mon Sep 17 00:00:00 2001
+From 41a0d0a98d89e3d67b957f20644ee523f705ea9e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Nov 2018 21:31:49 +0800
 Subject: [PATCH 03/17] gsttools: videooverlay: Support waylandsink and kmssink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- src/gsttools/qgstreamervideooverlay.cpp | 169 ++++++++++++++++++++----
- src/gsttools/qgstreamervideooverlay_p.h |   3 +
+ src/gsttools/qgstreamervideooverlay.cpp | 170 ++++++++++++++++++++----
+ src/gsttools/qgstreamervideooverlay_p.h |   2 +
  src/gsttools/qgstreamervideowidget.cpp  |  15 ++-
  3 files changed, 158 insertions(+), 29 deletions(-)
 
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index d410be7..e1fb728 100644
+index d410be7..1ca82da 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
 @@ -39,8 +39,13 @@
@@ -39,7 +39,7 @@ index d410be7..e1fb728 100644
  #include <QtMultimedia/private/qtmultimediaglobal_p.h>
  
  QT_BEGIN_NAMESPACE
-@@ -447,27 +456,115 @@ void QGstreamerVideoOverlay::setWindowHandle(WId id)
+@@ -447,27 +456,116 @@ void QGstreamerVideoOverlay::setWindowHandle(WId id)
  {
      m_windowId = id;
  
@@ -84,6 +84,7 @@ index d410be7..e1fb728 100644
 +    wl_surface *surface = NULL;
 +    wl_compositor *compositor = NULL;
  #endif
++    QWindow *window;
 +    GstVideoOverlay *overlay;
 +    QPoint position;
 +
@@ -100,20 +101,20 @@ index d410be7..e1fb728 100644
 +
 +    overlay = GST_VIDEO_OVERLAY(m_videoSink);
 +
-+    m_window = (id && main_thread) ? getVideoWindow(id) : NULL;
++    window = (id && main_thread) ? getVideoWindow(id) : NULL;
 +
-+    if (!m_window) {
++    if (!window) {
 +        gst_video_overlay_set_window_handle(overlay, 0);
 +        goto set_rectangle;
 +    }
 +
 +    // HACK: Force updating decoration
-+    m_window->setFlags(m_window->flags());
++    window->setFlags(window->flags());
 +
 +#ifdef ENABLE_WAYLAND_PLATFORM
 +    if (native) {
-+        surface = (wl_surface*) native->nativeResourceForWindow("surface", m_window);
-+        compositor = (wl_compositor*) native->nativeResourceForWindow("compositor", m_window);
++        surface = (wl_surface*) native->nativeResourceForWindow("surface", window);
++        compositor = (wl_compositor*) native->nativeResourceForWindow("compositor", window);
 +    }
  
 -        // Properties need to be reset when changing the winId.
@@ -128,12 +129,12 @@ index d410be7..e1fb728 100644
 +        if (m_rect.width() <= 0 || m_rect.height() <= 0)
 +            goto out;
 +
-+        position = QPoint(m_window->frameMargins().left(),
-+                          m_window->frameMargins().top());
++        position = QPoint(window->frameMargins().left(),
++                          window->frameMargins().top());
 +
 +        // HACK: kmssink is using global position
 +        if (strstr(GST_ELEMENT_NAME(m_videoSink), "kmssink"))
-+            position += m_window->geometry().topLeft();
++            position += window->geometry().topLeft();
 +
 +        gst_video_overlay_set_render_rectangle(overlay,
 +                                               position.x() + m_rect.x(),
@@ -156,7 +157,7 @@ index d410be7..e1fb728 100644
      }
 +#endif // ENABLE_WAYLAND_PLATFORM
 +
-+    gst_video_overlay_set_window_handle(overlay, m_window->winId());
++    gst_video_overlay_set_window_handle(overlay, window->winId());
 +
 +set_rectangle:
 +    if (m_rect.width() > 0 && m_rect.height() > 0)
@@ -169,7 +170,7 @@ index d410be7..e1fb728 100644
  }
  
  void QGstreamerVideoOverlay::expose()
-@@ -499,24 +596,43 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
+@@ -499,24 +597,43 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
          h = rect.height();
      }
  
@@ -225,7 +226,7 @@ index d410be7..e1fb728 100644
  #if !GST_CHECK_VERSION(1,0,0)
      if (gm && (GST_MESSAGE_TYPE(gm) == GST_MESSAGE_ELEMENT) &&
              gst_structure_has_name(gm->structure, "prepare-xwindow-id")) {
-@@ -574,6 +690,7 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -574,6 +691,7 @@ void QGstreamerVideoOverlay::updateIsActive()
      if (newIsActive != m_isActive) {
          m_isActive = newIsActive;
          emit activeChanged();
@@ -234,7 +235,7 @@ index d410be7..e1fb728 100644
  }
  
 diff --git a/src/gsttools/qgstreamervideooverlay_p.h b/src/gsttools/qgstreamervideooverlay_p.h
-index f2ca8a2..c71124e 100644
+index f2ca8a2..32b3d93 100644
 --- a/src/gsttools/qgstreamervideooverlay_p.h
 +++ b/src/gsttools/qgstreamervideooverlay_p.h
 @@ -54,6 +54,7 @@
@@ -245,11 +246,10 @@ index f2ca8a2..c71124e 100644
  #include <QtCore/qsize.h>
  
  QT_BEGIN_NAMESPACE
-@@ -119,6 +120,8 @@ private:
+@@ -119,6 +120,7 @@ private:
  
      QGstreamerSinkProperties *m_sinkProperties = nullptr;
      WId m_windowId = 0;
-+    QWindow *m_window = nullptr;
 +    QRect m_rect;
  };
  
