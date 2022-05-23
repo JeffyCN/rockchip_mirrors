@@ -7,7 +7,7 @@
 # Generate version string using:
 #   git describe --match 'glibc-*' --abbrev=40 origin/release/MAJOR.MINOR/master | cut -d '-' -f 2-
 # When updating the version, please also update localedef
-GLIBC_VERSION = 2.34-9-g9acab0bba6a5a57323b1f94bf95b21618a9e5aa4
+GLIBC_VERSION = 2.35-96-g2c4fc8e5ca742c6a3a1933799495bb0b00a807f0
 # Upstream doesn't officially provide an https download link.
 # There is one (https://sourceware.org/git/glibc.git) but it's not reliable,
 # sometimes the connection times out. So use an unofficial github mirror.
@@ -53,6 +53,11 @@ ifeq ($(BR2_ENABLE_DEBUG),y)
 GLIBC_EXTRA_CFLAGS += -g
 endif
 
+# glibc explicitly requires compile barriers between files
+ifeq ($(BR2_TOOLCHAIN_GCC_AT_LEAST_4_7),y)
+GLIBC_EXTRA_CFLAGS += -fno-lto
+endif
+
 # The stubs.h header is not installed by install-headers, but is
 # needed for the gcc build. An empty stubs.h will work, as explained
 # in http://gcc.gnu.org/ml/gcc/2002-01/msg00900.html. The same trick
@@ -93,10 +98,12 @@ endif
 GLIBC_MAKE = $(BR2_MAKE)
 GLIBC_CONF_ENV += ac_cv_prog_MAKE="$(BR2_MAKE)"
 
-ifneq ($(BR2_PACKAGE_LINUX_HEADERS_AUTO_VERSION),y)
-GLIBC_KERNEL_HEADERS_VERSION = $(LINUX_HEADERS_VERSION_REAL)
+ifeq ($(BR2_PACKAGE_GLIBC_KERNEL_COMPAT),)
+ifeq ($(BR2_PACKAGE_LINUX_HEADERS_AUTO_VERSION),y)
+GLIBC_CONF_OPTS += --enable-kernel=$(LINUX_HEADERS_VERSION_REAL)
 else
-GLIBC_KERNEL_HEADERS_VERSION = $(BR2_TOOLCHAIN_HEADERS_AT_LEAST)
+GLIBC_CONF_OPTS += --enable-kernel=$(call qstrip,$(BR2_TOOLCHAIN_HEADERS_AT_LEAST))
+endif
 endif
 
 # Even though we use the autotools-package infrastructure, we have to
@@ -107,16 +114,31 @@ endif
 #
 #  2. We have to execute the configure script with bash and not sh.
 #
-# Note that as mentionned in
-# http://patches.openembedded.org/patch/38849/, glibc must be
-# built with -O2, so we pass our own CFLAGS and CXXFLAGS below.
+# Glibc nowadays can be build with optimization flags f.e. -Os
+
+GLIBC_CFLAGS = $(TARGET_OPTIMIZATION)
+# crash in qemu-system-nios2 with -Os
+ifeq ($(BR2_nios2),y)
+GLIBC_CFLAGS += -O2
+endif
+
+# glibc can't be built without optimization
+ifeq ($(BR2_OPTIMIZE_0),y)
+GLIBC_CFLAGS += -O1
+endif
+
+# glibc can't be built with Optimize for fast
+ifeq ($(BR2_OPTIMIZE_FAST),y)
+GLIBC_CFLAGS += -O2
+endif
+
 define GLIBC_CONFIGURE_CMDS
 	mkdir -p $(@D)/build
 	# Do the configuration
 	(cd $(@D)/build; \
 		$(TARGET_CONFIGURE_OPTS) \
-		CFLAGS="-O2 $(GLIBC_EXTRA_CFLAGS)" CPPFLAGS="" \
-		CXXFLAGS="-O2 $(GLIBC_EXTRA_CFLAGS)" \
+		CFLAGS="$(GLIBC_CFLAGS) $(GLIBC_EXTRA_CFLAGS)" CPPFLAGS="" \
+		CXXFLAGS="$(GLIBC_CFLAGS) $(GLIBC_EXTRA_CFLAGS)" \
 		$(GLIBC_CONF_ENV) \
 		$(SHELL) $(@D)/configure \
 		--target=$(GNU_TARGET_NAME) \
@@ -129,8 +151,8 @@ define GLIBC_CONFIGURE_CMDS
 		--disable-profile \
 		--disable-werror \
 		--without-gd \
-		--enable-kernel=$(GLIBC_KERNEL_HEADERS_VERSION) \
-		--with-headers=$(STAGING_DIR)/usr/include)
+		--with-headers=$(STAGING_DIR)/usr/include \
+		$(GLIBC_CONF_OPTS))
 	$(GLIBC_ADD_MISSING_STUB_H)
 endef
 
@@ -169,16 +191,13 @@ define GLIBC_INSTALL_TARGET_CMDS
 endef
 
 ifeq ($(BR2_PACKAGE_GLIBC_GEN_LD_CACHE),y)
-
 GLIBC_DEPENDENCIES += host-qemu
 
 define GLIBC_GEN_LD_CACHE
 	mkdir -p $(TARGET_DIR)/etc $(TARGET_DIR)/tmp
 	$(QEMU_USER) $(GLIBC_DIR)/build/elf/ldconfig -r $(TARGET_DIR) || true
 endef
-
 GLIBC_TARGET_FINALIZE_HOOKS += GLIBC_GEN_LD_CACHE
-
 endif
 
 $(eval $(autotools-package))
