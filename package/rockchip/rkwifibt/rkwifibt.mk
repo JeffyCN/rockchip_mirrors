@@ -102,10 +102,19 @@ define RKWIFIBT_REALTEK_BT_INSTALL
     $(INSTALL) -D -m 0755 $(TARGET_DIR)/usr/bin/bt_load_rtk_firmware $(TARGET_DIR)/usr/bin/bt_init.sh
 endef
 
+ifeq ($(BR2_PACKAGE_RKWIFIBT_CHIPNAME), "RK915")
+define RKWIFIBT_ROCKCHIP_INSTALL
+    $(SED) 's/BT_TTY_DEV/\/dev\/$(BT_TTY_DEV)/g' $(@D)/$(SXLOAD_WIFI)
+    $(SED) 's/WIFI_KO/\/$(FIRMWARE_DIR)\/lib\/modules\/$(BR2_PACKAGE_RKWIFIBT_WIFI_KO)/g' $(@D)/$(SXLOAD_WIFI)
+    $(INSTALL) -D -m 0755 $(@D)/$(SXLOAD_WIFI) $(TARGET_DIR)/etc/init.d/
+    $(INSTALL) -D -m 0644 $(@D)/firmware/rockchip/WIFI_FIRMWARE/rk915* $(TARGET_DIR)/system/etc/firmware/
+endef
+else
 define RKWIFIBT_ROCKCHIP_INSTALL
     $(INSTALL) -D -m 0644 $(@D)/firmware/rockchip/WIFI_FIRMWARE/rk912* $(TARGET_DIR)/lib/firmware/
     $(INSTALL) -D -m 0755 $(@D)/S36load_wifi_rk912_modules $(TARGET_DIR)/etc/init.d/
 endef
+endif
 
 define RKWIFIBT_BUILD_CMDS
     ln -sf $(FIRMWARE_DIR) $(TARGET_DIR)/vendor
