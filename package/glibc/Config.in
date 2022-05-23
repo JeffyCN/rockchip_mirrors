@@ -10,17 +10,17 @@ config BR2_PACKAGE_GLIBC
 	help
 	  https://www.gnu.org/software/libc/
 
-choice
-        prompt "glibc version"
-        default BR2_PACKAGE_GLIBC_2_34
+config BR2_PACKAGE_GLIBC_KERNEL_COMPAT
+	bool "Enable compatibiltiy shims to run on older kernels"
+	help
+	  Say 'y' here if you plan on running your system on a kernel
+	  older than the version used for the toolchain headers.
 
-config BR2_PACKAGE_GLIBC_2_34
-        bool "glibc 2.34"
+	  Enabling those compatibility shims may generate a slightly
+	  bigger and slightly slower glibc library.
 
-config BR2_PACKAGE_GLIBC_2_29
-        bool "glibc 2.29"
-
-endchoice
+	  The oldest supported kernel version depends on the
+	  architecture.
 
 config BR2_PACKAGE_GLIBC_UTILS
 	bool "Install glibc utilities"
@@ -31,8 +31,7 @@ config BR2_PACKAGE_GLIBC_UTILS
 config BR2_PACKAGE_GLIBC_GEN_LD_CACHE
 	bool "glibc gen ld.so.cache"
 	default y
-	select BR2_PACKAGE_HOST_QEMU
-	select BR2_PACKAGE_HOST_QEMU_LINUX_USER_MODE
+	depends on BR2_PACKAGE_HOST_QEMU
+	depends on BR2_PACKAGE_HOST_QEMU_LINUX_USER_MODE
 
 endif # BR2_TOOLCHAIN_BUILDROOT_GLIBC
-
