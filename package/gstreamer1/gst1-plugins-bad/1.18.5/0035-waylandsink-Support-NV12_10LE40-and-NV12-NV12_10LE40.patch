@@ -1,8 +1,8 @@
-From 6e489297e5e280a0b531e84766d60a55e7a44e82 Mon Sep 17 00:00:00 2001
+From fe26ee2647cf2635249f93a4d3142b0796bed936 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
-Subject: [PATCH 35/40] waylandsink: Support NV12_10LE40 NV12(AFBC) and
- NV12_10(AFBC)
+Subject: [PATCH 35/42] waylandsink: Support NV12_10LE40 and
+ NV12|NV12_10LE40|NV16 (AFBC)
 
 Tested on RK356x with:
 export GST_MPP_VIDEODEC_DEFAULT_ARM_AFBC=1
@@ -21,7 +21,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  8 files changed, 192 insertions(+), 12 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index e4617b2..1e67bac 100644
+index e4617b27..1e67bac8 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -78,7 +78,7 @@ GST_DEBUG_CATEGORY (gstwayland_debug);
@@ -191,7 +191,7 @@ index e4617b2..1e67bac 100644
    {
      GST_ERROR_OBJECT (sink, "failed to activate bufferpool.");
 diff --git a/ext/wayland/wldisplay.c b/ext/wayland/wldisplay.c
-index b02334d..07cd1b6 100644
+index b02334d8..07cd1b60 100644
 --- a/ext/wayland/wldisplay.c
 +++ b/ext/wayland/wldisplay.c
 @@ -145,10 +145,27 @@ dmabuf_format (void *data, struct zwp_linux_dmabuf_v1 *zwp_linux_dmabuf,
@@ -232,7 +232,7 @@ index b02334d..07cd1b6 100644
    }
  }
 diff --git a/ext/wayland/wldisplay.h b/ext/wayland/wldisplay.h
-index f2025a6..29c15f6 100644
+index f2025a6a..29c15f63 100644
 --- a/ext/wayland/wldisplay.h
 +++ b/ext/wayland/wldisplay.h
 @@ -62,6 +62,8 @@ struct _GstWlDisplay
@@ -245,7 +245,7 @@ index f2025a6..29c15f6 100644
    /* private */
    gboolean own_display;
 diff --git a/ext/wayland/wllinuxdmabuf.c b/ext/wayland/wllinuxdmabuf.c
-index bc1742c..de3660a 100644
+index bc1742c7..de3660ad 100644
 --- a/ext/wayland/wllinuxdmabuf.c
 +++ b/ext/wayland/wllinuxdmabuf.c
 @@ -44,8 +44,10 @@ gst_wl_linux_dmabuf_construct_wl_buffer (GstBuffer * buf,
@@ -302,7 +302,7 @@ index bc1742c..de3660a 100644
        GST_ERROR_OBJECT (mem->allocator, "memory does not seem to contain "
            "enough data for the specified format");
 diff --git a/ext/wayland/wlvideoformat.c b/ext/wayland/wlvideoformat.c
-index 68cec50..11ca051 100644
+index 68cec509..11ca051a 100644
 --- a/ext/wayland/wlvideoformat.c
 +++ b/ext/wayland/wlvideoformat.c
 @@ -56,6 +56,7 @@ static const wl_VideoFormat wl_formats[] = {
@@ -314,7 +314,7 @@ index 68cec50..11ca051 100644
    {WL_SHM_FORMAT_NV16, DRM_FORMAT_NV16, GST_VIDEO_FORMAT_NV16},
    {WL_SHM_FORMAT_NV61, DRM_FORMAT_NV61, GST_VIDEO_FORMAT_NV61},
 diff --git a/ext/wayland/wlvideoformat.h b/ext/wayland/wlvideoformat.h
-index 331f582..ddfb1e0 100644
+index 331f582b..ddfb1e0d 100644
 --- a/ext/wayland/wlvideoformat.h
 +++ b/ext/wayland/wlvideoformat.h
 @@ -30,6 +30,48 @@
@@ -367,7 +367,7 @@ index 331f582..ddfb1e0 100644
  gint gst_video_format_to_wl_dmabuf_format (GstVideoFormat format);
  GstVideoFormat gst_wl_shm_format_to_video_format (enum wl_shm_format wl_format);
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index 9388f75..bb82d43 100644
+index 9388f751..bb82d437 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -462,6 +462,14 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
@@ -435,7 +435,7 @@ index 9388f75..bb82d43 100644
  
    if (G_LIKELY (buffer)) {
 diff --git a/ext/wayland/wlwindow.h b/ext/wayland/wlwindow.h
-index 4932cdd..a12e0eb 100644
+index 4932cdd1..a12e0ebe 100644
 --- a/ext/wayland/wlwindow.h
 +++ b/ext/wayland/wlwindow.h
 @@ -74,6 +74,8 @@ struct _GstWlWindow
