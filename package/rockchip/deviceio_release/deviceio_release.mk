@@ -14,7 +14,10 @@ else ifeq ($(call qstrip, $(BR2_ARCH)), aarch64)
         DEVICEIOARCH = lib64
 endif
 
-ifeq ($(call qstrip,$(BR2_PACKAGE_RKWIFIBT_VENDOR)), REALTEK)
+ifeq 	($(call qstrip,$(BR2_PACKAGE_RKWIFIBT_VENDOR)), ROCKCHIP)
+	LIBDEVICEIOSO = bluez/libDeviceIo.so
+	DEVICEIO_RELEASE_DEPENDENCIES += readline bluez5_utils libglib2 
+else ifeq ($(call qstrip,$(BR2_PACKAGE_RKWIFIBT_VENDOR)), REALTEK)
 	LIBDEVICEIOSO = bluez/libDeviceIo.so
 	DEVICEIO_RELEASE_DEPENDENCIES += readline bluez5_utils libglib2 bluez-alsa
 else ifeq ($(call qstrip,$(BR2_PACKAGE_RKWIFIBT_VENDOR)), BROADCOM)
