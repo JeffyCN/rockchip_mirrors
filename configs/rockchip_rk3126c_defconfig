@@ -11,6 +11,7 @@
 #include "camera_gst.config"
 #include "wifi.config"
 #include "network.config"
+#include "ubifs.config"
 BR2_TARGET_GENERIC_HOSTNAME="rk3126c"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3126C Buildroot"
 BR2_PACKAGE_RKWIFIBT_RK915=y
