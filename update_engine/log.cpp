@@ -33,12 +33,12 @@ void Log(const char* file, int line, LogPriority level, const char* fmt, ...) {
   va_end(ap);
 
   switch(level) {
-    case LOG_ERROR: printf("LOG_ERROR : %s\n", buf); break;
-    case LOG_WARN: printf("LOG_WARN : %s\n", buf); break;
-    case LOG_INFO: printf("LOG_INFO :%s \n", buf); break;
+    case LOG_ERROR: printf("LOG_ERROR : %s", buf); break;
+    case LOG_WARN: printf("LOG_WARN : %s", buf); break;
+    case LOG_INFO: printf("LOG_INFO :%s", buf); break;
     case LOG_DEBUG:
       //#if LOG_NDEBUG
-      printf("LOG_DEBUG :%s \n", buf);
+      printf("LOG_DEBUG :%s", buf);
       //#endif
       break;
     default :

@@ -861,7 +861,7 @@ main(int argc, char **argv) {
     const char *encrypted_fs_mode = NULL;
     int wipe_data = 0;
     int wipe_all = 0;
-    int pcba_test = 0;  //chad.ma add for pcba test
+    int pcba_test = 0;  // add for pcba test
     int toggle_secure_fs = 0;
     encrypted_fs_info encrypted_fs_data;
 
@@ -876,7 +876,7 @@ main(int argc, char **argv) {
         case 'a': wipe_all = 1; break;
         case 'e': encrypted_fs_mode = optarg; toggle_secure_fs = 1; break;
         case 't': ui_show_text(1); break;
-        case 'f': pcba_test = 1; break;  //chad.ma add for pcba test
+        case 'f': pcba_test = 1; break;  // add for pcba test
         case '?':
             LOGE("Invalid command argument\n");
             continue;
