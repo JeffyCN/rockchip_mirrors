@@ -1,7 +1,7 @@
-From c922ec472eb6d384372bc3406d76721981589ae2 Mon Sep 17 00:00:00 2001
+From 6987304b29be6430eacc179f333de1fdad7ca072 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 28/62] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 28/67] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -16,7 +16,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  6 files changed, 232 insertions(+), 7 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 128016b3..38244041 100644
+index 128016b33..38244041c 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -2337,6 +2337,9 @@ drm_heads_changed(struct wl_listener *listener, void *arg)
@@ -30,7 +30,7 @@ index 128016b3..38244041 100644
  
  		connected = weston_head_is_connected(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 0e274359..bbd1c1c5 100644
+index 0e2743595..bbd1c1c5c 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4765,10 +4765,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
@@ -55,7 +55,7 @@ index 0e274359..bbd1c1c5 100644
  		shell->lock_surface->committed(shell->lock_surface, 0, 0);
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index ed1e0aa6..42da77ff 100644
+index ed1e0aa66..42da77ff8 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -337,6 +337,8 @@ struct drm_backend {
@@ -78,7 +78,7 @@ index ed1e0aa6..42da77ff 100644
  
  struct drm_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index ae7623a6..1dd2df07 100644
+index 7ccce1f8e..db5860a45 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -209,8 +209,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -402,7 +402,7 @@ index ae7623a6..1dd2df07 100644
  
  	/* 'compute' faked zpos values in case HW doesn't expose any */
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 4b5ba42b..a3c55bd3 100644
+index 4b5ba42b8..a3c55bd34 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1170,6 +1170,9 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
@@ -416,10 +416,10 @@ index 4b5ba42b..a3c55bd3 100644
  
  			drm_debug(b, "\t\t[atomic] disabling inactive head %s\n",
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index a13469cf..cdcb7b1c 100644
+index 0136b8431..913b079b5 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -6455,6 +6455,9 @@ weston_output_set_color_transforms(struct weston_output *output)
+@@ -6458,6 +6458,9 @@ weston_output_set_color_transforms(struct weston_output *output)
  	struct weston_color_transform *sRGB_to_blend = NULL;
  	bool ok;
  
