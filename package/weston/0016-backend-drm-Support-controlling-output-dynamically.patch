@@ -1,7 +1,7 @@
-From 7ac9f2423950e62d5885abeab9fdcccbbb4ce26b Mon Sep 17 00:00:00 2001
+From 59e7c60a7a20a479406bbaf3554b110427073fb8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 16/62] backend-drm: Support controlling output dynamically
+Subject: [PATCH 16/67] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/size/pos/mode/off/freeze/display
 rectangle and prefer/primary output.
@@ -26,14 +26,14 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  compositor/main.c                    |  14 ++
  desktop-shell/shell.c                |  58 ++++++-
  include/libweston/libweston.h        |   5 +
- libweston/backend-drm/drm-internal.h |  17 ++
- libweston/backend-drm/drm.c          | 249 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm-internal.h |  16 ++
+ libweston/backend-drm/drm.c          | 248 ++++++++++++++++++++++++++-
  libweston/backend-drm/modes.c        |  20 ++-
  libweston/compositor.c               |  48 ++++--
- 7 files changed, 375 insertions(+), 36 deletions(-)
+ 7 files changed, 372 insertions(+), 37 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 47bf5409..a4f679a0 100644
+index 47bf54093..a4f679a04 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -1832,6 +1832,20 @@ drm_backend_output_configure(struct weston_output *output,
@@ -58,7 +58,7 @@ index 47bf5409..a4f679a0 100644
  		weston_log("Cannot configure an output using weston_drm_output_api.\n");
  		free(modeline);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index ddc9ad9a..83f425fd 100644
+index ddc9ad9a1..83f425fdb 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4203,7 +4203,7 @@ weston_view_set_initial_position(struct weston_view *view,
@@ -163,7 +163,7 @@ index ddc9ad9a..83f425fd 100644
  }
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 88686224..72adbc79 100644
+index 886862240..72adbc794 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -413,6 +413,10 @@ struct weston_output {
@@ -186,21 +186,20 @@ index 88686224..72adbc79 100644
  
  struct weston_buffer {
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index aeeac1c0..ed1e0aa6 100644
+index 1cd11b0da..d86377715 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -114,6 +114,10 @@
- #define DRM_MIN_UPDATE_MS	1000
- #define DRM_UPDATE_FREEZE_MS	60
+@@ -115,6 +115,9 @@
+ 
+ #define DRM_RESIZE_FREEZE_MS    600
  
 +#define WESTON_DRM_CONFIG_FILE	"/tmp/.weston_drm.conf"
 +#define DRM_CONFIG_UPDATE_MS	100
-+#define DRM_RESIZE_FREEZE_MS	600
 +
  /**
   * Represents the values of an enum-type KMS property
   */
-@@ -343,6 +347,9 @@ struct drm_backend {
+@@ -345,6 +348,9 @@ struct drm_backend {
  	int virtual_height;
  
  	bool mirror_mode;
@@ -210,7 +209,7 @@ index aeeac1c0..ed1e0aa6 100644
  };
  
  struct drm_mode {
-@@ -621,6 +628,9 @@ struct drm_output {
+@@ -623,6 +629,9 @@ struct drm_output {
  	bool is_mirror;
  
  	pixman_box32_t plane_bounds;
@@ -220,7 +219,7 @@ index aeeac1c0..ed1e0aa6 100644
  };
  
  static inline struct drm_head *
-@@ -703,6 +713,13 @@ drm_mode_list_destroy(struct drm_backend *backend, struct wl_list *mode_list);
+@@ -705,6 +714,13 @@ drm_mode_list_destroy(struct drm_backend *backend, struct wl_list *mode_list);
  void
  drm_output_print_modes(struct drm_output *output);
  
@@ -235,7 +234,7 @@ index aeeac1c0..ed1e0aa6 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c4d3f1f1..14bd6cbb 100644
+index 149eb7b8b..8418e7962 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -255,6 +254,15 @@ index c4d3f1f1..14bd6cbb 100644
  static inline bool
  drm_head_is_external(struct drm_head *head)
  {
+@@ -204,7 +207,7 @@ close_src:
+ static void
+ drm_backend_update_outputs(struct drm_backend *b)
+ {
+-	struct weston_output *primary;
++	struct weston_output *base, *primary;
+ 
+ 	if (!b->primary_head)
+ 		return;
 @@ -492,6 +495,12 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
  		return;
  	}
@@ -268,23 +276,17 @@ index c4d3f1f1..14bd6cbb 100644
  	ts.tv_sec = sec;
  	ts.tv_nsec = usec * 1000;
  
-@@ -813,6 +822,7 @@ drm_output_repaint(struct weston_output *output_base,
- 	struct drm_output_state *state = NULL;
- 	struct drm_plane_state *scanout_state;
- 	struct timespec now;
-+	int64_t now_ms;
- 
- 	assert(!output->virtual);
- 
-@@ -822,11 +832,14 @@ drm_output_repaint(struct weston_output *output_base,
- 	assert(!output->state_last);
+@@ -824,7 +833,8 @@ drm_output_repaint(struct weston_output *output_base,
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
--	if (timespec_to_msec(&now) < b->last_update_ms + DRM_UPDATE_FREEZE_MS) {
-+	now_ms = timespec_to_msec(&now);
-+
-+	if (now_ms < b->last_update_ms + DRM_UPDATE_FREEZE_MS ||
+ 	now_ms = timespec_to_msec(&now);
+-	if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS) {
++	if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS ||
 +	    now_ms < output->last_resize_ms + DRM_RESIZE_FREEZE_MS) {
+ 		/* Resize fullscreen/maxmium views(not always success) */
+ 		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
+ 			wl_signal_emit(&b->compositor->output_resized_signal,
+@@ -833,7 +843,7 @@ drm_output_repaint(struct weston_output *output_base,
  		weston_output_damage(&output->base);
  		weston_output_finish_frame(output_base, NULL,
  					   WP_PRESENTATION_FEEDBACK_INVALID);
@@ -293,7 +295,7 @@ index c4d3f1f1..14bd6cbb 100644
  	}
  
  	/* If planes have been disabled in the core, we might not have
-@@ -854,7 +867,8 @@ drm_output_repaint(struct weston_output *output_base,
+@@ -861,7 +871,8 @@ drm_output_repaint(struct weston_output *output_base,
  
  err:
  	drm_output_state_free(state);
@@ -303,7 +305,7 @@ index c4d3f1f1..14bd6cbb 100644
  }
  
  /* Determine the type of vblank synchronization to use for the output.
-@@ -2207,6 +2221,8 @@ drm_output_enable(struct weston_output *base)
+@@ -2214,6 +2225,8 @@ drm_output_enable(struct weston_output *base)
  	output->base.switch_mode = drm_output_switch_mode;
  	output->base.set_gamma = drm_output_set_gamma;
  
@@ -312,7 +314,7 @@ index c4d3f1f1..14bd6cbb 100644
  	output->state_invalid = true;
  
  	weston_log("Output %s (crtc %d) video modes:\n",
-@@ -3029,6 +3045,7 @@ drm_destroy(struct weston_compositor *ec)
+@@ -3041,6 +3054,7 @@ drm_destroy(struct weston_compositor *ec)
  
  	udev_input_destroy(&b->input);
  
@@ -320,7 +322,7 @@ index c4d3f1f1..14bd6cbb 100644
  	wl_event_source_remove(b->hotplug_timer);
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
-@@ -3451,6 +3468,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -3463,6 +3477,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -331,7 +333,7 @@ index c4d3f1f1..14bd6cbb 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -3459,6 +3480,224 @@ static const struct weston_drm_output_api api = {
+@@ -3471,6 +3489,224 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_seat,
  };
  
@@ -556,7 +558,7 @@ index c4d3f1f1..14bd6cbb 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3798,6 +4037,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3810,6 +4046,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b);
  
@@ -568,7 +570,7 @@ index c4d3f1f1..14bd6cbb 100644
  
  err_udev_monitor:
 diff --git a/libweston/backend-drm/modes.c b/libweston/backend-drm/modes.c
-index e7bbfa53..ff7421da 100644
+index e7bbfa536..ff7421da4 100644
 --- a/libweston/backend-drm/modes.c
 +++ b/libweston/backend-drm/modes.c
 @@ -385,15 +385,19 @@ drm_output_add_mode(struct drm_output *output, const drmModeModeInfo *info)
@@ -617,7 +619,7 @@ index e7bbfa53..ff7421da 100644
  			if (!backend->aspect_ratio_supported ||
  			    aspect_ratio == drm_mode->base.aspect_ratio)
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 1db5fb79..67b5fb74 100644
+index 1db5fb79b..67b5fb745 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3003,6 +3003,11 @@ weston_output_repaint(struct weston_output *output, void *repaint_data)

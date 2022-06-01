@@ -1,7 +1,7 @@
-From 510537d7b7b4ff3f490f2b92887d61c7dd684287 Mon Sep 17 00:00:00 2001
+From 71a76b766eea51d06b5a12240aa96e911bfe4723 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 15:17:39 +0800
-Subject: [PATCH 61/63] backend-drm: Stop disabling unused CRTCs by default
+Subject: [PATCH 61/67] backend-drm: Stop disabling unused CRTCs by default
 
 So that we can launch multiple weston instances for different monitors.
 
@@ -15,11 +15,11 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 11 insertions(+), 3 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index e68728a5..0c1861bc 100644
+index eb76dab29..ff28eda44 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -339,6 +339,7 @@ struct drm_backend {
- 
+@@ -338,6 +338,7 @@ struct drm_backend {
+ 	int64_t last_update_ms;
  	int64_t last_resize_ms;
  
 +	bool master;
@@ -27,10 +27,10 @@ index e68728a5..0c1861bc 100644
  	bool head_fallback;
  	drm_head_match_t *head_matches;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index eb2d78b3..fcb6d01e 100644
+index 66b872c39..122159dd0 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -2254,6 +2254,9 @@ drm_output_detach_crtc(struct drm_output *output)
+@@ -2252,6 +2252,9 @@ drm_output_detach_crtc(struct drm_output *output)
  	/* Force resetting unused CRTCs */
  	b->state_invalid = true;
  	output->state_invalid = true;
@@ -40,7 +40,7 @@ index eb2d78b3..fcb6d01e 100644
  }
  
  static int
-@@ -4087,6 +4090,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4085,6 +4088,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	if (b == NULL)
  		return NULL;
  
@@ -52,7 +52,7 @@ index eb2d78b3..fcb6d01e 100644
  	if (buf && buf[0] == '1')
  		b->single_head = true;
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 82247fb8..37da3f66 100644
+index 82247fb8b..37da3f66a 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1190,7 +1190,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
