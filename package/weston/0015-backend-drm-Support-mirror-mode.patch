@@ -1,7 +1,7 @@
-From ef789b8276246b29b9960d7397100a3aa842bc61 Mon Sep 17 00:00:00 2001
+From 0eb43f8782f82f7a6b2e7edbd5ee5be1c0b992f9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 15/67] backend-drm: Support mirror mode
+Subject: [PATCH 15/69] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -88,10 +88,10 @@ index d0a4c6ca4..d7bd05f13 100644
  	}
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 7fd0f4ac0..1cd11b0da 100644
+index ec68ed4ab..0bfb0a88f 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -343,6 +343,8 @@ struct drm_backend {
+@@ -344,6 +344,8 @@ struct drm_backend {
  
  	int virtual_width;
  	int virtual_height;
@@ -100,7 +100,7 @@ index 7fd0f4ac0..1cd11b0da 100644
  };
  
  struct drm_mode {
-@@ -600,6 +602,10 @@ struct drm_output {
+@@ -601,6 +603,10 @@ struct drm_output {
  	int current_image;
  	pixman_region32_t previous_damage;
  
@@ -111,7 +111,7 @@ index 7fd0f4ac0..1cd11b0da 100644
  	struct vaapi_recorder *recorder;
  	struct wl_listener recorder_frame_listener;
  
-@@ -613,6 +619,10 @@ struct drm_output {
+@@ -614,6 +620,10 @@ struct drm_output {
  
  	/* The dummy framebuffer for SET_CRTC. */
  	struct drm_fb *fb_dummy;
@@ -123,7 +123,7 @@ index 7fd0f4ac0..1cd11b0da 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index dded76b87..149eb7b8b 100644
+index 95c8c0aa6..df46efcd8 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -67,6 +67,11 @@
@@ -535,9 +535,9 @@ index dded76b87..149eb7b8b 100644
  	free(output);
  }
  
-@@ -3299,6 +3602,12 @@ drm_backend_create(struct weston_compositor *compositor,
- 	if (buf)
- 		sscanf(buf, "%dx%d", &b->virtual_width, &b->virtual_height);
+@@ -3305,6 +3608,12 @@ drm_backend_create(struct weston_compositor *compositor,
+ 	else
+ 		b->resize_freeze_ms = DRM_RESIZE_FREEZE_MS;
  
 +	buf = getenv("WESTON_DRM_MIRROR");
 +	if (buf && buf[0] == '1') {

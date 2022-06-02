@@ -14,6 +14,9 @@ export WESTON_DISABLE_ATOMIC=1
 # Allow disabling unused CRTCs
 # WESTON_DRM_MASTER=1
 
+# Override output's freezing time
+# export WESTON_DRM_RESIZE_FREEZE_MS=1000
+
 # Primary screen
 # export WESTON_DRM_PRIMARY=eDP-1
 

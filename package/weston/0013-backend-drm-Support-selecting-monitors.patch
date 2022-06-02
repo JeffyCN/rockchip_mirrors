@@ -1,7 +1,7 @@
-From 7e2ef2848584fe2cfd27c2713b20c9fb58ed984c Mon Sep 17 00:00:00 2001
+From 926f89636a81e1251c4d6e62808cc7efdc4e8000 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
-Subject: [PATCH 13/67] backend-drm: Support selecting monitors
+Subject: [PATCH 13/69] backend-drm: Support selecting monitors
 
 Using these environments:
 
@@ -232,7 +232,7 @@ index 55e9414b9..caa9c55d0 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index d6a858873..4beeeb116 100644
+index d6a858873..254795520 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -47,6 +47,7 @@
@@ -314,7 +314,7 @@ index d6a858873..4beeeb116 100644
 +			wl_signal_emit(&b->compositor->output_resized_signal,
 +				       output);
 +
-+		weston_output_damage(&output->base);
++		weston_output_damage(output_base);
 +		weston_output_finish_frame(output_base, NULL,
 +					   WP_PRESENTATION_FEEDBACK_INVALID);
 +		return 0;
