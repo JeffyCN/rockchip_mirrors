@@ -1,7 +1,7 @@
-From 59e7c60a7a20a479406bbaf3554b110427073fb8 Mon Sep 17 00:00:00 2001
+From e37186205352824ac06375390b0ee629d9bfdb0c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 16/67] backend-drm: Support controlling output dynamically
+Subject: [PATCH 16/69] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/size/pos/mode/off/freeze/display
 rectangle and prefer/primary output.
@@ -186,7 +186,7 @@ index 886862240..72adbc794 100644
  
  struct weston_buffer {
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 1cd11b0da..d86377715 100644
+index 0bfb0a88f..b34dcde0a 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -115,6 +115,9 @@
@@ -199,7 +199,7 @@ index 1cd11b0da..d86377715 100644
  /**
   * Represents the values of an enum-type KMS property
   */
-@@ -345,6 +348,9 @@ struct drm_backend {
+@@ -346,6 +349,9 @@ struct drm_backend {
  	int virtual_height;
  
  	bool mirror_mode;
@@ -209,7 +209,7 @@ index 1cd11b0da..d86377715 100644
  };
  
  struct drm_mode {
-@@ -623,6 +629,9 @@ struct drm_output {
+@@ -624,6 +630,9 @@ struct drm_output {
  	bool is_mirror;
  
  	pixman_box32_t plane_bounds;
@@ -219,7 +219,7 @@ index 1cd11b0da..d86377715 100644
  };
  
  static inline struct drm_head *
-@@ -705,6 +714,13 @@ drm_mode_list_destroy(struct drm_backend *backend, struct wl_list *mode_list);
+@@ -706,6 +715,13 @@ drm_mode_list_destroy(struct drm_backend *backend, struct wl_list *mode_list);
  void
  drm_output_print_modes(struct drm_output *output);
  
@@ -234,7 +234,7 @@ index 1cd11b0da..d86377715 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 149eb7b8b..8418e7962 100644
+index df46efcd8..18ef5fbf1 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -280,14 +280,14 @@ index 149eb7b8b..8418e7962 100644
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
  	now_ms = timespec_to_msec(&now);
--	if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS) {
-+	if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS ||
-+	    now_ms < output->last_resize_ms + DRM_RESIZE_FREEZE_MS) {
+-	if (now_ms < b->last_resize_ms + b->resize_freeze_ms) {
++	if (now_ms < b->last_resize_ms + b->resize_freeze_ms ||
++	    now_ms < output->last_resize_ms + b->resize_freeze_ms) {
  		/* Resize fullscreen/maxmium views(not always success) */
  		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
  			wl_signal_emit(&b->compositor->output_resized_signal,
 @@ -833,7 +843,7 @@ drm_output_repaint(struct weston_output *output_base,
- 		weston_output_damage(&output->base);
+ 		weston_output_damage(output_base);
  		weston_output_finish_frame(output_base, NULL,
  					   WP_PRESENTATION_FEEDBACK_INVALID);
 -		return 0;
@@ -558,7 +558,7 @@ index 149eb7b8b..8418e7962 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3810,6 +4046,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3816,6 +4052,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b);
  

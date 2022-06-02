@@ -1,7 +1,7 @@
-From effdaafe7a657bd8905c979b1da4b77f00a9d3ee Mon Sep 17 00:00:00 2001
+From fc43e17fdcb720b2ac8f293818702683c499f08f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 7 Mar 2022 17:20:59 +0800
-Subject: [PATCH 58/67] backend-drm: Allow overriding plane type when using
+Subject: [PATCH 58/69] backend-drm: Allow overriding plane type when using
  atomic
 
 Set env DRM_PLANE_TYPE_<plane id> to primary|overlay|cursor.
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 34 insertions(+), 4 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index ea0792211..eb76dab29 100644
+index e3f65db1f..ffe60394b 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -755,6 +755,9 @@ drm_plane_populate_formats(struct drm_plane *plane, const drmModePlane *kplane,
+@@ -756,6 +756,9 @@ drm_plane_populate_formats(struct drm_plane *plane, const drmModePlane *kplane,
  void
  drm_property_info_free(struct drm_property_info *info, int num_props);
  
@@ -28,7 +28,7 @@ index ea0792211..eb76dab29 100644
  extern const struct drm_property_info plane_props[];
  extern struct drm_property_enum_info dpms_state_enums[];
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 239caea7b..66b872c39 100644
+index 6041b9941..0c566952f 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1172,10 +1172,8 @@ drm_plane_create(struct drm_backend *b, const drmModePlane *kplane)

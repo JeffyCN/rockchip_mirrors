@@ -1,0 +1,108 @@
+From 2f5402292021fd875fb2e2fa5a6e1368da48d939 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 2 Jun 2022 19:00:40 +0800
+Subject: [PATCH 69/69] desktop-shell: Support setting panel scale in
+ weston.ini
+
+Tested with:
+[shell]
+panel-scale=2
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ clients/desktop-shell.c | 23 +++++++++++++++--------
+ 1 file changed, 15 insertions(+), 8 deletions(-)
+
+diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
+index 6cf21dad7..d96521779 100644
+--- a/clients/desktop-shell.c
++++ b/clients/desktop-shell.c
+@@ -109,6 +109,7 @@ struct panel {
+ 	enum weston_desktop_shell_panel_position panel_position;
+ 	enum clock_format clock_format;
+ 	uint32_t color;
++	double scale;
+ };
+ 
+ struct background {
+@@ -242,17 +243,18 @@ panel_launcher_redraw_handler(struct widget *widget, void *data)
+ {
+ 	struct panel_launcher *launcher = data;
+ 	struct rectangle allocation;
++	double scale = launcher->panel->scale;
+ 	cairo_t *cr;
+ 
+ 	cr = widget_cairo_create(launcher->panel->widget);
+ 
+ 	widget_get_allocation(widget, &allocation);
+ 	allocation.x += allocation.width / 2 -
+-		cairo_image_surface_get_width(launcher->icon) / 2;
++		cairo_image_surface_get_width(launcher->icon) * scale / 2;
+ 	if (allocation.width > allocation.height)
+ 		allocation.x += allocation.width / 2 - allocation.height / 2;
+ 	allocation.y += allocation.height / 2 -
+-		cairo_image_surface_get_height(launcher->icon) / 2;
++		cairo_image_surface_get_height(launcher->icon) * scale / 2;
+ 	if (allocation.height > allocation.width)
+ 		allocation.y += allocation.height / 2 - allocation.width / 2;
+ 	if (launcher->pressed) {
+@@ -260,8 +262,9 @@ panel_launcher_redraw_handler(struct widget *widget, void *data)
+ 		allocation.y++;
+ 	}
+ 
++	cairo_scale(cr, scale, scale);
+ 	cairo_set_source_surface(cr, launcher->icon,
+-				 allocation.x, allocation.y);
++				 allocation.x / scale, allocation.y / scale);
+ 	cairo_paint(cr);
+ 
+ 	if (launcher->focused) {
+@@ -404,7 +407,7 @@ panel_clock_redraw_handler(struct widget *widget, void *data)
+ 		return;
+ 
+ 	cr = widget_cairo_create(clock->panel->widget);
+-	cairo_set_font_size(cr, 14);
++	cairo_set_font_size(cr, 14 * clock->panel->scale);
+ 	cairo_text_extents(cr, string, &extents);
+ 	if (allocation.x > 0)
+ 		allocation.x +=
+@@ -552,21 +555,21 @@ panel_configure(void *data,
+ 	switch (desktop->panel_position) {
+ 	case WESTON_DESKTOP_SHELL_PANEL_POSITION_TOP:
+ 	case WESTON_DESKTOP_SHELL_PANEL_POSITION_BOTTOM:
+-		height = 32;
++		height = 32 * panel->scale;
+ 		break;
+ 	case WESTON_DESKTOP_SHELL_PANEL_POSITION_LEFT:
+ 	case WESTON_DESKTOP_SHELL_PANEL_POSITION_RIGHT:
+ 		switch (desktop->clock_format) {
+ 		case CLOCK_FORMAT_NONE:
+-			width = 32;
++			width = 32 * panel->scale;
+ 			break;
+ 		case CLOCK_FORMAT_MINUTES:
+ 		case CLOCK_FORMAT_MINUTES_24H:
+ 		case CLOCK_FORMAT_SECONDS_24H:
+-			width = 150;
++			width = 150 * panel->scale;
+ 			break;
+ 		case CLOCK_FORMAT_SECONDS:
+-			width = 170;
++			width = 170 * panel->scale;
+ 			break;
+ 		}
+ 		break;
+@@ -636,6 +639,10 @@ panel_create(struct desktop *desktop, struct output *output)
+ 	s = weston_config_get_section(desktop->config, "shell", NULL, NULL);
+ 	weston_config_section_get_color(s, "panel-color",
+ 					&panel->color, 0xaa000000);
++	weston_config_section_get_double(s, "panel-scale",
++					 &panel->scale, 1.0f);
++	if (!panel->scale)
++		panel->scale = 1.0f;
+ 
+ 	panel_add_launchers(panel, desktop);
+ 
+-- 
+2.20.1
+

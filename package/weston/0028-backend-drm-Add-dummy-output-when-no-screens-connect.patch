@@ -1,7 +1,7 @@
-From 4a628c6af88e1460952786fffd300d54c3bac6be Mon Sep 17 00:00:00 2001
+From 14efc00e8f1a7df150a5f44284c89b7269bbae09 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 28/67] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 28/69] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -10,10 +10,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  compositor/main.c                    |   3 +
  desktop-shell/shell.c                |   7 +-
  libweston/backend-drm/drm-internal.h |   3 +
- libweston/backend-drm/drm.c          | 205 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 203 ++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          |   3 +
  libweston/compositor.c               |   3 +
- 6 files changed, 218 insertions(+), 6 deletions(-)
+ 6 files changed, 216 insertions(+), 6 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 128016b33..38244041c 100644
@@ -55,10 +55,10 @@ index 0e2743595..bbd1c1c5c 100644
  		shell->lock_surface->committed(shell->lock_surface, 0, 0);
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index d86377715..17b2484c4 100644
+index b34dcde0a..651ef6670 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -351,6 +351,9 @@ struct drm_backend {
+@@ -352,6 +352,9 @@ struct drm_backend {
  
  	struct wl_event_source *config_timer;
  	struct stat config_stat;
@@ -69,7 +69,7 @@ index d86377715..17b2484c4 100644
  
  struct drm_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index ee25d15d9..9e5e75446 100644
+index a6556f626..49790007c 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -209,8 +209,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -332,7 +332,7 @@ index ee25d15d9..9e5e75446 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3962,12 +4156,19 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3968,6 +4162,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  
@@ -344,14 +344,6 @@ index ee25d15d9..9e5e75446 100644
  	wl_list_init(&b->writeback_connector_list);
  	if (drm_backend_update_connectors(b, drm_device) < 0) {
  		weston_log("Failed to create heads for %s\n", b->drm.filename);
- 		goto err_udev_input;
- 	}
- 
-+	b->last_resize_ms = -1;
-+
- 	drmModeFreeResources(res);
- 
- 	/* 'compute' faked zpos values in case HW doesn't expose any */
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
 index 4b5ba42b8..a3c55bd34 100644
 --- a/libweston/backend-drm/kms.c
