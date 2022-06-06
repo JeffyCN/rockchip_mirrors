@@ -1,4 +1,4 @@
-From 3a46aae7731c136275d1e21a86bca2ad8cc0d387 Mon Sep 17 00:00:00 2001
+From 00370796a9186c20e557708c8c0e994d263303a3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
 Subject: [PATCH 50/69] HACK: pixman-renderer: Support passing dma fd to pixman
@@ -28,7 +28,7 @@ index e4d51e130..e3f65db1f 100644
  	uint32_t plane_mask;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 0d17f0700..e6a555eb6 100644
+index a202cc154..1a6931591 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1635,6 +1635,9 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)

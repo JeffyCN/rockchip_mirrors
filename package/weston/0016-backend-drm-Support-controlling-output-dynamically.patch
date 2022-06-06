@@ -1,4 +1,4 @@
-From e37186205352824ac06375390b0ee629d9bfdb0c Mon Sep 17 00:00:00 2001
+From d4d82b50e967114f5d6b3fe1c4843053e98eb82f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 16/69] backend-drm: Support controlling output dynamically
@@ -27,10 +27,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                |  58 ++++++-
  include/libweston/libweston.h        |   5 +
  libweston/backend-drm/drm-internal.h |  16 ++
- libweston/backend-drm/drm.c          | 248 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 249 ++++++++++++++++++++++++++-
  libweston/backend-drm/modes.c        |  20 ++-
  libweston/compositor.c               |  48 ++++--
- 7 files changed, 372 insertions(+), 37 deletions(-)
+ 7 files changed, 373 insertions(+), 37 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 47bf54093..a4f679a04 100644
@@ -234,7 +234,7 @@ index 0bfb0a88f..b34dcde0a 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index df46efcd8..18ef5fbf1 100644
+index 39911e554..a34676f38 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -314,7 +314,7 @@ index df46efcd8..18ef5fbf1 100644
  	output->state_invalid = true;
  
  	weston_log("Output %s (crtc %d) video modes:\n",
-@@ -3041,6 +3054,7 @@ drm_destroy(struct weston_compositor *ec)
+@@ -3042,6 +3055,7 @@ drm_destroy(struct weston_compositor *ec)
  
  	udev_input_destroy(&b->input);
  
@@ -322,7 +322,7 @@ index df46efcd8..18ef5fbf1 100644
  	wl_event_source_remove(b->hotplug_timer);
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
-@@ -3463,6 +3477,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -3464,6 +3478,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -333,7 +333,7 @@ index df46efcd8..18ef5fbf1 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -3471,6 +3489,224 @@ static const struct weston_drm_output_api api = {
+@@ -3472,6 +3490,225 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_seat,
  };
  
@@ -533,8 +533,6 @@ index df46efcd8..18ef5fbf1 100644
 +	if (st.st_mtime && !memcmp(&st, &b->config_stat, sizeof(st)))
 +		return 0;
 +
-+	b->config_stat = st;
-+
 +	conf_fp = fopen(config_file, "r");
 +	if (!conf_fp)
 +		return 0;
@@ -552,13 +550,16 @@ index df46efcd8..18ef5fbf1 100644
 +	}
 +
 +	fclose(conf_fp);
++
++	stat(config_file, &st);
++	b->config_stat = st;
 +	return 0;
 +}
 +
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3816,6 +4052,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3817,6 +4054,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b);
  
