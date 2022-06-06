@@ -1,4 +1,4 @@
-From 926f89636a81e1251c4d6e62808cc7efdc4e8000 Mon Sep 17 00:00:00 2001
+From 6883eb6e577e26ca359e050cabdede1e8400d691 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
 Subject: [PATCH 13/69] backend-drm: Support selecting monitors
@@ -29,10 +29,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                |  24 +-
  include/libweston/libweston.h        |   2 +
  libweston/backend-drm/drm-internal.h |  22 ++
- libweston/backend-drm/drm.c          | 360 +++++++++++++++++++++++----
+ libweston/backend-drm/drm.c          | 361 +++++++++++++++++++++++----
  libweston/backend-drm/kms.c          |  42 +++-
  libweston/compositor.c               |  40 ++-
- 7 files changed, 456 insertions(+), 60 deletions(-)
+ 7 files changed, 457 insertions(+), 60 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index e946b4a54..47bf54093 100644
@@ -232,7 +232,7 @@ index 55e9414b9..caa9c55d0 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index d6a858873..254795520 100644
+index d6a858873..db8aaf2d9 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -47,6 +47,7 @@
@@ -504,7 +504,7 @@ index d6a858873..254795520 100644
  	/* collect new connectors that have appeared, e.g. MST */
  	for (i = 0; i < resources->count_connectors; i++) {
  		connector_id = resources->connectors[i];
-@@ -2456,6 +2516,53 @@ drm_backend_update_connectors(struct drm_backend *b, struct udev_device *drm_dev
+@@ -2456,6 +2516,54 @@ drm_backend_update_connectors(struct drm_backend *b, struct udev_device *drm_dev
  	}
  
  	drmModeFreeResources(resources);
@@ -551,14 +551,15 @@ index d6a858873..254795520 100644
 +	b->last_update_ms = timespec_to_msec(&now);
 +
 +	/* Assume primary output's size changed */
-+	if (b->primary_head != old_primary_head)
++	if (b->primary_head && old_primary_head &&
++	    b->primary_head != old_primary_head)
 +		b->last_resize_ms = b->last_update_ms;
 +
 +	return 0;
  }
  
  static enum wdrm_connector_property
-@@ -2546,6 +2653,48 @@ udev_event_is_conn_prop_change(struct drm_backend *b,
+@@ -2546,6 +2654,48 @@ udev_event_is_conn_prop_change(struct drm_backend *b,
  	return 1;
  }
  
@@ -607,7 +608,7 @@ index d6a858873..254795520 100644
  static int
  udev_drm_event(int fd, uint32_t mask, void *data)
  {
-@@ -2559,7 +2708,7 @@ udev_drm_event(int fd, uint32_t mask, void *data)
+@@ -2559,7 +2709,7 @@ udev_drm_event(int fd, uint32_t mask, void *data)
  		if (udev_event_is_conn_prop_change(b, event, &conn_id, &prop_id))
  			drm_backend_update_conn_props(b, conn_id, prop_id);
  		else
@@ -616,7 +617,7 @@ index d6a858873..254795520 100644
  	}
  
  	udev_device_unref(event);
-@@ -2577,6 +2726,7 @@ drm_destroy(struct weston_compositor *ec)
+@@ -2577,6 +2727,7 @@ drm_destroy(struct weston_compositor *ec)
  
  	udev_input_destroy(&b->input);
  
@@ -624,7 +625,7 @@ index d6a858873..254795520 100644
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
  
-@@ -2627,6 +2777,10 @@ session_notify(struct wl_listener *listener, void *data)
+@@ -2627,6 +2778,10 @@ session_notify(struct wl_listener *listener, void *data)
  		weston_compositor_wake(compositor);
  		weston_compositor_damage_all(compositor);
  		b->state_invalid = true;
@@ -635,7 +636,7 @@ index d6a858873..254795520 100644
  		udev_input_enable(&b->input);
  	} else {
  		weston_log("deactivating session\n");
-@@ -2987,6 +3141,14 @@ recorder_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+@@ -2987,6 +3142,14 @@ recorder_binding(struct weston_keyboard *keyboard, const struct timespec *time,
  }
  #endif
  
@@ -650,7 +651,7 @@ index d6a858873..254795520 100644
  
  static const struct weston_drm_output_api api = {
  	drm_output_set_mode,
-@@ -2994,6 +3156,73 @@ static const struct weston_drm_output_api api = {
+@@ -2994,6 +3157,73 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_seat,
  };
  
@@ -724,7 +725,7 @@ index d6a858873..254795520 100644
  static struct drm_backend *
  drm_backend_create(struct weston_compositor *compositor,
  		   struct weston_drm_backend_config *config)
-@@ -3004,7 +3233,9 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3004,7 +3234,9 @@ drm_backend_create(struct weston_compositor *compositor,
  	const char *seat_id = default_seat;
  	const char *session_seat;
  	struct weston_drm_format_array *scanout_formats;
@@ -734,7 +735,7 @@ index d6a858873..254795520 100644
  	int ret;
  
  	session_seat = getenv("XDG_SEAT");
-@@ -3020,6 +3251,38 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3020,6 +3252,38 @@ drm_backend_create(struct weston_compositor *compositor,
  	if (b == NULL)
  		return NULL;
  
@@ -773,7 +774,7 @@ index d6a858873..254795520 100644
  	b->state_invalid = true;
  	b->drm.fd = -1;
  
-@@ -3115,7 +3378,7 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3115,7 +3379,7 @@ drm_backend_create(struct weston_compositor *compositor,
  	}
  
  	wl_list_init(&b->writeback_connector_list);
@@ -782,7 +783,7 @@ index d6a858873..254795520 100644
  		weston_log("Failed to create heads for %s\n", b->drm.filename);
  		goto err_udev_input;
  	}
-@@ -3154,6 +3417,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3154,6 +3418,10 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	udev_device_unref(drm_device);
  
@@ -793,7 +794,7 @@ index d6a858873..254795520 100644
  	weston_compositor_add_debug_binding(compositor, KEY_O,
  					    planes_binding, b);
  	weston_compositor_add_debug_binding(compositor, KEY_C,
-@@ -3215,6 +3482,9 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3215,6 +3483,9 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_monitor;
  	}
  

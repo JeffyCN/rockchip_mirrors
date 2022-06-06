@@ -1,4 +1,4 @@
-From fc43e17fdcb720b2ac8f293818702683c499f08f Mon Sep 17 00:00:00 2001
+From 0887fad953bf6af7caf901c7848e1f40e2359492 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 7 Mar 2022 17:20:59 +0800
 Subject: [PATCH 58/69] backend-drm: Allow overriding plane type when using
@@ -28,7 +28,7 @@ index e3f65db1f..ffe60394b 100644
  extern const struct drm_property_info plane_props[];
  extern struct drm_property_enum_info dpms_state_enums[];
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 6041b9941..0c566952f 100644
+index 85874f4b7..cfc2a7d3b 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1172,10 +1172,8 @@ drm_plane_create(struct drm_backend *b, const drmModePlane *kplane)

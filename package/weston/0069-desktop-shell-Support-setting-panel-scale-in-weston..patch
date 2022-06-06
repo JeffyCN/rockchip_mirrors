@@ -1,4 +1,4 @@
-From 2f5402292021fd875fb2e2fa5a6e1368da48d939 Mon Sep 17 00:00:00 2001
+From 7b7dee1bcf9e0ab7969880bfb54cb929ed37d87a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 2 Jun 2022 19:00:40 +0800
 Subject: [PATCH 69/69] desktop-shell: Support setting panel scale in

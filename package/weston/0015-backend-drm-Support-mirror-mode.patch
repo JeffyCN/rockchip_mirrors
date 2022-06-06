@@ -1,4 +1,4 @@
-From 0eb43f8782f82f7a6b2e7edbd5ee5be1c0b992f9 Mon Sep 17 00:00:00 2001
+From f2c2c19f23c314a30163d79e1d781d9e60e16206 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
 Subject: [PATCH 15/69] backend-drm: Support mirror mode
@@ -123,7 +123,7 @@ index ec68ed4ab..0bfb0a88f 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 95c8c0aa6..df46efcd8 100644
+index 77d3db41f..39911e554 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -67,6 +67,11 @@
@@ -535,7 +535,7 @@ index 95c8c0aa6..df46efcd8 100644
  	free(output);
  }
  
-@@ -3305,6 +3608,12 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3306,6 +3609,12 @@ drm_backend_create(struct weston_compositor *compositor,
  	else
  		b->resize_freeze_ms = DRM_RESIZE_FREEZE_MS;
  
