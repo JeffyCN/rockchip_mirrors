@@ -1,4 +1,4 @@
-From 7b7dee1bcf9e0ab7969880bfb54cb929ed37d87a Mon Sep 17 00:00:00 2001
+From 0e1f339e66d16172bc09e843696a0ada0831630a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 2 Jun 2022 19:00:40 +0800
 Subject: [PATCH 69/69] desktop-shell: Support setting panel scale in
@@ -10,11 +10,11 @@ panel-scale=2
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- clients/desktop-shell.c | 23 +++++++++++++++--------
- 1 file changed, 15 insertions(+), 8 deletions(-)
+ clients/desktop-shell.c | 41 ++++++++++++++++++++++++++---------------
+ 1 file changed, 26 insertions(+), 15 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index 6cf21dad7..d96521779 100644
+index 6cf21dad7..a81eb0afe 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -109,6 +109,7 @@ struct panel {
@@ -46,7 +46,7 @@ index 6cf21dad7..d96521779 100644
  	if (allocation.height > allocation.width)
  		allocation.y += allocation.height / 2 - allocation.width / 2;
  	if (launcher->pressed) {
-@@ -260,8 +262,9 @@ panel_launcher_redraw_handler(struct widget *widget, void *data)
+@@ -260,14 +262,15 @@ panel_launcher_redraw_handler(struct widget *widget, void *data)
  		allocation.y++;
  	}
  
@@ -57,16 +57,68 @@ index 6cf21dad7..d96521779 100644
  	cairo_paint(cr);
  
  	if (launcher->focused) {
-@@ -404,7 +407,7 @@ panel_clock_redraw_handler(struct widget *widget, void *data)
+ 		cairo_set_source_rgba(cr, 1.0, 1.0, 1.0, 0.4);
+ 		cairo_mask_surface(cr, launcher->icon,
+-				   allocation.x, allocation.y);
++				   allocation.x / scale, allocation.y / scale);
+ 	}
+ 
+ 	cairo_destroy(cr);
+@@ -394,6 +397,8 @@ panel_clock_redraw_handler(struct widget *widget, void *data)
+ 	time_t rawtime;
+ 	struct tm * timeinfo;
+ 	char string[128];
++	double scale = clock->panel->scale;
++	int spacing = DEFAULT_SPACING * scale;
+ 
+ 	time(&rawtime);
+ 	timeinfo = localtime(&rawtime);
+@@ -404,11 +409,11 @@ panel_clock_redraw_handler(struct widget *widget, void *data)
  		return;
  
  	cr = widget_cairo_create(clock->panel->widget);
 -	cairo_set_font_size(cr, 14);
-+	cairo_set_font_size(cr, 14 * clock->panel->scale);
++	cairo_set_font_size(cr, 14 * scale);
  	cairo_text_extents(cr, string, &extents);
  	if (allocation.x > 0)
  		allocation.x +=
-@@ -552,21 +555,21 @@ panel_configure(void *data,
+-			allocation.width - DEFAULT_SPACING * 1.5 - extents.width;
++			allocation.width - spacing * 1.5 - extents.width;
+ 	else
+ 		allocation.x +=
+ 			allocation.width / 2 - extents.width / 2;
+@@ -499,8 +504,10 @@ panel_resize_handler(struct widget *widget,
+ 	int w = height > width ? width : height;
+ 	int h = w;
+ 	int horizontal = panel->panel_position == WESTON_DESKTOP_SHELL_PANEL_POSITION_TOP || panel->panel_position == WESTON_DESKTOP_SHELL_PANEL_POSITION_BOTTOM;
+-	int first_pad_h = horizontal ? 0 : DEFAULT_SPACING / 2;
+-	int first_pad_w = horizontal ? DEFAULT_SPACING / 2 : 0;
++	double scale = panel->scale;
++	int spacing = DEFAULT_SPACING * scale;
++	int first_pad_h = horizontal ? 0 : spacing / 2;
++	int first_pad_w = horizontal ? spacing / 2 : 0;
+ 
+ 	wl_list_for_each(launcher, &panel->launcher_list, link) {
+ 		widget_set_allocation(launcher->widget, x, y,
+@@ -513,14 +520,14 @@ panel_resize_handler(struct widget *widget,
+ 	}
+ 
+ 	if (panel->clock_format == CLOCK_FORMAT_SECONDS)
+-		w = 170;
++		w = 170 * scale;
+ 	else /* CLOCK_FORMAT_MINUTES and 24H versions */
+-		w = 150;
++		w = 150 * scale;
+ 
+ 	if (horizontal)
+ 		x = width - w;
+ 	else
+-		y = height - (h = DEFAULT_SPACING * 3);
++		y = height - (h = spacing * 3);
+ 
+ 	if (panel->clock)
+ 		widget_set_allocation(panel->clock->widget,
+@@ -552,21 +559,21 @@ panel_configure(void *data,
  	switch (desktop->panel_position) {
  	case WESTON_DESKTOP_SHELL_PANEL_POSITION_TOP:
  	case WESTON_DESKTOP_SHELL_PANEL_POSITION_BOTTOM:
@@ -92,7 +144,7 @@ index 6cf21dad7..d96521779 100644
  			break;
  		}
  		break;
-@@ -636,6 +639,10 @@ panel_create(struct desktop *desktop, struct output *output)
+@@ -636,6 +643,10 @@ panel_create(struct desktop *desktop, struct output *output)
  	s = weston_config_get_section(desktop->config, "shell", NULL, NULL);
  	weston_config_section_get_color(s, "panel-color",
  					&panel->color, 0xaa000000);

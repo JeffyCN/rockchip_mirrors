@@ -1,4 +1,4 @@
-From d69e966bc98584c03d8aa18a0b2fafc6df4799aa Mon Sep 17 00:00:00 2001
+From 47227a595642e537a1b004cf77a685b78ec26d52 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
 Subject: [PATCH 28/69] backend-drm: Add dummy output when no screens connected
@@ -69,10 +69,10 @@ index b34dcde0a..651ef6670 100644
  
  struct drm_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index f15303a2d..b692c812e 100644
+index 8cd3a5851..e9b588211 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -209,8 +209,14 @@ drm_backend_update_outputs(struct drm_backend *b)
+@@ -210,8 +210,14 @@ drm_backend_update_outputs(struct drm_backend *b)
  {
  	struct weston_output *base, *primary;
  
@@ -88,7 +88,7 @@ index f15303a2d..b692c812e 100644
  
  	primary = b->primary_head->base.output;
  
-@@ -1246,7 +1252,7 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
+@@ -1245,7 +1251,7 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,
  		    num_primary - 1 != output->crtc->pipe)
  			continue;
  
@@ -97,7 +97,7 @@ index f15303a2d..b692c812e 100644
  			continue;
  		if (!drm_plane_is_available(plane, output))
  			continue;
-@@ -2592,11 +2598,15 @@ drm_head_destroy(struct drm_head *head)
+@@ -2591,11 +2597,15 @@ drm_head_destroy(struct drm_head *head)
  {
  	weston_head_release(&head->base);
  
@@ -113,7 +113,7 @@ index f15303a2d..b692c812e 100644
  	free(head);
  }
  
-@@ -2819,6 +2829,9 @@ drm_backend_update_connectors(struct drm_backend *b, struct udev_device *drm_dev
+@@ -2818,6 +2828,9 @@ drm_backend_update_connectors(struct drm_backend *b, struct udev_device *drm_dev
  	wl_list_for_each_safe(base, base_next,
  			      &b->compositor->head_list, compositor_link) {
  		head = to_drm_head(base);
@@ -123,7 +123,7 @@ index f15303a2d..b692c812e 100644
  		connector_id = head->connector.connector_id;
  
  		if (resources_has_connector(resources, connector_id))
-@@ -2863,6 +2876,9 @@ drm_backend_update_connectors(struct drm_backend *b, struct udev_device *drm_dev
+@@ -2862,6 +2875,9 @@ drm_backend_update_connectors(struct drm_backend *b, struct udev_device *drm_dev
  				continue;
  
  			head = to_drm_head(base);
@@ -133,7 +133,7 @@ index f15303a2d..b692c812e 100644
  			conn = head->connector.conn;
  
  			if (conn->connection != DRM_MODE_CONNECTED ||
-@@ -2881,6 +2897,8 @@ drm_backend_update_connectors(struct drm_backend *b, struct udev_device *drm_dev
+@@ -2880,6 +2896,8 @@ drm_backend_update_connectors(struct drm_backend *b, struct udev_device *drm_dev
  			break;
  	}
  
@@ -142,7 +142,7 @@ index f15303a2d..b692c812e 100644
  	drm_backend_update_outputs(b);
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
-@@ -3053,6 +3071,8 @@ drm_destroy(struct weston_compositor *ec)
+@@ -3052,6 +3070,8 @@ drm_destroy(struct weston_compositor *ec)
  	struct drm_crtc *crtc, *crtc_tmp;
  	struct drm_writeback *writeback, *writeback_tmp;
  
@@ -151,7 +151,7 @@ index f15303a2d..b692c812e 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->config_timer);
-@@ -3741,6 +3761,180 @@ config_timer_handler(void *data)
+@@ -3750,6 +3770,180 @@ config_timer_handler(void *data)
  	return 0;
  }
  
@@ -332,7 +332,7 @@ index f15303a2d..b692c812e 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3978,6 +4172,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3987,6 +4181,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  
@@ -359,10 +359,10 @@ index 4b5ba42b8..a3c55bd34 100644
  
  			drm_debug(b, "\t\t[atomic] disabling inactive head %s\n",
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 0136b8431..913b079b5 100644
+index ff5b391c4..3c7398b8a 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -6458,6 +6458,9 @@ weston_output_set_color_transforms(struct weston_output *output)
+@@ -6457,6 +6457,9 @@ weston_output_set_color_transforms(struct weston_output *output)
  	struct weston_color_transform *sRGB_to_blend = NULL;
  	bool ok;
  

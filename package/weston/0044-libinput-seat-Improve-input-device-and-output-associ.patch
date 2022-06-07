@@ -1,4 +1,4 @@
-From c4d0925ffb785dcc2da027c1212999347b0ad9af Mon Sep 17 00:00:00 2001
+From c42a41df322c826de7e43eb4e67682ad86646b47 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 09:49:09 +0800
 Subject: [PATCH 44/69] libinput-seat: Improve input device and output
@@ -26,10 +26,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 79 insertions(+), 44 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 6e6787b5a..fde961a3d 100644
+index 538118f13..d8bb032f1 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1701,6 +1701,7 @@ setup_output_seat_constraint(struct drm_backend *b,
+@@ -1700,6 +1700,7 @@ setup_output_seat_constraint(struct drm_backend *b,
  			return;
  
  		seat->base.output = output;

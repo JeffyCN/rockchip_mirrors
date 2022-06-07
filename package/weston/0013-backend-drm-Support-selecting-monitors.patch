@@ -1,4 +1,4 @@
-From 6883eb6e577e26ca359e050cabdede1e8400d691 Mon Sep 17 00:00:00 2001
+From a2ac42f8c8db79d2995aacc5d4220d448bada6dd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
 Subject: [PATCH 13/69] backend-drm: Support selecting monitors
@@ -31,8 +31,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/backend-drm/drm-internal.h |  22 ++
  libweston/backend-drm/drm.c          | 361 +++++++++++++++++++++++----
  libweston/backend-drm/kms.c          |  42 +++-
- libweston/compositor.c               |  40 ++-
- 7 files changed, 457 insertions(+), 60 deletions(-)
+ libweston/compositor.c               |  42 +++-
+ 7 files changed, 459 insertions(+), 60 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index e946b4a54..47bf54093 100644
@@ -912,7 +912,7 @@ index 35113d54d..4426af402 100644
  
  	return 0;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 6b769fa22..5f20c19e1 100644
+index 6b769fa22..9b3e98061 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -157,6 +157,25 @@ weston_paint_node_destroy(struct weston_paint_node *pnode)
@@ -941,18 +941,20 @@ index 6b769fa22..5f20c19e1 100644
  /** Send wl_output events for mode and scale changes
   *
   * \param head Send on all resources bound to this head.
-@@ -1367,6 +1386,20 @@ weston_view_assign_output(struct weston_view *ev)
+@@ -1367,6 +1386,22 @@ weston_view_assign_output(struct weston_view *ev)
  	uint32_t max, area, mask;
  	pixman_box32_t *e;
  
 +	/* The static views should bind to the specific output */
 +	if (weston_compositor_is_static_layer(get_view_layer(ev))) {
-+		if (!ev->output)
-+			return;
++		struct weston_view *view = ev;
 +
-+		ev->output_mask |= 1u << ev->output->id;
++		while (view && !(output = view->output))
++			view = view->geometry.parent;
 +
-+		if (ev->output->destroying)
++		if (output && !output->destroying)
++			ev->output_mask |= 1u << output->id;
++		else
 +			weston_view_set_output(ev, NULL);
 +
 +		weston_surface_assign_output(ev->surface);
@@ -962,7 +964,7 @@ index 6b769fa22..5f20c19e1 100644
  	new_output = NULL;
  	max = 0;
  	mask = 0;
-@@ -2938,12 +2971,14 @@ weston_output_repaint(struct weston_output *output, void *repaint_data)
+@@ -2938,12 +2973,14 @@ weston_output_repaint(struct weston_output *output, void *repaint_data)
  	if (output->dirty)
  		weston_output_update_matrix(output);
  
@@ -979,7 +981,7 @@ index 6b769fa22..5f20c19e1 100644
  		output->repaint_status = REPAINT_AWAITING_COMPLETION;
  
  	weston_compositor_repick(ec);
-@@ -6432,6 +6467,7 @@ weston_compositor_remove_output(struct weston_output *output)
+@@ -6432,6 +6469,7 @@ weston_compositor_remove_output(struct weston_output *output)
  	 * Use view_list in case the output did not go through repaint
  	 * after a view came on it, lacking a paint node. Just to be sure.
  	 */

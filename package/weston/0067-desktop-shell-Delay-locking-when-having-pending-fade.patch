@@ -1,7 +1,7 @@
-From e4332ed58528ac51e42c0cab2c76df763f4c98d3 Mon Sep 17 00:00:00 2001
+From c168a6adbb6e9015bd2af5375bb654389d965bf9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 1 Jun 2022 11:28:24 +0800
-Subject: [PATCH 67/67] desktop-shell: Delay locking when having pending
+Subject: [PATCH 67/69] desktop-shell: Delay locking when having pending
  fade-out animations
 
 Avoid "unexpectedly large timestamp jump" warning when resuming with
@@ -64,10 +64,10 @@ index 3e3949cba..77b5d575a 100644
  
  	if (shell_output->fade.view) {
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 39e58c63f..6b2ea4318 100644
+index 4e8bfecf3..74dec9d46 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
-@@ -1205,6 +1205,7 @@ struct weston_compositor {
+@@ -1207,6 +1207,7 @@ struct weston_compositor {
  	struct weston_output *prefer_output;
  
  	bool warm_up;
