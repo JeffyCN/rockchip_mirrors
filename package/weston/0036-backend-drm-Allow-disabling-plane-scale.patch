@@ -1,4 +1,4 @@
-From 460c5bc1fd7499f6517983bdf601e13054fd1f8f Mon Sep 17 00:00:00 2001
+From d848ecdc6304c4d4e23e2e5088ce921deff9b51c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 26 Oct 2020 16:23:27 +0800
 Subject: [PATCH 36/69] backend-drm: Allow disabling plane scale
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 811492d6a..fc43b352e 100644
+index 95e78ec00..9e44d325a 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1182,6 +1182,9 @@ drm_plane_create(struct drm_backend *b, const drmModePlane *kplane)
+@@ -1181,6 +1181,9 @@ drm_plane_create(struct drm_backend *b, const drmModePlane *kplane)
  					 props,
  					 WDRM_PLANE_FEATURE_SCALE);
  
