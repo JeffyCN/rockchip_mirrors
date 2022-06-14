@@ -6,6 +6,7 @@
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
+#include "powermanager.config"
 #include "audio.config"
 #include "audio_gst.config"
 #include "camera.config"

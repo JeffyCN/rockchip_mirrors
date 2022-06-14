@@ -5,6 +5,7 @@
 #include "weston.config"
 #include "video_mpp.config"
 #include "video_gst.config"
+#include "powermanager.config"
 #include "audio.config"
 #include "audio_gst.config"
 #include "camera.config"
