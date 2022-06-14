@@ -7,7 +7,9 @@
 # Generate version string using:
 #   git describe --match 'glibc-*' --abbrev=40 origin/release/MAJOR.MINOR/master | cut -d '-' -f 2-
 # When updating the version, please also update localedef
-ifeq ($(BR2_PACKAGE_GLIBC_2_29),y)
+ifeq ($(BR2_PACKAGE_GLIBC_2_28),y)
+GLIBC_VERSION = 2.28-69-g1e5c5303a522764d7e9d2302a60e4a32cdb902f1
+else ifeq ($(BR2_PACKAGE_GLIBC_2_29),y)
 GLIBC_VERSION = 2.29-11-ge28ad442e73b00ae2047d89c8cc7f9b2a0de5436
 else
 GLIBC_VERSION = 2.35-134-gb6aade18a7e5719c942aa2da6cf3157aca993fa4
