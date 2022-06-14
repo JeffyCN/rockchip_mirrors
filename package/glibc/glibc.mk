@@ -7,7 +7,11 @@
 # Generate version string using:
 #   git describe --match 'glibc-*' --abbrev=40 origin/release/MAJOR.MINOR/master | cut -d '-' -f 2-
 # When updating the version, please also update localedef
+ifeq ($(BR2_PACKAGE_GLIBC_2_28),y)
+GLIBC_VERSION = 2.28-69-g1e5c5303a522764d7e9d2302a60e4a32cdb902f1
+else
 GLIBC_VERSION = 2.38-44-gd37c2b20a4787463d192b32041c3406c2bd91de0
+endif
 # Upstream doesn't officially provide an https download link.
 # There is one (https://sourceware.org/git/glibc.git) but it's not reliable,
 # sometimes the connection times out. So use an unofficial github mirror.
@@ -24,6 +28,7 @@ GLIBC_CPE_ID_VENDOR = gnu
 # allow proper matching with the CPE database.
 GLIBC_CPE_ID_VERSION = $(word 1, $(subst -,$(space),$(GLIBC_VERSION)))
 
+ifneq ($(BR2_PACKAGE_GLIBC_2_28),y)
 # Fixed by b25508dd774b617f99419bdc3cf2ace4560cd2d6, which is between
 # 2.38 and the version we're really using
 GLIBC_IGNORE_CVES += CVE-2023-4527
@@ -51,6 +56,7 @@ GLIBC_IGNORE_CVES += CVE-2023-6779
 # Fixed by d37c2b20a4787463d192b32041c3406c2bd91de0, which is between
 # 2.38 and the version we're really using.
 GLIBC_IGNORE_CVES += CVE-2023-6780
+endif
 
 # All these CVEs are considered as not being security issues by
 # upstream glibc:

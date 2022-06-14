@@ -52,6 +52,18 @@ config BR2_PACKAGE_GLIBC
 	help
 	  https://www.gnu.org/software/libc/
 
+choice
+        prompt "glibc version"
+        default BR2_PACKAGE_GLIBC_LATEST
+
+config BR2_PACKAGE_GLIBC_LATEST
+        bool "glibc latest"
+
+config BR2_PACKAGE_GLIBC_2_28
+        bool "glibc 2.28"
+
+endchoice
+
 config BR2_PACKAGE_GLIBC_KERNEL_COMPAT
 	bool "Enable compatibility shims to run on older kernels"
 	help
