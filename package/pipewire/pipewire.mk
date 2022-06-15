@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-PIPEWIRE_VERSION = 0.3.45
+PIPEWIRE_VERSION = 0.3.52
 PIPEWIRE_SOURCE = pipewire-$(PIPEWIRE_VERSION).tar.bz2
 PIPEWIRE_SITE = https://gitlab.freedesktop.org/pipewire/pipewire/-/archive/$(PIPEWIRE_VERSION)
 PIPEWIRE_LICENSE = MIT, LGPL-2.1+ (libspa-alsa), GPL-2.0 (libjackserver)
@@ -20,6 +20,7 @@ PIPEWIRE_CONF_OPTS += \
 	-Dspa-plugins=enabled \
 	-Daudiomixer=enabled \
 	-Daudioconvert=enabled \
+	-Dbluez5-codec-lc3plus=disabled \
 	-Dcontrol=enabled \
 	-Daudiotestsrc=enabled \
 	-Dsupport=enabled \
@@ -29,8 +30,8 @@ PIPEWIRE_CONF_OPTS += \
 	-Dvideotestsrc=enabled \
 	-Dvolume=enabled \
 	-Dsession-managers=[] \
-	-Dlibcanberra=disabled \
-	-Dlv2=disabled
+	-Dlegacy-rtkit=false \
+	-Dlibcanberra=disabled
 
 ifeq ($(BR2_PACKAGE_DBUS),y)
 PIPEWIRE_CONF_OPTS += -Ddbus=enabled
@@ -129,11 +130,25 @@ else
 PIPEWIRE_CONF_OPTS += -Dlibcamera=disabled
 endif
 
+ifeq ($(BR2_PACKAGE_LILV),y)
+PIPEWIRE_CONF_OPTS += -Dlv2=enabled
+PIPEWIRE_DEPENDENCIES += lilv
+else
+PIPEWIRE_CONF_OPTS += -Dlv2=disabled
+endif
+
 ifeq ($(BR2_PACKAGE_XLIB_LIBX11),y)
 PIPEWIRE_CONF_OPTS += -Dx11=enabled
 PIPEWIRE_DEPENDENCIES += xlib_libX11
 else
 PIPEWIRE_CONF_OPTS += -Dx11=disabled
+endif
+
+ifeq ($(BR2_PACKAGE_XLIB_LIBXFIXES),y)
+PIPEWIRE_CONF_OPTS += -Dx11-xfixes=enabled
+PIPEWIRE_DEPENDENCIES += xlib_libXfixes
+else
+PIPEWIRE_CONF_OPTS += -Dx11-xfixes=disabled
 endif
 
 ifeq ($(BR2_PACKAGE_LIBUSB),y)
