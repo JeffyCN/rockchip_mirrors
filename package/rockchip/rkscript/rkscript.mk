@@ -79,6 +79,7 @@ ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
 define RKSCRIPT_INSTALL_TARGET_UDEV_RULES
 	$(INSTALL) -m 0644 -D $(RKSCRIPT_PKGDIR)/88-rockchip-camera.rules \
 		$(TARGET_DIR)/lib/udev/rules.d/88-rockchip-camera.rules
+	$(INSTALL) -m 0755 -D $(@D)/61-sd-cards-auto-mount.rules $(TARGET_DIR)/lib/udev/rules.d/61-sd-cards-auto-mount.rules
 endef
 RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_UDEV_RULES
 endif
