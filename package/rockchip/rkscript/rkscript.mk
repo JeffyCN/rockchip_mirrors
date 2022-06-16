@@ -84,4 +84,12 @@ endef
 RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_UDEV_RULES
 endif
 
+# The recovery will handle storages itself
+ifeq ($(BR2_PACKAGE_RECOVERY)|$(BR2_PACKAGE_RECOVERY_USE_UPDATEENGINE),y|)
+define RKSCRIPT_REMOVE_MOUNTALL
+       rm -f $(TARGET_DIR)/etc/init.d/S21mountall.sh
+endef
+RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_REMOVE_MOUNTALL
+endif
+
 $(eval $(generic-package))
