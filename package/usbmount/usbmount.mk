@@ -27,4 +27,12 @@ define USBMOUNT_INSTALL_TARGET_CMDS
 	mkdir -p $(addprefix $(TARGET_DIR)/media/sdcard,0 1 2 3)
 endef
 
+ifeq ($(BR2_PACKAGE_USBMOUNT_SYNC_MOUNT),)
+define USBMOUNT_DISABLE_SYNC_MOUNT
+	$(SED) 's/^\(MOUNTOPTIONS="\)\<sync,*\(.*"\)/\1\2 #"sync,\2/' \
+		$(TARGET_DIR)/etc/usbmount/usbmount.conf
+endef
+USBMOUNT_POST_INSTALL_TARGET_HOOKS += USBMOUNT_DISABLE_SYNC_MOUNT
+endif
+
 $(eval $(generic-package))
