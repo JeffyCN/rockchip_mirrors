@@ -11,15 +11,6 @@ USBMOUNT_DEPENDENCIES = udev lockfile-progs
 USBMOUNT_LICENSE = BSD-2-Clause
 USBMOUNT_LICENSE_FILES = debian/copyright
 
-ifeq ($(BR2_PACKAGE_USBMOUNT_SYNC),)
-define USBMOUNT_FIX_NO_SYNC
-	$(SED) 's#MOUNTOPTIONS="sync,#MOUNTOPTIONS="#' \
-		$(@D)/usbmount.conf
-endef
-USBMOUNT_POST_PATCH_HOOKS += USBMOUNT_FIX_NO_SYNC
-endif
-
-
 define USBMOUNT_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 0755 -D $(@D)/usbmount $(TARGET_DIR)/usr/share/usbmount/usbmount
 
@@ -31,7 +22,17 @@ define USBMOUNT_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 0644 -D $(@D)/usbmount.rules $(TARGET_DIR)/lib/udev/rules.d/usbmount.rules
 	$(INSTALL) -m 0644 -D $(@D)/usbmount.conf $(TARGET_DIR)/etc/usbmount/usbmount.conf
 
-	mkdir -p $(addprefix $(TARGET_DIR)/media/usb,0 1 2 3 4 5 6 7)
+	mkdir -p $(addprefix $(TARGET_DIR)/media/storage,0 1 2 3)
+	mkdir -p $(addprefix $(TARGET_DIR)/media/udisk,0 1 2 3)
+	mkdir -p $(addprefix $(TARGET_DIR)/media/sdcard,0 1 2 3)
 endef
+
+ifeq ($(BR2_PACKAGE_USBMOUNT_SYNC_MOUNT),)
+define USBMOUNT_DISABLE_SYNC_MOUNT
+	$(SED) 's/^\(MOUNTOPTIONS="\)\<sync,*\(.*"\)/\1\2 #"sync,\2/' \
+		$(TARGET_DIR)/etc/usbmount/usbmount.conf
+endef
+USBMOUNT_POST_INSTALL_TARGET_HOOKS += USBMOUNT_DISABLE_SYNC_MOUNT
+endif
 
 $(eval $(generic-package))
