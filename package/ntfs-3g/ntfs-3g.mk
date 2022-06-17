@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-NTFS_3G_VERSION = 2017.3.23
+NTFS_3G_VERSION = 2022.5.17
 NTFS_3G_SOURCE = ntfs-3g_ntfsprogs-$(NTFS_3G_VERSION).tgz
 NTFS_3G_SITE = http://tuxera.com/opensource
 NTFS_3G_CONF_OPTS = --disable-ldconfig
@@ -12,6 +12,7 @@ NTFS_3G_INSTALL_STAGING = YES
 NTFS_3G_DEPENDENCIES = host-pkgconf
 NTFS_3G_LICENSE = GPL-2.0+, LGPL-2.0+
 NTFS_3G_LICENSE_FILES = COPYING COPYING.LIB
+NTFS_3G_CPE_ID_VENDOR = tuxera
 
 HOST_NTFS_3G_CONF_OPTS += --prefix=/ --disable-ldconfig
 HOST_NTFS_3G_INSTALL_OPTS += DESTDIR=$(HOST_DIR) install
@@ -33,14 +34,6 @@ endif
 
 ifneq ($(BR2_PACKAGE_NTFS_3G_NTFSPROGS),y)
 NTFS_3G_CONF_OPTS += --disable-ntfsprogs
-endif
-
-ifeq ($(BR2_PACKAGE_NTFS_3G_EXTRAS),y)
-NTFS_3G_CONF_OPTS += --enable-extras
-endif
-
-ifeq ($(BR2_PACKAGE_NTFS_3G_QUARANTINED),y)
-NTFS_3G_CONF_OPTS += --enable-quarantined
 endif
 
 # Create symlink to mount.ntfs
