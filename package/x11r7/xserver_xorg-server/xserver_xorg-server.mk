@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-XSERVER_XORG_SERVER_VERSION = 1.20.4_2022_04_06
+XSERVER_XORG_SERVER_VERSION = 1.20.4_2022_05_23
 XSERVER_XORG_SERVER_SITE = $(call github,JeffyCN,xorg-xserver,$(XSERVER_XORG_SERVER_VERSION))
 XSERVER_XORG_SERVER_PATCH_DIRS += $($(PKG)_PKGDIR)/1.20.4
 
