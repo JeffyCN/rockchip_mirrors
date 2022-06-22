@@ -1,4 +1,4 @@
-From 74aa2792971c73d728d4df195efcd4dd89541036 Mon Sep 17 00:00:00 2001
+From b4d73df39e669fc46616bf7c09ed6a55d32855e2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 19 Jan 2021 10:09:24 +0800
 Subject: [PATCH 10/17] gsttools: videowidget: Force updating geometry when
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/src/gsttools/qgstreamervideowidget.cpp b/src/gsttools/qgstreamervideowidget.cpp
-index 6e7def99..c8d5f8e5 100644
+index 6e7def9..c8d5f8e 100644
 --- a/src/gsttools/qgstreamervideowidget.cpp
 +++ b/src/gsttools/qgstreamervideowidget.cpp
 @@ -155,6 +155,9 @@ void QGstreamerVideoWidgetControl::setVideoSink(GstElement *sink)

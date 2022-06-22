@@ -1,4 +1,4 @@
-From 5ea02d4e006ff5833cff9c3a9cb3abb3bdc283ba Mon Sep 17 00:00:00 2001
+From f21099a38b1ad832e52f09c5408164235090dbda Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Feb 2019 16:52:15 +0800
 Subject: [PATCH 05/15] qwaylandxdgshell: Support setting window position
@@ -17,10 +17,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 16 insertions(+)
 
 diff --git a/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp b/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
-index b6d23ac..692e799 100644
+index d7d0ddf..61f7e8c 100644
 --- a/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
 +++ b/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
-@@ -359,6 +359,20 @@ void QWaylandXdgSurface::propagateSizeHints()
+@@ -355,6 +355,20 @@ void QWaylandXdgSurface::propagateSizeHints()
  void QWaylandXdgSurface::setWindowGeometry(const QRect &rect)
  {
      set_window_geometry(rect.x(), rect.y(), rect.width(), rect.height());

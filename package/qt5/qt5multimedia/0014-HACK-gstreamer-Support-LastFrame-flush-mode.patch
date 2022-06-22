@@ -1,4 +1,4 @@
-From 766309301fd0ac4611de036081bdb0b1b802b0dc Mon Sep 17 00:00:00 2001
+From 045fc2e0c6d7f6862856790d78ba76874c204401 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 06:32:34 +0800
 Subject: [PATCH 14/17] HACK: gstreamer: Support LastFrame flush mode

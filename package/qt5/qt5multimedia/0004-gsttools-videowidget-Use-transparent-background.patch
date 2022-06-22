@@ -1,4 +1,4 @@
-From d1ad43ef376e89794b8596c53e6dfe424ca25eda Mon Sep 17 00:00:00 2001
+From bd8a96896a5c8cdbce3a589c38964942ee7a1392 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 24 Dec 2018 15:38:58 +0800
 Subject: [PATCH 04/17] gsttools: videowidget: Use transparent background
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/gsttools/qgstreamervideowidget.cpp b/src/gsttools/qgstreamervideowidget.cpp
-index 91a487e1..6e7def99 100644
+index 91a487e..6e7def9 100644
 --- a/src/gsttools/qgstreamervideowidget.cpp
 +++ b/src/gsttools/qgstreamervideowidget.cpp
 @@ -56,7 +56,7 @@ public:

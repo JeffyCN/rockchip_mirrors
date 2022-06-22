@@ -1,4 +1,4 @@
-From 6ee8c98d0c28146c2f857d0d56cf05b8d77c73fc Mon Sep 17 00:00:00 2001
+From 0f5029c9d85f0d4b98599fcdc7e4b390f00b42ad Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 09:12:08 +0800
 Subject: [PATCH 07/15] qwaylandwindow: Support setting window flags and attrs
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 66 insertions(+)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index d4a1b7e..b83be29 100644
+index cb2e01e..187205d 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -121,6 +121,35 @@ void QWaylandWindow::ensureSize()
+@@ -117,6 +117,35 @@ void QWaylandWindow::ensureSize()
          mBackingStore->ensureSize();
  }
  
@@ -52,7 +52,7 @@ index d4a1b7e..b83be29 100644
  void QWaylandWindow::initWindow()
  {
      if (window()->type() == Qt::Desktop)
-@@ -459,6 +488,13 @@ void QWaylandWindow::lower()
+@@ -464,6 +493,13 @@ void QWaylandWindow::lower()
          mShellSurface->lower();
  }
  
@@ -65,8 +65,8 @@ index d4a1b7e..b83be29 100644
 +
  void QWaylandWindow::setMask(const QRegion &mask)
  {
-     if (mMask == mask)
-@@ -487,6 +523,28 @@ void QWaylandWindow::setMask(const QRegion &mask)
+     QReadLocker locker(&mSurfaceLock);
+@@ -492,6 +528,28 @@ void QWaylandWindow::setMask(const QRegion &mask)
      mSurface->commit();
  }
  
@@ -95,7 +95,7 @@ index d4a1b7e..b83be29 100644
  void QWaylandWindow::applyConfigureWhenPossible()
  {
      QMutexLocker resizeLocker(&mResizeLock);
-@@ -792,6 +850,8 @@ void QWaylandWindow::setWindowFlags(Qt::WindowFlags flags)
+@@ -812,6 +870,8 @@ void QWaylandWindow::setWindowFlags(Qt::WindowFlags flags)
  
      mFlags = flags;
      createDecoration();
@@ -105,10 +105,10 @@ index d4a1b7e..b83be29 100644
  
  bool QWaylandWindow::createDecoration()
 diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
-index 01337cf..f1a461b 100644
+index 54ac67a..7f52192 100644
 --- a/src/client/qwaylandwindow_p.h
 +++ b/src/client/qwaylandwindow_p.h
-@@ -152,8 +152,11 @@ public:
+@@ -153,8 +153,11 @@ public:
      void raise() override;
      void lower() override;
  
@@ -120,7 +120,7 @@ index 01337cf..f1a461b 100644
      int scale() const;
      qreal devicePixelRatio() const override;
  
-@@ -256,12 +259,14 @@ protected:
+@@ -257,12 +260,14 @@ protected:
      QRegion mMask;
      QRegion mOpaqueArea;
      Qt::WindowStates mLastReportedWindowStates = Qt::WindowNoState;
@@ -135,7 +135,7 @@ index 01337cf..f1a461b 100644
      void setGeometry_helper(const QRect &rect);
      void initWindow();
      void initializeWlSurface();
-@@ -278,6 +283,7 @@ private:
+@@ -279,6 +284,7 @@ private:
      void handleScreensChanged();
      void sendRecursiveExposeEvent();
  
