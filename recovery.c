@@ -41,6 +41,7 @@
 #include "encryptedfs_provisioning.h"
 #include "rktools.h"
 #include "sdboot.h"
+#include "usbboot.h"
 #include "mtdutils/mtdutils.h"
 
 static const struct option OPTIONS[] = {
@@ -66,8 +67,10 @@ static const char *UDISK_ROOT2 = "/mnt/usb_storage";
 static const char *TEMPORARY_LOG_FILE = "/tmp/recovery.log";
 static const char *SIDELOAD_TEMP_DIR = "/tmp/sideload";
 static const char *coldboot_done = "/dev/.coldboot_done";
+
 char systemFlag[252];
 bool bSDBootUpdate = false;
+bool bUdiskUpdate  = false;
 
 /*
  * The recovery tool communicates with the main system through /cache files.
@@ -808,7 +811,9 @@ print_property(const char *key, const char *name, void *cookie) {
 int
 main(int argc, char **argv) {
     bool bSDBoot    = false;
+    bool bUDiskBoot = false;
     const char *sdupdate_package = NULL;
+    const char *usbupdate_package = NULL;
 
     while(access(coldboot_done, F_OK) != 0){
         printf("coldboot not done, wait...\n");
@@ -839,18 +844,39 @@ main(int argc, char **argv) {
     setFlashPoint();
 
     bSDBoot = is_boot_from_SD();
-    if(!bSDBoot) {
+    bUDiskBoot = is_boot_from_udisk();
+
+    if(!bSDBoot && !bUDiskBoot) {
         get_args(&argc, &argv);
     } else {
-        if (is_sdcard_update()) {
-            char imageFile[64] = {0};
-            strlcpy(imageFile, EX_SDCARD_ROOT, sizeof(imageFile));
-            strlcat(imageFile, "/sdupdate.img", sizeof(imageFile));
-            if (access(imageFile, F_OK) == 0) {
-                sdupdate_package = strdup(imageFile);
-                bSDBootUpdate = true;
-                ui_show_text(1);
-                printf("sdupdate_package = %s \n",sdupdate_package);
+        char imageFile[64] = {0};
+        if (bSDBoot) {
+            if (is_sdcard_update()) {
+                strlcpy(imageFile, EX_SDCARD_ROOT, sizeof(imageFile));
+                strlcat(imageFile, "/sdupdate.img", sizeof(imageFile));
+                if (access(imageFile, F_OK) == 0) {
+                    sdupdate_package = strdup(imageFile);
+                    bSDBootUpdate = true;
+                    ui_show_text(1);
+                    printf("sdupdate_package = %s\n",sdupdate_package);
+                }
+            } else {
+                get_args(&argc, &argv);
+            }
+        }
+
+        if (bUDiskBoot) {
+            if (is_udisk_update()) {
+                strlcpy(imageFile, EX_UDISK_ROOT, sizeof(imageFile));
+                strlcat(imageFile, "/sdupdate.img", sizeof(imageFile));
+                if (access(imageFile, F_OK) == 0) {
+                    usbupdate_package = strdup(imageFile);
+                    bUdiskUpdate = true;
+                    ui_show_text(1);
+                    printf("usbupdate_package = %s\n",usbupdate_package);
+                }
+            } else {
+                get_args(&argc, &argv);
             }
         }
     }
@@ -993,9 +1019,9 @@ main(int argc, char **argv) {
                     if(access(update_package, F_OK) == 0)
                         remove(update_package);
                 }
-                strlcpy(text, "update images success!", 127);
+                strlcpy(text, "update images success!\n", 127);
             } else {
-                strlcpy(text, "update images failed!", 127);
+                strlcpy(text, "update images failed!\n", 127);
             }
         } else {
             strlcpy(text, "update images failed!", 127);
@@ -1018,9 +1044,66 @@ main(int argc, char **argv) {
         status = do_rk_update(binary, sdupdate_package);
 #endif
 
-        #ifdef USE_UPDATEENGINE
+#ifdef USE_UPDATEENGINE
+
 #define	FACTORY_FIRMWARE_IMAGE "/mnt/sdcard/out_image.img"
 #define	CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
+    if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
+        int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
+        if (tmp_fd < 0) {
+            printf("creat % error.\n", CMD4RECOVERY_FILENAME);
+            status = INSTALL_ERROR;
+        } else {
+            close(tmp_fd);
+            const char* updateEnginebin = "/usr/bin/updateEngine";
+            status = do_rk_updateEngine(updateEnginebin, sdupdate_package);
+        }
+    }
+
+    if (isMtdDevice()) {
+        printf("start flash write to /dev/mtd0.\n");
+        size_t total_size;
+        size_t erase_size;
+        mtd_scan_partitions();
+        const MtdPartition *part = mtd_find_partition_by_name("rk-nand");
+        if ( part == NULL ) {
+            part = mtd_find_partition_by_name("spi-nand0");
+        }
+        if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
+            if ((!access(FACTORY_FIRMWARE_IMAGE, F_OK)) && mtd_find_partition_by_name("sfc_nor") != NULL) {
+                printf("Info: start flash out_image.img to spi nor.\n");
+                system("flashcp -v " FACTORY_FIRMWARE_IMAGE " /dev/mtd0");
+            } else
+            printf("Error: Can't find rk-nand or spi-nand0.\n");
+        } else {
+            system("flash_erase /dev/mtd0 0x0 0");
+            system("sh "CMD4RECOVERY_FILENAME);
+        }
+    } else {
+        printf("Start to dd data to emmc partition.\n");
+        system("sh "CMD4RECOVERY_FILENAME);
+        printf("sdcard upgrade done\n");
+    }
+
+#endif
+
+        if (status == INSTALL_SUCCESS) {
+            printf("update.img Installation success.\n");
+            ui_print("update.img Installation success.\n");
+            //ui_show_text(0);
+        }
+
+    } else if (usbupdate_package != NULL) {
+        // update image from udisk
+#ifdef USE_RKUPDATE
+        const char* binary = "/usr/bin/rkupdate";
+        printf(">>>sdboot update will update from %s\n", usbupdate_package);
+        status = do_rk_update(binary, usbupdate_package);
+#endif
+
+#ifdef USE_UPDATEENGINE
+        #define	FACTORY_FIRMWARE_IMAGE "/mnt/usb_storage/out_image.img"
+        #define	CMD4RECOVERY_FILENAME "/mnt/usb_storage/cmd4recovery"
         if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
             int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
             if (tmp_fd < 0) {
@@ -1029,7 +1112,7 @@ main(int argc, char **argv) {
             } else {
                 close(tmp_fd);
                 const char* updateEnginebin = "/usr/bin/updateEngine";
-                status = do_rk_updateEngine(updateEnginebin, sdupdate_package);
+                status = do_rk_updateEngine(updateEnginebin, usbupdate_package);
             }
         }
 
@@ -1055,8 +1138,8 @@ main(int argc, char **argv) {
         } else {
             printf("Start to dd data to emmc partition.\n");
             system("sh "CMD4RECOVERY_FILENAME);
+            printf("usb upgrade done\n");
         }
-
 #endif
 
         if (status == INSTALL_SUCCESS) {
@@ -1064,7 +1147,6 @@ main(int argc, char **argv) {
             ui_print("update.img Installation success.\n");
             //ui_show_text(0);
         }
-
     } else if (wipe_data) {
         if (device_wipe_data()) status = INSTALL_ERROR;
         if (erase_volume("/userdata")) status = INSTALL_ERROR;
@@ -1103,7 +1185,7 @@ main(int argc, char **argv) {
     if (status != INSTALL_SUCCESS) ui_set_background(BACKGROUND_ICON_ERROR);
     if (status != INSTALL_SUCCESS) {
         printf("\n Install fail! \n");
-        if (!bSDBootUpdate && ui_text_visible())
+        if (!bSDBootUpdate && !bUdiskUpdate && ui_text_visible())
             prompt_and_wait();
     }
 
@@ -1123,6 +1205,21 @@ main(int argc, char **argv) {
 
             while (access(SDDdevice, F_OK) == 0) { sleep(1); }
             free(SDDdevice);
+        }
+    } else if (usbupdate_package && bUdiskUpdate) {
+        if (status == INSTALL_SUCCESS) {
+            char *udiskDev = strdup(get_mounted_device_from_path(EX_SDCARD_ROOT));
+            ensure_path_unmounted(EX_UDISK_ROOT);
+            /* Updating is finished here, we must print this message
+             * in console, it shows user a specific message that
+             * updating is completely, remove U-disk and reboot */
+            fflush(stdout);
+            freopen("/dev/console", "w", stdout);
+            printf("\nPlease remove U DISK!!!, wait for reboot.\n");
+            ui_print("Please remove U DISK!!!, wait for reboot.");
+
+            while (access(udiskDev, F_OK) == 0) { sleep(1); }
+            free(udiskDev);
         }
     }
 

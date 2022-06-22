@@ -175,7 +175,7 @@ bool isMtdDevice() {
         s = strstr(s, "=");
         if (s == NULL) {
             printf("no found storagemedia in cmdline, default is not MTD.\n");
-            return -1;
+            return false;
         }
 
         s++;

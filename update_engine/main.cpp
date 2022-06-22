@@ -18,6 +18,8 @@
 #include "rktools.h"
 
 extern bool is_sdboot;
+extern bool is_usbboot;
+
 RK_Upgrade_Status_t m_status = RK_UPGRADE_ERR;
 FILE* cmd_pipe = NULL;
 
@@ -72,7 +74,7 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
     LOGI("url = %s.\n", url);
     LOGI("[%s:%d] save path: %s\n", __func__, __LINE__, savepath);
     // If it's recovery mode, upgrade recovery in normal system.
-    if (slot == -1 && !is_sdboot){
+    if (slot == -1 && !is_sdboot && !is_usbboot){
         if (partition & 0x040000) {
             LOGI("update recovery in normal system.\n");
             partition = partition & 0xFBFFFF;
@@ -209,9 +211,15 @@ int main(int argc, char *argv[]) {
     }
 
     if (is_update) {
-        if (is_sdboot) {
+        if (optarg && (strstr(optarg , "usb") != NULL || strstr(optarg, "udisk")!=NULL)) {
+            is_usbboot = true;
+            is_sdboot = false;
+            LOGI("*** will upgrade firmware from udisk ***");
+        }
+
+        if (is_sdboot || is_usbboot) {
             int res = 0x3FFC00; //默认升级的分区
-            LOGI("%s-%d: is sdboot update.\n", __func__, __LINE__);
+            LOGI("%s-%d: is %s update.\n", __func__, __LINE__, is_usbboot ? "usbboot" : "sdboot");
             if (partition != NULL) {
                 res = strtol(partition+2, NULL, 16);
             }

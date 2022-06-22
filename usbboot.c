@@ -22,49 +22,64 @@
 #include <sys/types.h>
 
 #include "roots.h"
-#include "sdboot.h"
+#include "usbboot.h"
 
 extern size_t strlcpy(char *dst, const char *src, size_t dsize);
 extern size_t strlcat(char *dst, const char *src, size_t dsize);
 
-bool is_boot_from_SD(void){
-    bool bSDBoot = false;
+bool is_boot_from_udisk(void){
+    bool bUDisk = false;
     char param[1024];
     int fd, ret;
-    char *s=NULL;
+    char *s = NULL;
     printf("read cmdline\n");
     memset(param,0,1024);
 
     fd = open("/proc/cmdline", O_RDONLY);
     ret = read(fd, (char*)param, 1024);
 
-    s = strstr(param,"sdfwupdate");
+    s = strstr(param,"usbfwupdate");
     if(s != NULL){
-        bSDBoot = true;
-        printf(">>> Boot from SDcard\n");
+        bUDisk = true;
+        printf(">>> Boot from U-Disk\n");
     }else{
-        bSDBoot = false;
-        printf(">>> Boot from non-SDcard\n");
+        bUDisk = false;
+        printf(">>> Boot from non-U-Disk\n");
     }
 
     close(fd);
-    return bSDBoot;
+    return bUDisk;
 }
 
-void ensure_sd_mounted(bool *bSDMounted) {
+void ensure_udisk_mounted(bool *bMounted) {
     int i;
+    bool bSucc = false;
     for(i = 0; i < 3; i++) {
-        if(0 == ensure_path_mounted(EX_SDCARD_ROOT)){
-            *bSDMounted = true;
+        if(0 == ensure_path_mounted(EX_UDISK_ROOT)){
+            *bMounted = true;
+            bSucc = true;
             break;
-        }else {
-            printf("delay 1sec\n");
+        } else {
+            printf("delay 1 sec to try /mnt/udisk\n");
             sleep(1);
         }
     }
 
-    if (i == 3)
-        *bSDMounted = false;
+    if (!bSucc) {   // try another mount point
+        for(i = 0; i < 3; i++) {
+            if(0 == ensure_path_mounted(EX_UDISK_ROOT2)){
+                *bMounted = true;
+                bSucc = true;
+                break;
+            } else {
+                printf("delay 1 sec to try /mnt/usb_storage\n");
+                sleep(1);
+            }
+        }
+    }
+
+    if (bSucc)
+        *bMounted = false;
 }
 
 #define MaxLine 1024
@@ -134,22 +149,22 @@ End:
     return 0;
 }
 
-bool is_sdcard_update(void) {
+bool is_udisk_update(void) {
     int  ret = 0;
-    bool bSdMounted = false;
+    bool bUdiskMounted = false;
     char configFile[64] = {0};
     int vlen = 0;
     char str_val[10] = {0};
     char *str_key = "fw_update";
 
     printf("%s in\n",__func__);
-    ensure_sd_mounted(&bSdMounted);
-    if (!bSdMounted) {
-        printf("Error! SDcard not mounted\n");
+    ensure_udisk_mounted(&bUdiskMounted);
+    if (!bUdiskMounted) {
+        printf("Error! U-Disk not mounted\n");
         return false;
     }
 
-    strlcpy(configFile, EX_SDCARD_ROOT, sizeof(configFile));
+    strlcpy(configFile, EX_UDISK_ROOT, sizeof(configFile));
     strlcat(configFile, "/sd_boot_config.config", sizeof(configFile));
     printf("configFile = %s \n", configFile);
     ret = get_cfg_Item(configFile, str_key, str_val, &vlen);
@@ -165,7 +180,7 @@ bool is_sdcard_update(void) {
         return false;
     }
 
-    printf("firmware update will from SDCARD. \n");
+    printf("firmware update will from UDisk.\n");
     printf("%s out\n",__func__);
     return true;
 }

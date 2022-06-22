@@ -16,6 +16,7 @@ OBJ = recovery.o \
 	strlcat.o \
 	rkupdate.o \
 	sdboot.o \
+	usbboot.o \
 	mtdutils/mounts.o \
 	mtdutils/mtdutils.o \
 	mtdutils/rk29.o \

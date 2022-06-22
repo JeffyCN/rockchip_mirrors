@@ -12,21 +12,22 @@
  * GNU General Public License for more details.
  */
 
-#ifndef _SDBOOT_H_
-#define _SDBOOT_H_
+#ifndef _USBBOOT_H_
+#define _USBBOOT_H_
 
-#define EX_SDCARD_ROOT  "/mnt/sdcard"
+#define EX_UDISK_ROOT  "/mnt/udisk"
+#define EX_UDISK_ROOT2  "/mnt/usb_storage"
 
 #ifdef  __cplusplus
 extern "C" {
 #endif
 
-bool is_boot_from_SD(void);
-void ensure_sd_mounted(bool *bSDMounted);
-bool is_sdcard_update(void);
+bool is_boot_from_udisk(void);
+void ensure_udisk_mounted(bool *bSDMounted);
+bool is_udisk_update(void);
 
 #ifdef  __cplusplus
 }
 #endif
 
-#endif  //_SDBOOT_H_
+#endif  //_USBBOOT_H_

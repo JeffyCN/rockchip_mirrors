@@ -342,8 +342,8 @@ bool download_loader(PBYTE data_buf, int size, char *dest_path) {
     // 1. 获取头部信息,和文件内容
     pBootHead = (PSTRUCT_RKBOOT_HEAD)(data_buf);
 
-    if (pBootHead->uiTag!=0x544F4F42) {
-        LOGE("pBootHead->uiTag!=0x544F4F42\n");
+    if (pBootHead->uiTag!=0x544F4F42 && pBootHead->uiTag != 0x2052444C) {
+        LOGE("pBootHead->uiTag!=0x544F4F42 && pBootHead->uiTag!=0x2052444C, cur is 0x%08x\n", pBootHead->uiTag );
         return false;
     }
 

@@ -27,6 +27,7 @@ extern "C" {
 }
 
 #define	CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
+#define CMD4RECOVERY_UDISK_FILENAME "/mnt/usb_storage/cmd4recovery"
 static char * _url = NULL;
 static char const * _save_path = NULL;
 static char _url_dir[128];
@@ -51,6 +52,7 @@ void RK_ota_set_url(char *url, char *savepath) {
 }
 
 bool is_sdboot = false;
+bool is_usbboot = false;
 
 UPDATE_CMD update_cmd[] = {
            {"bootloader" , false , false , 0 , 0 , 0 , "" , false, flash_bootloader} ,
@@ -102,7 +104,7 @@ bool RK_ota_set_partition(int partition) {
         }
 
         for (int i = 0; i < num; i++) {
-            if ( update_cmd[i].need_update || is_sdboot) {
+            if ( update_cmd[i].need_update || is_sdboot || is_usbboot) {
                 update_cmd[i].need_update = false;
                 for (int j = 0; j < rkimage_hdr.item_count; j++) {
                     if (strcmp(rkimage_hdr.item[j].name, update_cmd[i].name) == 0) {
@@ -125,7 +127,7 @@ bool RK_ota_set_partition(int partition) {
                             update_cmd[i].size = rkimage_hdr.item[j].size;
                         }
 
-                        if (is_sdboot) {
+                        if (is_sdboot || is_usbboot) {
                             update_cmd[i].flash_offset = (long long)rkimage_hdr.item[j].flash_offset * SECTOR_SIZE;
                         }
                         update_cmd[i].need_update = true;
@@ -135,7 +137,7 @@ bool RK_ota_set_partition(int partition) {
             }
         }
 
-        if (!is_sdboot) {
+        if (!is_sdboot && !is_usbboot) {
             for ( int i=0; i<num; i++ ) {
                 if (*update_cmd[i].dest_path && (update_cmd[i].need_update == false)) {
 
@@ -185,11 +187,11 @@ bool RK_ota_set_partition(int partition) {
 
     for (int i = 0; i < num; i++) {
         // For OTA and SD update MUST read gpt from update***.img
-        if ( (partition & 0x800000 || is_sdboot || (strcmp(update_cmd[i].name, "parameter") == 0) ) ) {
+        if ( (partition & 0x800000 || is_sdboot || is_usbboot || (strcmp(update_cmd[i].name, "parameter") == 0) ) ) {
             LOGI("need update %s.\n", update_cmd[i].name);
             update_cmd[i].need_update = true;
 
-            if (is_sdboot) {
+            if (is_sdboot || is_usbboot) {
                 memset(update_cmd[i].dest_path, 0, sizeof(update_cmd[i].dest_path)/sizeof(update_cmd[i].dest_path[0]));
                 if (strcmp(update_cmd[i].name, "parameter") == 0) {
                     sprintf(update_cmd[i].dest_path, "%s/gpt", _url_dir);
@@ -227,7 +229,7 @@ static int ota_recovery_cmds (long long flash_offset, const char *dest_path)
 {
     char data_buf[256];
     unsigned int write_count = 0;
-
+    int fd = -1;
     if (dest_path == NULL) {
         LOGE("[%s-%d] error dest path is NULL.\n", __func__, __LINE__);
         return -1;
@@ -235,10 +237,19 @@ static int ota_recovery_cmds (long long flash_offset, const char *dest_path)
 
     LOGI("[%s:%d] parameter flash offset %#llx dest path %s\n", __func__, __LINE__, flash_offset, dest_path);
     memset(data_buf, 0, sizeof(data_buf)/sizeof(data_buf[0]));
-    int fd = open(CMD4RECOVERY_FILENAME, O_CREAT|O_RDWR|O_SYNC|O_APPEND, 0644);
-    if (fd < 0) {
-        LOGE("[%s-%d] error opening %s.\n", __func__, __LINE__,  CMD4RECOVERY_FILENAME);
-        return -1;
+
+    if (is_sdboot) {
+        fd = open(CMD4RECOVERY_FILENAME, O_CREAT|O_RDWR|O_SYNC|O_APPEND, 0644);
+        if (fd < 0) {
+            LOGE("[%s-%d] error opening %s.\n", __func__, __LINE__,  CMD4RECOVERY_FILENAME);
+            return -1;
+        }
+    } else if (is_usbboot) {
+        fd = open(CMD4RECOVERY_UDISK_FILENAME, O_CREAT|O_RDWR|O_SYNC|O_APPEND, 0644);
+        if (fd < 0) {
+            LOGE("[%s-%d] error opening %s.\n", __func__, __LINE__,  CMD4RECOVERY_UDISK_FILENAME);
+            return -1;
+        }
     }
 
     if (isMtdDevice()) {
@@ -324,7 +335,7 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
                 LOGI("now write %s to %s.\n", update_cmd[i].name, update_cmd[i].dest_path);
                 sprintf(prompt,"[%s] upgrade start...\n", update_cmd[i].name);
                 print_cb(prompt);
-                if (!is_sdboot &&
+                if (!is_sdboot && !is_usbboot &&
                         ( (strcmp(update_cmd[i].name, "misc") == 0) ||
                           (strcmp(update_cmd[i].name, "parameter") == 0) )) {
                     LOGI("ingore misc.\n");
@@ -348,7 +359,15 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
                         cb(NULL, RK_UPGRADE_ERR);
                         return ;
                     }
-                    LOGI("not check in sdboot.\n");
+                    LOGI("not check in sdboot (sdcard).\n");
+                    continue;
+                } else if (is_usbboot) {
+                    if (ota_recovery_cmds(update_cmd[i].flash_offset, update_cmd[i].dest_path)) {
+                        LOGE("write recovery cmds to %s failed.\n", CMD4RECOVERY_UDISK_FILENAME);
+                        cb(NULL, RK_UPGRADE_ERR);
+                        return ;
+                    }
+                    LOGI("not check in usb storage (udisk).\n");
                     continue;
                 }
                 // parameter 和loader 先不校验
@@ -374,7 +393,7 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
     /*
      * Fix if update_xxx.img not found some A/B partition image.
      */
-    if (is_sdboot) {
+    if (is_sdboot || is_usbboot) {
         for (int i = 0; i < num; i++) {
             if ( (!update_cmd[i].need_update) || (update_cmd[i].cmd == NULL)) {
                 continue;
