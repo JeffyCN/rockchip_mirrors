@@ -34,5 +34,13 @@ include(arch.conf)
 
 @EGLFS_DEVICE@
 
+# Extra config needed by Qt5Gui_EGL_LIBRARIES and Qt5Gui_OPENGL_LIBRARIES
+QMAKE_INCDIR_EGL        = $$[QT_SYSROOT]/usr/include
+QMAKE_LIBDIR_EGL        = $$[QT_SYSROOT]/usr/lib
+QMAKE_INCDIR_OPENGL_ES2 = $${QMAKE_INCDIR_EGL}
+QMAKE_LIBDIR_OPENGL_ES2 = $${QMAKE_LIBDIR_EGL}
+QMAKE_INCDIR_OPENVG     = $${QMAKE_INCDIR_EGL}
+QMAKE_LIBDIR_OPENVG     = $${QMAKE_LIBDIR_EGL}
+
 include(../common/linux_device_post.conf)
 load(qt_config)

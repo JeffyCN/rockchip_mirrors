@@ -1,4 +1,4 @@
-From bf17c79b516306f87b36d53d1fae67ff81f4ef54 Mon Sep 17 00:00:00 2001
+From ae53ac40e724efaccca69843b37057e44699441c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 11 Mar 2019 11:51:00 +0800
 Subject: [PATCH 08/17] gstreamer: mediaplayer: Force redo setMedia after
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/src/gsttools/qgstreamerplayersession.cpp b/src/gsttools/qgstreamerplayersession.cpp
-index 76282bcf..baa06b72 100755
+index 76282bc..baa06b7 100755
 --- a/src/gsttools/qgstreamerplayersession.cpp
 +++ b/src/gsttools/qgstreamerplayersession.cpp
 @@ -763,6 +763,10 @@ void QGstreamerPlayerSession::setVideoRenderer(QObject *videoOutput)

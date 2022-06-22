@@ -1,4 +1,4 @@
-From 3320a4098bb3d6217ad6f682d59827b011a74b27 Mon Sep 17 00:00:00 2001
+From b108273323d7c53ced3924c099e869011c695c6c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 27 Nov 2018 16:03:31 +0800
 Subject: [PATCH 02/17] gsttools: videowidget: Set overlay rectangle when
@@ -10,7 +10,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 10 insertions(+), 2 deletions(-)
 
 diff --git a/src/gsttools/qgstreamervideowidget.cpp b/src/gsttools/qgstreamervideowidget.cpp
-index 164e62f8..55f91574 100644
+index 164e62f..55f9157 100644
 --- a/src/gsttools/qgstreamervideowidget.cpp
 +++ b/src/gsttools/qgstreamervideowidget.cpp
 @@ -41,6 +41,7 @@

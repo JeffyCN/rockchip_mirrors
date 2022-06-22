@@ -1,4 +1,4 @@
-From 457ae8f19093c282a0f54d4e3b29e68c2a2477dc Mon Sep 17 00:00:00 2001
+From 937a06359ec904a50c7432a8235bb9a7fa9a34eb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:05:32 +0800
 Subject: [PATCH 08/15] qwaylanddisplay: Wakeup main event dispatcher when
@@ -18,7 +18,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 51 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylanddisplay.cpp b/src/client/qwaylanddisplay.cpp
-index ba4ce93..d07477a 100644
+index 6f1bada..57bf98e 100644
 --- a/src/client/qwaylanddisplay.cpp
 +++ b/src/client/qwaylanddisplay.cpp
 @@ -83,6 +83,8 @@
@@ -28,9 +28,9 @@ index ba4ce93..d07477a 100644
 +#include <QThread>
 +
  #include <errno.h>
- #include <poll.h>
  
-@@ -92,6 +94,48 @@ namespace QtWaylandClient {
+ #include <tuple> // for std::tie
+@@ -284,6 +286,48 @@ private:
  
  Q_LOGGING_CATEGORY(lcQpaWayland, "qt.qpa.wayland"); // for general (uncategorized) Wayland platform logging
  
@@ -79,16 +79,16 @@ index ba4ce93..d07477a 100644
  struct wl_surface *QWaylandDisplay::createSurface(void *handle)
  {
      struct wl_surface *surface = mCompositor.create_surface();
-@@ -160,6 +204,8 @@ QWaylandDisplay::QWaylandDisplay(QWaylandIntegration *waylandIntegration)
+@@ -351,6 +395,8 @@ QWaylandDisplay::QWaylandDisplay(QWaylandIntegration *waylandIntegration)
+     if (!mXkbContext)
          qCWarning(lcQpaWayland, "failed to create xkb context");
  #endif
- 
-+    mThread = new QWaylandDisplayThread(mDisplay);
 +
-     forceRoundTrip();
++    mThread = new QWaylandDisplayThread(mDisplay);
+ }
  
-     if (!mWaitingScreens.isEmpty()) {
-@@ -186,8 +232,10 @@ QWaylandDisplay::~QWaylandDisplay(void)
+ QWaylandDisplay::~QWaylandDisplay(void)
+@@ -377,8 +423,10 @@ QWaylandDisplay::~QWaylandDisplay(void)
  #if QT_CONFIG(cursor)
      qDeleteAll(mCursorThemes);
  #endif
@@ -99,9 +99,9 @@ index ba4ce93..d07477a 100644
 +    }
  }
  
- void QWaylandDisplay::ensureScreen()
+ // Steps which is called just after constructor. This separates registry_global() out of the constructor
 diff --git a/src/client/qwaylanddisplay_p.h b/src/client/qwaylanddisplay_p.h
-index 188e913..42b6c09 100644
+index 42bc661..fb632b3 100644
 --- a/src/client/qwaylanddisplay_p.h
 +++ b/src/client/qwaylanddisplay_p.h
 @@ -109,6 +109,7 @@ class QWaylandSurface;
@@ -109,17 +109,17 @@ index 188e913..42b6c09 100644
  class QWaylandCursor;
  class QWaylandCursorTheme;
 +class QWaylandDisplayThread;
+ class EventThread;
  
  typedef void (*RegistryListener)(void *data,
-                                  struct wl_registry *registry,
-@@ -280,6 +281,7 @@ private:
+@@ -276,6 +277,7 @@ private:
+     QList<QWaylandWindow *> mActiveWindows;
      struct wl_callback *mSyncCallback = nullptr;
      static const wl_callback_listener syncCallbackListener;
-     QReadWriteLock m_frameQueueLock;
 +    QWaylandDisplayThread *mThread = nullptr;
  
      bool mClientSideInputContextRequested = !QPlatformInputContextFactory::requested().isNull();
-     bool mUsingInputContextFromCompositor = false;
+ 
 -- 
 2.20.1
 

@@ -1,4 +1,4 @@
-From f336e871c572071ba9a9e6a69a3e5deee4d129d0 Mon Sep 17 00:00:00 2001
+From 3498b664b81e1fe42fe9382a6b4d7457b92ad7e8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 3 Nov 2021 17:55:58 +0800
 Subject: [PATCH 15/15] qwaylandwindow: Support lower() and raise()
@@ -49,10 +49,10 @@ index 76da10b..1c38151 100644
      void setDeSync();
      bool isSync() const { return m_synchronized; }
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 8ad3296..4f69dc5 100644
+index 92c046c..b115089 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -496,18 +496,26 @@ void QWaylandWindow::setVisible(bool visible)
+@@ -501,18 +501,26 @@ void QWaylandWindow::setVisible(bool visible)
      }
  }
  

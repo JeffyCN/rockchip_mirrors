@@ -1,4 +1,4 @@
-From b52453ff0b33de99ba4f3da5ae2d4ad2666399ea Mon Sep 17 00:00:00 2001
+From 60a5f650497fa6c58e89d3c13b0ac25c030146f0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 07:52:42 +0800
 Subject: [PATCH 13/17] HACK: gstreamer: Support fill mode
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 12 insertions(+)
 
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index 93a32119..592b56ab 100644
+index 1ca82da..431d8cc 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
 @@ -111,6 +111,7 @@ public:

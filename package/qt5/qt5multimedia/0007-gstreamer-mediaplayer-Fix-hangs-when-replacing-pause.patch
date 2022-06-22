@@ -1,4 +1,4 @@
-From b6e38e06726b80a0113e8dd2e4a1c6b83c45833c Mon Sep 17 00:00:00 2001
+From cf48f25dffc0a86840bcf6ad36242f66679cdbb5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 26 Dec 2018 17:51:51 +0800
 Subject: [PATCH 07/17] gstreamer: mediaplayer: Fix hangs when replacing paused
@@ -10,7 +10,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/src/gsttools/qgstreamerplayersession.cpp b/src/gsttools/qgstreamerplayersession.cpp
-index 98b7ffb8..76282bcf 100755
+index 98b7ffb..76282bc 100755
 --- a/src/gsttools/qgstreamerplayersession.cpp
 +++ b/src/gsttools/qgstreamerplayersession.cpp
 @@ -801,6 +801,11 @@ void QGstreamerPlayerSession::setVideoRenderer(QObject *videoOutput)

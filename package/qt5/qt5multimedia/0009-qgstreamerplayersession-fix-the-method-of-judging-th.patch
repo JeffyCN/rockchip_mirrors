@@ -1,4 +1,4 @@
-From 3b2fde13621e45aaddea753bc9ade514e97f40f1 Mon Sep 17 00:00:00 2001
+From 65ae571d4ed84d982c5d85a38281ce4f85a0c611 Mon Sep 17 00:00:00 2001
 From: Francis Fan <francis.fan@rock-chips.com>
 Date: Thu, 5 Sep 2019 07:51:23 +0000
 Subject: [PATCH 09/17] qgstreamerplayersession: fix the method of judging the
@@ -10,7 +10,7 @@ Signed-off-by: Francis Fan <francis.fan@rock-chips.com>
  1 file changed, 6 insertions(+), 1 deletion(-)
 
 diff --git a/src/gsttools/qgstreamerplayersession.cpp b/src/gsttools/qgstreamerplayersession.cpp
-index baa06b72..cc0681b1 100755
+index baa06b7..cc0681b 100755
 --- a/src/gsttools/qgstreamerplayersession.cpp
 +++ b/src/gsttools/qgstreamerplayersession.cpp
 @@ -1604,6 +1604,7 @@ void QGstreamerPlayerSession::updateDuration()

@@ -1,4 +1,4 @@
-From 41a0d0a98d89e3d67b957f20644ee523f705ea9e Mon Sep 17 00:00:00 2001
+From bbd1d65a2910b1b95d37ca0be6beb655b108f18d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Nov 2018 21:31:49 +0800
 Subject: [PATCH 03/17] gsttools: videooverlay: Support waylandsink and kmssink

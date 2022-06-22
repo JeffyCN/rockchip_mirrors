@@ -1,4 +1,4 @@
-From c0e84d5946a615100aa85525213921b0d76385d3 Mon Sep 17 00:00:00 2001
+From 8656a0534fc8178138fa48ae1a165d43acd11a6f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 26 Nov 2021 09:38:19 +0800
 Subject: [PATCH 17/17] gstreamer: Support choosing playbin2 and playbin3
@@ -22,7 +22,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/src/gsttools/qgstreamerplayersession.cpp b/src/gsttools/qgstreamerplayersession.cpp
-index b0a37f82..635b6e95 100755
+index b0a37f8..635b6e9 100755
 --- a/src/gsttools/qgstreamerplayersession.cpp
 +++ b/src/gsttools/qgstreamerplayersession.cpp
 @@ -120,7 +120,7 @@ QGstreamerPlayerSession::QGstreamerPlayerSession(QObject *parent)
@@ -35,7 +35,7 @@ index b0a37f82..635b6e95 100755
          //GST_PLAY_FLAG_NATIVE_VIDEO omits configuration of ffmpegcolorspace and videoscale,
          //since those elements are included in the video output bin when necessary.
 diff --git a/src/plugins/gstreamer/audiodecoder/qgstreameraudiodecodersession.cpp b/src/plugins/gstreamer/audiodecoder/qgstreameraudiodecodersession.cpp
-index d6b8ad75..6ad6849a 100644
+index d6b8ad7..6ad6849 100644
 --- a/src/plugins/gstreamer/audiodecoder/qgstreameraudiodecodersession.cpp
 +++ b/src/plugins/gstreamer/audiodecoder/qgstreameraudiodecodersession.cpp
 @@ -91,7 +91,7 @@ QGstreamerAudioDecoderSession::QGstreamerAudioDecoderSession(QObject *parent)

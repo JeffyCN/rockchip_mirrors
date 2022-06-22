@@ -1,4 +1,4 @@
-From e9694ff0a9abe5ae6b40d57c98773d906bea197a Mon Sep 17 00:00:00 2001
+From e71197737a4bf89a2ca47b9f464f38a88d559e08 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 30 Apr 2020 14:23:53 +0800
 Subject: [PATCH] Allow desktop keyboard in CROSS_COMPILE

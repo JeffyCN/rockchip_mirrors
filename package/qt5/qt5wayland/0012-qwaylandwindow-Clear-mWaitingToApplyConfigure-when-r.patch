@@ -1,4 +1,4 @@
-From c41b2420af1ffa22270882937f842535f0f7a3ee Mon Sep 17 00:00:00 2001
+From 61840bf9cb34b34744566d458fb8df38d164ceb7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 26 Jul 2021 17:07:44 +0800
 Subject: [PATCH 12/15] qwaylandwindow: Clear mWaitingToApplyConfigure when
@@ -10,10 +10,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 7940dd7..9b163ab 100644
+index 211a639..33a8a47 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -271,6 +271,8 @@ bool QWaylandWindow::shouldCreateSubSurface() const
+@@ -268,6 +268,8 @@ bool QWaylandWindow::shouldCreateSubSurface() const
  
  void QWaylandWindow::reset()
  {

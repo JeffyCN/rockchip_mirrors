@@ -1,4 +1,4 @@
-From 8f8eaa27439e25bb03444bd24a5c08e5b6271824 Mon Sep 17 00:00:00 2001
+From 37d2128c3b5a65fd35a0eb1dbd708a14cf1be160 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:23:59 +0800
 Subject: [PATCH 09/15] qwaylandxdgshell: Support switching between fullscreen
@@ -10,16 +10,16 @@ state firstly.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- .../shellintegration/xdg-shell/qwaylandxdgshell.cpp    | 10 ++++++++--
- 1 file changed, 8 insertions(+), 2 deletions(-)
+ .../shellintegration/xdg-shell/qwaylandxdgshell.cpp   | 11 +++++++++--
+ 1 file changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp b/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
-index 692e799..7034628 100644
+index 61f7e8c..c663000 100644
 --- a/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
 +++ b/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
-@@ -107,6 +107,9 @@ void QWaylandXdgSurface::Toplevel::applyConfigure()
- 
-     m_xdgSurface->setSizeHints();
+@@ -99,6 +99,9 @@ void QWaylandXdgSurface::Toplevel::applyConfigure()
+         m_xdgSurface->m_window->resizeFromApplyConfigure(m_pending.size);
+     }
  
 +    // Trigger a update to commit new state
 +    m_xdgSurface->m_window->window()->requestUpdate();
@@ -27,7 +27,7 @@ index 692e799..7034628 100644
      m_applied = m_pending;
      qCDebug(lcQpaWayland) << "Applied pending xdg_toplevel configure event:" << m_applied.size << m_applied.states;
  }
-@@ -170,6 +173,11 @@ void QWaylandXdgSurface::Toplevel::requestWindowStates(Qt::WindowStates states)
+@@ -162,6 +165,11 @@ void QWaylandXdgSurface::Toplevel::requestWindowStates(Qt::WindowStates states)
      // Re-send what's different from the applied state
      Qt::WindowStates changedStates = m_applied.states ^ states;
  
@@ -39,12 +39,13 @@ index 692e799..7034628 100644
      if (changedStates & Qt::WindowMaximized) {
          if (states & Qt::WindowMaximized)
              set_maximized();
-@@ -180,8 +188,6 @@ void QWaylandXdgSurface::Toplevel::requestWindowStates(Qt::WindowStates states)
-     if (changedStates & Qt::WindowFullScreen) {
-         if (states & Qt::WindowFullScreen)
-             set_fullscreen(nullptr);
--        else
+@@ -175,8 +183,7 @@ void QWaylandXdgSurface::Toplevel::requestWindowStates(Qt::WindowStates states)
+             if (screen) {
+                 set_fullscreen(screen->output());
+             }
+-        } else
 -            unset_fullscreen();
++        }
      }
  
      // Minimized state is not reported by the protocol, so always send it
