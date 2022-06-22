@@ -47,6 +47,9 @@ export GST_V4L2SRC_DEVICES=rkisp_mainpath:rkisp_selfpath
 # Max resolution for v4l2src
 export GST_V4L2SRC_MAX_RESOLUTION=3840x2160
 
+# Min buffers for V4L2 plugins
+# export GST_V4L2_MIN_BUFS=64
+
 # Preferred sinks for playbin3(autoaudiosink/autovideosink) and playbin.
 # export AUTOAUDIOSINK_PREFERRED=alsasink
 # export AUTOVIDEOSINK_PREFERRED=waylandsink
