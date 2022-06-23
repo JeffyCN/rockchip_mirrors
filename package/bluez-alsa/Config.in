@@ -7,7 +7,6 @@ config BR2_PACKAGE_BLUEZ_ALSA
 	depends on BR2_TOOLCHAIN_HAS_SYNC_4 # bluez5
 	depends on BR2_USE_MMU # bluez5 -> dbus
 	depends on BR2_USE_WCHAR # libglib2
-	depends on BR2_PACKAGE_RKWIFIBT_VENDOR = "REALTEK"
 	select BR2_PACKAGE_ALSA_LIB
 	select BR2_PACKAGE_BLUEZ5_UTILS
 	select BR2_PACKAGE_LIBGLIB2
