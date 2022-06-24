@@ -29,8 +29,8 @@ config BR2_PACKAGE_QT5WEBENGINE
 	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_9 # qt5base-icu
 	depends on BR2_TOOLCHAIN_HAS_THREADS # libglib2, libvpx, qt5base-dbus
 	depends on BR2_USE_WCHAR # libglib2
-	depends on BR2_PACKAGE_QT5_GL_AVAILABLE # qt5declarative, qt5base-eglfs
-	depends on BR2_PACKAGE_HAS_LIBEGL # qt5base-eglfs
+	depends on BR2_PACKAGE_QT5_GL_AVAILABLE
+	depends on BR2_PACKAGE_HAS_LIBEGL
 	depends on BR2_PACKAGE_HAS_UDEV
 	select BR2_PACKAGE_HOST_NODEJS
 	# v8 (a chromium 3rd-party) compiles its internal host-tools with the
@@ -55,7 +55,6 @@ config BR2_PACKAGE_QT5WEBENGINE
 	select BR2_PACKAGE_WEBP_DEMUX
 	select BR2_PACKAGE_WEBP_MUX
 	select BR2_PACKAGE_QT5BASE_DBUS
-	select BR2_PACKAGE_QT5BASE_EGLFS
 	select BR2_PACKAGE_QT5BASE_FONTCONFIG
 	select BR2_PACKAGE_QT5BASE_HARFBUZZ
 	select BR2_PACKAGE_QT5BASE_JPEG
