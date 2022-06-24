@@ -41,8 +41,8 @@ export GST_V4L2_USE_LIBV4L2=1
 # Default device for v4l2src
 export GST_V4L2SRC_DEFAULT_DEVICE=/dev/video-camera0
 
-# Available builtin devices for v4l2src
-export GST_V4L2SRC_DEVICES=rkisp_mainpath:rkisp_selfpath
+# Available RK devices for v4l2src
+export GST_V4L2SRC_RK_DEVICES=_mainpath:_selfpath:_bypass:_scale
 
 # Max resolution for v4l2src
 export GST_V4L2SRC_MAX_RESOLUTION=3840x2160
