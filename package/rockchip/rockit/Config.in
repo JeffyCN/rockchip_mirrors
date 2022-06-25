@@ -1,0 +1,5 @@
+config BR2_PACKAGE_ROCKIT
+	bool "rockit"
+	default n
+	help
+		rockit

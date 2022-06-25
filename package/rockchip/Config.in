@@ -94,6 +94,7 @@ menu "Rockchip BSP packages"
 	source "package/rockchip/rockchip-mali-nvr/Config.in"
 	source "package/rockchip/rockchip-mpp/Config.in"
 	source "package/rockchip/rockchip-test/Config.in"
+	source "package/rockchip/rockit/Config.in"
 	source "package/rockchip/tee-user-app/Config.in"
 	source "package/rockchip/slt_gpu_light/Config.in"
 endmenu
