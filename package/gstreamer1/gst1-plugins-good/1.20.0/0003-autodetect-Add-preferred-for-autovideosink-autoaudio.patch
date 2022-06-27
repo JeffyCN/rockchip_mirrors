@@ -1,7 +1,8 @@
-From b388a16398ae1c727cea2dd2bafe3cebc21058df Mon Sep 17 00:00:00 2001
+From d9fb9ad4276d63a784198c55ae9a2c0b2361761e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 11 Jun 2019 10:19:22 +0800
-Subject: [PATCH 3/5] autodetect: Add preferred for autovideosink/autoaudiosink
+Subject: [PATCH 03/12] autodetect: Add preferred for
+ autovideosink/autoaudiosink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -12,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 21 insertions(+)
 
 diff --git a/gst/autodetect/gstautoaudiosink.c b/gst/autodetect/gstautoaudiosink.c
-index 5c18972..088c83e 100644
+index 5c1897289..088c83e67 100644
 --- a/gst/autodetect/gstautoaudiosink.c
 +++ b/gst/autodetect/gstautoaudiosink.c
 @@ -39,6 +39,8 @@
@@ -33,7 +34,7 @@ index 5c18972..088c83e 100644
    sink->ts_offset = DEFAULT_TS_OFFSET;
  }
 diff --git a/gst/autodetect/gstautodetect.c b/gst/autodetect/gstautodetect.c
-index 864d465..56ce69d 100644
+index 864d465ee..56ce69d2b 100644
 --- a/gst/autodetect/gstautodetect.c
 +++ b/gst/autodetect/gstautodetect.c
 @@ -273,6 +273,20 @@ gst_auto_detect_find_best (GstAutoDetect * self)
@@ -58,7 +59,7 @@ index 864d465..56ce69d 100644
      GstElementFactory *f = GST_ELEMENT_FACTORY (item->data);
      GstElement *el;
 diff --git a/gst/autodetect/gstautodetect.h b/gst/autodetect/gstautodetect.h
-index 3f54c14..85731c0 100644
+index 3f54c1471..85731c0b5 100644
 --- a/gst/autodetect/gstautodetect.h
 +++ b/gst/autodetect/gstautodetect.h
 @@ -41,6 +41,7 @@ typedef struct _GstAutoDetect {
@@ -70,7 +71,7 @@ index 3f54c14..85731c0 100644
    GstElementFlags flag; /* GST_ELEMENT_FLAG_{SINK/SOURCE} */
  
 diff --git a/gst/autodetect/gstautovideosink.c b/gst/autodetect/gstautovideosink.c
-index b3eaf1f..545e21c 100644
+index b3eaf1f36..545e21c93 100644
 --- a/gst/autodetect/gstautovideosink.c
 +++ b/gst/autodetect/gstautovideosink.c
 @@ -39,6 +39,8 @@
