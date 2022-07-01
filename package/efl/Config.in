@@ -186,16 +186,16 @@ config BR2_PACKAGE_EFL_WAYLAND
 	bool "Wayland support"
 	depends on BR2_PACKAGE_WAYLAND
 	depends on BR2_TOOLCHAIN_HAS_THREADS # Evas DRM Engine -> libdrm
-	depends on BR2_PACKAGE_MESA3D_OPENGL_EGL # Evas DRM Engine
+	depends on BR2_PACKAGE_HAS_LIBGBM
 	depends on BR2_PACKAGE_HAS_UDEV # efl drm, efl-eeze
 	depends on BR2_PACKAGE_EFL_OPENGLES # OpenGL ES with EGL support only
 	depends on BR2_ENABLE_LOCALE # efl-drm <- efl-elput <- linput
 	select BR2_PACKAGE_EFL_DRM
 	select BR2_PACKAGE_WAYLAND_PROTOCOLS
 
-comment "Wayland support needs udev /dev management, OpenGL ES w/ EGL, threads, locales"
+comment "Wayland support needs udev /dev management, GBM, threads, locales"
 	depends on BR2_PACKAGE_WAYLAND
-	depends on !BR2_TOOLCHAIN_HAS_THREADS || !BR2_PACKAGE_MESA3D_OPENGL_EGL \
+	depends on !BR2_TOOLCHAIN_HAS_THREADS || !BR2_PACKAGE_HAS_LIBGBM \
 		|| !BR2_PACKAGE_EFL_OPENGLES || !BR2_PACKAGE_HAS_UDEV \
 		|| !BR2_ENABLE_LOCALE
 
@@ -231,7 +231,7 @@ config BR2_PACKAGE_EFL_DRM
 	bool "Evas DRM Engine"
 	depends on BR2_PACKAGE_HAS_UDEV # efl-elput, efl-eeze
 	depends on BR2_TOOLCHAIN_HAS_THREADS # libdrm
-	depends on BR2_PACKAGE_MESA3D_OPENGL_EGL # require libgbm from mesa3d
+	depends on BR2_PACKAGE_HAS_LIBGBM
 	select BR2_PACKAGE_EFL_ELPUT
 	select BR2_PACKAGE_LIBDRM
 	help
@@ -243,8 +243,8 @@ config BR2_PACKAGE_EFL_DRM
 	  etc) to handle interfacing with libinput without having to
 	  duplicate the code in each subsystem.
 
-comment "Evas DRM Engine needs udev /dev management, mesa3d w/ EGL support, threads"
-	depends on !BR2_TOOLCHAIN_HAS_THREADS || !BR2_PACKAGE_MESA3D_OPENGL_EGL \
+comment "Evas DRM Engine needs udev /dev management, GBM support, threads"
+	depends on !BR2_TOOLCHAIN_HAS_THREADS || !BR2_PACKAGE_HAS_LIBGBM \
 		|| !BR2_PACKAGE_HAS_UDEV
 
 comment "libevas loaders"
