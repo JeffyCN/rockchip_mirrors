@@ -4,10 +4,11 @@
 #
 ################################################################################
 
-IRQBALANCE_VERSION = 1.6.0
+IRQBALANCE_VERSION = 1.8.0
 IRQBALANCE_SITE = $(call github,irqbalance,irqbalance,v$(IRQBALANCE_VERSION))
 IRQBALANCE_LICENSE = GPL-2.0
 IRQBALANCE_LICENSE_FILES = COPYING
+IRQBALANCE_SELINUX_MODULES = irqbalance
 IRQBALANCE_DEPENDENCIES = host-pkgconf libglib2
 # Autoreconf needed because package is distributed without a configure script
 IRQBALANCE_AUTORECONF = YES
@@ -40,11 +41,6 @@ else
 IRQBALANCE_CONF_OPTS += --without-systemd
 endif
 
-# This would be done by the package's autogen.sh script
-define IRQBALANCE_PRECONFIGURE
-	mkdir -p $(@D)/m4
-endef
-
 IRQBALANCE_PRE_CONFIGURE_HOOKS += IRQBALANCE_PRECONFIGURE
 
 ifeq ($(BR2_PACKAGE_IRQBALANCE_FORCE_CORE),y)
@@ -52,7 +48,6 @@ define IRQBALANCE_INSTALL_FORCE_CORE
 	$(INSTALL) -D -m 755 package/irqbalance/force_core.sh \
 		$(TARGET_DIR)/etc/irqbalance.d/force_core.sh
 endef
-
 IRQBALANCE_POST_INSTALL_TARGET_HOOKS += IRQBALANCE_INSTALL_FORCE_CORE
 endif
 
@@ -64,9 +59,6 @@ endef
 define IRQBALANCE_INSTALL_INIT_SYSTEMD
 	$(INSTALL) -D -m 644 package/irqbalance/irqbalance.service \
 		$(TARGET_DIR)/usr/lib/systemd/system/irqbalance.service
-	mkdir -p $(TARGET_DIR)/etc/systemd/system/multi-user.target.wants
-	ln -fs ../../../../usr/lib/systemd/system/irqbalance.service \
-		$(TARGET_DIR)/etc/systemd/system/multi-user.target.wants/irqbalance.service
 endef
 
 $(eval $(autotools-package))
