@@ -15,8 +15,7 @@ ENLIGHTENMENT_CPE_ID_VENDOR = enlightenment
 ENLIGHTENMENT_DEPENDENCIES = \
 	host-pkgconf \
 	host-efl \
-	efl \
-	xcb-util-keysyms
+	efl
 
 ENLIGHTENMENT_CONF_OPTS = \
 	-Dedje-cc=$(HOST_DIR)/bin/edje_cc \
@@ -28,6 +27,14 @@ ENLIGHTENMENT_CONF_OPTS = \
 
 # enlightenment.pc and /usr/lib/enlightenment/modules/*.so
 ENLIGHTENMENT_INSTALL_STAGING = YES
+
+ifeq ($(BR2_PACKAGE_EFL_X_XLIB),)
+ENLIGHTENMENT_CONF_OPTS += -Dwl-x11=false -Dxwayland=false
+endif
+
+ifeq ($(BR2_PACKAGE_EFL_WAYLAND),y)
+ENLIGHTENMENT_CONF_OPTS += -Dwl=true
+endif
 
 ifeq ($(BR2_PACKAGE_SYSTEMD),y)
 ENLIGHTENMENT_CONF_OPTS += -Dsystemd=true
