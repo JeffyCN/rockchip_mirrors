@@ -1,7 +1,7 @@
-From 9311fa94e627e15c1c004b38bd623f7293c680b6 Mon Sep 17 00:00:00 2001
+From 40d6330b248b9e0bfe5925472eed9a14c684f117 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 1 Jul 2022 19:19:32 +0800
-Subject: [PATCH 5/7] elput: root: Allow root group
+Subject: [PATCH 05/10] elput: root: Allow root group
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

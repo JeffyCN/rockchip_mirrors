@@ -1,7 +1,7 @@
 From 9d71349961ef3d171ab8330ea169164a6a717d00 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 1 Jul 2022 17:28:05 +0800
-Subject: [PATCH 4/7] evas_gl_drm: Drop dependency on mesa3d
+Subject: [PATCH 04/10] evas_gl_drm: Drop dependency on mesa3d
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

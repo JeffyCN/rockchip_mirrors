@@ -1,8 +1,8 @@
-From 00833baac6935bd1e3e9856211bc165c5b02a7bd Mon Sep 17 00:00:00 2001
+From ec1c729eddd6cf30c3d723461f3f993cd5d31a2e Mon Sep 17 00:00:00 2001
 From: Romain Naour <romain.naour@gmail.com>
 Date: Sat, 1 Aug 2020 02:25:47 +0200
-Subject: [PATCH] ecore_evas/engines/drm/meson.build: use "gl_deps" as engine
- dependencies
+Subject: [PATCH 01/10] ecore_evas/engines/drm/meson.build: use "gl_deps" as
+ engine dependencies
 
 Meson trigger an error since "engine_gl_drm" variable doesn't exist.
 
@@ -19,7 +19,7 @@ Signed-off-by: Romain Naour <romain.naour@gmail.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/src/modules/ecore_evas/engines/drm/meson.build b/src/modules/ecore_evas/engines/drm/meson.build
-index 58071010d0..0741d7fccd 100644
+index 5807101..0741d7f 100644
 --- a/src/modules/ecore_evas/engines/drm/meson.build
 +++ b/src/modules/ecore_evas/engines/drm/meson.build
 @@ -3,7 +3,7 @@ engine_deps = [ecore_drm2, ecore_input, eeze, elput, libdrm, engine_drm]
@@ -32,5 +32,5 @@ index 58071010d0..0741d7fccd 100644
  
  engine_include_dir += include_directories(join_paths('..', '..', '..', 'evas', 'engines', 'drm'))
 -- 
-2.31.1
+2.20.1
 
