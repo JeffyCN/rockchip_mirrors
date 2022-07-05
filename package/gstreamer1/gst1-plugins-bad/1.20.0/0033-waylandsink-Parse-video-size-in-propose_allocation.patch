@@ -1,4 +1,4 @@
-From 6b0617af7ad7f1afc229a2b3bc5732422e8f0dc5 Mon Sep 17 00:00:00 2001
+From a39bce532a2ca291d1bfcd94bd01d66fae8d0289 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 11 May 2022 18:12:39 +0800
 Subject: [PATCH 33/33] waylandsink: Parse video size in propose_allocation()
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 19 insertions(+), 5 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 9256b02..8e092de 100644
+index 29900ab..65f30a0 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
-@@ -712,11 +712,10 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
+@@ -722,11 +722,10 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
  }
  
  static GstBufferPool *
@@ -27,7 +27,7 @@ index 9256b02..8e092de 100644
    GstAllocator *alloc;
  
    pool = g_object_new (gst_wayland_pool_get_type (), NULL);
-@@ -766,7 +765,7 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -776,7 +775,7 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
    /* create a new pool for the new caps */
    if (sink->pool)
      gst_object_unref (sink->pool);
@@ -36,7 +36,7 @@ index 9256b02..8e092de 100644
  
    if (!gst_wl_display_check_format_for_dmabuf (sink->display, format)
        && !gst_wl_display_check_format_for_shm (sink->display, format))
-@@ -796,10 +795,15 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -806,10 +805,15 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    GstBufferPool *pool = NULL;
    gboolean need_pool;
    GstAllocator *alloc;
@@ -52,7 +52,7 @@ index 9256b02..8e092de 100644
  
    s = gst_caps_get_structure (caps, 0);
    if (gst_structure_get_int (s, "arm-afbc", &value) && value) {
-@@ -808,9 +812,9 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -818,9 +822,9 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    }
  
    if (need_pool)
@@ -64,7 +64,7 @@ index 9256b02..8e092de 100644
    if (pool)
      g_object_unref (pool);
  
-@@ -821,6 +825,16 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -831,6 +835,16 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    g_object_unref (alloc);
  
    return TRUE;
