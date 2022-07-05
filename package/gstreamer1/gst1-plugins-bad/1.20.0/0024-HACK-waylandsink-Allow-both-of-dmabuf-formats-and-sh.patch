@@ -1,7 +1,7 @@
-From 28ca3f901c028d6e99cf27f9f6bb5425439110db Mon Sep 17 00:00:00 2001
+From 0cca51f4c9985b6cb88c0ee829d0126e38ff0832 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 9 Dec 2021 14:25:41 +0800
-Subject: [PATCH 24/31] HACK: waylandsink: Allow both of dmabuf formats and shm
+Subject: [PATCH 24/33] HACK: waylandsink: Allow both of dmabuf formats and shm
  formats
 
 For the plugins which provide dmabuf without
@@ -9,15 +9,42 @@ GST_CAPS_FEATURE_MEMORY_DMABUF.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- ext/wayland/gstwaylandsink.c | 14 ++------------
+ ext/wayland/gstwaylandsink.c | 24 +++++++++---------------
  ext/wayland/gstwaylandsink.h |  1 -
- 2 files changed, 2 insertions(+), 13 deletions(-)
+ 2 files changed, 9 insertions(+), 16 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 07bfec0..e64539b 100644
+index 07bfec0..d5f388a 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
-@@ -702,7 +702,6 @@ static gboolean
+@@ -639,9 +639,6 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
+       }
+     }
+ 
+-    gst_structure_take_value (gst_caps_get_structure (caps, 0), "format",
+-        &shm_list);
+-
+     /* Add corresponding dmabuf formats */
+     formats = sink->display->dmabuf_formats;
+     for (i = 0; i < formats->len; i++) {
+@@ -651,9 +648,16 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
+         g_value_init (&value, G_TYPE_STRING);
+         g_value_set_static_string (&value, gst_video_format_to_string (gfmt));
+         gst_value_list_append_and_take_value (&dmabuf_list, &value);
++
++        g_value_init (&value, G_TYPE_STRING);
++        g_value_set_static_string (&value, gst_video_format_to_string (gfmt));
++        gst_value_list_append_and_take_value (&shm_list, &value);
+       }
+     }
+ 
++    gst_structure_take_value (gst_caps_get_structure (caps, 0), "format",
++        &shm_list);
++
+     gst_structure_take_value (gst_caps_get_structure (caps, 1), "format",
+         &dmabuf_list);
+ 
+@@ -702,7 +706,6 @@ static gboolean
  gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
  {
    GstWaylandSink *sink;
@@ -25,7 +52,7 @@ index 07bfec0..e64539b 100644
    GstVideoFormat format;
  
    sink = GST_WAYLAND_SINK (bsink);
-@@ -721,18 +720,9 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -721,18 +724,9 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
      gst_object_unref (sink->pool);
    sink->pool = gst_wayland_create_pool (sink, caps);
  
