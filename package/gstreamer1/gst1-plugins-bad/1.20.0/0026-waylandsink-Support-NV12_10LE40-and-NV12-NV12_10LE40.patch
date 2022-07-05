@@ -1,4 +1,4 @@
-From 2da69a3f624bc9f0f8b99494150d50addcfa26ae Mon Sep 17 00:00:00 2001
+From 69f8cceb44cb1e26da1cb4ea7d65e8f577df7e05 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
 Subject: [PATCH 26/33] waylandsink: Support NV12_10LE40 and
@@ -16,9 +16,9 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  ext/wayland/wllinuxdmabuf.c  | 26 ++++++++++-
  ext/wayland/wlvideoformat.c  |  1 +
  ext/wayland/wlvideoformat.h  | 42 ++++++++++++++++++
- ext/wayland/wlwindow.c       | 26 +++++++----
+ ext/wayland/wlwindow.c       | 25 +++++++----
  ext/wayland/wlwindow.h       |  2 +
- 8 files changed, 192 insertions(+), 12 deletions(-)
+ 8 files changed, 191 insertions(+), 12 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
 index e64539b..41363f7 100644
@@ -367,7 +367,7 @@ index 331f582..ddfb1e0 100644
  gint gst_video_format_to_wl_dmabuf_format (GstVideoFormat format);
  GstVideoFormat gst_wl_shm_format_to_video_format (enum wl_shm_format wl_format);
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index f4e7ca9..cba168a 100644
+index f4e7ca9..2ba0eee 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -466,6 +466,14 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
@@ -385,7 +385,7 @@ index f4e7ca9..cba168a 100644
    if (window->video_viewport) {
      if (window->fill_mode == GST_WL_WINDOW_STRETCH) {
        res = dst;
-@@ -479,18 +487,13 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+@@ -479,22 +487,20 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
  
        if (src_ratio < dst_ratio) {
          int h = src.w / dst_ratio;
@@ -406,18 +406,14 @@ index f4e7ca9..cba168a 100644
        res = dst;
      }
  
-@@ -499,6 +502,10 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
+     wp_viewport_set_destination (window->video_viewport, res.w, res.h);
++    wp_viewport_set_source (window->video_viewport,
++        wl_fixed_from_int (src.x), wl_fixed_from_int (src.y),
++        wl_fixed_from_int (src.w), wl_fixed_from_int (src.h));
+   } else {
      gst_video_sink_center_rect (src, dst, &res, FALSE);
    }
- 
-+  wp_viewport_set_source (window->video_viewport,
-+      wl_fixed_from_int (src.x), wl_fixed_from_int (src.y),
-+      wl_fixed_from_int (src.w), wl_fixed_from_int (src.h));
-+
-   wl_subsurface_set_position (window->video_subsurface, res.x, res.y);
- 
-   if (commit)
-@@ -532,13 +539,14 @@ gst_wl_window_render (GstWlWindow * window, GstWlBuffer * buffer,
+@@ -532,13 +538,14 @@ gst_wl_window_render (GstWlWindow * window, GstWlBuffer * buffer,
      const GstVideoInfo * info)
  {
    if (G_UNLIKELY (info)) {
