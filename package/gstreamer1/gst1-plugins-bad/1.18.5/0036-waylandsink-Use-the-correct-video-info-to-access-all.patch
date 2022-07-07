@@ -1,7 +1,7 @@
-From b26bf89e0ee0a7b47c16f1a5d2d9fcce20768cf8 Mon Sep 17 00:00:00 2001
+From a104bbb63184e3ff2d6bb1ba9739dbd04acae1ca Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 22 Dec 2021 16:04:46 +0800
-Subject: [PATCH 36/42] waylandsink: Use the correct video info to access
+Subject: [PATCH 36/43] waylandsink: Use the correct video info to access
  allocated buffer
 
 The video info might changed after pool activated.
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 7939e3a9..75bdb6d3 100644
+index 0407fee8..1f449d3b 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
-@@ -903,7 +903,6 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -909,7 +909,6 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
    GstVideoCropMeta *crop;
    GstVideoMeta *vmeta;
    GstVideoFormat format;
@@ -24,7 +24,7 @@ index 7939e3a9..75bdb6d3 100644
    GstMemory *mem;
    struct wl_buffer *wbuf = NULL;
  
-@@ -977,7 +976,6 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -983,7 +982,6 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
    /* update video info from video meta */
    mem = gst_buffer_peek_memory (buffer, 0);
  
@@ -32,7 +32,7 @@ index 7939e3a9..75bdb6d3 100644
    vmeta = gst_buffer_get_video_meta (buffer);
    if (vmeta) {
      gint i;
-@@ -1018,9 +1016,6 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -1024,9 +1022,6 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
        GstVideoFrame src, dst;
        GstVideoInfo src_info = sink->video_info;
  
@@ -42,7 +42,7 @@ index 7939e3a9..75bdb6d3 100644
        /* we don't know how to create a wl_buffer directly from the provided
         * memory, so we have to copy the data to shm memory that we know how
         * to handle... */
-@@ -1046,8 +1041,13 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -1052,8 +1047,13 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
          if (!gst_buffer_pool_set_config (sink->pool, config) ||
              !gst_buffer_pool_set_active (sink->pool, TRUE))
            goto activate_failed;

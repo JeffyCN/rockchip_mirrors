@@ -1,7 +1,7 @@
-From b85614a635e40f93a854db8357a2bafb5ed4efea Mon Sep 17 00:00:00 2001
+From e38f5afa1ab44cea40ba8f1c8bc49f60fb3c06ed Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
-Subject: [PATCH 35/42] waylandsink: Support NV12_10LE40 and
+Subject: [PATCH 35/43] waylandsink: Support NV12_10LE40 and
  NV12|NV12_10LE40|NV16 (AFBC)
 
 Tested on RK356x with:
@@ -10,18 +10,18 @@ gst-play-1.0 video.mp4 --videosink=waylandsink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- ext/wayland/gstwaylandsink.c | 92 +++++++++++++++++++++++++++++++++++-
- ext/wayland/wldisplay.c      | 19 +++++++-
+ ext/wayland/gstwaylandsink.c | 98 +++++++++++++++++++++++++++++++++++-
+ ext/wayland/wldisplay.c      | 19 ++++++-
  ext/wayland/wldisplay.h      |  2 +
  ext/wayland/wllinuxdmabuf.c  | 26 +++++++++-
  ext/wayland/wlvideoformat.c  |  1 +
  ext/wayland/wlvideoformat.h  | 42 ++++++++++++++++
- ext/wayland/wlwindow.c       | 25 ++++++----
+ ext/wayland/wlwindow.c       | 25 +++++----
  ext/wayland/wlwindow.h       |  2 +
- 8 files changed, 197 insertions(+), 12 deletions(-)
+ 8 files changed, 203 insertions(+), 12 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 9a04233d..7939e3a9 100644
+index 9a04233d..0407fee8 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -78,7 +78,7 @@ GST_DEBUG_CATEGORY (gstwayland_debug);
@@ -33,7 +33,7 @@ index 9a04233d..7939e3a9 100644
  
  static GstStaticPadTemplate sink_template = GST_STATIC_PAD_TEMPLATE ("sink",
      GST_PAD_SINK,
-@@ -601,6 +601,47 @@ gst_wayland_sink_set_context (GstElement * element, GstContext * context)
+@@ -601,6 +601,53 @@ gst_wayland_sink_set_context (GstElement * element, GstContext * context)
      GST_ELEMENT_CLASS (parent_class)->set_context (element, context);
  }
  
@@ -45,7 +45,9 @@ index 9a04233d..7939e3a9 100644
 +  /* HACK: Allow nv12-10le40 and arm-afbc in main caps */
 +
 +  if (sink->display->support_nv12_10le40) {
-+    tmp_caps = gst_caps_from_string (GST_VIDEO_CAPS_MAKE ("NV12_10LE40"));
++    tmp_caps = gst_caps_from_string (
++        GST_VIDEO_CAPS_MAKE_WITH_FEATURES (GST_CAPS_FEATURE_MEMORY_DMABUF,
++            "NV12_10LE40"));
 +
 +    /* NV15(AFBC) */
 +    if (sink->display->support_afbc) {
@@ -62,14 +64,18 @@ index 9a04233d..7939e3a9 100644
 +  if (sink->display->support_afbc) {
 +    if (gst_wl_display_check_format_for_dmabuf (sink->display,
 +            GST_VIDEO_FORMAT_NV12)) {
-+      tmp_caps = gst_caps_from_string (GST_VIDEO_CAPS_MAKE ("NV12"));
++      tmp_caps = gst_caps_from_string (
++          GST_VIDEO_CAPS_MAKE_WITH_FEATURES (GST_CAPS_FEATURE_MEMORY_DMABUF,
++              "NV12"));
 +      gst_caps_set_simple (tmp_caps, "arm-afbc", G_TYPE_INT, 1, NULL);
 +      gst_caps_append (caps, tmp_caps);
 +    }
 +
 +    if (gst_wl_display_check_format_for_dmabuf (sink->display,
 +            GST_VIDEO_FORMAT_NV16)) {
-+      tmp_caps = gst_caps_from_string (GST_VIDEO_CAPS_MAKE ("NV16"));
++      tmp_caps = gst_caps_from_string (
++          GST_VIDEO_CAPS_MAKE_WITH_FEATURES (GST_CAPS_FEATURE_MEMORY_DMABUF,
++              "NV16"));
 +      gst_caps_set_simple (tmp_caps, "arm-afbc", G_TYPE_INT, 1, NULL);
 +      gst_caps_append (caps, tmp_caps);
 +    }
@@ -81,7 +87,7 @@ index 9a04233d..7939e3a9 100644
  static GstCaps *
  gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
  {
-@@ -659,6 +700,8 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
+@@ -659,6 +706,8 @@ gst_wayland_sink_get_caps (GstBaseSink * bsink, GstCaps * filter)
      gst_structure_take_value (gst_caps_get_structure (caps, 1), "format",
          &dmabuf_list);
  
@@ -90,7 +96,7 @@ index 9a04233d..7939e3a9 100644
      GST_DEBUG_OBJECT (sink, "display caps: %" GST_PTR_FORMAT, caps);
    }
  
-@@ -705,6 +748,8 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -705,6 +754,8 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
  {
    GstWaylandSink *sink;
    GstVideoFormat format;
@@ -99,7 +105,7 @@ index 9a04233d..7939e3a9 100644
  
    sink = GST_WAYLAND_SINK (bsink);
  
-@@ -714,6 +759,15 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -714,6 +765,15 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
    if (!gst_video_info_from_caps (&sink->video_info, caps))
      goto invalid_format;
  
@@ -115,7 +121,7 @@ index 9a04233d..7939e3a9 100644
    format = GST_VIDEO_INFO_FORMAT (&sink->video_info);
    sink->video_info_changed = TRUE;
  
-@@ -750,9 +804,17 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -750,9 +810,17 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    GstBufferPool *pool = NULL;
    gboolean need_pool;
    GstAllocator *alloc;
@@ -133,7 +139,7 @@ index 9a04233d..7939e3a9 100644
    if (need_pool)
      pool = gst_wayland_create_pool (sink, caps);
  
-@@ -763,6 +825,7 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -763,6 +831,7 @@ gst_wayland_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    alloc = gst_wl_shm_allocator_get ();
    gst_query_add_allocation_param (query, alloc, NULL);
    gst_query_add_allocation_meta (query, GST_VIDEO_META_API_TYPE, NULL);
@@ -141,7 +147,7 @@ index 9a04233d..7939e3a9 100644
    g_object_unref (alloc);
  
    return TRUE;
-@@ -837,6 +900,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -837,6 +906,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
    GstWaylandSink *sink = GST_WAYLAND_SINK (vsink);
    GstBuffer *to_render;
    GstWlBuffer *wlbuffer;
@@ -149,7 +155,7 @@ index 9a04233d..7939e3a9 100644
    GstVideoMeta *vmeta;
    GstVideoFormat format;
    GstVideoInfo old_vinfo;
-@@ -874,6 +938,23 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -874,6 +944,23 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
      }
    }
  
@@ -173,7 +179,7 @@ index 9a04233d..7939e3a9 100644
    /* drop buffers until we get a frame callback */
    if (sink->redraw_pending) {
      GST_LOG_OBJECT (sink, "buffer %p dropped (redraw pending)", buffer);
-@@ -924,6 +1005,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -924,6 +1011,9 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
            &sink->video_info);
    }
  
@@ -183,7 +189,7 @@ index 9a04233d..7939e3a9 100644
    if (!wbuf && gst_wl_display_check_format_for_shm (sink->display, format)) {
      if (gst_buffer_n_memory (buffer) == 1 && gst_is_fd_memory (mem))
        wbuf = gst_wl_shm_memory_construct_wl_buffer (mem, sink->display,
-@@ -1052,6 +1136,12 @@ no_wl_buffer:
+@@ -1052,6 +1142,12 @@ no_wl_buffer:
      ret = GST_FLOW_ERROR;
      goto done;
    }
