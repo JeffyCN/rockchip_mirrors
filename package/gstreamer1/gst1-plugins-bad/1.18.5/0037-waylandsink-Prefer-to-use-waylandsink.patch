@@ -1,7 +1,7 @@
-From 0a5615d660830a8f2282389d1472d4b27acf63b8 Mon Sep 17 00:00:00 2001
+From b4d1f041ad2c45b4708839134f4dc1f09b9d3aff Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 27 Dec 2021 21:37:06 +0800
-Subject: [PATCH 37/42] waylandsink: Prefer to use waylandsink
+Subject: [PATCH 37/43] waylandsink: Prefer to use waylandsink
 
 Increase rank to primary.
 
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 75bdb6d3..23d1c06c 100644
+index 1f449d3b..83659997 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
-@@ -1323,7 +1323,7 @@ plugin_init (GstPlugin * plugin)
+@@ -1329,7 +1329,7 @@ plugin_init (GstPlugin * plugin)
  
    gst_wl_shm_allocator_register ();
  
