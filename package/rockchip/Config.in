@@ -24,13 +24,13 @@ choice
 
 config BR2_PACKAGE_RK3399
 	bool "rk3399 chip"
-	select BR2_ROCKCHIP_HAS_ISP1
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
 	help
 	  Use Rockchip's rk3399 SoC
 
 config BR2_PACKAGE_RK356X
 	bool "rk356x chip"
-	select BR2_ROCKCHIP_HAS_ISP2
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP2
 	help
 	  Use Rockchip's rk356x SoC
 
