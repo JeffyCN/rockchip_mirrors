@@ -1,0 +1,113 @@
+From ba561332d1b8c71ae86178307fe40db2536f2a5b Mon Sep 17 00:00:00 2001
+From: "jinkun.hong" <jinkun.hong@rock-chips.com>
+Date: Tue, 12 Jul 2022 15:04:23 +0800
+Subject: [PATCH 9/9] update drm_display.c
+
+Signed-off-by: jinkun.hong <jinkun.hong@rock-chips.com>
+---
+ rk_lvgl_demo/src/hal/drm_display.c | 24 +++++++++++++++---------
+ 1 file changed, 15 insertions(+), 9 deletions(-)
+
+diff --git a/rk_lvgl_demo/src/hal/drm_display.c b/rk_lvgl_demo/src/hal/drm_display.c
+index 85dce61..c6d1cb0 100644
+--- a/rk_lvgl_demo/src/hal/drm_display.c
++++ b/rk_lvgl_demo/src/hal/drm_display.c
+@@ -18,7 +18,7 @@
+ #include "drm_display.h"
+ 
+ #define NUM_DUMB_BO 3
+-
++#define VIDEO_PLANE_ENABLE 1
+ #define DEBUG
+ #ifdef DEBUG
+ #define DRM_DEBUG(fmt, ...) \
+@@ -411,7 +411,7 @@ drm_get_plane(struct device *dev, int plane_id, int pipe)
+ 
+     DRM_DEBUG("Check plane: %d, possible_crtcs: %x\n", plane_id,
+               plane->possible_crtcs);
+-    if (drm_plane_is_overlay(dev, plane_id)) {
++    if (drm_plane_is_primary(dev, plane_id)) {
+         if (plane->possible_crtcs & (1 << pipe))
+             return plane;
+     }
+@@ -431,7 +431,7 @@ drm_get_video_plane(struct device *dev, int plane_id, int pipe)
+ 
+     DRM_DEBUG("Check plane: %d, possible_crtcs: %x\n", plane_id,
+               plane->possible_crtcs);
+-    if (drm_plane_is_primary(dev, plane_id)) {
++    if (drm_plane_is_overlay(dev, plane_id)) {
+         if (plane->possible_crtcs & (1 << pipe))
+             return plane;
+     }
+@@ -654,7 +654,9 @@ static int drm_setup(struct device *dev)
+     drmModeConnectorPtr conn = NULL;
+     drmModeModeInfoPtr mode;
+     drmModePlanePtr plane = NULL;
++#if VIDEO_PLANE_ENABLE
+     drmModePlanePtr video_plane = NULL;
++#endif
+     drmModeCrtcPtr crtc = NULL;
+     //int ret;
+     int i, success = 0;
+@@ -692,16 +694,16 @@ static int drm_setup(struct device *dev)
+         goto err;
+     }
+     configure_plane_zpos(dev, plane->plane_id, 1);
+-    DRM_DEBUG("Best plane: %d\n", plane->plane_id);
+-
++    printf("Best plane: %d\n", plane->plane_id);
++#if VIDEO_PLANE_ENABLE
+     video_plane = drm_find_video_plane(dev, crtc);
+     if (!video_plane) {
+         fprintf(stderr, "drm find video plane failed\n");
+         goto err;
+     }
+     configure_plane_zpos(dev, video_plane->plane_id, 0);
+-    DRM_DEBUG("video plane: %d\n", video_plane->plane_id);
+-
++    printf("video plane: %d\n", video_plane->plane_id);
++#endif
+     for (i = 0; i < NUM_DUMB_BO; i++) {
+         dev->dumb_bo[i] = bo_create(dev, mode->hdisplay, mode->vdisplay, DRM_FORMAT_ARGB8888);
+         if (!dev->dumb_bo[i]) {
+@@ -710,6 +712,7 @@ static int drm_setup(struct device *dev)
+         }
+         DRM_DEBUG("Created dumb bo fb: %d\n", dev->dumb_bo[i]->fb_id);
+     }
++#if VIDEO_PLANE_ENABLE
+     for (i = 0; i < NUM_DUMB_BO; i++) {
+         dev->video_bo[i] = bo_create(dev, mode->hdisplay, mode->vdisplay, DRM_FORMAT_ARGB8888/*DRM_FORMAT_NV12*/);
+         if (!dev->video_bo[i]) {
+@@ -718,7 +721,7 @@ static int drm_setup(struct device *dev)
+         }
+         DRM_DEBUG("Created video bo fb: %d\n", dev->video_bo[i]->fb_id);
+     }
+-
++#endif
+     dev->current_dumb = 0;
+     dev->current_video = 0;
+ #if 0
+@@ -733,8 +736,9 @@ static int drm_setup(struct device *dev)
+     dev->connector_id = conn->connector_id;
+     dev->crtc_id = crtc->crtc_id;
+     dev->plane_id = plane->plane_id;
++#if VIDEO_PLANE_ENABLE
+     dev->video_plane_id = video_plane->plane_id;
+-
++#endif
+     dev->last_fb_id = 0;
+     dev->mode.hdisplay = mode->hdisplay;
+     dev->mode.vdisplay = mode->vdisplay;
+@@ -746,7 +750,9 @@ static int drm_setup(struct device *dev)
+ err:
+     drmModeFreeConnector(conn);
+     drmModeFreePlane(plane);
++#if VIDEO_PLANE_ENABLE
+     drmModeFreePlane(video_plane);
++#endif
+     drmModeFreeCrtc(crtc);
+     if (!success) {
+         drm_free(dev);
+-- 
+2.25.1
+
