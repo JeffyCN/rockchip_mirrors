@@ -1,7 +1,7 @@
-From 22395e7f96b7977ea8d95dc6cc201ef93553d7e9 Mon Sep 17 00:00:00 2001
+From bbfa547dfdc8158fcf32631ac220f2629e00657a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 28/70] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 28/75] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -359,10 +359,10 @@ index 4b5ba42b8..a3c55bd34 100644
  
  			drm_debug(b, "\t\t[atomic] disabling inactive head %s\n",
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index ff5b391c4..3c7398b8a 100644
+index a37e9c31b..d2c80bd7e 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -6457,6 +6457,9 @@ weston_output_set_color_transforms(struct weston_output *output)
+@@ -6461,6 +6461,9 @@ weston_output_set_color_transforms(struct weston_output *output)
  	struct weston_color_transform *sRGB_to_blend = NULL;
  	bool ok;
  
