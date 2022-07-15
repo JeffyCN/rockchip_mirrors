@@ -1,4 +1,4 @@
-From 4d2daf3d7584ca1296aa2e1154f704fcfca7f231 Mon Sep 17 00:00:00 2001
+From 6468f84a2883b97982415ca1c4558878ce40a9b3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 Jul 2022 11:09:23 +0800
 Subject: [PATCH 75/75] gl-renderer: Support SHM XBGR8888 and ABGR8888

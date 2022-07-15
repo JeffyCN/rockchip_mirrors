@@ -1,4 +1,4 @@
-From 2ee0bfdbe1d0a7a044ef261742d08b196ebc603f Mon Sep 17 00:00:00 2001
+From 688023f5f4b4bb46b449a31f5cde1920350897cd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 16/75] backend-drm: Support controlling output dynamically
@@ -28,12 +28,12 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                |  58 +++++-
  include/libweston/libweston.h        |   7 +
  libweston/backend-drm/drm-internal.h |  16 ++
- libweston/backend-drm/drm.c          | 263 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 264 ++++++++++++++++++++++++++-
  libweston/backend-drm/modes.c        |  20 +-
  libweston/compositor.c               |  50 +++--
  libweston/pixman-renderer.c          |   3 +
  libweston/renderer-gl/gl-renderer.c  |   4 +
- 9 files changed, 396 insertions(+), 39 deletions(-)
+ 9 files changed, 397 insertions(+), 39 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 47bf54093..a4f679a04 100644
@@ -239,7 +239,7 @@ index 0bfb0a88f..b34dcde0a 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index bf61bb726..e9917269f 100644
+index bf61bb726..d0d594845 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -349,7 +349,7 @@ index bf61bb726..e9917269f 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -3471,6 +3489,235 @@ static const struct weston_drm_output_api api = {
+@@ -3471,6 +3489,236 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_seat,
  };
  
@@ -417,7 +417,8 @@ index bf61bb726..e9917269f 100644
 +	struct timespec now;
 +
 +	if (output->base.fixed_size &&
-+	    output->base.width == w && output->base.height == h)
++	    output->base.current_mode->width == w &&
++	    output->base.current_mode->height == h)
 +		return;
 +
 +	wl_list_for_each(mode, &output->base.mode_list, link) {
@@ -585,7 +586,7 @@ index bf61bb726..e9917269f 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3816,6 +4063,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3816,6 +4064,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b);
  

@@ -1,7 +1,7 @@
-From 518d272a1a00614c3fa62fa2c678ed011cd50166 Mon Sep 17 00:00:00 2001
+From d5a797277865cecf6277c8620eb4fe381a759756 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 26/70] backend-drm: Support controlling compositor dynamically
+Subject: [PATCH 26/75] backend-drm: Support controlling compositor dynamically
 
 Use config file to control compositor's state.
 
@@ -24,10 +24,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 36 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index e9917269f..5c3d5d393 100644
+index d0d594845..9e06ba5e9 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -3670,6 +3670,37 @@ config_handle_output(struct drm_backend *b, const char *name,
+@@ -3671,6 +3671,37 @@ config_handle_output(struct drm_backend *b, const char *name,
  	}
  }
  
@@ -65,7 +65,7 @@ index e9917269f..5c3d5d393 100644
  static int
  config_timer_handler(void *data)
  {
-@@ -3701,7 +3732,9 @@ config_timer_handler(void *data)
+@@ -3702,7 +3733,9 @@ config_timer_handler(void *data)
  
  	/**
  	 * Parse configs, formated with <type>:<key>:<value>
@@ -76,7 +76,7 @@ index e9917269f..5c3d5d393 100644
  	 */
  	while (3 == fscanf(conf_fp,
  			   "%" STR(MAX_CONF_LEN) "[^:]:"
-@@ -3709,6 +3742,8 @@ config_timer_handler(void *data)
+@@ -3710,6 +3743,8 @@ config_timer_handler(void *data)
  			   "%" STR(MAX_CONF_LEN) "s ", type, key, value)) {
  		if (!strcmp(type, "output"))
  			config_handle_output(b, key, value);
