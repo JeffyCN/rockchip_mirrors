@@ -48,8 +48,10 @@ export WESTON_DRM_KEEP_RATIO=1
 # export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 
 # Dynamic config file path, config examples:
-# echo "compositor:state:sleep" > /tmp/.weston_drm.conf
-# echo "compositor:state:off" > /tmp/.weston_drm.conf
+# echo "compositor:state:sleep" > /tmp/.weston_drm.conf # off + input wakeable
+# echo "compositor:state:block" > /tmp/.weston_drm.conf # no input
+# echo "compositor:state:freeze" > /tmp/.weston_drm.conf # no input + freeze
+# echo "compositor:state:off" > /tmp/.weston_drm.conf # no input + off
 # echo "compositor:state:on" > /tmp/.weston_drm.conf
 # echo "output:DSI-1:off" >> /tmp/.weston_drm.conf
 # echo "output:eDP-1:freeze" >> /tmp/.weston_drm.conf
