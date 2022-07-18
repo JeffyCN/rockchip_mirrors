@@ -1,6 +1,6 @@
 #include "tinyrootfs.config"
 #include "arm_a7.config"
-#include "gcc8.config"
+#include "gcc_arm_8_armhf.config"
 #include "camera.config"
 BR2_CCACHE=y
 BR2_TARGET_GENERIC_HOSTNAME="RV1126_RV1109"

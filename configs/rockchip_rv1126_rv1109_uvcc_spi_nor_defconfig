@@ -1,5 +1,5 @@
 #include "arm_a7.config"
-#include "gcc8.config"
+#include "gcc_arm_8_armhf.config"
 #include "audio.config"
 #include "video_mpp.config"
 #include "camera.config"
