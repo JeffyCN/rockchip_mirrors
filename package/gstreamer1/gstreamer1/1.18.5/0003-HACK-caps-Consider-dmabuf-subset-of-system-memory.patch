@@ -1,4 +1,4 @@
-From 5d82d9acea7e3041ac73975b448b48a41b4c5e13 Mon Sep 17 00:00:00 2001
+From 03b9d4f24f0b83903dd094254b4b74214d072910 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 19 Jul 2022 18:19:48 +0800
 Subject: [PATCH 3/3] HACK: caps: Consider dmabuf subset of system memory
@@ -7,14 +7,38 @@ Note, this is only true when the dmabuf is mmapable.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- gst/gstcaps.c | 15 +++++++++++++++
- 1 file changed, 15 insertions(+)
+ gst/gstcaps.c | 49 +++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 49 insertions(+)
 
 diff --git a/gst/gstcaps.c b/gst/gstcaps.c
-index 818404d..79cfe73 100644
+index 818404d..e7bbba5 100644
 --- a/gst/gstcaps.c
 +++ b/gst/gstcaps.c
-@@ -1341,6 +1341,8 @@ gst_caps_is_subset (const GstCaps * subset, const GstCaps * superset)
+@@ -124,6 +124,23 @@ typedef struct _GstCapsImpl
+ /* lock to protect multiple invocations of static caps to caps conversion */
+ G_LOCK_DEFINE_STATIC (static_caps_lock);
+ 
++#ifndef GST_CAPS_FEATURE_MEMORY_DMABUF
++#define GST_CAPS_FEATURE_MEMORY_DMABUF "memory:DMABuf"
++#endif
++
++/* HACK: dma memory would likely provide system memory through mmap */
++static gboolean
++gst_caps_features_fixup_dma (GstCapsFeatures * features)
++{
++  if (gst_caps_features_is_any (features) ||
++      !gst_caps_features_contains (features, GST_CAPS_FEATURE_MEMORY_DMABUF))
++    return FALSE;
++
++  gst_caps_features_remove (features, GST_CAPS_FEATURE_MEMORY_DMABUF);
++  gst_caps_features_add (features, GST_CAPS_FEATURE_MEMORY_SYSTEM_MEMORY);
++  return TRUE;
++}
++
+ static void gst_caps_transform_to_string (const GValue * src_value,
+     GValue * dest_value);
+ static gboolean gst_caps_from_string_inplace (GstCaps * caps,
+@@ -1341,6 +1358,8 @@ gst_caps_is_subset (const GstCaps * subset, const GstCaps * superset)
      if (!f1)
        f1 = GST_CAPS_FEATURES_MEMORY_SYSTEM_MEMORY;
  
@@ -23,26 +47,90 @@ index 818404d..79cfe73 100644
      for (j = GST_CAPS_LEN (superset) - 1; j >= 0; j--) {
        s2 = gst_caps_get_structure_unchecked (superset, j);
        f2 = gst_caps_get_features_unchecked (superset, j);
-@@ -1355,6 +1357,19 @@ gst_caps_is_subset (const GstCaps * subset, const GstCaps * superset)
+@@ -1355,6 +1374,11 @@ gst_caps_is_subset (const GstCaps * subset, const GstCaps * superset)
        }
      }
  
-+    /* HACK: dma memory would likely provide system memory through mmap */
-+#ifndef GST_CAPS_FEATURE_MEMORY_DMABUF
-+#define GST_CAPS_FEATURE_MEMORY_DMABUF "memory:DMABuf"
-+#endif
-+    if (j == -1 &&
-+        gst_caps_features_contains (f1, GST_CAPS_FEATURE_MEMORY_DMABUF)) {
-+      gst_caps_features_remove (f1, GST_CAPS_FEATURE_MEMORY_DMABUF);
-+      gst_caps_features_add (f1, GST_CAPS_FEATURE_MEMORY_SYSTEM_MEMORY);
++    if (j == -1 && gst_caps_features_fixup_dma (f1))
 +      goto retry;
-+    }
 +
 +    gst_caps_features_free (f1);
 +
      /* If we found no superset for this subset structure
       * we return FALSE immediately */
      if (j == -1) {
+@@ -1597,10 +1621,18 @@ gst_caps_can_intersect (const GstCaps * caps1, const GstCaps * caps2)
+       features2 = gst_caps_get_features_unchecked (caps2, k);
+       if (!features2)
+         features2 = GST_CAPS_FEATURES_MEMORY_SYSTEM_MEMORY;
++retry:
+       if (gst_caps_features_is_equal (features1, features2) &&
+           gst_structure_can_intersect (struct1, struct2)) {
+         return TRUE;
++      } else {
++        if (gst_caps_features_fixup_dma (features1))
++          goto retry;
++
++        if (gst_caps_features_fixup_dma (features2))
++          goto retry;
+       }
++
+       /* move down left */
+       k++;
+       if (G_UNLIKELY (j == 0))
+@@ -1660,6 +1692,7 @@ gst_caps_intersect_zig_zag (GstCaps * caps1, GstCaps * caps2)
+       features2 = gst_caps_get_features_unchecked (caps2, k);
+       if (!features2)
+         features2 = GST_CAPS_FEATURES_MEMORY_SYSTEM_MEMORY;
++retry:
+       if (gst_caps_features_is_equal (features1, features2)) {
+         istruct = gst_structure_intersect (struct1, struct2);
+         if (istruct) {
+@@ -1672,7 +1705,14 @@ gst_caps_intersect_zig_zag (GstCaps * caps1, GstCaps * caps2)
+                 gst_caps_merge_structure_full (dest, istruct,
+                 gst_caps_features_copy_conditional (features1));
+         }
++      } else {
++        if (gst_caps_features_fixup_dma (features1))
++          goto retry;
++
++        if (gst_caps_features_fixup_dma (features2))
++          goto retry;
+       }
++
+       /* move down left */
+       k++;
+       if (G_UNLIKELY (j == 0))
+@@ -1680,6 +1720,7 @@ gst_caps_intersect_zig_zag (GstCaps * caps1, GstCaps * caps2)
+       j--;
+     }
+   }
++
+   return dest;
+ }
+ 
+@@ -1721,6 +1762,8 @@ gst_caps_intersect_first (GstCaps * caps1, GstCaps * caps2)
+       features2 = gst_caps_get_features_unchecked (caps2, j);
+       if (!features2)
+         features2 = GST_CAPS_FEATURES_MEMORY_SYSTEM_MEMORY;
++
++retry:
+       if (gst_caps_features_is_equal (features1, features2)) {
+         istruct = gst_structure_intersect (struct1, struct2);
+         if (istruct) {
+@@ -1733,6 +1776,12 @@ gst_caps_intersect_first (GstCaps * caps1, GstCaps * caps2)
+                 gst_caps_merge_structure_full (dest, istruct,
+                 gst_caps_features_copy_conditional (features1));
+         }
++      } else {
++        if (gst_caps_features_fixup_dma (features1))
++          goto retry;
++
++        if (gst_caps_features_fixup_dma (features2))
++          goto retry;
+       }
+     }
+   }
 -- 
 2.20.1
 
