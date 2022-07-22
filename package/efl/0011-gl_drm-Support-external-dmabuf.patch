@@ -1,7 +1,7 @@
-From 215003c9fa9321d79de51645291f831179adef78 Mon Sep 17 00:00:00 2001
+From 75b3b3fba88f13d1bf4ffe1091af061758561000 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 11 Jul 2022 19:19:56 +0800
-Subject: [PATCH 12/12] gl_drm: Support external dmabuf
+Subject: [PATCH 11/11] gl_drm: Support external dmabuf
 
 Tested with gstreamer mppvideodec + waylandsink.
 

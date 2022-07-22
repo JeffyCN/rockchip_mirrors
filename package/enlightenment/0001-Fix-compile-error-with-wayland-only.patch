@@ -1,7 +1,7 @@
 From 963b69842897406aa238b5e5eca2aaf840a227f2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 1 Jul 2022 18:15:50 +0800
-Subject: [PATCH] Fix compile error with wayland-only
+Subject: [PATCH 01/10] Fix compile error with wayland-only
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

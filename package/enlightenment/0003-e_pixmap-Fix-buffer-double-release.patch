@@ -1,7 +1,7 @@
 From db816df122d42a3bcd771d83c4693dc5c5c461ac Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 5 Jul 2022 17:54:47 +0800
-Subject: [PATCH 3/3] e_pixmap: Fix buffer double-release
+Subject: [PATCH 03/10] e_pixmap: Fix buffer double-release
 
 Tested with weston-simple-shm.
 
