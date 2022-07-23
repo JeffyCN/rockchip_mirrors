@@ -1,4 +1,4 @@
-From 125552ae49731e4a2c0709ad9cf6e86e4e9e89be Mon Sep 17 00:00:00 2001
+From 6bf724c142f41ae9fe9de6aa1c421781e1f3f8e5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 21 Jul 2022 16:05:53 +0800
 Subject: [PATCH 07/10] HACK: wl: Support setting size in

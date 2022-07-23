@@ -1,4 +1,4 @@
-From 51776575d8d3c281d80442f808797a5cdc7ff8b5 Mon Sep 17 00:00:00 2001
+From e0c46c2b8db6ec0b377cc82a4478f1a9ce6658b3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 4 Jul 2022 11:43:03 +0800
 Subject: [PATCH 02/10] wl_wl: Force maxium screen

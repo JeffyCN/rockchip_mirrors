@@ -1,4 +1,4 @@
-From db816df122d42a3bcd771d83c4693dc5c5c461ac Mon Sep 17 00:00:00 2001
+From 755b3fa1303dc7212138a9a18ce8ca83f8f0af19 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 5 Jul 2022 17:54:47 +0800
 Subject: [PATCH 03/10] e_pixmap: Fix buffer double-release

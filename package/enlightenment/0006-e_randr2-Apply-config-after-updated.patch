@@ -1,4 +1,4 @@
-From 63fe97706b0205d9fe3385921e36b5b6526b037f Mon Sep 17 00:00:00 2001
+From 31e547e088b095ce7785a9139d0b57c2bf02ff6f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 21 Jul 2022 11:09:31 +0800
 Subject: [PATCH 06/10] e_randr2: Apply config after updated

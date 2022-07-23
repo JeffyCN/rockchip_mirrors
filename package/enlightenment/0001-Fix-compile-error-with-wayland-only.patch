@@ -1,4 +1,4 @@
-From 963b69842897406aa238b5e5eca2aaf840a227f2 Mon Sep 17 00:00:00 2001
+From cb1dec373ec8dc5627ed3fa1e74f6eefe2a232e2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 1 Jul 2022 18:15:50 +0800
 Subject: [PATCH 01/10] Fix compile error with wayland-only
@@ -6,8 +6,9 @@ Subject: [PATCH 01/10] Fix compile error with wayland-only
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  src/bin/e_includes.h                         | 2 ++
+ src/bin/tools/fprint/meson.build             | 1 -
  src/modules/conf_randr/e_int_config_randr2.c | 2 ++
- 2 files changed, 4 insertions(+)
+ 3 files changed, 4 insertions(+), 1 deletion(-)
 
 diff --git a/src/bin/e_includes.h b/src/bin/e_includes.h
 index c2b0e69a9..8d161b569 100644
@@ -23,6 +24,18 @@ index c2b0e69a9..8d161b569 100644
 +#endif
  #include "e_watchdog.h"
  #include "e_gesture.h"
+ 
+diff --git a/src/bin/tools/fprint/meson.build b/src/bin/tools/fprint/meson.build
+index 27a3b2840..405d2a16c 100644
+--- a/src/bin/tools/fprint/meson.build
++++ b/src/bin/tools/fprint/meson.build
+@@ -16,7 +16,6 @@ efl_version = '>= 1.19.0'
+ elm  = dependency('elementary', required: true,  version: efl_version)
+ edje = dependency('edje',       required: true,  version: efl_version)
+ ecore = dependency('ecore', required: true,  version: efl_version)
+-ecorex = dependency('ecore-x', required: true,  version: efl_version)
+ depe = dependency('enlightenment', required: false)
+ #curl_dep = dependency('libcurl', version : '>= 7.35.0', required: true)
  
 diff --git a/src/modules/conf_randr/e_int_config_randr2.c b/src/modules/conf_randr/e_int_config_randr2.c
 index 9f2163b41..0712c0520 100644

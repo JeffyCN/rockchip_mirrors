@@ -1,4 +1,4 @@
-From ab5af24126a976465991ec856ee3299f9361b0da Mon Sep 17 00:00:00 2001
+From 0464abb571f35d7086222b007dd5f1a2303b2f32 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 12 Jul 2022 12:29:57 +0800
 Subject: [PATCH 05/10] xdg-shell{,-v6}: Fix crash when unbind early

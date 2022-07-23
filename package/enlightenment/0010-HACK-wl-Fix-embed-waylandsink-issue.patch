@@ -1,4 +1,4 @@
-From 2607f1db8eebdec71d6208e2aca001f048d3b699 Mon Sep 17 00:00:00 2001
+From 8ff9916305e10f13c12835c573dd036bf7bac02c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 22 Jul 2022 18:30:10 +0800
 Subject: [PATCH 10/10] HACK: wl: Fix embed waylandsink issue

@@ -32,8 +32,9 @@ ifeq ($(BR2_PACKAGE_EFL_X_XLIB),)
 ENLIGHTENMENT_CONF_OPTS += -Dwl-x11=false -Dxwayland=false
 endif
 
-ifeq ($(BR2_PACKAGE_EFL_WAYLAND),y)
+ifeq ($(BR2_PACKAGE_WAYLAND),y)
 ENLIGHTENMENT_CONF_OPTS += -Dwl=true
+ENLIGHTENMENT_DEPENDENCIES += wayland wayland-protocols
 endif
 
 ifeq ($(BR2_PACKAGE_SYSTEMD),y)

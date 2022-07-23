@@ -1,4 +1,4 @@
-From be83676c0830d0cc0c8eab9e5192311f81ff787a Mon Sep 17 00:00:00 2001
+From 48830ce0a5b251ad85df1a080979999816ccf467 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 12 Jul 2022 12:29:11 +0800
 Subject: [PATCH 04/10] xdg-shell: Avoid conflict with xdg-shell-v6

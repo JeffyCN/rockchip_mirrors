@@ -1,4 +1,4 @@
-From 04a237e52d9bdc5039e16ffab792fbd434fcb8a5 Mon Sep 17 00:00:00 2001
+From 2be954ad6a3203b6ee71d69b674bdbf71caf8a29 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 22 Jul 2022 14:55:41 +0800
 Subject: [PATCH 08/10] wl: Support subsurface stacking

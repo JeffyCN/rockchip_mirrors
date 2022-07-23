@@ -1,4 +1,4 @@
-From 2166dc927d5056b3af2211e10f7fc0dda6a4af2f Mon Sep 17 00:00:00 2001
+From 3d33d31d1cba0b83f6b7fef1c98f86a9f56b38df Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 22 Jul 2022 16:34:32 +0800
 Subject: [PATCH 09/10] HACK: xdg-shell: Allow setting position only in
