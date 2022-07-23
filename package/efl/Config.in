@@ -234,6 +234,7 @@ config BR2_PACKAGE_EFL_DRM
 	depends on BR2_PACKAGE_HAS_LIBGBM
 	select BR2_PACKAGE_EFL_ELPUT
 	select BR2_PACKAGE_LIBDRM
+	default y if !BR2_PACKAGE_EFL_X_XLIB
 	help
 	  This option enable building support for the Evas DRM Engine.
 
