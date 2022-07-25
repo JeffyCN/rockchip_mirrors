@@ -1,4 +1,4 @@
-From 688023f5f4b4bb46b449a31f5cde1920350897cd Mon Sep 17 00:00:00 2001
+From 4c7413c97ff5878c10bbdac038e97b7f48a24b00 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 16/75] backend-drm: Support controlling output dynamically
@@ -811,10 +811,10 @@ index 754adce2f..d7182e7f8 100644
  		weston_matrix_multiply(&matrix, &ev->transform.inverse);
  	} else {
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index dbeb85c5d..00e0c7464 100644
+index 6e04baa7d..f853149e0 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
-@@ -1718,6 +1718,10 @@ gl_renderer_repaint_output(struct weston_output *output,
+@@ -1720,6 +1720,10 @@ gl_renderer_repaint_output(struct weston_output *output,
  
  	/* Calculate the global GL matrix */
  	go->output_matrix = output->matrix;
