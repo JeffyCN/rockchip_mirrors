@@ -1,4 +1,4 @@
-# The env variables below can be override by the init script(e.g. S50launcher)
+# The env variables below can be overridden
 
 # The kmssink has better performance but is more limited.
 # export PREFERED_VIDEOSINK=kmssink
