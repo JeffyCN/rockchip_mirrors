@@ -92,6 +92,7 @@ config BR2_PACKAGE_EFL_ELPUT
 	select BR2_PACKAGE_EFL_EEZE
 	select BR2_PACKAGE_LIBINPUT
 	select BR2_PACKAGE_LIBXKBCOMMON
+	select BR2_PACKAGE_XKEYBOARD_CONFIG
 	help
 	  Eplut is used to support gesture recognition.
 
