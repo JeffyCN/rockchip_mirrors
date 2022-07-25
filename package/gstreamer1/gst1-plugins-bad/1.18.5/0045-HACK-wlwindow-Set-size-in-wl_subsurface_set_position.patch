@@ -1,4 +1,4 @@
-From 60ade8cfd8968f7c276b7eb3686c9e865b2f7b7f Mon Sep 17 00:00:00 2001
+From 35f6bc4bf7cb5f2fa1b36fb13f6746bb269e0841 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 21 Jul 2022 12:29:27 +0800
 Subject: [PATCH 45/45] HACK: wlwindow: Set size in
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/ext/wayland/wlwindow.c b/ext/wayland/wlwindow.c
-index cedeea85..682a701e 100644
+index cedeea85..49604f89 100644
 --- a/ext/wayland/wlwindow.c
 +++ b/ext/wayland/wlwindow.c
 @@ -502,7 +502,17 @@ gst_wl_window_resize_video_surface (GstWlWindow * window, gboolean commit)
@@ -23,10 +23,10 @@ index cedeea85..682a701e 100644
 +    if (window->fill_mode == GST_WL_WINDOW_STRETCH) {
 +      res = dst;
 +    } else {
-+      if (window->fill_mode == GST_WL_WINDOW_FIT)
-+        GST_WARNING ("The compositor doesn't support fit mode (viewport)!");
++      if (window->fill_mode == GST_WL_WINDOW_CROP)
++        GST_WARNING ("The compositor doesn't support crop mode (no viewport)!");
 +
-+      gst_video_sink_center_rect (src, dst, &res, FALSE);
++      gst_video_sink_center_rect (src, dst, &res, TRUE);
 +    }
 +
 +    wl_subsurface_set_position (window->video_subsurface,
