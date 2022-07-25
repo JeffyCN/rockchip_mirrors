@@ -1,6 +1,4 @@
-# The env variables below can be override by the init script(e.g. S50launcher)
-
-export XDG_RUNTIME_DIR=/var/run
+# The env variables below can be overridden
 
 # Comment out this for atomic related functions, e.g. sprites
 export WESTON_DISABLE_ATOMIC=1
@@ -47,7 +45,10 @@ export WESTON_DRM_KEEP_RATIO=1
 # Tag file for freezing weston display
 # export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 
-# Dynamic config file path, config examples:
+# Set dynamic config file path
+# export WESTON_DRM_CONFIG=/tmp/.weston_drm.conf
+#
+# Dynamic config examples:
 # echo "compositor:state:sleep" > /tmp/.weston_drm.conf # off + input wakeable
 # echo "compositor:state:block" > /tmp/.weston_drm.conf # no input
 # echo "compositor:state:freeze" > /tmp/.weston_drm.conf # no input + freeze
@@ -63,6 +64,3 @@ export WESTON_DRM_KEEP_RATIO=1
 # echo "output:HDMI-A-1:size=1920x1080" >> /tmp/.weston_drm.conf
 # echo "output:HDMI-A-1:prefer" >> /tmp/.weston_drm.conf
 # echo "output:HDMI-A-1:primary" >> /tmp/.weston_drm.conf
-# export WESTON_DRM_CONFIG=/tmp/.weston_drm.conf
-
-export QT_QPA_PLATFORM=wayland
