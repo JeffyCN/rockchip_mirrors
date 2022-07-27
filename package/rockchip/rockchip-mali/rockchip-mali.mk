@@ -71,7 +71,7 @@ ROCKCHIP_MALI_PLATFORM = $(BR2_PACKAGE_ROCKCHIP_MALI_CUSTOM_PLATFORM)
 else
 
 # OpenCL is enabled by default for DDK newer than utgard.
-ifneq ($(findstring utgard,$(ROCKCHIP_MALI_PLATFORM)),)
+ifeq ($(findstring utgard,$(ROCKCHIP_MALI_PLATFORM)),)
 ifeq ($(BR2_PACKAGE_ROCKCHIP_MALI_HAS_OPENCL),)
 ROCKCHIP_MALI_PLATFORM += without-cl
 endif
