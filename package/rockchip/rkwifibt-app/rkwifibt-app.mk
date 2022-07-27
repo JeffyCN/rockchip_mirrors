@@ -8,10 +8,25 @@ RKWIFIBT_APP_CONF_OPTS += -DREALTEK=TRUE
 RKWIFIBT_APP_DEPENDENCIES += readline bluez5_utils libglib2
 
 ifeq ($(call qstrip,$(BR2_ARCH)), arm)
-RKWIFIBT_APP_BUILD_TYPE = arm
+SODIR = lib32
 else ifeq ($(call qstrip, $(BR2_ARCH)), aarch64)
-RKWIFIBT_APP_BUILD_TYPE = arm64
+SODIR = lib64
 endif
+
+define RKWIFIBT_APP_INSTALL_COMMON
+	$(INSTALL) -D -m 0755 $(STAGING_DIR)/usr/bin/rkwifibt* $(TARGET_DIR)/usr/bin/
+endef
+
+define RKWIFIBT_APP_INSTALL_TARGET_CMDS
+	$(RKWIFIBT_APP_INSTALL_COMMON)
+endef
+
+define RKWIFIBT_PRE_BUILD_HOOK
+	$(INSTALL) -D -m 0755 $(@D)/$(SODIR)/librkwifibt.so $(TARGET_DIR)/usr/lib/
+	$(INSTALL) -D -m 0755 $(@D)/$(SODIR)/librkwifibt.so $(STAGING_DIR)/usr/lib/
+endef
+
+RKWIFIBT_APP_PRE_BUILD_HOOKS += RKWIFIBT_PRE_BUILD_HOOK
 
 RKWIFIBT_APP_CONF_OPTS += -DCPU_ARCH=$(BR2_ARCH) -DBUILD_TYPE=$(RKWIFIBT_APP_BUILD_TYPE)
 
