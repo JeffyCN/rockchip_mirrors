@@ -1,6 +1,6 @@
 # sha1 from: http://downloads.asterisk.org/pub/telephony/dahdi-linux/releases
 # sha256 locally computed
-sha1    8cbd55b8611c6ed80bcdf84d537566b4934f3def  dahdi-linux-2.11.1.tar.gz
+sha1  8cbd55b8611c6ed80bcdf84d537566b4934f3def  dahdi-linux-2.11.1.tar.gz
 sha256  f59f382365118205e77d2874f1c0e1546e936247bcc45f07a43bc21778bee9df  dahdi-linux-2.11.1.tar.gz
 
 # Firmware files have no upstream hash, so sha56 locally computed
