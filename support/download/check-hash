@@ -35,7 +35,7 @@ gen_hash() {
     _hash=$( sha256sum "${file}" |cut -d ' ' -f 1 )
     cat << EOF > "${h_file}"
 # Locally calculated
-sha256 ${_hash}  ${base}
+sha256  ${_hash}  ${base}
 EOF
 }
 
