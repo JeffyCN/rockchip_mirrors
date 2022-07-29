@@ -1,17 +1,17 @@
-From 39d023577d29f5ea035593d94155af06857e70e4 Mon Sep 17 00:00:00 2001
+From fca8f74afe7d96c37d1649350d2fda0b7f0f9151 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 13 May 2019 17:45:21 +0800
-Subject: [PATCH] Support dynamic remove devices when not available.
+Subject: [PATCH 3/7] Support dynamic remove devices when not available.
 
 It's the same behaviour as triggerhappy.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- input-event-daemon.c | 19 ++++++++++++++-----
- 1 file changed, 14 insertions(+), 5 deletions(-)
+ input-event-daemon.c | 20 +++++++++++++++-----
+ 1 file changed, 15 insertions(+), 5 deletions(-)
 
 diff --git a/input-event-daemon.c b/input-event-daemon.c
-index a324382..5b4f45e 100644
+index 646d00d..f124250 100644
 --- a/input-event-daemon.c
 +++ b/input-event-daemon.c
 @@ -690,19 +690,23 @@ void daemon_start_listener() {
@@ -41,7 +41,7 @@ index a324382..5b4f45e 100644
      if(fd_len == 0) {
          fprintf(stderr, PROGRAM": no listener found!\n");
          return;
-@@ -749,12 +753,17 @@ void daemon_start_listener() {
+@@ -749,12 +753,18 @@ void daemon_start_listener() {
              idle_time = 0;
          }
  
@@ -57,10 +57,11 @@ index a324382..5b4f45e 100644
 +                    FD_CLR(conf.listen_fd[i], &initial_fdset);
 +                    close(conf.listen_fd[i]);
 +                    conf.listen_fd[i] = 0;
++                    fd_len --;
 +                    continue;
                  }
                  input_parse_event(&event, conf.listen[i]);
              }
 -- 
-2.11.0
+2.20.1
 
