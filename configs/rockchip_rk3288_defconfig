@@ -17,6 +17,7 @@
 #include "network.config"
 #include "bt.config"
 #include "ntfs.config"
+#include "exfat.config"
 BR2_ROOTFS_OVERLAY="board/rockchip/rk3288/fs-overlay/"
 BR2_TARGET_GENERIC_HOSTNAME="rk3288"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3288 Buildroot"

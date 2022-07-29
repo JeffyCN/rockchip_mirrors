@@ -10,6 +10,7 @@
 #include "gpu_dummy.config"
 #include "network.config"
 #include "ntfs.config"
+#include "exfat.config"
 #include "video_mpp.config"
 #include "rk356x_arm64.config"
 #include "test.config"

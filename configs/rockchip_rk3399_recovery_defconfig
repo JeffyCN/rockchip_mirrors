@@ -3,3 +3,4 @@
 #include "base_extra.config"
 #include "recovery.config"
 #include "ntfs.config"
+#include "exfat.config"
