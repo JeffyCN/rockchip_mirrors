@@ -1,6 +1,6 @@
 #include "base_nvr.config"
 #include "audio.config"
-#include "gpu_dummy.config"
+#include "gpu_nvr.config"
 #include "network_only_eth.config"
 #include "video_mpp.config"
 #include "rk356x_arm64.config"
