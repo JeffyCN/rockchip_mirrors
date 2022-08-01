@@ -86,10 +86,12 @@ endef
 
 ADBD_AUTH_PASSWORD = $(call qstrip,$(BR2_PACKAGE_ANDROID_TOOLS_AUTH_PASSWORD))
 ifneq ($(ADBD_AUTH_PASSWORD),)
+ADBD_AUTH_PASSWORD_MD5=$(shell echo $(ADBD_AUTH_PASSWORD) | md5sum)
+
 define ANDROID_TOOLS_INSTALL_AUTH
 	$(INSTALL) -D -m 0755 $(ANDROID_TOOLS_PKGDIR)/adb_auth.sh \
 		$(TARGET_DIR)/usr/bin/adb_auth.sh
-	sed -i "s/AUTH_PASSWORD/${ADBD_AUTH_PASSWORD}/g" \
+	sed -i "s/AUTH_PASSWORD/${ADBD_AUTH_PASSWORD_MD5}/g" \
 		$(TARGET_DIR)/usr/bin/adb_auth.sh
 endef
 endif
