@@ -3,15 +3,15 @@ VERIFIED=/tmp/.adb_auth_verified
 
 if [ -f "$VERIFIED" ]; then
     echo "success."
-    return
+    exit
 fi
 
 for i in $(seq 1 3); do
     read -p "$(hostname -s)'s password: " PASSWD
-    if [ "$PASSWD" = "AUTH_PASSWORD" ]; then
+    if [ "$(echo $PASSWD | md5sum)" = "AUTH_PASSWORD" ]; then
         echo "success."
         touch $VERIFIED
-        return
+        exit
     fi
 
     echo "password incorrect!"
