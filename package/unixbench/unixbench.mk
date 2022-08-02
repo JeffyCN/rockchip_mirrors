@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-UNIXBENCH_VERSION = master
-UNIXBENCH_SITE = https://github.com/kdlucas/byte-unixbench
+UNIXBENCH_VERSION = e477bc034137f994f2bbaba52952ca6e1de53856
+UNIXBENCH_SITE = https://github.com/kdlucas/byte-unixbench.git
 UNIXBENCH_SITE_METHOD = git
 
 UNIXBENCH_LICENSE = GPL-2.0+
