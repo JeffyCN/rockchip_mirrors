@@ -1,4 +1,4 @@
-From 66e17877664c741372a452b9b7575281f91c7f76 Mon Sep 17 00:00:00 2001
+From eb87e757e488aea841d73f640483e076a999524b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 17 Jun 2022 15:27:30 +0800
 Subject: [PATCH 5/5] Handle SD card as well
@@ -9,8 +9,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  usbmount       |  8 ++++++++
  usbmount.conf  |  5 +++--
- usbmount.rules | 13 ++++++++-----
- 3 files changed, 19 insertions(+), 7 deletions(-)
+ usbmount.rules | 15 ++++++++++-----
+ 3 files changed, 21 insertions(+), 7 deletions(-)
 
 diff --git a/usbmount b/usbmount
 index d9a1f0c..4613dac 100755
@@ -48,10 +48,10 @@ index b265940..98b77eb 100644
  # Filesystem types: removable storage devices are only mounted if they
  # contain a filesystem type which is in this list.
 diff --git a/usbmount.rules b/usbmount.rules
-index 81d657b..1e0f7eb 100644
+index 81d657b..b919f12 100644
 --- a/usbmount.rules
 +++ b/usbmount.rules
-@@ -1,7 +1,10 @@
+@@ -1,7 +1,12 @@
  # Rules for USBmount -*- conf -*-
  
 -KERNEL=="sd*", DRIVERS=="sbp2",		ACTION=="add",	RUN+="/usr/share/usbmount/usbmount add"
@@ -60,11 +60,13 @@ index 81d657b..1e0f7eb 100644
 -KERNEL=="sd*",				ACTION=="remove",	RUN+="/usr/share/usbmount/usbmount remove"
 -KERNEL=="ub*",				ACTION=="remove",	RUN+="/usr/share/usbmount/usbmount remove"
 +SUBSYSTEM!="block", GOTO="usbmount_end"
-+ACTION!="add|remove", GOTO="usbmount_end"
++ACTION=="remove", RUN+="/usr/share/usbmount/usbmount remove"
++
++ACTION!="add", GOTO="usbmount_end"
 +ENV{ID_FS_TYPE}=="", GOTO="usbmount_end"
 +
-+KERNEL=="mmcblk*", ATTRS{type}=="SD", RUN+="/usr/share/usbmount/usbmount $env{ACTION} sd"
-+ENV{ID_BUS}=="usb", RUN+="/usr/share/usbmount/usbmount $env{ACTION} usb"
++KERNEL=="mmcblk*", ATTRS{type}=="SD", RUN+="/usr/share/usbmount/usbmount add sd"
++ENV{ID_BUS}=="usb", RUN+="/usr/share/usbmount/usbmount add usb"
 +
 +LABEL="usbmount_end"
 -- 
