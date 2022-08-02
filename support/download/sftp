@@ -3,7 +3,7 @@
 # We want to catch any unexpected failure, and exit immediately
 set -e
 
-# Download helper for scp, to be called from the download wrapper script
+# Download helper for sftp, to be called from the download wrapper script
 #
 # Options:
 #   -q          Be quiet.
@@ -12,7 +12,7 @@ set -e
 #   -u URI      Download file at URI.
 #
 # Environment:
-#   SCP       : the scp command to call
+#   SFTP      : the sftp command to call
 
 quiet=
 while getopts "${BR_BACKEND_DL_GETOPTS}" OPT; do
@@ -30,18 +30,12 @@ shift $((OPTIND-1)) # Get rid of our options
 
 # Caller needs to single-quote its arguments to prevent them from
 # being expanded a second time (in case there are spaces in them)
-_scp() {
+_sftp() {
     if [ -z "${quiet}" ]; then
-        printf '%s ' ${SCP} "${@}"; printf '\n'
+        printf '%s ' ${SFTP} "${@}"; printf '\n'
     fi
-    _plain_scp "$@"
-}
-# Note: please keep command below aligned with what is printed above
-_plain_scp() {
-    eval ${SCP} "${@}"
+    # Note: please keep command below aligned with what is printed above
+    eval ${SFTP} "${@}"
 }
 
-# Remove any scheme prefix
-uri="${uri##scp://}"
-
-_scp ${quiet} "${@}" "'${uri}/${filename}'" "'${output}'"
+_sftp ${quiet} "${@}" "'${uri}/${filename}'" "'${output}'"
