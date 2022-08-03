@@ -1,3 +1,2 @@
 config BR2_PACKAGE_INIPARSER
 	bool "iniparser"
-	help

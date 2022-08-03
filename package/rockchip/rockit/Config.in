@@ -1,18 +1,19 @@
 config BR2_PACKAGE_ROCKIT
-    bool "rockit"
-    select BR2_PACKAGE_ROCKCHIP_MPP
-    help
-      rockit
+	bool "rockit"
+	select BR2_PACKAGE_ROCKCHIP_MPP
+	help
+	  rockit
 
 if BR2_PACKAGE_ROCKIT
 config BR2_PACKAGE_ROCKIT_TGI
-    bool "rockit_tgi"
-    default y
-    help
-       rockit
+	bool "rockit_tgi"
+	default y
+	help
+	  rockit
+
 config BR2_PACKAGE_ROCKIT_MPI
-    bool "rockit_mpi"
-    default n
-    help
-       rockit
+	bool "rockit_mpi"
+	default n
+	help
+	  rockit
 endif

@@ -3,7 +3,6 @@ if BR2_PACKAGE_RV1108
 # BSP packages
 config BR2_PACKAGE_RKFB
 	bool "RV1108 package rkfb"
-	help
 
 if BR2_PACKAGE_RKFB
 menu "framebuffer"
