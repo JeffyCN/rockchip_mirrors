@@ -56,6 +56,7 @@ EOF
 # ELF files should not be in these sub-directories
 HOST_EXCLUDEPATHS="/share/terminfo"
 STAGING_EXCLUDEPATHS="/usr/include /usr/share/terminfo"
+TARGET_EXCLUDEPATHS="/lib/firmware"
 
 main() {
     local rootdir
@@ -106,6 +107,11 @@ main() {
 
         target)
             rootdir="${TARGET_DIR}"
+
+            for excludepath in ${TARGET_EXCLUDEPATHS}; do
+                find_args+=( "-path" "${TARGET_DIR}""${excludepath}" "-prune" "-o" )
+            done
+
             # we don't want $ORIGIN-based rpaths but absolute paths without rootdir.
             # we also want to remove rpaths pointing to /lib or /usr/lib.
             sanitize_extra_args+=( "--no-standard-lib-dirs" )
@@ -121,14 +127,29 @@ main() {
 
     while read file ; do
         # check if it's an ELF file
-        if ${PATCHELF} --print-rpath "${file}" > /dev/null 2>&1; then
-            # make files writable if necessary
-            changed=$(chmod -c u+w "${file}")
-            # call patchelf to sanitize the rpath
-            ${PATCHELF} --make-rpath-relative "${rootdir}" ${sanitize_extra_args[@]} "${file}"
-            # restore the original permission
-            test "${changed}" != "" && chmod u-w "${file}"
+        rpath=$(${PATCHELF} --print-rpath "${file}" 2>&1)
+        if test $? -ne 0 ; then
+            continue
         fi
+
+        # make files writable if necessary
+        changed=$(chmod -c u+w "${file}")
+
+        # With per-package directory support, most RPATH of host
+        # binaries will point to per-package directories. This won't
+        # work with the --make-rpath-relative ${rootdir} invocation as
+        # the per-package host directory is not within ${rootdir}. So,
+        # we rewrite all RPATHs pointing to per-package directories so
+        # that they point to the global host directry.
+        changed_rpath=$(echo ${rpath} | sed "s@${PER_PACKAGE_DIR}/[^/]\+/host@${HOST_DIR}@")
+        if test "${rpath}" != "${changed_rpath}" ; then
+            ${PATCHELF} --set-rpath ${changed_rpath} "${file}"
+        fi
+
+        # call patchelf to sanitize the rpath
+        ${PATCHELF} --make-rpath-relative "${rootdir}" ${sanitize_extra_args[@]} "${file}"
+        # restore the original permission
+        test "${changed}" != "" && chmod u-w "${file}"
     done < <(find "${rootdir}" ${find_args[@]})
 
     # Restore patched patchelf utility
