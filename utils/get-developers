@@ -1,9 +1,8 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import getdeveloperlib
 import sys
-import os
 
 
 def parse_args():
@@ -18,13 +17,16 @@ def parse_args():
                         help='find developers in charge of these files')
     parser.add_argument('-c', dest='check', action='store_const',
                         const=True, help='list files not handled by any developer')
+    parser.add_argument('-e', dest='email', action='store_const',
+                        const=True, help='only list affected developer email addresses')
+    parser.add_argument('-v', dest='validate', action='store_const',
+                        const=True, help='validate syntax of DEVELOPERS file')
+    parser.add_argument('-d', dest='filename', action='store', default=None,
+                        help='override the default DEVELOPERS file (for debug)')
     return parser.parse_args()
 
 
 def __main__():
-    devs = getdeveloperlib.parse_developers()
-    if devs is None:
-        sys.exit(1)
     args = parse_args()
 
     # Check that only one action is given
@@ -37,6 +39,8 @@ def __main__():
         action += 1
     if args.check:
         action += 1
+    if args.validate:
+        action += 1
     if len(args.patches) != 0:
         action += 1
     if action > 1:
@@ -44,6 +48,16 @@ def __main__():
         return
     if action == 0:
         print("No action specified")
+        return
+
+    devs = getdeveloperlib.parse_developers(args.filename)
+    if devs is None:
+        sys.exit(1)
+
+    # Validation is done by parse_developers() above and we error out
+    # if the validation didn't work, so if we reach here, it means
+    # validation passed, so we can simply bail out in success.
+    if args.validate:
         return
 
     # Handle the check action
@@ -68,11 +82,9 @@ def __main__():
 
     # Handle the files action
     if args.files is not None:
-        args.files = [os.path.abspath(f) for f in args.files]
         for dev in devs:
-            for devfile in dev.files:
-                commonfiles = [f for f in args.files if f.startswith(devfile)]
-                if commonfiles:
+            for f in args.files:
+                if dev.hasfile(f):
                     print(dev.name)
                     break
 
@@ -90,12 +102,16 @@ def __main__():
                 if i in dev.infras:
                     matching_devs.add(dev.name)
 
-        result = "--to buildroot@buildroot.org"
-        for dev in matching_devs:
-            result += " --cc \"%s\"" % dev
+        if args.email:
+            for dev in matching_devs:
+                print(dev)
+        else:
+            result = "--to buildroot@buildroot.org"
+            for dev in matching_devs:
+                result += " --cc \"%s\"" % dev
 
-        if result != "":
-            print("git send-email %s" % result)
+            if result != "":
+                print("git send-email %s" % result)
 
 
 __main__()
