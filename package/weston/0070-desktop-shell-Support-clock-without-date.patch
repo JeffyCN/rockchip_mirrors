@@ -1,7 +1,7 @@
-From 417003075bfaacbd2984cc3f95ce69f9c6389d05 Mon Sep 17 00:00:00 2001
+From 6f7938949af240b24e3bddce8f4c18ff7d0f73b2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 15 Jun 2022 11:02:44 +0800
-Subject: [PATCH 71/71] desktop-shell: Support clock without date
+Subject: [PATCH 70/74] desktop-shell: Support clock without date
 
 Tested with:
 [shell]
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 50 insertions(+), 23 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index a81eb0afe..b2414be1b 100644
+index a81eb0a..b2414be 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -75,6 +75,7 @@ struct desktop {

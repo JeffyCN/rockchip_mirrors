@@ -1,7 +1,7 @@
-From d8235e9bc1be7ea206ddb1a08d9a21051fc11df8 Mon Sep 17 00:00:00 2001
+From 6d5750788b6fbe065c31a8e33977fc6a3dd94059 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 11:23:36 +0800
-Subject: [PATCH 05/64] backend-drm: Bind Nth primary plane to Nth CRTC
+Subject: [PATCH 05/74] backend-drm: Bind Nth primary plane to Nth CRTC
 
 The vop2 allows primary planes to bind with random CRTC, but we need to
 use the same pair as the driver registered.
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 17 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 42787702..e557d413 100644
+index 4278770..e557d41 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -842,10 +842,26 @@ drm_output_find_special_plane(struct drm_backend *b, struct drm_output *output,

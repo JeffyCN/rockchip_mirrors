@@ -1,7 +1,7 @@
-From 25e5bef9930b25b8b74e79235dc560d5658599ff Mon Sep 17 00:00:00 2001
+From c972ab79cad678871d2fdc9d3eb1face14770736 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 16 May 2022 15:54:21 +0800
-Subject: [PATCH 63/63] HACK: clients: Drop dmabuf-feedback
+Subject: [PATCH 63/74] HACK: clients: Drop dmabuf-feedback
 
 We don't need it.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 25 insertions(+), 25 deletions(-)
 
 diff --git a/clients/meson.build b/clients/meson.build
-index 362f7fe3..ff8374f0 100644
+index 362f7fe..ff8374f 100644
 --- a/clients/meson.build
 +++ b/clients/meson.build
 @@ -53,31 +53,31 @@ simple_clients = [

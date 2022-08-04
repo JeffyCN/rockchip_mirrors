@@ -1,7 +1,7 @@
-From a8255c2b58f22e4396124828d75ac5bd7bb163b5 Mon Sep 17 00:00:00 2001
+From 63fa4567fe3052ee7e71bd7f001fd5696616e5e9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
-Subject: [PATCH 13/75] backend-drm: Support selecting monitors
+Subject: [PATCH 13/74] backend-drm: Support selecting monitors
 
 Using these environments:
 
@@ -37,7 +37,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  7 files changed, 471 insertions(+), 57 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index e946b4a54..47bf54093 100644
+index e946b4a..47bf540 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -2067,7 +2067,7 @@ drm_head_prepare_enable(struct wet_compositor *wet,
@@ -98,10 +98,10 @@ index e946b4a54..47bf54093 100644
  		enabled = weston_head_is_enabled(head);
  		changed = weston_head_is_device_changed(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 051d0a81a..94f919a5c 100644
+index 15c148f..515c57f 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -3960,6 +3960,9 @@ shell_fade_done_for_output(struct weston_view_animation *animation, void *data)
+@@ -3988,6 +3988,9 @@ shell_fade_done_for_output(struct weston_view_animation *animation, void *data)
  	struct shell_output *shell_output = data;
  	struct desktop_shell *shell = shell_output->shell;
  
@@ -111,7 +111,7 @@ index 051d0a81a..94f919a5c 100644
  	shell_output->fade.animation = NULL;
  	switch (shell_output->fade.type) {
  	case FADE_IN:
-@@ -3993,6 +3996,7 @@ shell_fade_create_surface_for_output(struct desktop_shell *shell, struct shell_o
+@@ -4021,6 +4024,7 @@ shell_fade_create_surface_for_output(struct desktop_shell *shell, struct shell_o
  
  	weston_surface_set_size(surface, shell_output->output->width, shell_output->output->height);
  	weston_view_set_position(view, shell_output->output->x, shell_output->output->y);
@@ -119,7 +119,7 @@ index 051d0a81a..94f919a5c 100644
  	weston_surface_set_color(surface, 0.0, 0.0, 0.0, 1.0);
  	weston_layer_entry_insert(&compositor->fade_layer.view_list,
  				  &view->layer_link);
-@@ -4790,8 +4794,11 @@ shell_output_destroy(struct shell_output *shell_output)
+@@ -4841,8 +4845,11 @@ shell_output_destroy(struct shell_output *shell_output)
  	}
  
  	if (shell_output->fade.view) {
@@ -132,7 +132,7 @@ index 051d0a81a..94f919a5c 100644
  	}
  
  	if (shell_output->fade.startup_timer)
-@@ -4895,12 +4902,25 @@ handle_output_move_layer(struct desktop_shell *shell,
+@@ -4946,12 +4953,25 @@ handle_output_move_layer(struct desktop_shell *shell,
  static void
  handle_output_move(struct wl_listener *listener, void *data)
  {
@@ -160,7 +160,7 @@ index 051d0a81a..94f919a5c 100644
  
  static void
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index c6ba50819..bdecc1997 100644
+index c6ba508..bdecc19 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -261,6 +261,8 @@ struct weston_head {
@@ -173,7 +173,7 @@ index c6ba50819..bdecc1997 100644
  
  /** Content producer for heads
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 55e9414b9..8983fe5fb 100644
+index 4860088..3f42a25 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -110,6 +110,10 @@
@@ -187,7 +187,7 @@ index 55e9414b9..8983fe5fb 100644
  
  /**
   * Represents the values of an enum-type KMS property
-@@ -248,6 +252,10 @@ enum actions_needed_dmabuf_feedback {
+@@ -249,6 +253,10 @@ enum actions_needed_dmabuf_feedback {
  	ACTION_NEEDED_REMOVE_SCANOUT_TRANCHE = (1 << 1),
  };
  
@@ -198,7 +198,7 @@ index 55e9414b9..8983fe5fb 100644
  struct drm_backend {
  	struct weston_backend base;
  	struct weston_compositor *compositor;
-@@ -263,6 +271,7 @@ struct drm_backend {
+@@ -264,6 +272,7 @@ struct drm_backend {
  		int fd;
  		char *filename;
  		dev_t devnum;
@@ -206,7 +206,7 @@ index 55e9414b9..8983fe5fb 100644
  	} drm;
  	struct gbm_device *gbm;
  	struct wl_listener session_listener;
-@@ -310,6 +319,18 @@ struct drm_backend {
+@@ -311,6 +320,18 @@ struct drm_backend {
  	bool fb_modifiers;
  
  	struct weston_log_scope *debug;
@@ -225,7 +225,7 @@ index 55e9414b9..8983fe5fb 100644
  };
  
  struct drm_mode {
-@@ -573,6 +594,8 @@ struct drm_output {
+@@ -574,6 +595,8 @@ struct drm_output {
  	bool virtual;
  
  	submit_frame_cb virtual_submit_frame;
@@ -235,7 +235,7 @@ index 55e9414b9..8983fe5fb 100644
  
  static inline struct drm_head *
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index d6a858873..4e0093379 100644
+index d6a8588..4e00933 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -47,6 +47,7 @@
@@ -823,7 +823,7 @@ index d6a858873..4e0093379 100644
  
  err_udev_monitor:
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 35113d54d..4426af402 100644
+index 35113d5..4426af4 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -704,6 +704,8 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
@@ -930,7 +930,7 @@ index 35113d54d..4426af402 100644
  
  	return 0;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 491008836..33def20cc 100644
+index e184349..22a8593 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -157,6 +157,25 @@ weston_paint_node_destroy(struct weston_paint_node *pnode)
@@ -982,7 +982,7 @@ index 491008836..33def20cc 100644
  	new_output = NULL;
  	max = 0;
  	mask = 0;
-@@ -2938,12 +2973,14 @@ weston_output_repaint(struct weston_output *output, void *repaint_data)
+@@ -2942,12 +2977,14 @@ weston_output_repaint(struct weston_output *output, void *repaint_data)
  	if (output->dirty)
  		weston_output_update_matrix(output);
  
@@ -999,7 +999,7 @@ index 491008836..33def20cc 100644
  		output->repaint_status = REPAINT_AWAITING_COMPLETION;
  
  	weston_compositor_repick(ec);
-@@ -6432,6 +6469,7 @@ weston_compositor_remove_output(struct weston_output *output)
+@@ -6407,6 +6444,7 @@ weston_compositor_remove_output(struct weston_output *output)
  	 * Use view_list in case the output did not go through repaint
  	 * after a view came on it, lacking a paint node. Just to be sure.
  	 */

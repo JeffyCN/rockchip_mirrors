@@ -1,7 +1,7 @@
-From 8759ae294d207935131d9c2cecba328d2c190abf Mon Sep 17 00:00:00 2001
+From 134abc9308dc93578d981200ae0ba4e3a7b58158 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 7 May 2022 16:41:20 +0800
-Subject: [PATCH 23/75] Avoid adding views to other outputs
+Subject: [PATCH 23/74] Avoid adding views to other outputs
 
 The outputs can be overlapped now.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index d36d70a89..5bbf5cbb0 100644
+index b959424..02d1fa1 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1314,6 +1314,7 @@ weston_view_set_output(struct weston_view *view, struct weston_output *output)
@@ -22,7 +22,7 @@ index d36d70a89..5bbf5cbb0 100644
  		view->output_destroy_listener.notify =
  			notify_view_output_destroy;
  		wl_signal_add(&output->destroy_signal,
-@@ -2830,6 +2831,10 @@ view_list_add(struct weston_compositor *compositor,
+@@ -2834,6 +2835,10 @@ view_list_add(struct weston_compositor *compositor,
  	struct weston_paint_node *pnode;
  	struct weston_subsurface *sub;
  

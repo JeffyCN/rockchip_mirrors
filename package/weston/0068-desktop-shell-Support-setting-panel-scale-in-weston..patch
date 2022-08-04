@@ -1,7 +1,7 @@
-From 0e1f339e66d16172bc09e843696a0ada0831630a Mon Sep 17 00:00:00 2001
+From 33877c8f9403d33b514fc67bce3602b0e515b242 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 2 Jun 2022 19:00:40 +0800
-Subject: [PATCH 69/69] desktop-shell: Support setting panel scale in
+Subject: [PATCH 68/74] desktop-shell: Support setting panel scale in
  weston.ini
 
 Tested with:
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 26 insertions(+), 15 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index 6cf21dad7..a81eb0afe 100644
+index 6cf21da..a81eb0a 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -109,6 +109,7 @@ struct panel {

@@ -1,7 +1,7 @@
-From 9d45f8a0626da88d1af7737985cfad8c573e2b22 Mon Sep 17 00:00:00 2001
+From e9fcdbde7e8259e35d6dcc04014a271c156f67bd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 13 Aug 2021 10:10:01 +0800
-Subject: [PATCH 49/62] backend-drm: Allow pageflip error
+Subject: [PATCH 49/74] backend-drm: Allow pageflip error
 
 Allow to recover from pageflip error:
 [02:08:14.089] queueing pageflip failed: Operation not permitted
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 6 insertions(+), 2 deletions(-)
 
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 6596d9e5..47ce5c5a 100644
+index 6596d9e..47ce5c5 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1353,6 +1353,7 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)

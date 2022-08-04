@@ -1,7 +1,7 @@
-From 89b96cb471b4b0a500ce45d7b73e8dd5b64839c0 Mon Sep 17 00:00:00 2001
+From a24254471c1eb19e06b916c1a20b7216769a93cf Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 9 Oct 2020 18:00:11 +0800
-Subject: [PATCH 29/62] libweston: animation: Fix double-destroy
+Subject: [PATCH 29/74] libweston: animation: Fix double-destroy
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/animation.c b/libweston/animation.c
-index f11754cb..b228558a 100644
+index f11754c..b228558 100644
 --- a/libweston/animation.c
 +++ b/libweston/animation.c
 @@ -136,6 +136,7 @@ struct weston_view_animation {

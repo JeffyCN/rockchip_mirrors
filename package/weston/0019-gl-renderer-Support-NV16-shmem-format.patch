@@ -1,7 +1,7 @@
-From 656cfef04ca995a8215b7543c544c7b0da8d472c Mon Sep 17 00:00:00 2001
+From 3c3515391c447efa5b03c6b19aa3c559312678d5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 22 Nov 2019 12:06:35 +0800
-Subject: [PATCH 19/75] gl-renderer: Support NV16 shmem format
+Subject: [PATCH 19/74] gl-renderer: Support NV16 shmem format
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 36 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index f853149e0..3c60f8597 100644
+index f853149..3c60f85 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2154,6 +2154,25 @@ gl_renderer_attach_shm(struct weston_surface *es, struct weston_buffer *buffer,

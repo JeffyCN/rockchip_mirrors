@@ -1,7 +1,7 @@
-From 331456e7806ba8a9785b5c94225ae083f977e6f3 Mon Sep 17 00:00:00 2001
+From ed5f6a0074133ac8f5ec65d0436d97ebdb4414d3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 7 Jul 2020 17:00:40 +0800
-Subject: [PATCH 10/75] HACK: gl-renderer: Support making hole for surface
+Subject: [PATCH 10/74] HACK: gl-renderer: Support making hole for surface
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 103 insertions(+)
 
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index bfa7e36da..be2514a40 100644
+index bfa7e36..be2514a 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1551,6 +1551,9 @@ struct weston_surface {
@@ -25,7 +25,7 @@ index bfa7e36da..be2514a40 100644
  
  struct weston_subsurface {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 264953598..b586f0f82 100644
+index 2e38c1b..9579493 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -605,6 +605,7 @@ weston_surface_create(struct weston_compositor *compositor)
@@ -36,7 +36,7 @@ index 264953598..b586f0f82 100644
  
  	wl_list_init(&surface->views);
  	wl_list_init(&surface->paint_node_list);
-@@ -2337,6 +2338,7 @@ weston_surface_destroy(struct weston_surface *surface)
+@@ -2341,6 +2342,7 @@ weston_surface_destroy(struct weston_surface *surface)
  	pixman_region32_fini(&surface->damage);
  	pixman_region32_fini(&surface->opaque);
  	pixman_region32_fini(&surface->input);
@@ -44,7 +44,7 @@ index 264953598..b586f0f82 100644
  
  	wl_resource_for_each_safe(cb, next, &surface->frame_callback_list)
  		wl_resource_destroy(cb);
-@@ -3515,6 +3517,33 @@ surface_set_opaque_region(struct wl_client *client,
+@@ -3519,6 +3521,33 @@ surface_set_opaque_region(struct wl_client *client,
  
  	if (region_resource) {
  		region = wl_resource_get_user_data(region_resource);
@@ -79,7 +79,7 @@ index 264953598..b586f0f82 100644
  				     &region->region);
  	} else {
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 053fd5203..6e04baa7d 100644
+index 053fd52..6e04baa 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -1034,6 +1034,46 @@ gl_shader_config_init_for_paint_node(struct gl_shader_config *sconf,

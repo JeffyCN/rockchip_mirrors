@@ -1,7 +1,7 @@
-From 1dcc65fd78b8810ef3fadc6ba9d1a2522f1bb900 Mon Sep 17 00:00:00 2001
+From 7347bc7a3b2ee0bf8226ba2f15ae4c6a02110bdd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 28/75] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 28/74] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -16,7 +16,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  6 files changed, 216 insertions(+), 6 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 128016b33..38244041c 100644
+index 128016b..3824404 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -2337,6 +2337,9 @@ drm_heads_changed(struct wl_listener *listener, void *arg)
@@ -30,10 +30,10 @@ index 128016b33..38244041c 100644
  
  		connected = weston_head_is_connected(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 5c0760e0a..212238c1c 100644
+index aedb1e9..c57e7ef 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4769,10 +4769,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
+@@ -4820,10 +4820,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
  	shsurf = get_shell_surface(view->surface);
  	if (!shsurf)
  		return;
@@ -44,7 +44,7 @@ index 5c0760e0a..212238c1c 100644
  }
  
  void
-@@ -4904,6 +4900,9 @@ handle_output_resized(struct wl_listener *listener, void *data)
+@@ -4955,6 +4951,9 @@ handle_output_resized(struct wl_listener *listener, void *data)
  	struct weston_output *output = (struct weston_output *)data;
  	struct shell_output *sh_output = find_shell_output_from_weston_output(shell, output);
  
@@ -55,10 +55,10 @@ index 5c0760e0a..212238c1c 100644
  		shell->lock_surface->committed(shell->lock_surface, 0, 0);
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index b0fef67fe..19f1a38ad 100644
+index 9d24017..67e6dd2 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -353,6 +353,9 @@ struct drm_backend {
+@@ -354,6 +354,9 @@ struct drm_backend {
  
  	struct wl_event_source *config_timer;
  	struct stat config_stat;
@@ -69,7 +69,7 @@ index b0fef67fe..19f1a38ad 100644
  
  struct drm_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 53a3d4933..e829d7751 100644
+index 53a3d49..e829d77 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -210,8 +210,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -345,7 +345,7 @@ index 53a3d4933..e829d7751 100644
  	if (drm_backend_update_connectors(b, drm_device) < 0) {
  		weston_log("Failed to create heads for %s\n", b->drm.filename);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 4b5ba42b8..a3c55bd34 100644
+index 4b5ba42..a3c55bd 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1170,6 +1170,9 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
@@ -359,10 +359,10 @@ index 4b5ba42b8..a3c55bd34 100644
  
  			drm_debug(b, "\t\t[atomic] disabling inactive head %s\n",
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index a37e9c31b..d2c80bd7e 100644
+index 121871c..67766df 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -6461,6 +6461,9 @@ weston_output_set_color_transforms(struct weston_output *output)
+@@ -6436,6 +6436,9 @@ weston_output_set_color_transforms(struct weston_output *output)
  	struct weston_color_transform *sRGB_to_blend = NULL;
  	bool ok;
  
