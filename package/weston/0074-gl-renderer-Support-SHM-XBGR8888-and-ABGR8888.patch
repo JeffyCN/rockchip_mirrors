@@ -1,7 +1,7 @@
-From 5db2c7a3b4f836cd27a1bd628c42420b3826e22a Mon Sep 17 00:00:00 2001
+From 8d625278e89ce44042244406ffbf70857e740397 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 Jul 2022 11:09:23 +0800
-Subject: [PATCH 75/75] gl-renderer: Support SHM XBGR8888 and ABGR8888
+Subject: [PATCH 74/74] gl-renderer: Support SHM XBGR8888 and ABGR8888
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 16 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index c0863c165..7ffcfedc0 100644
+index c0863c1..7ffcfed 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2097,6 +2097,20 @@ gl_renderer_attach_shm(struct weston_surface *es, struct weston_buffer *buffer,

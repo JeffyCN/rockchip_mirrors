@@ -1,7 +1,7 @@
-From ea172f340298e71c070821e42a487117a103c447 Mon Sep 17 00:00:00 2001
+From 7485b2c553b66973b441df44bf91ac195b736aba Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Feb 2019 17:06:58 +0800
-Subject: [PATCH 07/53] HACK: xdg-shell: Support setting window position
+Subject: [PATCH 07/74] HACK: xdg-shell: Support setting window position
 
 Set window position when .set_window_geometry() called with size 0x0.
 
@@ -16,10 +16,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  6 files changed, 33 insertions(+)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 4ca7897..2ded336 100644
+index 63e1431..3c71192 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4192,6 +4192,12 @@ weston_view_set_initial_position(struct weston_view *view,
+@@ -4243,6 +4243,12 @@ weston_view_set_initial_position(struct weston_view *view,
  	struct weston_seat *seat;
  	pixman_rectangle32_t area;
  
@@ -81,7 +81,7 @@ index 433f08a..21ff080 100644
  weston_desktop_surface_set_title(struct weston_desktop_surface *surface,
  				 const char *title)
 diff --git a/libweston-desktop/xdg-shell.c b/libweston-desktop/xdg-shell.c
-index ff76c39..5782810 100644
+index 6cbf55e..a0161f6 100644
 --- a/libweston-desktop/xdg-shell.c
 +++ b/libweston-desktop/xdg-shell.c
 @@ -1266,6 +1266,16 @@ weston_desktop_xdg_surface_protocol_set_window_geometry(struct wl_client *wl_cli
@@ -102,7 +102,7 @@ index ff76c39..5782810 100644
  		return;
  
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index bbc2483..2986683 100644
+index bfb4c0f..70d7127 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1792,6 +1792,8 @@ weston_surface_damage(struct weston_surface *surface)

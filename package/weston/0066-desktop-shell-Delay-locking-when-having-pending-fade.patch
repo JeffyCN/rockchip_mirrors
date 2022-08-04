@@ -1,7 +1,7 @@
-From 8a30e7617e82e9f9318e1072fbc9ed4db9770b23 Mon Sep 17 00:00:00 2001
+From 10645cfbd525058545ca9121e9ec73aecd4f307a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 1 Jun 2022 11:28:24 +0800
-Subject: [PATCH 67/70] desktop-shell: Delay locking when having pending
+Subject: [PATCH 66/74] desktop-shell: Delay locking when having pending
  fade-out animations
 
 Avoid "unexpectedly large timestamp jump" warning when resuming with
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 1970bf0b5..e3a774f94 100644
+index 748df7d..1fc2f3b 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -3994,18 +3994,24 @@ shell_fade_done_for_output(struct weston_view_animation *animation, void *data)
+@@ -4018,18 +4018,24 @@ shell_fade_done_for_output(struct weston_view_animation *animation, void *data)
  {
  	struct shell_output *shell_output = data;
  	struct desktop_shell *shell = shell_output->shell;
@@ -43,7 +43,7 @@ index 1970bf0b5..e3a774f94 100644
  		break;
  	default:
  		break;
-@@ -4084,6 +4090,9 @@ shell_fade(struct desktop_shell *shell, enum fade_type type)
+@@ -4131,6 +4137,9 @@ shell_fade(struct desktop_shell *shell, enum fade_type type)
  		} else if (shell_output->fade.animation) {
  			weston_fade_update(shell_output->fade.animation, tint);
  		} else {
@@ -53,7 +53,7 @@ index 1970bf0b5..e3a774f94 100644
  			shell_output->fade.animation =
  				weston_fade_run(shell_output->fade.view,
  						1.0 - tint, tint, 300.0,
-@@ -4831,6 +4840,9 @@ shell_output_destroy(struct shell_output *shell_output)
+@@ -4878,6 +4887,9 @@ shell_output_destroy(struct shell_output *shell_output)
  	if (shell_output->fade.animation) {
  		weston_view_animation_destroy(shell_output->fade.animation);
  		shell_output->fade.animation = NULL;
@@ -64,7 +64,7 @@ index 1970bf0b5..e3a774f94 100644
  
  	if (shell_output->fade.view) {
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 4e8bfecf3..74dec9d46 100644
+index 4e8bfec..74dec9d 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1207,6 +1207,7 @@ struct weston_compositor {

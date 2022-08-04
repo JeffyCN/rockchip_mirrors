@@ -1,7 +1,7 @@
-From 92d8fc83b248da362df78db17e02bf9adceb8403 Mon Sep 17 00:00:00 2001
+From 4cb0cb798af7d558229036e90db4079f07e39a34 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
-Subject: [PATCH 50/75] HACK: pixman-renderer: Support passing dma fd to pixman
+Subject: [PATCH 50/74] HACK: pixman-renderer: Support passing dma fd to pixman
 
 Usage:
 pixman_image_set_destroy_function(image, NULL, (void *)(ptrdiff_t)dma_fd)
@@ -16,10 +16,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 25 insertions(+)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 46ed38b5a..627ba0a22 100644
+index 161c1ee..a2019ce 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -387,6 +387,7 @@ struct drm_fb {
+@@ -388,6 +388,7 @@ struct drm_fb {
  	uint64_t modifier;
  	int width, height;
  	int fd;
@@ -28,7 +28,7 @@ index 46ed38b5a..627ba0a22 100644
  	uint32_t plane_mask;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 4979bf5cb..d9beca003 100644
+index 4979bf5..d9beca0 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1634,6 +1634,9 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
@@ -42,7 +42,7 @@ index 4979bf5cb..d9beca003 100644
  
  	if (pixman_renderer_output_create(&output->base, &options) < 0)
 diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
-index 4474e0cc9..5506ef8b8 100644
+index af31a8a..748c641 100644
 --- a/libweston/backend-drm/fb.c
 +++ b/libweston/backend-drm/fb.c
 @@ -58,6 +58,9 @@ drm_fb_destroy_dumb(struct drm_fb *fb)
@@ -84,7 +84,7 @@ index 4474e0cc9..5506ef8b8 100644
  	drmModeRmFB(b->drm.fd, fb->fb_id);
  err_bo:
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index c6d1cbb2c..b56e9b5c0 100644
+index c6d1cbb..b56e9b5 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -821,6 +821,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
@@ -97,7 +97,7 @@ index c6d1cbb2c..b56e9b5c0 100644
  		buffer_state_handle_buffer_destroy;
  	wl_signal_add(&buffer->destroy_signal,
 diff --git a/libweston/pixman-renderer.h b/libweston/pixman-renderer.h
-index 2b81dde51..bcd248fb0 100644
+index 2b81dde..bcd248f 100644
 --- a/libweston/pixman-renderer.h
 +++ b/libweston/pixman-renderer.h
 @@ -29,6 +29,10 @@

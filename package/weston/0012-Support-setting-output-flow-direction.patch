@@ -1,7 +1,7 @@
-From e7a48439113a3d24a7e3413090de28e56f17ad54 Mon Sep 17 00:00:00 2001
+From 9706acaa44e85acbd2c5329d69fedc76ac86307f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 18:05:28 +0800
-Subject: [PATCH 12/75] Support setting output flow direction
+Subject: [PATCH 12/74] Support setting output flow direction
 
 Set env "WESTON_OUTPUT_FLOW" to change output flow direction:
 horizontal:
@@ -21,7 +21,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 75 insertions(+), 30 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index fb53069e4..56c3976f5 100644
+index fb53069..56c3976 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -134,6 +134,8 @@ struct output {
@@ -70,7 +70,7 @@ index fb53069e4..56c3976f5 100644
  		display_bind(desktop->display, id, &wl_output_interface, 2);
  	output->server_output_id = id;
 diff --git a/compositor/main.c b/compositor/main.c
-index d7eb4229c..e946b4a54 100644
+index d7eb422..e946b4a 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -3297,6 +3297,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
@@ -99,10 +99,10 @@ index d7eb4229c..e946b4a54 100644
  		weston_log_ctx_add_log_scope(log_ctx, "proto",
  					     "Wayland protocol dump for all clients.\n",
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 2ded336db..051d0a81a 100644
+index 3c71192..15c148f 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -1482,7 +1482,7 @@ constrain_position(struct weston_move_grab *move, int *cx, int *cy)
+@@ -1490,7 +1490,7 @@ constrain_position(struct weston_move_grab *move, int *cx, int *cy)
  	y = wl_fixed_to_int(pointer->y + move->dy);
  
  	if (shsurf->shell->panel_position ==
@@ -111,7 +111,7 @@ index 2ded336db..051d0a81a 100644
  		get_output_work_area(shsurf->shell, surface->output, &area);
  		geometry =
  			weston_desktop_surface_get_geometry(shsurf->desktop_surface);
-@@ -3063,6 +3063,18 @@ desktop_shell_set_panel(struct wl_client *client,
+@@ -3091,6 +3091,18 @@ desktop_shell_set_panel(struct wl_client *client,
  		wl_resource_get_user_data(surface_resource);
  	struct weston_view *view, *next;
  	struct shell_output *sh_output;
@@ -130,7 +130,7 @@ index 2ded336db..051d0a81a 100644
  
  	if (surface->committed) {
  		wl_resource_post_error(surface_resource,
-@@ -3078,10 +3090,9 @@ desktop_shell_set_panel(struct wl_client *client,
+@@ -3106,10 +3118,9 @@ desktop_shell_set_panel(struct wl_client *client,
  	surface->committed = panel_committed;
  	surface->committed_private = shell;
  	weston_surface_set_label_func(surface, panel_get_label);
@@ -143,7 +143,7 @@ index 2ded336db..051d0a81a 100644
  		/* The output already has a panel, tell our helper
  		 * there is no need for another one. */
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index be2514a40..c6ba50819 100644
+index be2514a..c6ba508 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1057,6 +1057,12 @@ struct weston_color_manager;
@@ -179,7 +179,7 @@ index be2514a40..c6ba50819 100644
  }
  #endif
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 7652f9d16..491008836 100644
+index f36ec9b..e184349 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -255,10 +255,6 @@ weston_mode_switch_finish(struct weston_output *output,
@@ -217,7 +217,7 @@ index 7652f9d16..491008836 100644
  
  		wl_signal_emit(&output->compositor->output_resized_signal, output);
  	}
-@@ -6069,27 +6063,26 @@ weston_head_get_destroy_listener(struct weston_head *head,
+@@ -6044,27 +6038,26 @@ weston_head_get_destroy_listener(struct weston_head *head,
  	return wl_signal_get(&head->destroy_signal, notify);
  }
  
@@ -259,7 +259,7 @@ index 7652f9d16..491008836 100644
  	}
  }
  
-@@ -6199,6 +6192,8 @@ weston_output_transform_scale_init(struct weston_output *output, uint32_t transf
+@@ -6174,6 +6167,8 @@ weston_output_transform_scale_init(struct weston_output *output, uint32_t transf
  static void
  weston_output_init_geometry(struct weston_output *output, int x, int y)
  {
@@ -268,7 +268,7 @@ index 7652f9d16..491008836 100644
  	output->x = x;
  	output->y = y;
  
-@@ -6226,8 +6221,6 @@ weston_output_move(struct weston_output *output, int x, int y)
+@@ -6201,8 +6196,6 @@ weston_output_move(struct weston_output *output, int x, int y)
  
  	weston_output_init_geometry(output, x, y);
  
@@ -277,7 +277,7 @@ index 7652f9d16..491008836 100644
  	/* Move views on this output. */
  	wl_signal_emit(&output->compositor->output_moved_signal, output);
  
-@@ -6448,7 +6441,7 @@ weston_compositor_remove_output(struct weston_output *output)
+@@ -6423,7 +6416,7 @@ weston_compositor_remove_output(struct weston_output *output)
  
  	weston_presentation_feedback_discard_list(&output->feedback_list);
  
@@ -286,7 +286,7 @@ index 7652f9d16..491008836 100644
  
  	wl_list_remove(&output->link);
  	wl_list_insert(compositor->pending_output_list.prev, &output->link);
-@@ -6522,7 +6515,7 @@ weston_output_set_transform(struct weston_output *output,
+@@ -6497,7 +6490,7 @@ weston_output_set_transform(struct weston_output *output,
  
  	weston_output_init_geometry(output, output->x, output->y);
  
@@ -295,7 +295,7 @@ index 7652f9d16..491008836 100644
  
  	/* Notify clients of the change for output transform. */
  	wl_list_for_each(head, &output->head_list, output_link) {
-@@ -6790,7 +6783,6 @@ weston_output_enable(struct weston_output *output)
+@@ -6765,7 +6758,6 @@ weston_output_enable(struct weston_output *output)
  
  	output->x = x;
  	output->y = y;

@@ -1,7 +1,7 @@
-From c5ed58a7632adb7d58cc539c14ba5383de2f9122 Mon Sep 17 00:00:00 2001
+From 75ef810f8867c703ad2cdd6409e091c748ad1436 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 4 Aug 2020 14:30:33 +0800
-Subject: [PATCH 25/62] Support setting touch calibration through environment
+Subject: [PATCH 25/74] Support setting touch calibration through environment
 
 For example:
 1/ Use weston-calibrator tool to get calibration data
@@ -19,7 +19,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 30 insertions(+), 4 deletions(-)
 
 diff --git a/clients/calibrator.c b/clients/calibrator.c
-index be65d9bd..20fc1e79 100644
+index be65d9b..20fc1e7 100644
 --- a/clients/calibrator.c
 +++ b/clients/calibrator.c
 @@ -106,6 +106,7 @@ finish_calibration (struct calibrator *calibrator)
@@ -46,7 +46,7 @@ index be65d9bd..20fc1e79 100644
  }
  
 diff --git a/clients/touch-calibrator.c b/clients/touch-calibrator.c
-index 49dd9206..04a966b2 100644
+index 49dd920..04a966b 100644
 --- a/clients/touch-calibrator.c
 +++ b/clients/touch-calibrator.c
 @@ -772,15 +772,19 @@ touch_device_handler(void *data, struct weston_touch_calibration *c,
@@ -74,7 +74,7 @@ index 49dd9206..04a966b2 100644
  
  struct weston_touch_calibration_listener touch_calibration_listener = {
 diff --git a/libweston/libinput-device.c b/libweston/libinput-device.c
-index 4ea89de0..09bd4591 100644
+index 4ea89de..09bd459 100644
 --- a/libweston/libinput-device.c
 +++ b/libweston/libinput-device.c
 @@ -627,6 +627,19 @@ evdev_device_set_calibration(struct evdev_device *device)

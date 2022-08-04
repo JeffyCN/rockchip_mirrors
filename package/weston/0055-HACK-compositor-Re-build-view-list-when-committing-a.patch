@@ -1,7 +1,7 @@
-From baff016bed15e9f1735fd66c5d100f0e88d3e7c6 Mon Sep 17 00:00:00 2001
+From bf36d2e7f53fc1c9feefceb217f480e8d73f66c9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 22 Feb 2022 09:51:29 +0800
-Subject: [PATCH 55/75] HACK: compositor: Re-build view list when committing an
+Subject: [PATCH 55/74] HACK: compositor: Re-build view list when committing an
  unassigned surface
 
 To avoid skipping repaint for unassigned surface.
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 511d1abe3..1a8ef1297 100644
+index 9ef5669..6d8a878 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -4034,6 +4034,10 @@ weston_surface_commit(struct weston_surface *surface)
+@@ -4038,6 +4038,10 @@ weston_surface_commit(struct weston_surface *surface)
  
  	weston_surface_commit_subsurface_order(surface);
  

@@ -1,7 +1,7 @@
-From 066b69b8f726bd5a6e6a3afda224e8ad78ad2140 Mon Sep 17 00:00:00 2001
+From 246f97a1c52ecbaa2ecb61dfde17de40d959176a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 22 Mar 2021 22:54:28 +0800
-Subject: [PATCH 40/62] desktop-shell: Use real size for non-image background
+Subject: [PATCH 40/74] desktop-shell: Use real size for non-image background
 
 Currently we are faking 1x1 size for non-image background, which would
 causing incorrect opaque region.
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 6 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index 56c3976f..9d17e702 100644
+index 8711399..6cf21da 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -870,12 +870,6 @@ background_configure(void *data,

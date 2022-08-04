@@ -1,7 +1,7 @@
-From a65299d1cd4838514ecc5ab9724432b37c7643c5 Mon Sep 17 00:00:00 2001
+From c41ad5e822a18fa58103770f471c80d5723bb1ce Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:23:45 +0800
-Subject: [PATCH 17/60] pixman-renderer: Support yuv formats
+Subject: [PATCH 17/74] pixman-renderer: Support yuv formats
 
 Support yuy2/yv12/i420/nv12/nv16.
 
@@ -62,7 +62,7 @@ index 9064cb6..172e6cc 100644
  	{
  		DRM_FORMAT(YUV422),
 diff --git a/meson.build b/meson.build
-index f8ac557..c7f9d10 100644
+index c9c58e0..d867771 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -161,6 +161,16 @@ dep_libdrm = dependency('libdrm', version: '>= 2.4.95')
