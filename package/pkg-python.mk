@@ -20,10 +20,6 @@
 #
 ################################################################################
 
-ifeq ($$($(2)_NEEDS_HOST_PYTHON),python2)
-$$(error "$(1): python2 is no longer supported!")
-endif
-
 ifeq ($(BR2_arm)$(BR2_armeb),y)
 PKG_PYTHON_ARCH = arm
 else
