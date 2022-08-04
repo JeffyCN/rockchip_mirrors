@@ -11,7 +11,7 @@ ifeq ($(BINUTILS_VERSION),)
 ifeq ($(BR2_arc),y)
 BINUTILS_VERSION = arc-2020.09-release
 else
-BINUTILS_VERSION = 2.36.1
+BINUTILS_VERSION = 2.37
 endif
 endif # BINUTILS_VERSION
 
@@ -90,6 +90,8 @@ HOST_BINUTILS_CONF_OPTS = \
 	--with-sysroot=$(STAGING_DIR) \
 	--enable-poison-system-directories \
 	--without-debuginfod \
+	--enable-plugins \
+	--enable-lto \
 	$(BINUTILS_DISABLE_GDB_CONF_OPTS) \
 	$(BINUTILS_EXTRA_CONFIG_OPTIONS)
 
@@ -111,10 +113,10 @@ endef
 
 # If we don't want full binutils on target
 ifneq ($(BR2_PACKAGE_BINUTILS_TARGET),y)
+# libiberty is static-only, so it is only installed to staging, above.
 define BINUTILS_INSTALL_TARGET_CMDS
 	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/bfd DESTDIR=$(TARGET_DIR) install
 	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/opcodes DESTDIR=$(TARGET_DIR) install
-	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/libiberty DESTDIR=$(STAGING_DIR) install
 endef
 endif
 
@@ -126,10 +128,6 @@ BINUTILS_POST_EXTRACT_HOOKS += BINUTILS_XTENSA_OVERLAY_EXTRACT
 BINUTILS_EXTRA_DOWNLOADS += $(ARCH_XTENSA_OVERLAY_URL)
 HOST_BINUTILS_POST_EXTRACT_HOOKS += BINUTILS_XTENSA_OVERLAY_EXTRACT
 HOST_BINUTILS_EXTRA_DOWNLOADS += $(ARCH_XTENSA_OVERLAY_URL)
-endif
-
-ifeq ($(BR2_BINUTILS_ENABLE_LTO),y)
-HOST_BINUTILS_CONF_OPTS += --enable-plugins --enable-lto
 endif
 
 # Hardlinks between binaries in different directories cause a problem
