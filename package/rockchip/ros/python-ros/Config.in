@@ -8,6 +8,5 @@ source "package/rockchip/ros/python-ros/python-catkin_pkg/Config.in"
 source "package/rockchip/ros/python-ros/python-rospkg/Config.in"
 source "package/rockchip/ros/python-ros/python-em/Config.in.host"
 source "package/rockchip/ros/python-ros/python-empy/Config.in.host"
-source "package/rockchip/ros/python-ros/python-defusedxml/Config.in"
 
 endif
