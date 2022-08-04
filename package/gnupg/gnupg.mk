@@ -4,12 +4,14 @@
 #
 ################################################################################
 
-GNUPG_VERSION = 1.4.22
+GNUPG_VERSION = 1.4.23
 GNUPG_SOURCE = gnupg-$(GNUPG_VERSION).tar.bz2
 GNUPG_SITE = https://gnupg.org/ftp/gcrypt/gnupg
 GNUPG_LICENSE = GPL-3.0+
 GNUPG_LICENSE_FILES = COPYING
-GNUPG_DEPENDENCIES = zlib ncurses $(if $(BR2_PACKAGE_LIBICONV),libiconv)
+GNUPG_DEPENDENCIES = zlib $(if $(BR2_PACKAGE_LIBICONV),libiconv)
+GNUPG_CPE_ID_VENDOR = gnupg
+GNUPG_SELINUX_MODULES = gpg
 GNUPG_CONF_ENV = ac_cv_sys_symbol_underscore=no
 GNUPG_CONF_OPTS = \
 	--disable-rpath \
@@ -18,7 +20,7 @@ GNUPG_CONF_OPTS = \
 	--enable-sha256 \
 	--enable-sha512
 
-HOST_GNUPG_DEPENDENCIES = host-zlib host-ncurses
+HOST_GNUPG_DEPENDENCIES = host-zlib
 HOST_GNUPG_CONF_OPTS = \
 	--disable-rpath \
 	--enable-minimal \
@@ -78,6 +80,12 @@ define GNUPG_REMOVE_GPGSPLIT
 endef
 GNUPG_POST_INSTALL_TARGET_HOOKS += GNUPG_REMOVE_GPGSPLIT
 endif
+
+define GNUPG_FIXUP_GPG_ZIP
+	test -f $(TARGET_DIR)/usr/bin/gpg-zip && \
+		$(SED) 's%^TAR=.*%TAR=/bin/tar%' $(TARGET_DIR)/usr/bin/gpg-zip
+endef
+GNUPG_POST_INSTALL_TARGET_HOOKS += GNUPG_FIXUP_GPG_ZIP
 
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))
