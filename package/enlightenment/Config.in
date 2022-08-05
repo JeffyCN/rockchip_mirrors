@@ -18,8 +18,8 @@ config BR2_PACKAGE_ENLIGHTENMENT
 	select BR2_PACKAGE_EFL_JPEG # needed at runtime by enlightenment_start
 	select BR2_PACKAGE_EFL_SVG
 	help
-      Enlightenment is an eye-candy, compositing and stacking window
-      manager that is released under the permissive BSD License.
+	  Enlightenment is an eye-candy, compositing and stacking window
+	  manager that is released under the permissive BSD License.
 
 	  https://www.enlightenment.org/
 
