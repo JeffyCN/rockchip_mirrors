@@ -138,7 +138,6 @@ menu "Debugging, profiling and benchmark"
 	source "package/valgrind/Config.in"
 	source "package/whetstone/Config.in"
 	source "package/stressapptest/Config.in"
-	source "package/punybench/Config.in"
 	source "package/unixbench/Config.in"
 endmenu
 
