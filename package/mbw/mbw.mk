@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-MBW_VERSION = master
-MBW_SITE = https://github.com/raas/mbw
+MBW_VERSION = d2cd3d36c353fee578f752c4e65a8c1efcee002c
+MBW_SITE = https://github.com/raas/mbw.git
 MBW_SITE_METHOD = git
 MBW_LICENSE = MIT
 MBW_LICENSE_FILES = LICENSE
