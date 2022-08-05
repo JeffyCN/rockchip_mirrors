@@ -31,6 +31,14 @@ h_file="${1}"
 file="${2}"
 base="${3}"
 
+gen_hash() {
+    _hash=$( sha256sum "${file}" |cut -d ' ' -f 1 )
+    cat << EOF > "${h_file}"
+# Locally calculated
+sha256 ${_hash}  ${base}
+EOF
+}
+
 # Bail early if no hash to check
 if [ -z "${h_file}" ]; then
     exit 0
@@ -38,6 +46,7 @@ fi
 # Does the hash-file exist?
 if [ ! -f "${h_file}" ]; then
     printf "WARNING: no hash file for %s\n" "${base}" >&2
+    gen_hash
     exit 0
 fi
 
@@ -107,5 +116,6 @@ if [ ${nb_checks} -eq 0 ]; then
         ;;
     esac
     printf "ERROR: No hash found for %s\n" "${base}" >&2
-    exit 3
+    gen_hash
+    exit 0
 fi
