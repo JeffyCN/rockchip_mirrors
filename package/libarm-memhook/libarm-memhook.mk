@@ -4,8 +4,8 @@
 #
 ################################################################################
 
-LIBARM_MEMHOOK_SITE = http://github.com/JeffyCN/arm-memhook
-LIBARM_MEMHOOK_VERSION = master
+LIBARM_MEMHOOK_SITE = http://github.com/JeffyCN/arm-memhook.git
+LIBARM_MEMHOOK_VERSION = b9bb01a106fd1c588566d3a21bf5ca3440acbc60
 LIBARM_MEMHOOK_SITE_METHOD = git
 
 LIBARM_MEMHOOK_LICENSE = GPL-2.0+
