@@ -1,27 +1,44 @@
-#include "base.config"
-#include "base_extra.config"
+# Architecture
 #include "rk3399_aarch64.config"
 
-#include "debug.config"
+# Filesystem
+#include "base.config"
+#include "base_extra.config"
 
+# Audio
 #include "audio.config"
 #include "audio_gst.config"
+
+# Camera
 #include "camera.config"
 #include "camera_gst.config"
+
+# Display
+#include "weston.config"
+
+# Browser
+#include "chromium.config"
+
+# Mali
+#include "gpu.config"
+
+# NPU
+#include "npu2.config"
+
+# Video
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
 
-#include "gpu.config"
-#include "weston.config"
+# Benchmark
+#include "benchmark.config"
 
+# Debug
+#include "debug.config"
+#include "test.config"
+
+# Network
 #include "network.config"
 #include "wifi.config"
 #include "bt.config"
-
-#include "chromium.config"
-
-#include "test.config"
-#include "benchmark.config"
-
 BR2_PACKAGE_RKWIFIBT_BTUART="ttyS0"
