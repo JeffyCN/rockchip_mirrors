@@ -1,4 +1,4 @@
 #include "base.config"
 #include "base_extra.config"
 #include "recovery.config"
-#include "rk3399_arm64.config"
+#include "rk3399_aarch64.config"

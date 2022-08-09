@@ -1,6 +1,6 @@
 #include "base.config"
 #include "base_extra.config"
-#include "rk356x_arm64.config"
+#include "rk356x_aarch64.config"
 #include "npu2.config"
 
 #include "debug.config"

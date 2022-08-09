@@ -1,5 +1,5 @@
 #include "base.config"
-#include "rk3588_arm64.config"
+#include "rk3588_aarch64.config"
 #include "rk3588_tee.config"
 
 # BR2_PACKAGE_RKSCRIPT is not set
