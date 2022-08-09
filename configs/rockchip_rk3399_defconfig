@@ -22,9 +22,6 @@
 # Mali
 #include "gpu.config"
 
-# NPU
-#include "npu2.config"
-
 # Video
 #include "video_mpp.config"
 #include "video_gst.config"
