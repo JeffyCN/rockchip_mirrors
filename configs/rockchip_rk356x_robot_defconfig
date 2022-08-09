@@ -3,7 +3,7 @@
 #include "audio.config"
 #include "network.config"
 #include "video_mpp.config"
-#include "rk356x_arm64.config"
+#include "rk356x_aarch64.config"
 #include "ubifs.config"
 #include "test.config"
 #include "camera.config"

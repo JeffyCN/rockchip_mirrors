@@ -16,7 +16,7 @@
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
-#include "rk3588_arm64.config"
+#include "rk3588_aarch64.config"
 #include "test.config"
 #include "wifi.config"
 

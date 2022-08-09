@@ -17,7 +17,7 @@
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
 #include "powermanager.config"
-#include "rk356x_arm64.config"
+#include "rk356x_aarch64.config"
 #include "test.config"
 #include "wifi.config"
 BR2_PACKAGE_RKWIFIBT_AP6398S=y

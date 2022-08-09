@@ -1,4 +1,4 @@
-#include "rk356x_arm64.config"
+#include "rk356x_aarch64.config"
 #include "audio.config"
 #include "video_mpp.config"
 #include "base.config"

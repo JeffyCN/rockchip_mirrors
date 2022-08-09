@@ -12,7 +12,7 @@
 #include "ntfs.config"
 #include "exfat.config"
 #include "video_mpp.config"
-#include "rk356x_arm64.config"
+#include "rk356x_aarch64.config"
 #include "test.config"
 #include "wifi.config"
 BR2_PACKAGE_RKWIFIBT_AP6398S=y
