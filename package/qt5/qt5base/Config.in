@@ -192,6 +192,7 @@ comment "directfb backend available if directfb is enabled"
 
 config BR2_PACKAGE_QT5BASE_XCB
 	bool "X.org XCB support"
+	default y
 	depends on BR2_PACKAGE_XORG7
 	select BR2_PACKAGE_XLIB_LIBX11
 	select BR2_PACKAGE_LIBXCB
