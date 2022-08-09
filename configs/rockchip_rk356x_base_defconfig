@@ -1,0 +1,6 @@
+# Architecture
+#include "rk356x_aarch64.config"
+
+# Filesystem
+#include "base.config"
+#include "base_extra.config"

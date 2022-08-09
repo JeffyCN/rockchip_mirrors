@@ -1,0 +1,6 @@
+# Architecture
+#include "rk3399_aarch64.config"
+
+# Filesystem
+#include "base.config"
+#include "base_extra.config"
