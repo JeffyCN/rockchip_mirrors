@@ -1,4 +1,4 @@
-From 045fc2e0c6d7f6862856790d78ba76874c204401 Mon Sep 17 00:00:00 2001
+From c086a049125cd81864cee652ab98e87bbbb4deae Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 06:32:34 +0800
 Subject: [PATCH 14/17] HACK: gstreamer: Support LastFrame flush mode
@@ -56,10 +56,10 @@ index cc0681b..b0a37f8 100755
          m_renderer->stopRenderer();
  
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index 431d8cc..d4e1a18 100644
+index c54a50d..c11cb7a 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
-@@ -700,6 +700,10 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -709,6 +709,10 @@ void QGstreamerVideoOverlay::updateIsActive()
  
      bool newIsActive = (state == GST_STATE_PLAYING || (state == GST_STATE_PAUSED && showPreroll));
  
