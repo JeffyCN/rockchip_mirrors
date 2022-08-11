@@ -1,4 +1,4 @@
-From 91e1fb87ca2f4e3fd16f1330a444d14a3ce09573 Mon Sep 17 00:00:00 2001
+From 65dce9bd2fc22cef26460a834ca770982322fda9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 18 Oct 2021 16:10:11 +0800
 Subject: [PATCH 15/17] gsttools: videowidget: Reflush window handle even it's
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+), 5 deletions(-)
 
 diff --git a/src/gsttools/qgstreamervideowidget.cpp b/src/gsttools/qgstreamervideowidget.cpp
-index 931b24d..390b36b 100644
+index f082bec..878702c 100644
 --- a/src/gsttools/qgstreamervideowidget.cpp
 +++ b/src/gsttools/qgstreamervideowidget.cpp
-@@ -186,11 +186,8 @@ void QGstreamerVideoWidgetControl::onNativeVideoSizeChanged()
+@@ -187,11 +187,8 @@ void QGstreamerVideoWidgetControl::onNativeVideoSizeChanged()
  bool QGstreamerVideoWidgetControl::eventFilter(QObject *object, QEvent *e)
  {
      if (m_widget && object == m_widget) {

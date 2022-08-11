@@ -1,17 +1,17 @@
-From bbd1d65a2910b1b95d37ca0be6beb655b108f18d Mon Sep 17 00:00:00 2001
+From a9655e044dd00901013ae9b0131f4cde206546a9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Nov 2018 21:31:49 +0800
 Subject: [PATCH 03/17] gsttools: videooverlay: Support waylandsink and kmssink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- src/gsttools/qgstreamervideooverlay.cpp | 170 ++++++++++++++++++++----
+ src/gsttools/qgstreamervideooverlay.cpp | 179 ++++++++++++++++++++----
  src/gsttools/qgstreamervideooverlay_p.h |   2 +
- src/gsttools/qgstreamervideowidget.cpp  |  15 ++-
- 3 files changed, 158 insertions(+), 29 deletions(-)
+ src/gsttools/qgstreamervideowidget.cpp  |  16 ++-
+ 3 files changed, 168 insertions(+), 29 deletions(-)
 
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index d410be7..1ca82da 100644
+index d410be7..454c149 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
 @@ -39,8 +39,13 @@
@@ -39,8 +39,15 @@ index d410be7..1ca82da 100644
  #include <QtMultimedia/private/qtmultimediaglobal_p.h>
  
  QT_BEGIN_NAMESPACE
-@@ -447,27 +456,116 @@ void QGstreamerVideoOverlay::setWindowHandle(WId id)
+@@ -445,29 +454,127 @@ QSize QGstreamerVideoOverlay::nativeVideoSize() const
+ 
+ void QGstreamerVideoOverlay::setWindowHandle(WId id)
  {
++#ifndef ENABLE_WAYLAND_PLATFORM
++    if (m_windowId == id)
++        return;
++#endif
++
      m_windowId = id;
  
 -    if (isActive())
@@ -83,8 +90,8 @@ index d410be7..1ca82da 100644
 +            QGuiApplication::platformNativeInterface();
 +    wl_surface *surface = NULL;
 +    wl_compositor *compositor = NULL;
- #endif
 +    QWindow *window;
++#endif
 +    GstVideoOverlay *overlay;
 +    QPoint position;
 +
@@ -101,8 +108,8 @@ index d410be7..1ca82da 100644
 +
 +    overlay = GST_VIDEO_OVERLAY(m_videoSink);
 +
++#ifdef ENABLE_WAYLAND_PLATFORM
 +    window = (id && main_thread) ? getVideoWindow(id) : NULL;
-+
 +    if (!window) {
 +        gst_video_overlay_set_window_handle(overlay, 0);
 +        goto set_rectangle;
@@ -111,14 +118,17 @@ index d410be7..1ca82da 100644
 +    // HACK: Force updating decoration
 +    window->setFlags(window->flags());
 +
++    id = window->winId();
+ #endif
+ 
+-        // Properties need to be reset when changing the winId.
+-        m_sinkProperties->reset();
 +#ifdef ENABLE_WAYLAND_PLATFORM
 +    if (native) {
 +        surface = (wl_surface*) native->nativeResourceForWindow("surface", window);
 +        compositor = (wl_compositor*) native->nativeResourceForWindow("compositor", window);
-+    }
- 
--        // Properties need to be reset when changing the winId.
--        m_sinkProperties->reset();
+     }
++
 +    // It's wayland platform, using wl_surface as window handle.
 +    if (compositor) {
 +        if (!isActive())
@@ -152,12 +162,13 @@ index d410be7..1ca82da 100644
 +        wl_region_add(region, -1, -1, 1, 1);
 +        wl_surface_set_opaque_region(surface, region);
 +        wl_region_destroy(region);
++        wl_surface_set_opaque_region(surface, NULL);
 +
 +        goto out;
-     }
++    }
 +#endif // ENABLE_WAYLAND_PLATFORM
 +
-+    gst_video_overlay_set_window_handle(overlay, window->winId());
++    gst_video_overlay_set_window_handle(overlay, id);
 +
 +set_rectangle:
 +    if (m_rect.width() > 0 && m_rect.height() > 0)
@@ -170,7 +181,7 @@ index d410be7..1ca82da 100644
  }
  
  void QGstreamerVideoOverlay::expose()
-@@ -499,24 +597,43 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
+@@ -499,24 +606,43 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
          h = rect.height();
      }
  
@@ -226,7 +237,7 @@ index d410be7..1ca82da 100644
  #if !GST_CHECK_VERSION(1,0,0)
      if (gm && (GST_MESSAGE_TYPE(gm) == GST_MESSAGE_ELEMENT) &&
              gst_structure_has_name(gm->structure, "prepare-xwindow-id")) {
-@@ -574,6 +691,7 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -574,6 +700,7 @@ void QGstreamerVideoOverlay::updateIsActive()
      if (newIsActive != m_isActive) {
          m_isActive = newIsActive;
          emit activeChanged();
@@ -255,7 +266,7 @@ index f2ca8a2..32b3d93 100644
  
  QT_END_NAMESPACE
 diff --git a/src/gsttools/qgstreamervideowidget.cpp b/src/gsttools/qgstreamervideowidget.cpp
-index 55f9157..91a487e 100644
+index 55f9157..95bfe6e 100644
 --- a/src/gsttools/qgstreamervideowidget.cpp
 +++ b/src/gsttools/qgstreamervideowidget.cpp
 @@ -43,10 +43,11 @@
@@ -271,22 +282,23 @@ index 55f9157..91a487e 100644
  {
  public:
      QGstreamerVideoWidget(QGstreamerVideoOverlay *overlay, QWidget *parent = 0)
-@@ -85,6 +86,14 @@ public:
+@@ -85,6 +86,15 @@ public:
          painter.fillRect(rect(), palette().window());
      }
  
 +    WId videoWinId() const Q_DECL_OVERRIDE {
++#ifdef ENABLE_WAYLAND_PLATFORM
 +        QWidget *parent = parentWidget();
 +        if (parent)
 +            return parent->winId() ?: parent->internalWinId();
-+
++#endif
 +        return winId() ?: internalWinId();
 +    }
 +
  protected:
      void paintEvent(QPaintEvent *) override
      {
-@@ -131,7 +140,7 @@ void QGstreamerVideoWidgetControl::createVideoWidget()
+@@ -131,7 +141,7 @@ void QGstreamerVideoWidgetControl::createVideoWidget()
      m_widget = new QGstreamerVideoWidget(&m_videoOverlay);
  
      m_widget->installEventFilter(this);
@@ -295,7 +307,7 @@ index 55f9157..91a487e 100644
  }
  
  GstElement *QGstreamerVideoWidgetControl::videoSink()
-@@ -171,7 +180,7 @@ bool QGstreamerVideoWidgetControl::eventFilter(QObject *object, QEvent *e)
+@@ -171,7 +181,7 @@ bool QGstreamerVideoWidgetControl::eventFilter(QObject *object, QEvent *e)
  {
      if (m_widget && object == m_widget) {
          if (e->type() == QEvent::ParentChange || e->type() == QEvent::Show || e->type() == QEvent::WinIdChange) {
