@@ -1,2 +1,4 @@
 # Locally calculated after checking pgp signature
-sha256  66fb2f6c35b342148f549c276b12a3aa3fb408e27ab6360ddec513e14376150b  xterm-327.tgz
+sha256  32f888277b19e28ebc0a3112bff000607c07bed0679caa0beebb36f9cad484f5  xterm-371.tgz
+# Locally calculated
+sha256  9521ef761474cd31ea406f56a751646a7b42a9287cdc6f2f8e52ed4c4d2a73e7  COPYING
