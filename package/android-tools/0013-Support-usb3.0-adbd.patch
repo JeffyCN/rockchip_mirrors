@@ -1,12 +1,12 @@
-From 9b75e703df88db6b314acca4fd7d34919cdf2c0b Mon Sep 17 00:00:00 2001
+From 5f60736b1b6799bdf20399576b8a08700246629c Mon Sep 17 00:00:00 2001
 From: Lin Huang <hl@rock-chips.com>
 Date: Fri, 26 Apr 2019 17:33:18 +0800
-Subject: [PATCH] Support usb3.0 adbd
+Subject: [PATCH 13/19] Support usb3.0 adbd
 
 Signed-off-by: Lin Huang <hl@rock-chips.com>
 ---
- core/adbd/functionfs.h       | 12 +++++++--
- core/adbd/usb_linux_client.c | 63 +++++++++++++++++++++++++++++++++++++++-----
+ core/adbd/functionfs.h       | 12 +++++--
+ core/adbd/usb_linux_client.c | 63 ++++++++++++++++++++++++++++++++----
  2 files changed, 66 insertions(+), 9 deletions(-)
 
 diff --git a/core/adbd/functionfs.h b/core/adbd/functionfs.h
@@ -129,5 +129,5 @@ index 0e4d200..a437ad1 100644
  
  #define STR_INTERFACE_ "ADB Interface"
 -- 
-2.7.4
+2.20.1
 

@@ -1,7 +1,7 @@
-From df69f819356cce8caca734344f682f86d2e9e7a7 Mon Sep 17 00:00:00 2001
+From 7bcefc57f96ea64c0fbfdaf72de043b4d00f8a2e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 29 Apr 2020 11:48:28 +0800
-Subject: [PATCH] usb_linux_client: Compat with old kernel
+Subject: [PATCH 15/19] usb_linux_client: Compat with old kernel
 
 Port related logic from upstream(without os desc):
 git log --oneline adb/daemon/usb_ffs.cpp

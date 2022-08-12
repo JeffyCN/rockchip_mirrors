@@ -1,7 +1,7 @@
-From 9f7965caf8393b5cd609963a571bf899235bbd10 Mon Sep 17 00:00:00 2001
+From 30cea6fa396df1822988a9860b47b13dfb279161 Mon Sep 17 00:00:00 2001
 From: "vicent.chi" <vicent.chi@rock-chips.com>
 Date: Tue, 16 Jun 2020 10:06:06 +0800
-Subject: [PATCH] make adb tcp function default enbale
+Subject: [PATCH 18/19] make adb tcp function default enable
 
 Signed-off-by: vicent.chi <vicent.chi@rock-chips.com>
 ---
@@ -24,5 +24,5 @@ index c4c00d7..0004f2c 100644
          // listen on default port
          local_init(DEFAULT_ADB_LOCAL_TRANSPORT_PORT);
 -- 
-2.26.1
+2.20.1
 

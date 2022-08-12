@@ -1,7 +1,7 @@
-From 86d419c414f1850497ef6236939ab986e20ca10c Mon Sep 17 00:00:00 2001
+From 76d6b90f4b17770a5151521d69634e5766d1f7f4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 13 May 2020 11:00:40 +0800
-Subject: [PATCH] Support requiring login for adb shell
+Subject: [PATCH 16/19] Support requiring login for adb shell
 
 Run /usr/bin/adb_auth.sh for "adb shell auth" to login.
 

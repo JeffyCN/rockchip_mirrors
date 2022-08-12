@@ -1,7 +1,7 @@
-From a8430a11444914ebe6e815af5aceef5e2a6b5886 Mon Sep 17 00:00:00 2001
+From 91be3404e94e08b5a2b8afb027978332279a94b5 Mon Sep 17 00:00:00 2001
 From: Lin Huang <hl@rock-chips.com>
 Date: Thu, 16 May 2019 09:28:03 +0800
-Subject: [PATCH] package: android-tools: fix adb forward bug
+Subject: [PATCH 14/19] package: android-tools: fix adb forward bug
 
 rknn-toolkit need this patch to fix transfer bug
 
@@ -39,5 +39,5 @@ index 036ce2e..4ab600f 100644
  
              // Test with length +1 for the *initial* '\0'.
 -- 
-2.7.4
+2.20.1
 
