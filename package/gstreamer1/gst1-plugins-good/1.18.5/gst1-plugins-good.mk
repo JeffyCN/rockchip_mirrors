@@ -33,7 +33,7 @@ GST1_PLUGINS_GOOD_CONF_OPTS += \
 	-Ddv=disabled \
 	-Ddv1394=disabled
 
-GST1_PLUGINS_GOOD_DEPENDENCIES = \
+GST1_PLUGINS_GOOD_DEPENDENCIES += \
 	gstreamer1 \
 	gst1-plugins-base \
 	$(TARGET_NLS_DEPENDENCIES)
