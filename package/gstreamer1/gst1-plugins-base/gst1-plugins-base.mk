@@ -4,6 +4,10 @@
 #
 ################################################################################
 
+ifeq ($(BR2_PACKAGE_LIBDRM),y)
+GST1_PLUGINS_BASE_DEPENDENCIES += libdrm
+endif
+
 ifeq ($(BR2_PACKAGE_ROCKCHIP_RGA),y)
 GST1_PLUGINS_BASE_DEPENDENCIES += rockchip-rga
 endif

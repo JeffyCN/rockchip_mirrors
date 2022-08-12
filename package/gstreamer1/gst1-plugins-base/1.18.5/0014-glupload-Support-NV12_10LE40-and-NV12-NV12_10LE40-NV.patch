@@ -1,7 +1,7 @@
-From bd5be40f06359857a82c1ebdef473b9c8ce3ae0f Mon Sep 17 00:00:00 2001
+From ada215bff757b0f970f6a0ced10383c1a27442b7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 24 May 2022 16:16:33 +0800
-Subject: [PATCH 14/14] glupload: Support NV12_10LE40 and NV12|NV12_10LE40|NV16
+Subject: [PATCH 14/15] glupload: Support NV12_10LE40 and NV12|NV12_10LE40|NV16
  (AFBC)
 
 Tested on RK356x with:
@@ -14,7 +14,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  gst-libs/gst/gl/egl/gsteglimage.h | 44 +++++++++++++++++++++++++++
  gst-libs/gst/gl/gstglmemory.h     |  2 +-
  gst-libs/gst/gl/gstglupload.c     | 15 +++++++++-
- 4 files changed, 101 insertions(+), 9 deletions(-)
+ gst-libs/gst/gl/meson.build       |  5 +++-
+ 5 files changed, 105 insertions(+), 10 deletions(-)
 
 diff --git a/gst-libs/gst/gl/egl/gsteglimage.c b/gst-libs/gst/gl/egl/gsteglimage.c
 index 9bd2f0fa3..8b2b4f11e 100644
@@ -244,6 +245,29 @@ index 6462a5733..5489e4c7d 100644
    upload->priv->method = NULL;
    upload->priv->method_impl = NULL;
    upload->priv->method_i = 0;
+diff --git a/gst-libs/gst/gl/meson.build b/gst-libs/gst/gl/meson.build
+index 731ee9f5e..a7fec295a 100644
+--- a/gst-libs/gst/gl/meson.build
++++ b/gst-libs/gst/gl/meson.build
+@@ -998,6 +998,8 @@ if build_gstgl
+   # case-insensitive FS would include gst-libs/gl/egl/egl.h as EGL/egl.h.
+   common_args += '-I@0@'.format(meson.current_build_dir())
+ 
++  libdrm_dep = dependency('libdrm')
++
+   gstgl = library('gstgl-' + api_version,
+     gl_sources, gl_egl_sources, gl_x11_sources, gl_wayland_sources, gl_priv_sources, gl_enumtypes_c, gl_enumtypes_h,
+     c_args : common_args,
+@@ -1009,7 +1011,8 @@ if build_gstgl
+     darwin_versions : osxversion,
+     install : true,
+     dependencies : [gst_base_dep, video_dep, allocators_dep, gmodule_dep,
+-                    gl_lib_deps, gl_platform_deps, gl_winsys_deps, gl_misc_deps],
++                    gl_lib_deps, gl_platform_deps, gl_winsys_deps, gl_misc_deps,
++                    libdrm_dep],
+     # don't confuse EGL/egl.h with gst-libs/gl/egl/egl.h on case-insensitive file systems
+     implicit_include_directories : false)
+ 
 -- 
 2.20.1
 
