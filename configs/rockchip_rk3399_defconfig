@@ -12,6 +12,7 @@
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
+#include "ntfs.config"
 #include "benchmark.config"
 #include "debug.config"
 #include "test.config"
