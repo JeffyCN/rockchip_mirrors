@@ -16,22 +16,6 @@ config BR2_PACKAGE_GSTREAMER1
 
 if BR2_PACKAGE_GSTREAMER1
 
-choice
-	prompt "Gstreamer version"
-	default BR2_PACKAGE_GSTREAMER1_20
-
-config BR2_PACKAGE_GSTREAMER1_18
-	bool "gstreamer-1.18"
-	help
-	  This option builds gstreamer-1.18
-
-config BR2_PACKAGE_GSTREAMER1_20
-	bool "gstreamer-1.20"
-	help
-	  This option builds gstreamer-1.20
-
-endchoice
-
 config BR2_PACKAGE_GSTREAMER1_CHECK
 	bool "enable unit test libraries"
 	help
