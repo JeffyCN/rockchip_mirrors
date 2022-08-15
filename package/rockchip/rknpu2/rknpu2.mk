@@ -19,11 +19,17 @@ endif
 
 ifeq ($(BR2_PACKAGE_RK356X),y)
 NPU_PLATFORM_INFO = RK356X
+NPU_DEMO_BUILD = build-linux_RK356X.sh
 endif
 
 ifeq ($(BR2_PACKAGE_RK3588), y)
 NPU_PLATFORM_INFO = RK3588
+NPU_DEMO_BUILD = build-linux_RK3588.sh
 endif
+
+define RKNPU2_BUILD_CMDS
+	cd $(@D)/examples/rknn_common_test && ./$(NPU_DEMO_BUILD)
+endef
 
 define RKNPU2_INSTALL_STAGING_CMDS
     mkdir -p $(STAGING_DIR)/usr/include/rknn
@@ -34,6 +40,9 @@ define RKNPU2_INSTALL_TARGET_CMDS
 
     cp -r $(@D)/runtime/$(NPU_PLATFORM_INFO)/Linux/rknn_server/${NPU_PLATFORM_ARCH}/usr/bin/* ${TARGET_DIR}/usr/bin/
     cp -r $(@D)/runtime/$(NPU_PLATFORM_INFO)/Linux/librknn_api/${NPU_PLATFORM_ARCH}/* ${TARGET_DIR}/usr/lib/
+    $(INSTALL) -D -m 0755 $(@D)/examples/rknn_common_test/install/rknn_common_test_Linux/rknn_common_test ${TARGET_DIR}/usr/bin/
+    cp -r $(@D)/examples/rknn_common_test/install/rknn_common_test_Linux/lib/* ${TARGET_DIR}/usr/lib/
+    cp -r $(@D)/examples/rknn_common_test/install/rknn_common_test_Linux/model/ ${TARGET_DIR}/usr/share/
 endef
 
 $(eval $(generic-package))
