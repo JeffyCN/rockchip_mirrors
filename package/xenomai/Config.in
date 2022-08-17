@@ -4,6 +4,7 @@ config BR2_PACKAGE_XENOMAI_COBALT_ARCH_SUPPORTS
 	default y if BR2_x86_64
 	default y if BR2_powerpc
 	default y if BR2_arm && !BR2_ARM_CPU_ARMV7M && !BR2_ARM_CPU_ARMV8A
+	default y if BR2_aarch64
 
 comment "xenomai needs a glibc or uClibc toolchain w/ threads"
 	depends on BR2_USE_MMU
@@ -50,8 +51,15 @@ choice
 	  patch manually with BR2_LINUX_KERNEL_EXT_XENOMAI_ADEOS_PATCH,
 	  in the Linux Kernel -> Linux Kernel Extensions menu.
 
-config BR2_PACKAGE_XENOMAI_LATEST_VERSION
-	bool "Latest version (3.0.10)"
+config BR2_PACKAGE_XENOMAI_3_2
+	bool "3.2"
+
+config BR2_PACKAGE_XENOMAI_3_1
+	bool "3.1"
+
+config BR2_PACKAGE_XENOMAI_3_0
+	bool "3.0"
+	depends on !BR2_aarch64
 
 config BR2_PACKAGE_XENOMAI_CUSTOM_VERSION
 	bool "Custom version"
@@ -81,7 +89,9 @@ config BR2_PACKAGE_XENOMAI_REPOSITORY_VERSION
 
 config BR2_PACKAGE_XENOMAI_VERSION
 	string
-	default "3.0.10" if BR2_PACKAGE_XENOMAI_LATEST_VERSION
+	default "v3.2.2" if BR2_PACKAGE_XENOMAI_3_2
+	default "v3.1.3" if BR2_PACKAGE_XENOMAI_3_1
+	default "v3.0.13" if BR2_PACKAGE_XENOMAI_3_0
 	default BR2_PACKAGE_XENOMAI_CUSTOM_VERSION_VALUE \
 		if BR2_PACKAGE_XENOMAI_CUSTOM_VERSION
 	default "custom" if BR2_PACKAGE_XENOMAI_CUSTOM_TARBALL
