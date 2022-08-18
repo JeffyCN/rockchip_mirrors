@@ -22,6 +22,11 @@ choice
 	default BR2_PACKAGE_RK3588
 	prompt "Rockchip SoC"
 
+config BR2_PACKAGE_RK3308
+	bool "rk3308 chip"
+	help
+	  Use rockchip's rk3308 chip
+
 config BR2_PACKAGE_RK3399
 	bool "rk3399 chip"
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
