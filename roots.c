@@ -124,10 +124,10 @@ void load_volume_table() {
 			   mount_point, fs_type, option, dump, pass);
 		if (file_system[0] == '#') continue;
 		//printf("load_volume_table file_system:%s, mount_point:%s, fs_type:%s, option:%s, dump:%s, pass:%s\n", file_system, mount_point, fs_type, option, dump, pass);
-		/* HACK: Convert PARTLABEL to "by-name" symlink */
-		if (file_system == strstr(file_system, "PARTLABEL="))
+		/* HACK: Convert *LABEL to "by-name" symlink */
+		if (file_system == strstr(file_system, "LABEL="))
 			snprintf(device, sizeof(device), "/dev/block/by-name/%s",
-				 file_system + strlen("PARTLABEL="));
+				 file_system + strlen("LABEL="));
 		else
 			strcpy(device, file_system);
 
