@@ -403,7 +403,7 @@ do_part()
 	# Ignore comments
 	echo $1 |grep -q "^#" && return
 
-	DEV=$(echo $1 | sed "s#PARTLABEL=#/dev/block/by-name/#")
+	DEV=$(echo $1 | sed "s#.*LABEL=#/dev/block/by-name/#")
 	MOUNT_POINT=$2
 	FSTYPE=$3
 	OPTS=$4
