@@ -42,22 +42,6 @@ RKSCRIPT_USB_CONFIG += ums_block_auto_mount=on
 endif
 endif
 
-define RKSCRIPT_INSTALL_TARGET_CMDS
-	$(INSTALL) -m 0644 -D $(@D)/61-partition-init.rules $(TARGET_DIR)/lib/udev/rules.d/
-	$(INSTALL) -m 0644 -D $(@D)/fstab $(TARGET_DIR)/etc/
-	$(INSTALL) -m 0755 -D $(@D)/S21mountall.sh $(TARGET_DIR)/etc/init.d/
-
-	$(INSTALL) -m 0755 -D $(@D)/usbdevice $(TARGET_DIR)/usr/bin/
-	$(INSTALL) -m 0755 -D $(@D)/S50usbdevice $(TARGET_DIR)/etc/init.d/
-	$(INSTALL) -m 0644 -D $(@D)/61-usbdevice.rules $(TARGET_DIR)/lib/udev/rules.d/
-endef
-
-define RKSCRIPT_INSTALL_TARGET_USB_CONFIG
-	echo $(RKSCRIPT_USB_CONFIG) | xargs -n 1 > \
-		$(TARGET_DIR)/etc/init.d/.usb_config
-endef
-RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_USB_CONFIG
-
 ifneq ($(BR2_PACKAGE_RKSCRIPT_DEFAULT_PCM),"")
 define RKSCRIPT_INSTALL_TARGET_PCM_HOOK
 	$(SED) "s#\#PCM_ID#$(BR2_PACKAGE_RKSCRIPT_DEFAULT_PCM)#g" \
@@ -67,28 +51,44 @@ endef
 RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_PCM_HOOK
 endif
 
-ifneq ($(BR2_PACKAGE_RK356X)$(BR2_PACKAGE_RV1126_RV1109)$(BR2_PACKAGE_RK3308),)
-define RKSCRIPT_INSTALL_TARGET_IO_DOMAIN_SCRIPT
-	$(INSTALL) -m 0755 -D $(@D)/S98iodomain.sh $(TARGET_DIR)/etc/init.d/
-	$(INSTALL) -m 0755 -D $(@D)/list-iodomain.sh $(TARGET_DIR)/usr/bin/
-endef
-RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_IO_DOMAIN_SCRIPT
-endif
-
 ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
 define RKSCRIPT_INSTALL_TARGET_UDEV_RULES
-	$(INSTALL) -m 0644 -D $(RKSCRIPT_PKGDIR)/88-rockchip-camera.rules \
-		$(TARGET_DIR)/lib/udev/rules.d/88-rockchip-camera.rules
+	$(INSTALL) -m 0644 -D $(@D)/*.rules $(TARGET_DIR)/lib/udev/rules.d/
 endef
 RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_UDEV_RULES
 endif
 
-# The recovery will handle storages itself
-ifeq ($(BR2_PACKAGE_RECOVERY)|$(BR2_PACKAGE_RECOVERY_USE_UPDATEENGINE),y|)
-define RKSCRIPT_REMOVE_MOUNTALL
-       rm -f $(TARGET_DIR)/etc/init.d/S21mountall.sh
+ifneq ($(BR2_PACKAGE_RK356X)$(BR2_PACKAGE_RV1126_RV1109)$(BR2_PACKAGE_RK3308),)
+define RKSCRIPT_INSTALL_INIT_SYSV_IODOMAIN
+	$(INSTALL) -m 0755 -D $(@D)/list-iodomain.sh $(TARGET_DIR)/usr/bin/
+	$(INSTALL) -m 0755 -D $(@D)/S98iodomain.sh $(TARGET_DIR)/etc/init.d/
 endef
-RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_REMOVE_MOUNTALL
 endif
+
+# The recovery will handle storages itself
+ifneq ($(BR2_PACKAGE_RECOVERY)|$(BR2_PACKAGE_RECOVERY_USE_UPDATEENGINE),y|)
+define RKSCRIPT_INSTALL_INIT_SYSV_MOUNTALL
+	$(INSTALL) -m 0755 -D $(@D)/S21mountall.sh $(TARGET_DIR)/etc/init.d/
+endef
+endif
+
+define RKSCRIPT_INSTALL_TARGET_CMDS
+	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/init.d/
+	$(INSTALL) -m 0755 -D $(@D)/usbdevice $(TARGET_DIR)/usr/bin/
+	$(INSTALL) -m 0755 -D $(@D)/S50usbdevice $(TARGET_DIR)/etc/init.d/
+
+	echo $(RKSCRIPT_USB_CONFIG) | xargs -n 1 > \
+		$(TARGET_DIR)/etc/init.d/.usb_config
+endef
+
+define RKSCRIPT_INSTALL_INIT_SYSV
+	$(RKSCRIPT_INSTALL_INIT_SYSV_MOUNTALL)
+	$(RKSCRIPT_INSTALL_INIT_SYSV_IODOMAIN)
+endef
+
+define RKSCRIPT_INSTALL_INIT_SYSTEMD
+	$(INSTALL) -D -m 644 $(@D)/usbdevice.service \
+		$(TARGET_DIR)/usr/lib/systemd/system/
+endef
 
 $(eval $(generic-package))
