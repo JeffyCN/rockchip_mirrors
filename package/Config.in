@@ -225,6 +225,7 @@ comment "Fonts"
 	source "package/ghostscript-fonts/Config.in"
 	source "package/inconsolata/Config.in"
 	source "package/liberation/Config.in"
+	source "package/wqy-zenhei/Config.in"
 	source "package/noto/Config.in"
 	source "package/source-han-sans/Config.in"
 
