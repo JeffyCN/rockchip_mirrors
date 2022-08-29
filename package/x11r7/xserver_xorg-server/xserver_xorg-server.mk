@@ -40,6 +40,10 @@ XSERVER_XORG_SERVER_DEPENDENCIES = \
 	mcookie \
 	host-pkgconf
 
+ifeq ($(BR2_PREFER_ROCKCHIP_RGA),y)
+XSERVER_XORG_SERVER_DEPENDENCIES += rockchip-rga
+endif
+
 # We force -O2 regardless of the optimization level chosen by the
 # user, as the X.org server is known to trigger some compiler bugs at
 # -Os on several architectures.
