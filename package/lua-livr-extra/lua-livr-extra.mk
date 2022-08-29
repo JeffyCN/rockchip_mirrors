@@ -1,12 +1,12 @@
 ################################################################################
 #
-# luacrypto
+# lua-livr-extra
 #
 ################################################################################
 
-LUACRYPTO_VERSION = 0.3.2-1
-LUACRYPTO_LICENSE = MIT
-LUACRYPTO_LICENSE_FILES = $(LUACRYPTO_SUBDIR)/COPYING
-LUACRYPTO_DEPENDENCIES = openssl
+LUA_LIVR_EXTRA_VERSION = 0.1.1-1
+LUA_LIVR_EXTRA_NAME_UPSTREAM = lua-LIVR-extra
+LUA_LIVR_EXTRA_LICENSE = MIT
+LUA_LIVR_EXTRA_LICENSE_FILES = $(LUA_LIVR_EXTRA_SUBDIR)/COPYRIGHT
 
 $(eval $(luarocks-package))
