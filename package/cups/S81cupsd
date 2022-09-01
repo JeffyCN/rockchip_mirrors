@@ -1,13 +1,13 @@
 #!/bin/sh
 
-DAEMON="cups-browsed"
+DAEMON="cupsd"
 PIDFILE="/var/run/$DAEMON.pid"
 
 start() {
 	printf 'Starting %s: ' "$DAEMON"
 	# shellcheck disable=SC2086 # we need the word splitting
 	start-stop-daemon -b -m -S -q -p "$PIDFILE" -x "/usr/sbin/$DAEMON" \
-		-- -c /etc/cups/cups-browsed.conf
+		-- -C /etc/cups/cupsd.conf -s /etc/cups/cups-files
 	status=$?
 	if [ "$status" -eq 0 ]; then
 		echo "OK"
