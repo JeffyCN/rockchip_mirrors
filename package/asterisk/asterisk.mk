@@ -4,33 +4,37 @@
 #
 ################################################################################
 
-ASTERISK_VERSION = 14.7.6
+ASTERISK_VERSION = 16.25.2
 # Use the github mirror: it's an official mirror maintained by Digium, and
 # provides tarballs, which the main Asterisk git tree (behind Gerrit) does not.
 ASTERISK_SITE = $(call github,asterisk,asterisk,$(ASTERISK_VERSION))
 
 ASTERISK_SOUNDS_BASE_URL = http://downloads.asterisk.org/pub/telephony/sounds/releases
 ASTERISK_EXTRA_DOWNLOADS = \
-	$(ASTERISK_SOUNDS_BASE_URL)/asterisk-core-sounds-en-gsm-1.5.tar.gz \
+	$(ASTERISK_SOUNDS_BASE_URL)/asterisk-core-sounds-en-gsm-1.6.1.tar.gz \
 	$(ASTERISK_SOUNDS_BASE_URL)/asterisk-moh-opsound-wav-2.03.tar.gz
 
-ASTERISK_LICENSE = GPL-2.0, BSD-3c (SHA1, resample), BSD-4c (db1-ast)
+ASTERISK_LICENSE = GPL-2.0, BSD-3-Clause (SHA1, resample), BSD-4-Clause (db1-ast)
 ASTERISK_LICENSE_FILES = \
 	COPYING \
 	main/sha1.c \
 	codecs/speex/speex_resampler.h \
 	utils/db1-ast/include/db.h
 
-# For patches 0001, 0003 and 0004
+ASTERISK_CPE_ID_VENDOR = asterisk
+ASTERISK_CPE_ID_PRODUCT = open_source
+ASTERISK_SELINUX_MODULES = asterisk
+
+# For patches 0002, 0003 and 0005
 ASTERISK_AUTORECONF = YES
-ASTERISK_AUTORECONF_OPTS = -Iautoconf -Ithird-party -Ithird-party/pjproject
+ASTERISK_AUTORECONF_OPTS = -Iautoconf -Ithird-party -Ithird-party/pjproject -Ithird-party/jansson
 
 ASTERISK_DEPENDENCIES = \
 	host-asterisk \
 	jansson \
 	libcurl \
+	libedit \
 	libxml2 \
-	ncurses \
 	sqlite \
 	util-linux
 
@@ -54,7 +58,6 @@ ASTERISK_CONF_OPTS = \
 	--without-curses \
 	--without-gtk2 \
 	--without-gmime \
-	--without-h323 \
 	--without-hoard \
 	--without-iconv \
 	--without-iksemel \
@@ -67,7 +70,6 @@ ASTERISK_CONF_OPTS = \
 	--without-kqueue \
 	--without-libedit \
 	--without-libxslt \
-	--without-ltdl \
 	--without-lua \
 	--without-misdn \
 	--without-mysqlclient \
@@ -79,12 +81,11 @@ ASTERISK_CONF_OPTS = \
 	--without-oss \
 	--without-postgres \
 	--without-pjproject \
+	--without-pjproject-bundled \
 	--without-popt \
-	--without-pwlib \
 	--without-resample \
 	--without-sdl \
 	--without-SDL_image \
-	--without-spandsp \
 	--without-sqlite \
 	--without-suppserv \
 	--without-tds \
@@ -100,9 +101,9 @@ ASTERISK_CONF_OPTS = \
 	--with-libcurl \
 	--with-ilbc \
 	--with-libxml2 \
-	--with-ncurses="$(STAGING_DIR)/usr" \
+	--with-libedit="$(STAGING_DIR)/usr" \
 	--with-sqlite3="$(STAGING_DIR)/usr" \
-	--with-sounds-cache=$(BR2_DL_DIR)
+	--with-sounds-cache=$(ASTERISK_DL_DIR)
 
 # avcodec are from ffmpeg. There is virtually zero chance this could
 # even work; asterisk is looking for ffmpeg/avcodec.h which has not
@@ -110,8 +111,17 @@ ASTERISK_CONF_OPTS = \
 # the time of this writing).
 ASTERISK_CONF_OPTS += --without-avcodec
 
+# asterisk is not compatible with freeswitch spandsp
+ASTERISK_CONF_OPTS += --without-spandsp
+
 ASTERISK_CONF_ENV = \
+	ac_cv_file_bridges_bridge_softmix_include_hrirs_h=true \
 	ac_cv_path_CONFIG_LIBXML2=$(STAGING_DIR)/usr/bin/xml2-config
+
+# Uses __atomic_fetch_add_4
+ifeq ($(BR2_TOOLCHAIN_HAS_LIBATOMIC),y)
+ASTERISK_CONF_ENV += LIBS="-latomic"
+endif
 
 ifeq ($(BR2_TOOLCHAIN_USES_GLIBC),y)
 ASTERISK_CONF_OPTS += --with-execinfo
@@ -133,8 +143,8 @@ else
 ASTERISK_CONF_OPTS += --without-asound
 endif
 
-ifeq ($(BR2_PACKAGE_BLUEZ_UTILS),y)
-ASTERISK_DEPENDENCIES += bluez_utils
+ifeq ($(BR2_PACKAGE_BLUEZ5_UTILS),y)
+ASTERISK_DEPENDENCIES += bluez5_utils
 ASTERISK_CONF_OPTS += --with-bluetooth
 else
 ASTERISK_CONF_OPTS += --without-bluetooth
@@ -229,14 +239,15 @@ else
 ASTERISK_CONF_OPTS += --without-ssl
 endif
 
-ifeq ($(BR2_PACKAGE_SPEEX),y)
+ifeq ($(BR2_PACKAGE_SPEEX)$(BR2_PACKAGE_SPEEXDSP),yy)
 ASTERISK_DEPENDENCIES += speex
 ASTERISK_CONF_OPTS += --with-speex --with-speexdsp
 else
-ASTERISK_CONF_OPTS += --without-speex  --without-speexdsp
+ASTERISK_CONF_OPTS += --without-speex --without-speexdsp
 endif
 
-ifeq ($(BR2_PACKAGE_LIBSRTP),y)
+# asterisk needs an openssl-enabled libsrtp
+ifeq ($(BR2_PACKAGE_LIBSRTP)$(BR2_PACKAGE_OPENSSL),yy)
 ASTERISK_DEPENDENCIES += libsrtp
 ASTERISK_CONF_OPTS += --with-srtp
 else
@@ -265,6 +276,22 @@ ASTERISK_DIRS = \
 
 ASTERISK_MAKE_OPTS = $(ASTERISK_DIRS)
 
+# Uses __atomic_fetch_add_4
+ifeq ($(BR2_TOOLCHAIN_HAS_LIBATOMIC),y)
+ASTERISK_MAKE_OPTS += ASTLDFLAGS="-latomic"
+endif
+
+# Remove default -O3 optimization flag
+ASTERISK_MAKE_OPTS += OPTIMIZE=""
+
+ASTERISK_CFLAGS = $(TARGET_CFLAGS)
+
+ifeq ($(BR2_TOOLCHAIN_HAS_GCC_BUG_93847),y)
+ASTERISK_CFLAGS += -O0
+endif
+
+ASTERISK_CONF_OPTS += CFLAGS="$(ASTERISK_CFLAGS)"
+
 # We want to install sample configuration files, too.
 ASTERISK_INSTALL_TARGET_OPTS = \
 	$(ASTERISK_DIRS) \
@@ -292,7 +319,7 @@ HOST_ASTERISK_CONF_ENV = CONFIG_LIBXML2=$(HOST_DIR)/bin/xml2-config
 HOST_ASTERISK_CONF_OPTS = \
 	--without-newt \
 	--without-curses \
-	--with-ncurses=$(HOST_DIR)/usr
+	--with-ncurses=$(HOST_DIR)
 
 # Not an automake package, so does not inherit LDFLAGS et al. from
 # the configure run.

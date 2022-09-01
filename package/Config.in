@@ -2216,7 +2216,6 @@ menu "Miscellaneous"
 endmenu
 
 menu "Networking applications"
-	source "package/aliyun-oss-c-sdk/Config.in"
 	source "package/aircrack-ng/Config.in"
 	source "package/alfred/Config.in"
 	source "package/aoetools/Config.in"
