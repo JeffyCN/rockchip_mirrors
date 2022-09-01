@@ -4,12 +4,25 @@
 #
 ################################################################################
 
-MINETEST_VERSION = 0.4.16
+MINETEST_VERSION = 5.5.1
 MINETEST_SITE = $(call github,minetest,minetest,$(MINETEST_VERSION))
-MINETEST_LICENSE = LGPL-2.1+ (code), CC-BY-SA-3.0 (textures and sounds)
-MINETEST_LICENSE_FILES = README.txt
+MINETEST_LICENSE = LGPL-2.1+ (code), CC-BY-SA-3.0 (textures and sounds), Zlib (irrlicht)
+MINETEST_LICENSE_FILES = LICENSE.txt lib/irrlichtmt/doc/irrlicht-license.txt
 
-MINETEST_DEPENDENCIES = gmp irrlicht jsoncpp luajit sqlite zlib
+MINETEST_DEPENDENCIES = gmp jsoncpp luajit sqlite zlib zstd
+
+MINETEST_IRRLICHTMT_VERSION = 1.9.0mt5
+MINETEST_EXTRA_DOWNLOADS = $(call github,minetest,irrlicht,$(MINETEST_IRRLICHTMT_VERSION))/irrlicht-$(MINETEST_IRRLICHTMT_VERSION).tar.gz
+
+define MINETEST_IRRLICHTMT_EXTRACT
+	mkdir -p $(@D)/lib
+	$(foreach f, $(notdir $(MINETEST_EXTRA_DOWNLOADS)), \
+		$(call suitable-extractor,$(f)) $(MINETEST_DL_DIR)/$(f) | \
+			$(TAR) -C $(@D)/lib $(TAR_OPTIONS) -
+	)
+	ln -sf irrlicht-$(MINETEST_IRRLICHTMT_VERSION) $(@D)/lib/irrlichtmt
+endef
+MINETEST_POST_EXTRACT_HOOKS += MINETEST_IRRLICHTMT_EXTRACT
 
 MINETEST_CONF_OPTS = \
 	-DDEFAULT_RUN_IN_PLACE=OFF \
@@ -18,10 +31,11 @@ MINETEST_CONF_OPTS = \
 	-DENABLE_CURSES=OFF \
 	-DAPPLY_LOCALE_BLACKLIST=OFF \
 	-DENABLE_SYSTEM_GMP=ON \
-	-DENABLE_SYSTEM_JSONCPP=ON
+	-DENABLE_SYSTEM_JSONCPP=ON \
+	-DBUILD_UNITTESTS=OFF
 
 ifeq ($(BR2_PACKAGE_MINETEST_CLIENT),y)
-MINETEST_DEPENDENCIES += bzip2 jpeg libgl libpng xlib_libXxf86vm
+MINETEST_DEPENDENCIES += bzip2 freetype jpeg libgl libpng xlib_libXxf86vm
 MINETEST_CONF_OPTS += -DBUILD_CLIENT=ON
 else
 MINETEST_CONF_OPTS += -DBUILD_CLIENT=OFF
@@ -38,13 +52,6 @@ MINETEST_DEPENDENCIES += libvorbis openal
 MINETEST_CONF_OPTS += -DENABLE_SOUND=ON
 else
 MINETEST_CONF_OPTS += -DENABLE_SOUND=OFF
-endif
-
-ifeq ($(BR2_PACKAGE_FREETYPE),y)
-MINETEST_DEPENDENCIES += freetype
-MINETEST_CONF_OPTS += -DENABLE_FREETYPE=ON
-else
-MINETEST_CONF_OPTS += -DENABLE_FREETYPE=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_HIREDIS),y)

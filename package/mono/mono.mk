@@ -4,12 +4,13 @@
 #
 ################################################################################
 
-MONO_VERSION = 5.4.0.201
+MONO_VERSION = 6.12.0.122
 MONO_SITE = http://download.mono-project.com/sources/mono
-MONO_SOURCE = mono-$(MONO_VERSION).tar.bz2
+MONO_SOURCE = mono-$(MONO_VERSION).tar.xz
 MONO_LICENSE = GPL-2.0 or MIT (compiler, tools), MIT (libs) or commercial
-MONO_LICENSE_FILES = LICENSE mcs/COPYING eglib/COPYING \
+MONO_LICENSE_FILES = LICENSE mcs/COPYING \
 	external/Newtonsoft.Json/Tools/7-zip/copying.txt
+MONO_CPE_ID_VENDOR = mono-project
 MONO_INSTALL_STAGING = YES
 
 ## Mono native
@@ -17,13 +18,15 @@ MONO_INSTALL_STAGING = YES
 # patching configure.ac
 MONO_AUTORECONF = YES
 
-# Disable managed code (mcs folder) from building
-MONO_CONF_OPTS = --with-mcs-docs=no \
+MONO_COMMON_CONF_OPTS = --with-mcs-docs=no \
 	--with-ikvm-native=no \
-	--enable-minimal=profiler,debug,aot \
-	--disable-mcs-build \
+	--enable-minimal=profiler,debug \
 	--enable-static \
-	--disable-btls
+	--disable-btls \
+	--disable-system-aot
+
+# Disable managed code (mcs folder) from building
+MONO_CONF_OPTS = $(MONO_COMMON_CONF_OPTS) --disable-mcs-build
 
 # The libraries have been built by the host-mono build. Since they are
 # architecture-independent, we simply copy them to the target.
@@ -38,21 +41,19 @@ ifeq ($(BR2_PACKAGE_LIBICONV),y)
 MONO_DEPENDENCIES += libiconv
 endif
 
-MONO_DEPENDENCIES += host-mono
+MONO_DEPENDENCIES += \
+	host-mono \
+	$(if $(BR2_PACKAGE_LIBUNWIND),libunwind) \
+	libatomic_ops
 
 ## Mono managed
 
-HOST_MONO_CONF_OPTS = --with-mcs-docs=no \
-	--disable-libraries \
-	--with-ikvm-native=no \
-	--enable-minimal=profiler,debug,aot \
-	--enable-static \
-	--disable-btls
+HOST_MONO_CONF_OPTS = $(MONO_COMMON_CONF_OPTS) --disable-libraries
 
 # ensure monolite is used
 HOST_MONO_MAKE_OPTS += EXTERNAL_MCS=false
 
-HOST_MONO_DEPENDENCIES = host-monolite host-gettext
+HOST_MONO_DEPENDENCIES = host-monolite host-gettext host-python3
 
 define HOST_MONO_SETUP_MONOLITE
 	rm -rf $(@D)/mcs/class/lib/monolite
