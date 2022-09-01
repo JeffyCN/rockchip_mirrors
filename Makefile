@@ -96,9 +96,9 @@ all:
 .PHONY: all
 
 # Set and export the version string
-export BR2_VERSION := 2022.08-git
+export BR2_VERSION := 2022.08-rc1
 # Actual time the release is cut (for reproducible builds)
-BR2_VERSION_EPOCH = 1654546000
+BR2_VERSION_EPOCH = 1660332552
 
 # Save running make version since it's clobbered by the make package
 RUNNING_MAKE_VERSION := $(MAKE_VERSION)
@@ -1071,6 +1071,9 @@ endif
 # to workaround a bug in make 4.3; see https://savannah.gnu.org/bugs/?59093
 .PHONY: printvars
 printvars:
+ifndef VARS
+	$(error Please pass a non-empty VARS to 'make printvars')
+endif
 	@:
 	$(foreach V, \
 		$(sort $(foreach X, $(.VARIABLES), $(filter $(VARS),$(X)))), \
@@ -1086,17 +1089,24 @@ printvars:
 show-vars: VARS?=%
 show-vars:
 	@:
-	$(info $(call clean-json, { \
+	$(foreach i, \
+		$(call clean-json, { \
 			$(foreach V, \
-				$(sort $(foreach X, $(.VARIABLES), $(filter $(VARS),$(X)))), \
-				$(if $(filter-out environment% default automatic, $(origin $V)), \
+				$(.VARIABLES), \
+				$(and $(filter $(VARS),$(V)) \
+					, \
+					$(filter-out environment% default automatic, $(origin $V)) \
+					, \
 					"$V": { \
 						"expanded": $(call mk-json-str,$($V))$(comma) \
 						"raw": $(call mk-json-str,$(value $V)) \
 					}$(comma) \
 				) \
 			) \
-	} ))
+		} ) \
+		, \
+		$(info $(i)) \
+	)
 
 .PHONY: clean
 clean:
@@ -1255,6 +1265,7 @@ check-flake8:
 
 check-package:
 	find $(TOPDIR) -type f \( -name '*.mk' -o -name '*.hash' -o -name 'Config.*' -o -name '*.patch' \) \
+		-a -not -name '*.orig' -a -not -name '*.rej' \
 		-exec ./utils/check-package --exclude=Sob {} +
 
 include docs/manual/manual.mk
