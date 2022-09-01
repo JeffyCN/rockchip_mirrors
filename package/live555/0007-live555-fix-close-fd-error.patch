@@ -1,7 +1,7 @@
-From a9bc13efdf4c6eb891a4c5e53bec3ace58e8f613 Mon Sep 17 00:00:00 2001
+From 35a06eb08bd61e68e8e1c783f41d0c9d0869dbbd Mon Sep 17 00:00:00 2001
 From: "jkand.huang" <jkand.huang@rock-chips.com>
 Date: Wed, 17 Jun 2020 17:05:31 +0800
-Subject: [PATCH] live555: fix close fd error.
+Subject: [PATCH 7/7] live555: fix close fd error.
 
 Signed-off-by: jkand.huang <jkand.huang@rock-chips.com>
 ---
@@ -9,10 +9,10 @@ Signed-off-by: jkand.huang <jkand.huang@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/liveMedia/RTSPServer.cpp b/liveMedia/RTSPServer.cpp
-index 5b53812..af053c1 100644
+index 5932225..c2f8170 100644
 --- a/liveMedia/RTSPServer.cpp
 +++ b/liveMedia/RTSPServer.cpp
-@@ -574,7 +574,7 @@ void RTSPServer::RTSPClientConnection::closeSocketsRTSP() {
+@@ -609,7 +609,7 @@ void RTSPServer::RTSPClientConnection::closeSocketsRTSP() {
    fOurRTSPServer.stopTCPStreamingOnSocket(fClientOutputSocket);
  
    // Turn off background handling on our input socket (and output socket, if different); then close it (or them):
@@ -22,5 +22,5 @@ index 5b53812..af053c1 100644
      ::closeSocket(fClientOutputSocket);
    }
 -- 
-2.26.1
+2.20.1
 

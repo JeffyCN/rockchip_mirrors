@@ -1,29 +1,19 @@
-From cb276426d8669cf3031f68ef583dc125addd4704 Mon Sep 17 00:00:00 2001
+From d9025b2cfac85222cc4cf7873b1acb69bd43677f Mon Sep 17 00:00:00 2001
 From: "jkand.huang" <jkand.huang@rock-chips.com>
 Date: Wed, 29 Apr 2020 16:10:27 +0800
-Subject: [PATCH] live555: change time from gettimeofday to clock_gettime.
+Subject: [PATCH 4/7] live555: change time from gettimeofday to clock_gettime.
 
 Signed-off-by: jkand.huang <jkand.huang@rock-chips.com>
 ---
- groupsock/GroupsockHelper.cpp        | 88 ++--------------------------
- groupsock/include/GroupsockHelper.hh |  8 +--
- groupsock/include/NetCommon.h        |  2 +-
- 3 files changed, 8 insertions(+), 90 deletions(-)
+ groupsock/GroupsockHelper.cpp | 85 +++--------------------------------
+ groupsock/include/NetCommon.h |  2 +-
+ 2 files changed, 6 insertions(+), 81 deletions(-)
 
 diff --git a/groupsock/GroupsockHelper.cpp b/groupsock/GroupsockHelper.cpp
-index 9821931..16b3ab1 100644
+index 5378e7a..c61962a 100644
 --- a/groupsock/GroupsockHelper.cpp
 +++ b/groupsock/GroupsockHelper.cpp
-@@ -26,7 +26,7 @@ extern "C" int initializeWinsockIfNecessary();
- #else
- #include <stdarg.h>
- #include <time.h>
--#include <sys/time.h>
-+//#include <sys/time.h>
- #include <fcntl.h>
- #define initializeWinsockIfNecessary() 1
- #endif
-@@ -758,87 +758,11 @@ char const* timestampString() {
+@@ -1017,88 +1017,13 @@ char const* timestampString() {
    return (char const*)&timeString;
  }
  
@@ -107,36 +97,18 @@ index 9821931..16b3ab1 100644
 -
 -  tp->tv_sec =  (long)(tickNow.QuadPart / tickFrequency.QuadPart);
 -  tp->tv_usec = (long)(((tickNow.QuadPart % tickFrequency.QuadPart) * 1000000L) / tickFrequency.QuadPart);
--
 +  struct timespec timeNow = {0, 0};
 +  clock_gettime(CLOCK_MONOTONIC, &timeNow);
 +  tp->tv_sec = timeNow.tv_sec;
 +  tp->tv_usec = timeNow.tv_nsec/1000;
+ 
    return 0;
  }
 -#endif
 +
-diff --git a/groupsock/include/GroupsockHelper.hh b/groupsock/include/GroupsockHelper.hh
-index 8ca4275..0313d67 100644
---- a/groupsock/include/GroupsockHelper.hh
-+++ b/groupsock/include/GroupsockHelper.hh
-@@ -129,13 +129,7 @@ struct _groupsockPriv { // There should be only one of these allocated
- _groupsockPriv* groupsockPriv(UsageEnvironment& env); // allocates it if necessary
- void reclaimGroupsockPriv(UsageEnvironment& env);
- 
--
--#if (defined(__WIN32__) || defined(_WIN32)) && !defined(__MINGW32__)
--// For Windoze, we need to implement our own gettimeofday()
--extern int gettimeofday(struct timeval*, int*);
--#else
--#include <sys/time.h>
--#endif
-+int gettimeofday(struct timeval*, int*);
- 
- // The following are implemented in inet.c:
- extern "C" netAddressBits our_inet_addr(char const*);
+ #undef ANDROID_OLD_NDK
 diff --git a/groupsock/include/NetCommon.h b/groupsock/include/NetCommon.h
-index 4ec115b..9495a66 100644
+index 87e3d2f..015786f 100644
 --- a/groupsock/include/NetCommon.h
 +++ b/groupsock/include/NetCommon.h
 @@ -93,7 +93,7 @@ typedef unsigned char u_int8_t;
@@ -149,5 +121,5 @@ index 4ec115b..9495a66 100644
  #include <arpa/inet.h>
  #include <netdb.h>
 -- 
-2.26.1
+2.20.1
 

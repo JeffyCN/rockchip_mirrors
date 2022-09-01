@@ -1,7 +1,7 @@
-From 2e161af98e24ad4a7e0e235fc59ea13042a237dc Mon Sep 17 00:00:00 2001
+From 6b30487f87d3a6e90126184df3b4ffa5e3569b17 Mon Sep 17 00:00:00 2001
 From: "jkand.huang" <jkand.huang@rock-chips.com>
 Date: Tue, 2 Jun 2020 17:41:14 +0800
-Subject: [PATCH] fix rtcp rtp-timestamp error.
+Subject: [PATCH 6/7] fix rtcp rtp-timestamp error.
 
 Signed-off-by: jkand.huang <jkand.huang@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: jkand.huang <jkand.huang@rock-chips.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/liveMedia/RTPSink.cpp b/liveMedia/RTPSink.cpp
-index cb2572a..a3c9b75 100644
+index 4d78513..a2c6d60 100644
 --- a/liveMedia/RTPSink.cpp
 +++ b/liveMedia/RTPSink.cpp
 @@ -108,6 +108,11 @@ u_int32_t RTPSink::presetNextTimestamp() {
@@ -25,5 +25,5 @@ index cb2572a..a3c9b75 100644
  }
  
 -- 
-2.26.1
+2.20.1
 
