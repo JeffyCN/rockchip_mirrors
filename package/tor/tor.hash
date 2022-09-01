@@ -1,3 +1,4 @@
+# From https://dist.torproject.org/tor-0.4.7.8.tar.gz.sha256sum
+sha256  9e9a5c67ad2acdd5f0f8be14ed591fed076b1708abf8344066990a0fa66fe195  tor-0.4.7.8.tar.gz
 # Locally computed
-sha256  6e1b04f7890e782fd56014a0de5075e4ab29b52a35d8bca1f6b80c93f58f3d26  tor-0.3.1.9.tar.gz
-sha256  f9a4f724d8037711dde7d3f1d17094fb7d211545b3a3bbb1b03e769e13ca5608  LICENSE
+sha256  47b54ed17e8fdcab3c44729a1789a09b208f9a63a845a7e50def9df729eebad0  LICENSE
