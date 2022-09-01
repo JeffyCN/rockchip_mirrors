@@ -1,7 +1,7 @@
-From 62e0ca08ab53ab03e014c4851583de8861cd9adb Mon Sep 17 00:00:00 2001
+From b5ab9134617641318900a98a88f80767213720cd Mon Sep 17 00:00:00 2001
 From: Xing Zheng <zhengxing@rock-chips.com>
 Date: Wed, 7 Jul 2021 15:12:10 +0800
-Subject: [PATCH] alsa-lib: fix the overflow if DCB_FILTER_16BIT is defened
+Subject: [PATCH 4/4] alsa-lib: fix the overflow if DCB_FILTER_16BIT is defened
 
 Signed-off-by: Xing Zheng <zhengxing@rock-chips.com>
 ---
@@ -9,10 +9,10 @@ Signed-off-by: Xing Zheng <zhengxing@rock-chips.com>
  1 file changed, 6 insertions(+), 6 deletions(-)
 
 diff --git a/src/pcm/pcm.c b/src/pcm/pcm.c
-index 7be6cb7..f96c77d 100644
+index 2720f07..a0d6c7b 100644
 --- a/src/pcm/pcm.c
 +++ b/src/pcm/pcm.c
-@@ -698,7 +698,7 @@ static int16_t   y_prev_r3=0;
+@@ -726,7 +726,7 @@ static int16_t   y_prev_r3=0;
  void dc_filter_left1(int16_t *pcmIn)
  {
      int16_t sampleIn, delta_x, sampleOut;
@@ -21,7 +21,7 @@ index 7be6cb7..f96c77d 100644
  
      sampleIn = *pcmIn;
      delta_x = sampleIn-x_prev_l1;
-@@ -713,7 +713,7 @@ void dc_filter_left1(int16_t *pcmIn)
+@@ -741,7 +741,7 @@ void dc_filter_left1(int16_t *pcmIn)
  void dc_filter_right1(int16_t *pcmIn)
  {
      int16_t sampleIn, delta_x, sampleOut;
@@ -30,7 +30,7 @@ index 7be6cb7..f96c77d 100644
  
      sampleIn = *pcmIn;
      delta_x = sampleIn-x_prev_r1;
-@@ -728,7 +728,7 @@ void dc_filter_right1(int16_t *pcmIn)
+@@ -756,7 +756,7 @@ void dc_filter_right1(int16_t *pcmIn)
  void dc_filter_left2(int16_t *pcmIn)
  {
      int16_t sampleIn, delta_x, sampleOut;
@@ -39,7 +39,7 @@ index 7be6cb7..f96c77d 100644
  
      sampleIn = *pcmIn;
      delta_x = sampleIn-x_prev_l2;
-@@ -744,7 +744,7 @@ void dc_filter_left2(int16_t *pcmIn)
+@@ -772,7 +772,7 @@ void dc_filter_left2(int16_t *pcmIn)
  void dc_filter_right2(int16_t *pcmIn)
  {
      int16_t sampleIn, delta_x, sampleOut;
@@ -48,7 +48,7 @@ index 7be6cb7..f96c77d 100644
  
      sampleIn = *pcmIn;
      delta_x = sampleIn-x_prev_r2;
-@@ -759,7 +759,7 @@ void dc_filter_right2(int16_t *pcmIn)
+@@ -787,7 +787,7 @@ void dc_filter_right2(int16_t *pcmIn)
  void dc_filter_left3(int16_t *pcmIn)
  {
      int16_t sampleIn, delta_x, sampleOut;
@@ -57,7 +57,7 @@ index 7be6cb7..f96c77d 100644
  
      sampleIn = *pcmIn;
      delta_x = sampleIn-x_prev_l3;
-@@ -775,7 +775,7 @@ void dc_filter_left3(int16_t *pcmIn)
+@@ -803,7 +803,7 @@ void dc_filter_left3(int16_t *pcmIn)
  void dc_filter_right3(int16_t *pcmIn)
  {
      int16_t sampleIn, delta_x, sampleOut;
@@ -67,5 +67,5 @@ index 7be6cb7..f96c77d 100644
      sampleIn = *pcmIn;
      delta_x = sampleIn-x_prev_r3;
 -- 
-2.25.1
+2.20.1
 
