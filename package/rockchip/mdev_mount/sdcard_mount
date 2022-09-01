@@ -1,9 +1,0 @@
-#!/bin/sh
-
-if [ "${ACTION}" == "add" ]
-then
-        mount ${PWD}/${DEVNAME} /mnt/sdcard
-elif [ "${ACTION}" == "remove" ]
-then
-        umount /mnt/sdcard
-fi

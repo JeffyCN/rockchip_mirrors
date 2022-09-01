@@ -1,2 +1,0 @@
-config BR2_PACKAGE_RTC_DEMO
-	bool "rtc_demo"

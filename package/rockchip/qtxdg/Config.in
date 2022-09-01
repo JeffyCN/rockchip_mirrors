@@ -1,4 +1,0 @@
-config BR2_PACKAGE_QTXDG
-	bool "LXQT qtxdg"
-	help
-	qtxdg is a Qt 5 implementation of freedesktop.org XDG specifications.

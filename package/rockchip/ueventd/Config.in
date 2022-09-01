@@ -1,4 +1,0 @@
-config BR2_PACKAGE_UEVENTD
-	bool "Rockchip ueventd for linux"
-	help
-	  Rockchip ueventd for linux, port from Android

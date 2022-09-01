@@ -1,3 +1,0 @@
-config BR2_PACKAGE_RK_WEBUI
-    bool "Rockchip web ui"
-    select BR2_PACKAGE_BOA
