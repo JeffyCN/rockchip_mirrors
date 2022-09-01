@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-SDL2_VERSION = 2.0.16
+SDL2_VERSION = 2.0.22
 SDL2_SOURCE = SDL2-$(SDL2_VERSION).tar.gz
 SDL2_SITE = http://www.libsdl.org/release
 SDL2_LICENSE = Zlib
@@ -127,6 +127,7 @@ endif
 
 else
 SDL2_CONF_OPTS += --disable-video-x11 --without-x
+SDL2_CONF_ENV += CFLAGS=" -DMESA_EGL_NO_X11_HEADERS "
 endif
 
 ifeq ($(BR2_PACKAGE_SDL2_OPENGL),y)
@@ -151,7 +152,7 @@ SDL2_CONF_OPTS += --disable-alsa
 endif
 
 ifeq ($(BR2_PACKAGE_SDL2_KMSDRM),y)
-SDL2_DEPENDENCIES += libdrm mesa3d
+SDL2_DEPENDENCIES += libdrm libgbm
 SDL2_CONF_OPTS += --enable-video-kmsdrm
 else
 SDL2_CONF_OPTS += --disable-video-kmsdrm
