@@ -1,7 +1,7 @@
-From 7df4add68e15cc0286ac14335a32617ae84fc2d4 Mon Sep 17 00:00:00 2001
+From d86fb1667ffd8e4dcf4a6339b2a2465da560e015 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 May 2022 15:54:25 +0800
-Subject: [PATCH 9/9] libv4l: Disallow conversion by default
+Subject: [PATCH 7/7] libv4l: Disallow conversion by default
 
 The conversion is slow, let's disable it by default.
 
