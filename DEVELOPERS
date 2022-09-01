@@ -777,6 +777,10 @@ N:	Eloi Bail <eloi.bail@savoirfairelinux.com>
 F:	package/bayer2rgb-neon/
 F:	package/gstreamer1/gst1-plugins-bayer2rgb-neon/
 
+N:	Emile Cormier <emile.cormier.jr@gmail.com>
+F:	package/python-appdirs/
+F:	package/python-zlmdb/
+
 N:	Eric Le Bihan <eric.le.bihan.dev@free.fr>
 F:	docs/manual/adding-packages-meson.txt
 F:	package/adwaita-icon-theme/
@@ -1183,6 +1187,7 @@ N:	Guillaume William Brs <guillaume.bressaix@gmail.com>
 F:	package/libnids/
 F:	package/libxcrypt/
 F:	package/liquid-dsp/
+F:	package/mbw/
 F:	package/pixiewps/
 F:	package/python-beniget/
 F:	package/python-gast/
@@ -1375,6 +1380,7 @@ F:	package/python-pycares/
 F:	package/python-pydyf/
 F:	package/python-pypa-build/
 F:	package/python-pyphen/
+F:	package/python-rtoml/
 F:	package/python-snappy/
 F:	package/python-sockjs/
 F:	package/python-terminaltables/
@@ -1389,6 +1395,8 @@ F:	package/serd/
 F:	package/sord/
 F:	package/sratom/
 F:	package/zchunk/
+F:	support/testing/tests/package/sample_python_rtoml.py
+F:	support/testing/tests/package/test_python_rtoml.py
 
 N:	James Knight <james.knight@collins.com>
 F:	package/atkmm/
@@ -1920,6 +1928,11 @@ N:	Martin Kepplinger <martink@posteo.de>
 F:	package/tslib/
 F:	package/x11r7/xdriver_xf86-input-tslib/
 F:	package/x11vnc/
+
+N:	Martin Povišer <povik+lin@cutebit.org>
+F:	package/python-construct/
+F:	support/testing/tests/package/sample_python_construct.py
+F:	support/testing/tests/package/test_python_construct.py
 
 N:	Masahiro Yamada <yamada.masahiro@socionext.com>
 F:	board/arm/foundation-v8/
@@ -2459,6 +2472,8 @@ F:	board/avnet/s6lx9_microboard/
 F:	configs/s6lx9_microboard_defconfig
 
 N:	Rafał Miłecki <rafal@milecki.pl>
+F:	board/broadcom/northstar/
+F:	configs/broadcom_northstar_defconfig
 F:	package/firmware-utils/
 
 N:	Rahul Bedarkar <rahulbedarkar89@gmail.com>
@@ -2897,6 +2912,7 @@ F:	package/python3/
 F:	package/python-augeas/
 F:	package/python-flask-expects-json/
 F:	package/python-git/
+F:	package/python-qrcode/
 F:	package/python-serial/
 F:	package/python-unittest-xml-reporting/
 F:	package/qextserialport/
@@ -3027,8 +3043,6 @@ F:	package/gloox/
 F:	package/tpm2-pkcs11/
 
 N:	Yann E. MORIN <yann.morin.1998@free.fr>
-F:	board/friendlyarm/nanopi-neo/
-F:	configs/friendlyarm_nanopi_neo_defconfig
 F:	fs/squashfs/
 F:	package/asterisk/
 F:	package/cegui/
@@ -3126,8 +3140,10 @@ F:	package/wpa_supplicant/
 F:	package/x11r7/xapp_xconsole/
 F:	package/x11r7/xapp_xinput-calibrator/
 F:	package/zlog/
+F:	support/testing/tests/package/sample_python_dtschema.py
 F:	support/testing/tests/package/test_libftdi1.py
 F:	support/testing/tests/package/test_python_can.py
+F:	support/testing/tests/package/test_python_dtschema.py
 F:	utils/scanpypi
 
 N:	Yunhao Tian <t123yh.xyz@gmail.com>
