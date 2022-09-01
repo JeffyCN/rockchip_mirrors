@@ -1,0 +1,66 @@
+From ba638eb5ba57f7be15ab3bb5112974cc760add6d Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 1 Sep 2022 18:12:04 +0800
+Subject: [PATCH] Support meson buildsystem and libjhead
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ meson.build | 46 ++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 46 insertions(+)
+ create mode 100644 meson.build
+
+diff --git a/meson.build b/meson.build
+new file mode 100644
+index 0000000..088679f
+--- /dev/null
++++ b/meson.build
+@@ -0,0 +1,46 @@
++project(
++  'jhead',
++  'c',
++  version : '3.0',
++)
++
++pkgconfig = import('pkgconfig')
++
++cc = meson.get_compiler('c')
++m = cc.find_library('m')
++
++jhead_srcs = [
++  'jhead.c',
++  'jpgfile.c',
++  'jpgqguess.c',
++  'paths.c',
++  'exif.c',
++  'iptc.c',
++  'gpsinfo.c',
++  'makernote.c',
++]
++
++executable(
++  'jhead',
++  jhead_srcs,
++  dependencies : m,
++  install : true,
++)
++
++install_headers('jhead.h')
++
++libjhead = shared_library(
++  'jhead',
++  jhead_srcs,
++  c_args : '-Dmain=dummy_main',
++  dependencies : m,
++  version : meson.project_version(),
++  install : true,
++)
++
++pkgconfig.generate(
++    libraries : libjhead,
++    name : 'libjhead',
++    version : meson.project_version(),
++    description : 'Manipulate settings and thumbnails in Exif jpeg headers',
++)
+-- 
+2.20.1
+

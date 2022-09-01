@@ -9,9 +9,3 @@ config BR2_PACKAGE_JHEAD
 
 comment "jhead needs a toolchain w/ wchar"
 	depends on !BR2_USE_WCHAR
-
-config BR2_PACKAGE_LIBJHEAD
-	bool "libjhead"
-	depends on BR2_PACKAGE_JHEAD
-	default y
-
