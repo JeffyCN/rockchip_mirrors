@@ -1,4 +1,4 @@
-From b188d1bad47e761e40d1ecd37ea2007f93fc620a Mon Sep 17 00:00:00 2001
+From d4318d3412c747b2a84b48d19fad12f4cc32a690 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 30 Nov 2018 17:45:33 +0800
 Subject: [PATCH 4/4] qquickwidget: Provide widget window id for video window
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 15 insertions(+), 1 deletion(-)
 
 diff --git a/src/quickwidgets/qquickwidget.cpp b/src/quickwidgets/qquickwidget.cpp
-index 39780f8..ddf56f3 100644
+index 223d91f..fd4c7e3 100644
 --- a/src/quickwidgets/qquickwidget.cpp
 +++ b/src/quickwidgets/qquickwidget.cpp
 @@ -100,12 +100,26 @@ private:
@@ -37,9 +37,9 @@ index 39780f8..ddf56f3 100644
      renderControl = new QQuickWidgetRenderControl(q);
 -    offscreenWindow = new QQuickWindow(*new QQuickOffcreenWindowPrivate(),renderControl);
 +    offscreenWindow = new QQuickOffscreenWindow(*new QQuickOffcreenWindowPrivate(),renderControl);
+     offscreenWindow->setScreen(q->screen());
      offscreenWindow->setTitle(QString::fromLatin1("Offscreen"));
      offscreenWindow->setObjectName(QString::fromLatin1("QQuickOffScreenWindow"));
-     // Do not call create() on offscreenWindow.
 -- 
 2.20.1
 

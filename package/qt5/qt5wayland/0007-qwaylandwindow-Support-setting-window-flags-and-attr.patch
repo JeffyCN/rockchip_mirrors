@@ -1,7 +1,7 @@
-From 0f5029c9d85f0d4b98599fcdc7e4b390f00b42ad Mon Sep 17 00:00:00 2001
+From d4bd42f942efbc2c93ccc420969c88ff20bfdaab Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 09:12:08 +0800
-Subject: [PATCH 07/15] qwaylandwindow: Support setting window flags and attrs
+Subject: [PATCH 07/17] qwaylandwindow: Support setting window flags and attrs
 
 Support setting window flags and attrs through app_id, for example:
 app_id = "attrs=alpha:0.5;flags=stay-on-top|stay-on-bottom|no-focus"
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 66 insertions(+)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index cb2e01e..187205d 100644
+index 6ec9e99..7c18a72 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
 @@ -117,6 +117,35 @@ void QWaylandWindow::ensureSize()
@@ -95,7 +95,7 @@ index cb2e01e..187205d 100644
  void QWaylandWindow::applyConfigureWhenPossible()
  {
      QMutexLocker resizeLocker(&mResizeLock);
-@@ -812,6 +870,8 @@ void QWaylandWindow::setWindowFlags(Qt::WindowFlags flags)
+@@ -810,6 +868,8 @@ void QWaylandWindow::setWindowFlags(Qt::WindowFlags flags)
  
      mFlags = flags;
      createDecoration();
@@ -105,7 +105,7 @@ index cb2e01e..187205d 100644
  
  bool QWaylandWindow::createDecoration()
 diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
-index 54ac67a..7f52192 100644
+index c0a7634..afd318c 100644
 --- a/src/client/qwaylandwindow_p.h
 +++ b/src/client/qwaylandwindow_p.h
 @@ -153,8 +153,11 @@ public:

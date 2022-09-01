@@ -1,7 +1,7 @@
-From c07a5fc10832b4d0f7f5e67b7ab715130a2cdae2 Mon Sep 17 00:00:00 2001
+From 9bc14b7363f4da0ea1f71db3a952a998435a592b Mon Sep 17 00:00:00 2001
 From: Eskil Abrahamsen Blomfeldt <eskil.abrahamsen-blomfeldt@qt.io>
 Date: Thu, 22 Apr 2021 08:42:33 +0200
-Subject: [PATCH 02/15] client: Gracefully handle shutdown and window hiding
+Subject: [PATCH 02/17] client: Gracefully handle shutdown and window hiding
 
 When a window is hidden or destroyed, the render thread may already
 be rendering. We need to properly read-lock the surface pointer
@@ -37,7 +37,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 14 insertions(+), 3 deletions(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 4c5711a..9718e3d 100644
+index ceaa4c7..6cbd315 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
 @@ -414,6 +414,7 @@ void QWaylandWindow::closePopups(QWaylandWindow *parent)
@@ -79,7 +79,7 @@ index 4c5711a..9718e3d 100644
  }
  
  const wl_callback_listener QWaylandWindow::callbackListener = {
-@@ -725,6 +734,7 @@ QPointF QWaylandWindow::mapFromWlSurface(const QPointF &surfacePosition) const
+@@ -723,6 +732,7 @@ QPointF QWaylandWindow::mapFromWlSurface(const QPointF &surfacePosition) const
  
  wl_surface *QWaylandWindow::wlSurface()
  {
@@ -87,7 +87,7 @@ index 4c5711a..9718e3d 100644
      return mSurface ? mSurface->object() : nullptr;
  }
  
-@@ -749,7 +759,8 @@ QWaylandScreen *QWaylandWindow::waylandScreen() const
+@@ -747,7 +757,8 @@ QWaylandScreen *QWaylandWindow::waylandScreen() const
  
  void QWaylandWindow::handleContentOrientationChange(Qt::ScreenOrientation orientation)
  {
@@ -98,7 +98,7 @@ index 4c5711a..9718e3d 100644
  
      wl_output_transform transform;
 diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
-index d45980a..54ac67a 100644
+index cb9135f..c0a7634 100644
 --- a/src/client/qwaylandwindow_p.h
 +++ b/src/client/qwaylandwindow_p.h
 @@ -288,7 +288,7 @@ private:

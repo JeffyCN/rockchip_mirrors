@@ -1,7 +1,7 @@
-From 968121a32cdfcaab23121a6664b13e44b76ca12f Mon Sep 17 00:00:00 2001
+From dcea7e200b90a5ad5571a558d5a693165381c9fc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Jun 2020 16:48:42 +0800
-Subject: [PATCH 03/15] Revert "Use a dedicated EGLContext for the decorations
+Subject: [PATCH 03/17] Revert "Use a dedicated EGLContext for the decorations
  blitter"
 
 This reverts commit 7a69fc27a7cb5c5e9c70c1c56e534e6e59b46696.
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 148 insertions(+), 61 deletions(-)
 
 diff --git a/src/hardwareintegration/client/wayland-egl/qwaylandglcontext.cpp b/src/hardwareintegration/client/wayland-egl/qwaylandglcontext.cpp
-index 683fe12..6dcc05a 100644
+index 1a1c349..d076d9e 100644
 --- a/src/hardwareintegration/client/wayland-egl/qwaylandglcontext.cpp
 +++ b/src/hardwareintegration/client/wayland-egl/qwaylandglcontext.cpp
 @@ -56,7 +56,6 @@
@@ -167,16 +167,16 @@ index 683fe12..6dcc05a 100644
      EGLint a = EGL_MIN_SWAP_INTERVAL;
      EGLint b = EGL_MAX_SWAP_INTERVAL;
      if (!eglGetConfigAttrib(m_eglDisplay, m_config, a, &a) ||
-@@ -408,8 +399,6 @@ QWaylandGLContext::~QWaylandGLContext()
+@@ -406,8 +397,6 @@ void QWaylandGLContext::updateGLFormat()
+ QWaylandGLContext::~QWaylandGLContext()
+ {
      delete m_blitter;
-     m_blitter = nullptr;
-     eglDestroyContext(m_eglDisplay, m_context);
 -    if (m_decorationsContext != EGL_NO_CONTEXT)
 -        eglDestroyContext(m_eglDisplay, m_decorationsContext);
+     eglDestroyContext(m_eglDisplay, m_context);
  }
  
- bool QWaylandGLContext::makeCurrent(QPlatformSurface *surface)
-@@ -436,7 +425,12 @@ bool QWaylandGLContext::makeCurrent(QPlatformSurface *surface)
+@@ -435,7 +424,12 @@ bool QWaylandGLContext::makeCurrent(QPlatformSurface *surface)
  
      if (window->isExposed())
          window->setCanResize(false);
@@ -190,7 +190,7 @@ index 683fe12..6dcc05a 100644
          window->createDecoration();
  
      if (eglSurface == EGL_NO_SURFACE) {
-@@ -467,6 +461,102 @@ void QWaylandGLContext::doneCurrent()
+@@ -466,6 +460,102 @@ void QWaylandGLContext::doneCurrent()
      eglMakeCurrent(m_eglDisplay, EGL_NO_SURFACE, EGL_NO_SURFACE, EGL_NO_CONTEXT);
  }
  
@@ -293,7 +293,7 @@ index 683fe12..6dcc05a 100644
  void QWaylandGLContext::swapBuffers(QPlatformSurface *surface)
  {
      QWaylandEglWindow *window = static_cast<QWaylandEglWindow *>(surface);
-@@ -474,23 +564,15 @@ void QWaylandGLContext::swapBuffers(QPlatformSurface *surface)
+@@ -473,23 +563,15 @@ void QWaylandGLContext::swapBuffers(QPlatformSurface *surface)
      EGLSurface eglSurface = window->eglSurface();
  
      if (window->decoration()) {
@@ -321,7 +321,7 @@ index 683fe12..6dcc05a 100644
      }
  
      int swapInterval = m_supportNonBlockingSwap ? 0 : m_format.swapInterval();
-@@ -508,6 +590,9 @@ void QWaylandGLContext::swapBuffers(QPlatformSurface *surface)
+@@ -507,6 +589,9 @@ void QWaylandGLContext::swapBuffers(QPlatformSurface *surface)
  
  GLuint QWaylandGLContext::defaultFramebufferObject(QPlatformSurface *surface) const
  {

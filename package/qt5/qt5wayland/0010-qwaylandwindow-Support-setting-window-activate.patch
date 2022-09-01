@@ -1,7 +1,7 @@
-From da7b2e18d4dc4ccf0c8ee7cfb4f14fcd53649c08 Mon Sep 17 00:00:00 2001
+From 0f4945f9cc03452f2a20d7a48d53b2085ee80bfe Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:28:29 +0800
-Subject: [PATCH 10/15] qwaylandwindow: Support setting window activate
+Subject: [PATCH 10/17] qwaylandwindow: Support setting window activate
 
 Support setting window activate through app_id, for example:
 app_id = "requests=activate"
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 187205d..211a639 100644
+index 7c18a72..032008f 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
-@@ -1125,7 +1125,13 @@ void QWaylandWindow::restoreMouseCursor(QWaylandInputDevice *device)
+@@ -1123,7 +1123,13 @@ void QWaylandWindow::restoreMouseCursor(QWaylandInputDevice *device)
  
  void QWaylandWindow::requestActivateWindow()
  {

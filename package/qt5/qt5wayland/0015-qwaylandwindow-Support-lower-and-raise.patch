@@ -1,7 +1,7 @@
-From 3498b664b81e1fe42fe9382a6b4d7457b92ad7e8 Mon Sep 17 00:00:00 2001
+From b3be9051f1ad37160d412cb215e7230257d0919a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 3 Nov 2021 17:55:58 +0800
-Subject: [PATCH 15/15] qwaylandwindow: Support lower() and raise()
+Subject: [PATCH 15/17] qwaylandwindow: Support lower() and raise()
 
 Support lower() and raise() through hacked subsurface::place_below() and
 subsurface::place_below().
@@ -49,7 +49,7 @@ index 76da10b..1c38151 100644
      void setDeSync();
      bool isSync() const { return m_synchronized; }
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index 92c046c..b115089 100644
+index ef308c5..b8d19a4 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
 @@ -501,18 +501,26 @@ void QWaylandWindow::setVisible(bool visible)

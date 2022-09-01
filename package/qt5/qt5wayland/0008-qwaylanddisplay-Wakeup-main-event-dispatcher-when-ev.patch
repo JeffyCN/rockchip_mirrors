@@ -1,7 +1,7 @@
-From 937a06359ec904a50c7432a8235bb9a7fa9a34eb Mon Sep 17 00:00:00 2001
+From c8853fb402c4ea6cc978d8cf1c50232f5edb81f4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 May 2020 17:05:32 +0800
-Subject: [PATCH 08/15] qwaylanddisplay: Wakeup main event dispatcher when
+Subject: [PATCH 08/17] qwaylanddisplay: Wakeup main event dispatcher when
  events pending
 
 The socket might not be able to generate poll events to wakeup the main
@@ -18,7 +18,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 51 insertions(+), 1 deletion(-)
 
 diff --git a/src/client/qwaylanddisplay.cpp b/src/client/qwaylanddisplay.cpp
-index 6f1bada..57bf98e 100644
+index 86045a3..dc61d23 100644
 --- a/src/client/qwaylanddisplay.cpp
 +++ b/src/client/qwaylanddisplay.cpp
 @@ -83,6 +83,8 @@
