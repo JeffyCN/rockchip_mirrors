@@ -1,7 +1,7 @@
-From cfe3ddd30f9c4d4fc031356f8334bab0626d799e Mon Sep 17 00:00:00 2001
+From e19d2fbf2ccb95343dcb25cfe4c60457f4e9a249 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 3 Jan 2019 15:27:59 +0800
-Subject: [PATCH 04/15] qwayland-egl: Fix mali crash during exiting
+Subject: [PATCH 04/17] qwayland-egl: Fix mali crash during exiting
 
 By adding the missing ~QWaylandEglPlatformIntegration() to call
 eglTerminate().

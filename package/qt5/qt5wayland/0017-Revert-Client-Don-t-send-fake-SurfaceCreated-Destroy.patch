@@ -1,4 +1,4 @@
-From ada377201e475fc71fc01d65cef47e7738296bf0 Mon Sep 17 00:00:00 2001
+From 9809b77e3fb1fb7fc74dad0aa6f5bd3482255271 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Aug 2022 16:32:54 +0800
 Subject: [PATCH 17/17] Revert "Client: Don't send fake
@@ -16,7 +16,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 9 insertions(+), 3 deletions(-)
 
 diff --git a/src/client/qwaylandwindow.cpp b/src/client/qwaylandwindow.cpp
-index c71d709..e23af43 100644
+index 81d4aef..fdb3d17 100644
 --- a/src/client/qwaylandwindow.cpp
 +++ b/src/client/qwaylandwindow.cpp
 @@ -97,7 +97,7 @@ QWaylandWindow::~QWaylandWindow()
@@ -52,7 +52,7 @@ index c71d709..e23af43 100644
  
      delete mShellSurface;
 diff --git a/src/client/qwaylandwindow_p.h b/src/client/qwaylandwindow_p.h
-index 7f52192..27ff0d4 100644
+index afd318c..63901a0 100644
 --- a/src/client/qwaylandwindow_p.h
 +++ b/src/client/qwaylandwindow_p.h
 @@ -273,7 +273,7 @@ private:
