@@ -1,0 +1,79 @@
+From a5c5692188d48160e473257c33a29e8d47a0c7fe Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 1 Sep 2022 11:34:16 +0800
+Subject: [PATCH 4/5] add peap mschapv2 support
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ include/mbedtls/config.h | 2 +-
+ include/mbedtls/ssl.h    | 1 -
+ library/ssl_tls.c        | 7 ++++---
+ 3 files changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/include/mbedtls/config.h b/include/mbedtls/config.h
+index d661c91..50ea00b 100644
+--- a/include/mbedtls/config.h
++++ b/include/mbedtls/config.h
+@@ -2989,7 +2989,7 @@
+  *            it, and considering stronger message digests instead.
+  *
+  */
+-//#define MBEDTLS_MD4_C
++#define MBEDTLS_MD4_C
+ 
+ /**
+  * \def MBEDTLS_MD5_C
+diff --git a/include/mbedtls/ssl.h b/include/mbedtls/ssl.h
+index 010e975..26bedc5 100644
+--- a/include/mbedtls/ssl.h
++++ b/include/mbedtls/ssl.h
+@@ -1195,7 +1195,6 @@ struct mbedtls_ssl_config
+     void *p_export_keys;            /*!< context for key export callback    */
+ #if defined(MBEDTLS_EAP_TLS_EXPORT_KEYS)
+     mbedtls_tls_key_t export_key_type;
+-    unsigned char eap_tls_keyblk[128];
+ #endif
+ #endif
+ 
+diff --git a/library/ssl_tls.c b/library/ssl_tls.c
+index f3efe98..9aaa049 100644
+--- a/library/ssl_tls.c
++++ b/library/ssl_tls.c
+@@ -1360,7 +1360,7 @@ static int ssl_populate_transform( mbedtls_ssl_transform *transform,
+         if ( ssl->conf->export_key_type == EAP_TLS_KEY && eap_tls_keyblk)
+             ssl->conf->f_export_keys( ssl->conf->p_export_keys,
+                                   master, eap_tls_keyblk,
+-                                  0, 128, 0 );
++                                  0, 128, 64 );
+         else
+ #endif /* MBEDTLS_EAP_TLS_EXPORT_KEYS */
+         ssl->conf->f_export_keys( ssl->conf->p_export_keys,
+@@ -1527,7 +1527,7 @@ static int ssl_populate_transform( mbedtls_ssl_transform *transform,
+ end:
+ #if defined(MBEDTLS_EAP_TLS_EXPORT_KEYS)
+     if (eap_tls_keyblk)
+-        mbedtls_platform_zeroize( eap_tls_keyblk, 128 ); // eap_tls_keyblk len
++        mbedtls_platform_zeroize( eap_tls_keyblk, 192 ); // eap_tls_keyblk len
+ #endif
+ 
+     mbedtls_platform_zeroize( keyblk, sizeof( keyblk ) );
+@@ -1748,7 +1748,7 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
+     const mbedtls_ssl_ciphersuite_t * const ciphersuite_info =
+         ssl->handshake->ciphersuite_info;
+ #if defined(MBEDTLS_EAP_TLS_EXPORT_KEYS)
+-    unsigned char eap_tls_keyblk[128];
++    unsigned char eap_tls_keyblk[192];
+ #endif
+ 
+     MBEDTLS_SSL_DEBUG_MSG( 2, ( "=> derive keys" ) );
+@@ -1782,6 +1782,7 @@ int mbedtls_ssl_derive_keys( mbedtls_ssl_context *ssl )
+             MBEDTLS_SSL_DEBUG_RET( 1, "eap_tls_prf", ret );
+             return( ret );
+         }
++        memcpy( eap_tls_keyblk + 128, ssl->handshake->randbytes, 64 );
+     }
+ #endif
+ 
+-- 
+2.20.1
+

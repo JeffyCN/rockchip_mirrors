@@ -1,0 +1,25 @@
+From 694bf4d82a9d07927980e89ea33e0de3d88e290f Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 1 Sep 2022 11:34:41 +0800
+Subject: [PATCH 5/5] disable debugging
+
+---
+ include/mbedtls/config.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/include/mbedtls/config.h b/include/mbedtls/config.h
+index 50ea00b..e58800e 100644
+--- a/include/mbedtls/config.h
++++ b/include/mbedtls/config.h
+@@ -2722,7 +2722,7 @@
+  *
+  * This module provides debugging functions.
+  */
+-#define MBEDTLS_DEBUG_C
++// #define MBEDTLS_DEBUG_C
+ 
+ /**
+  * \def MBEDTLS_DES_C
+-- 
+2.20.1
+
