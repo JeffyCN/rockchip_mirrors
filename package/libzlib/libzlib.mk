@@ -4,13 +4,15 @@
 #
 ################################################################################
 
-LIBZLIB_VERSION = 1.2.11
+LIBZLIB_VERSION = 1.2.12
 LIBZLIB_SOURCE = zlib-$(LIBZLIB_VERSION).tar.xz
 LIBZLIB_SITE = http://www.zlib.net
 LIBZLIB_LICENSE = Zlib
 LIBZLIB_LICENSE_FILES = README
 LIBZLIB_INSTALL_STAGING = YES
 LIBZLIB_PROVIDES = zlib
+LIBZLIB_CPE_ID_VENDOR = gnu
+LIBZLIB_CPE_ID_PRODUCT = zlib
 
 # It is not possible to build only a shared version of zlib, so we build both
 # shared and static, unless we only want the static libs, and we eventually
@@ -23,18 +25,11 @@ LIBZLIB_PIC = -fPIC
 LIBZLIB_SHARED = --shared
 endif
 
-ifeq ($(BR2_RELRO_FULL), y)
-LIBZLIB_LDFLAGS = $(filter-out -pie, $(TARGET_LDFLAGS))
-else
-LIBZLIB_LDFLAGS = $(TARGET_LDFLAGS)
-endif
-
 define LIBZLIB_CONFIGURE_CMDS
 	(cd $(@D); rm -rf config.cache; \
 		$(TARGET_CONFIGURE_ARGS) \
 		$(TARGET_CONFIGURE_OPTS) \
 		CFLAGS="$(TARGET_CFLAGS) $(LIBZLIB_PIC)" \
-		LDFLAGS="$(LIBZLIB_LDFLAGS)" \
 		./configure \
 		$(LIBZLIB_SHARED) \
 		--prefix=/usr \
