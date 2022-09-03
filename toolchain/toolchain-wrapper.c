@@ -245,7 +245,7 @@ int main(int argc, char **argv)
 	char *progpath = argv[0];
 	char *basename;
 	char *env_debug;
-	int ret, i, count = 0, debug = 0, found_shared = 0;
+	int ret, i, count = 0, debug = 0, found_shared = 0, linker_args = 1;
 
 	/* Debug the wrapper to see arguments it was called with.
 	 * If environment variable BR2_DEBUG_WRAPPER is:
@@ -296,6 +296,17 @@ int main(int argc, char **argv)
 	if (absbasedir == NULL) {
 		perror(__FILE__ ": realpath");
 		return 2;
+	}
+
+	/* clang/clang++ doesn't like linker input when no linking */
+	for (i = 1; i < argc; i++) {
+		if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "-E") ||
+		    !strcmp(argv[i], "-s") ||
+		    !strcmp(argv[i], "--precompile")) {
+			if (!strncmp(basename, "clang", strlen("clang")))
+				linker_args = 0;
+			break;
+		}
 	}
 
 	/* Fill in the relative paths */
@@ -461,6 +472,21 @@ int main(int argc, char **argv)
 		*cur++ = "-Wl,-z,now";
 		*cur++ = "-Wl,-z,relro";
 #endif
+	}
+
+	/* filter out linker args */
+	if (!linker_args) {
+		for (i = 0; args + i != cur;) {
+			if (!strncmp(args[i], "-Wl,", strlen("-Wl,")) ||
+			    !strcmp(args[i], "-pie") ||
+			    !strcmp(args[i], "-no-pie")) {
+				cur--;
+				args[i] = *cur;
+				continue;
+			}
+
+			i++;
+		}
 	}
 
 	/* Check for unsafe library and header paths */
