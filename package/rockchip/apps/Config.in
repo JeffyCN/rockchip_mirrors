@@ -1,0 +1,7 @@
+source "package/rockchip/apps/multivideoplayer/Config.in"
+source "package/rockchip/apps/qcamera/Config.in"
+source "package/rockchip/apps/QFacialGate/Config.in"
+source "package/rockchip/apps/qfm/Config.in"
+source "package/rockchip/apps/qlauncher/Config.in"
+source "package/rockchip/apps/qplayer/Config.in"
+source "package/rockchip/apps/qsetting/Config.in"
