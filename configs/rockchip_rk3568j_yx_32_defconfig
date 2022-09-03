@@ -1,0 +1,5 @@
+#include "rk356x.config"
+#include "base.config"
+#include "base_extra.config"
+#include "yx.config"
+BR2_arm=y

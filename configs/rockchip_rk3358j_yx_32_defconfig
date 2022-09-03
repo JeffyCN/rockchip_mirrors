@@ -1,0 +1,7 @@
+#include "rk3326_arm.config"
+#include "base.config"
+#include "base_extra.config"
+#include "yx.config"
+BR2_CCACHE=y
+BR2_TARGET_GENERIC_HOSTNAME="rk3358_32"
+BR2_TARGET_GENERIC_ISSUE="Welcome to RK3358 Buildroot"
