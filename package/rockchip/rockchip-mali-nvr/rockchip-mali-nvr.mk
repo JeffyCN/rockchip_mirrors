@@ -50,7 +50,7 @@ ROCKCHIP_MALI_NVR_PKG += OpenCL
 endif
 
 define ROCKCHIP_MALI_NVR_INSTALL_STAGING_CMDS
-        $(INSTALL) -D -m 0755 $(@D)/$(ROCKCHIP_MALI_NVR_SRC) \
+	$(INSTALL) -D -m 0755 $(@D)/$(ROCKCHIP_MALI_NVR_SRC) \
 		$(STAGING_DIR)/usr/lib/libmali.so.1
 
 	for l in $(ROCKCHIP_MALI_NVR_LINKS); do \
@@ -67,7 +67,7 @@ define ROCKCHIP_MALI_NVR_INSTALL_STAGING_CMDS
 endef
 
 define ROCKCHIP_MALI_NVR_INSTALL_TARGET_CMDS
-        $(INSTALL) -D -m 0755 $(@D)/$(ROCKCHIP_MALI_NVR_SRC) \
+	$(INSTALL) -D -m 0755 $(@D)/$(ROCKCHIP_MALI_NVR_SRC) \
 		$(TARGET_DIR)/usr/lib/libmali.so.1
 
 	for l in $(ROCKCHIP_MALI_NVR_LINKS); do \

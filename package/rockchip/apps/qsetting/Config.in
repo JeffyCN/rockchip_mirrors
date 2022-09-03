@@ -3,4 +3,4 @@ config BR2_PACKAGE_QSETTING
 	depends on BR2_PACKAGE_QT5
 	depends on BR2_PACKAGE_RKWIFIBT_APP
 	help
-	  Rockchip setting application based on QT
+	  Rockchip setting application based on Qt

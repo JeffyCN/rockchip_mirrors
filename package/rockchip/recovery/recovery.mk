@@ -44,12 +44,12 @@ ifeq ($(BR2_PACKAGE_RECOVERY_RETRY),y)
 endif
 
 RECOVERY_MAKE_OPTS = \
-        CFLAGS="$(TARGET_CFLAGS) $(RECOVERY_BUILD_OPTS)" \
-        PROJECT_DIR="$(@D)"
+	CFLAGS="$(TARGET_CFLAGS) $(RECOVERY_BUILD_OPTS)" \
+	PROJECT_DIR="$(@D)"
 
 define RECOVERY_IMAGE_COPY
-        mkdir -p $(TARGET_DIR)/res/images
-        cp $(BUILD_DIR)/recovery-$(RECOVERY_VERSION)/res/images/* $(TARGET_DIR)/res/images/
+	mkdir -p $(TARGET_DIR)/res/images
+	cp $(BUILD_DIR)/recovery-$(RECOVERY_VERSION)/res/images/* $(TARGET_DIR)/res/images/
 endef
 
 define RECOVERY_BUILD_CMDS

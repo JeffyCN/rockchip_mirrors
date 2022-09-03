@@ -26,16 +26,16 @@ config BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN
 	  Rockchip sensor IQ bin file.
 
 config BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE
-        string "Rockchip Camera Engine fake camera IQ xml file"
-        default ""
-        help
-          Rockchip sensor fake camera IQ xml file.
+	string "Rockchip Camera Engine fake camera IQ xml file"
+	default ""
+	help
+	  Rockchip sensor fake camera IQ xml file.
 
 config BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_RKISP_DEMO
 	depends on BR2_PACKAGE_ROCKCHIP_RGA
 	bool "Build rkisp_demo"
 	default n
 	help
-		Build rkisp_demo
+	  Build rkisp_demo
 
 endif

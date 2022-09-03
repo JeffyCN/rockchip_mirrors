@@ -1,6 +1,6 @@
 config BR2_PACKAGE_QLAUNCHER
-	bool "QLauncher"
+	bool "qlauncher"
 	depends on BR2_PACKAGE_QT5
 	select BR2_PACKAGE_HICOLOR_ICON_THEME
 	help
-	  Rockchip QLauncher application based on QT
+	  Rockchip qlauncher application based on Qt

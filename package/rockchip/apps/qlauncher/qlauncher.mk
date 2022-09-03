@@ -13,7 +13,7 @@ QLAUNCHER_LICENSE_FILES = LICENSE
 
 # TODO: Add install rules in .pro
 define QLAUNCHER_INSTALL_TARGET_CMDS
-        $(INSTALL) -D -m 0755 $(@D)/QLauncher $(TARGET_DIR)/usr/bin/QLauncher
+	$(INSTALL) -D -m 0755 $(@D)/QLauncher $(TARGET_DIR)/usr/bin/QLauncher
 endef
 
 define QLAUNCHER_INSTALL_INIT_SYSV

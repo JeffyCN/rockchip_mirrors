@@ -31,8 +31,8 @@ ifeq ($(BR2_PACKAGE_RKUPDATE_SIMULATE_ABNORMAL_POWER_OFF),y)
 endif
 
 RKUPDATE_MAKE_OPTS = \
-        CFLAGS="$(TARGET_CFLAGS) $(RKUPDATE_BUILD_OPTS)" \
-        PROJECT_DIR="$(@D)"
+	CFLAGS="$(TARGET_CFLAGS) $(RKUPDATE_BUILD_OPTS)" \
+	PROJECT_DIR="$(@D)"
 
 
 
@@ -41,7 +41,7 @@ define RKUPDATE_BUILD_CMDS
 endef
 
 define RKUPDATE_INSTALL_TARGET_CMDS
-        $(INSTALL) -D -m 755 $(@D)/rkupdate $(TARGET_DIR)/usr/bin/
+	$(INSTALL) -D -m 755 $(@D)/rkupdate $(TARGET_DIR)/usr/bin/
 endef
 
 $(eval $(generic-package))
