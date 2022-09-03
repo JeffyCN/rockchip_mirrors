@@ -23,8 +23,8 @@ RKUPDATE_BUILD_OPTS=-I"$(STAGING_DIR)/usr/include/" -I$(PROJECT_DIR) \
 	-shared -nostdlib
 
 RKUPDATE_MAKE_OPTS = \
-        CFLAGS="$(TARGET_CFLAGS) $(RKUPDATE_BUILD_OPTS)" \
-        PROJECT_DIR="$(@D)"
+	CFLAGS="$(TARGET_CFLAGS) $(RKUPDATE_BUILD_OPTS)" \
+	PROJECT_DIR="$(@D)"
 
 
 
@@ -33,7 +33,7 @@ define RKUPDATE_BUILD_CMDS
 endef
 
 define RKUPDATE_INSTALL_TARGET_CMDS
-        $(INSTALL) -D -m 755 $(@D)/rkupdate $(TARGET_DIR)/usr/bin/
+	$(INSTALL) -D -m 755 $(@D)/rkupdate $(TARGET_DIR)/usr/bin/
 endef
 
 $(eval $(generic-package))
