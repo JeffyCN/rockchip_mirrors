@@ -90,9 +90,9 @@ RKawbDir = $(TARGET_DIR)/usr/lib/rkisp/awb
 define CAMERA_ENGINE_RKISP_INSTALL_STAGING_CMDS
 	$(INSTALL) -D -m 644 $(@D)/build/lib/librkisp.so $(STAGING_DIR)/usr/lib/
 	$(INSTALL) -D -m 644 $(@D)/build/lib/librkisp_api.so $(STAGING_DIR)/usr/lib/
-	mkdir -p $(STAGING_DIR)/usr/include/camera_engine_rkisp/interface
-	$(foreach header,$(wildcard $($(PKG)_BUILDDIR)/interface/*.h),$(INSTALL) -D -m 644 $(header) $(STAGING_DIR)/usr/include/camera_engine_rkisp/interface;)
-	$(INSTALL) -D -m 644 $(@D)/apps/rkisp_api/rkisp_api.h $(STAGING_DIR)/usr/include/camera_engine_rkisp/interface
+	mkdir -p $(STAGING_DIR)/usr/include/camera-engine-rkisp/interface
+	$(foreach header,$(wildcard $($(PKG)_BUILDDIR)/interface/*.h),$(INSTALL) -D -m 644 $(header) $(STAGING_DIR)/usr/include/camera-engine-rkisp/interface;)
+	$(INSTALL) -D -m 644 $(@D)/apps/rkisp_api/rkisp_api.h $(STAGING_DIR)/usr/include/camera-engine-rkisp/interface
 endef
 
 define CAMERA_ENGINE_RKISP_INSTALL_TARGET_CMDS
@@ -103,7 +103,7 @@ define CAMERA_ENGINE_RKISP_INSTALL_TARGET_CMDS
 	mkdir -p $(TARGET_DIR)/etc/iqfiles
 
 	if [ x${CAMERA_ENGINE_RKISP_INSTALL_3A_SCRIPT} != x ]; then \
-		$(INSTALL) -D -m 755 $(TOPDIR)/package/rockchip/camera_engine_rkisp/SXXrkisp_3A \
+		$(INSTALL) -D -m 755 $(TOPDIR)/package/rockchip/camera-engine-rkisp/SXXrkisp_3A \
 			$(TARGET_DIR)/etc/init.d/$(CAMERA_ENGINE_RKISP_3A_SCRIPT_FILENAME); \
 		mkdir -p $(TARGET_DIR)/${CAMERA_ENGINE_RKISP_IQ_DB_DIR}; \
 		sed -i "s:CAMERA_ENGINE_RKISP_XML_DB=.*:CAMERA_ENGINE_RKISP_XML_DB=${CAMERA_ENGINE_RKISP_IQ_DB_DIR}:g" \

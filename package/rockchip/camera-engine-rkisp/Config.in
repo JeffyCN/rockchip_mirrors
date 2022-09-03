@@ -1,6 +1,6 @@
 config BR2_PACKAGE_CAMERA_ENGINE_RKISP
 	depends on BR2_PACKAGE_CAMERA_ENGINE
-	depends on BR2_ROCKCHIP_HAS_ISP1
+	depends on BR2_PACKAGE_ROCKCHIP_HAS_ISP1
 	bool "Rockchip Camera Engine for SoC with ISP1"
 	help
 	  Rockchip camera engine for SoC with ISP1, e.g.
