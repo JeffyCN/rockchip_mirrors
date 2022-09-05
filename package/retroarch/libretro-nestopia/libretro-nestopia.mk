@@ -3,7 +3,7 @@
 # NESTOPIA
 #
 ################################################################################
-LIBRETRO_NESTOPIA_VERSION = faf19f8e64baa09059201d40f09621f820453fca
+LIBRETRO_NESTOPIA_VERSION = a9ee6ca84f04990e209880fe47144e62b14253db
 LIBRETRO_NESTOPIA_SITE = $(call github,libretro,nestopia,$(LIBRETRO_NESTOPIA_VERSION))
 
 LIBRETRO_NESTOPIA_PLATFORM=$(LIBRETRO_PLATFORM)
