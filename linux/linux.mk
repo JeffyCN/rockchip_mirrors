@@ -16,11 +16,6 @@ LINUX_CPE_ID_VENDOR = linux
 LINUX_CPE_ID_PRODUCT = linux_kernel
 LINUX_CPE_ID_PREFIX = cpe:2.3:o
 
-# HACK: Make it virtual for other kernel related packages, e.g. linux-tools.
-ifeq ($(BR2_PACKAGE_LINUX),)
-LINUX_IS_VIRTUAL = YES
-endif
-
 # Compute LINUX_SOURCE and LINUX_SITE from the configuration
 ifeq ($(BR2_LINUX_KERNEL_CUSTOM_TARBALL),y)
 LINUX_TARBALL = $(call qstrip,$(BR2_LINUX_KERNEL_CUSTOM_TARBALL_LOCATION))
