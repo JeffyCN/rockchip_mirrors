@@ -294,6 +294,7 @@ bind_functions()
 {
 	USB_FUNCTIONS_CNT=1
 
+	test $RNDIS_EN = on && syslink_function rndis.gs0
 	test $UAC1_EN = on && syslink_function uac1.gs0
 	test $UAC2_EN = on && syslink_function uac2.gs0
 
@@ -339,7 +340,6 @@ bind_functions()
 	test $NTB_EN = on && syslink_function ffs.ntb
 	test $ADB_EN = on && syslink_function ffs.adb
 	test $ACM_EN = on && syslink_function acm.gs6
-	test $RNDIS_EN = on && syslink_function rndis.gs0
 
 	if [ $HID_EN = on ]; then
 		echo 1 > /sys/kernel/config/usb_gadget/rockchip/functions/hid.usb0/protocol
