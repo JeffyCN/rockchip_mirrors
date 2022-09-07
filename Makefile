@@ -578,7 +578,6 @@ endif
 ifeq ($(BR_FORCE_CHECK_DEPENDENCIES),YES)
 
 define CHECK_ONE_DEPENDENCY
-ifneq ($(2)|$(BR2_LINUX_KERNEL),LINUX|)
 ifeq ($$($(2)_TYPE),target)
 ifeq ($$($(2)_IS_VIRTUAL),)
 ifneq ($$($$($(2)_KCONFIG_VAR)),y)
