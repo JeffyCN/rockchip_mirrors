@@ -1,0 +1,6 @@
+[Match]
+Name=FE0
+[Network]
+Address=192.168.2.170
+Gateway=192.168.2.254
+DNS=192.168.2.240

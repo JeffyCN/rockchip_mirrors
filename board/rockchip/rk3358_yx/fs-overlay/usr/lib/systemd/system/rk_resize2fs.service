@@ -1,0 +1,9 @@
+[Unit]
+Description=Resize root partition
+Before=docker.service
+
+[Service]
+ExecStart=/usr/bin/rk_resize2fs.sh
+
+[Install]
+WantedBy=multi-user.target
