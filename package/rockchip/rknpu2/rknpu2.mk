@@ -12,8 +12,12 @@ RKNPU2_LICENSE = ROCKCHIP
 RKNPU2_LICENSE_FILES = LICENSE
 
 ifeq ($(BR2_arm),y)
+GCC_TYPE=arm-none-linux-gnueabihf
+EXPORT_PATH=$(PATH):$(TOPDIR)/../prebuilts/gcc/linux-x86/arm/gcc-arm-10.3-2021.07-x86_64-arm-none-linux-gnueabihf/bin
 NPU_PLATFORM_ARCH = armhf
 else
+GCC_TYPE=aarch64-none-linux-gnu
+EXPORT_PATH=$(PATH):$(TOPDIR)/../prebuilts/gcc/linux-x86/aarch64/gcc-arm-10.3-2021.07-x86_64-aarch64-none-linux-gnu/bin
 NPU_PLATFORM_ARCH = aarch64
 endif
 
@@ -28,7 +32,7 @@ NPU_DEMO_BUILD = build-linux_RK3588.sh
 endif
 
 define RKNPU2_BUILD_CMDS
-	cd $(@D)/examples/rknn_common_test && ./$(NPU_DEMO_BUILD)
+	cd $(@D)/examples/rknn_common_test && export PATH=$(EXPORT_PATH) && export GCC_COMPILER=$(GCC_TYPE) && ./$(NPU_DEMO_BUILD)
 endef
 
 define RKNPU2_INSTALL_STAGING_CMDS
