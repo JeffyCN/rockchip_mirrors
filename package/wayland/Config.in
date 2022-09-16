@@ -14,3 +14,8 @@ config BR2_PACKAGE_WAYLAND
 
 comment "wayland needs a toolchain w/ threads, dynamic library"
 	depends on !BR2_TOOLCHAIN_HAS_THREADS || BR2_STATIC_LIBS
+
+if BR2_PACKAGE_WAYLAND
+config BR2_PACKAGE_WAYLAND_WITHOUT_EGL
+	bool "without wayland-egl"
+endif
