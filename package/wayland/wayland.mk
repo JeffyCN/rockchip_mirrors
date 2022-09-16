@@ -17,7 +17,7 @@ HOST_WAYLAND_DEPENDENCIES = host-pkgconf host-expat host-libffi host-libxml2
 WAYLAND_CONF_OPTS = -Dtests=false -Ddocumentation=false
 HOST_WAYLAND_CONF_OPTS = -Dtests=false -Ddocumentation=false
 
-ifeq ($(BR2_PACKAGE_WAYLAND_INSTALL_WAYLAND_EGL),)
+ifeq ($(BR2_PACKAGE_WAYLAND_WITHOUT_EGL),y)
 WAYLAND_CONF_OPTS += -Degl=false
 endif
 

@@ -49,6 +49,7 @@ config BR2_PACKAGE_ROCKCHIP_MALI_HAS_WAYLAND
 	bool "wayland winsys"
 	default y
 	depends on BR2_PACKAGE_WAYLAND
+	select BR2_PACKAGE_WAYLAND_WITHOUT_EGL
 	help
 	  For wayland platform.
 
