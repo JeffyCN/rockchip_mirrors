@@ -1,7 +1,6 @@
 #include "rk3308_aarch64.config"
 #include "audio.config"
 #include "base.config"
-#include "wifi.config"
 #include "network.config"
 BR2_CCACHE=y
 # base tools

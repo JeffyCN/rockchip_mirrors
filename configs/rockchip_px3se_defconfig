@@ -10,10 +10,8 @@
 #include "test.config"
 #include "debug.config"
 #include "benchmark.config"
-#include "wifi.config"
 #include "network.config"
 #include "bt.config"
 #include "px3se_arm.config"
 BR2_TARGET_GENERIC_HOSTNAME="px3se"
 BR2_TARGET_GENERIC_ISSUE="Welcome to PX3se Buildroot"
-BR2_PACKAGE_RKWIFIBT_RTL8723DS=y

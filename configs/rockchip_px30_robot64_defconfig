@@ -1,7 +1,6 @@
 #include "rk3326_aarch64.config"
 #include "audio.config"
 #include "base.config"
-#include "wifi.config"
 #include "network.config"
 #include "camera.config"
 BR2_CCACHE=y
@@ -28,7 +27,6 @@ BR2_PACKAGE_IW=y
 # camera
 BR2_PACKAGE_CAMERA_ENGINE_RKISP_IQFILE="ov5695_TongJu_CHT842-MD.xml"
 # wifi type
-BR2_PACKAGE_RKWIFIBT_AP6212A1=y
 BR2_ROOTFS_OVERLAY:="board/rockchip/common/robot/base board/rockchip/common/robot/fs-overlay-64"
 BR2_TARGET_GENERIC_HOSTNAME="rk3326_robot64"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3326 Buildroot For Robot"
