@@ -13,13 +13,11 @@
 #include "test.config"
 #include "debug.config"
 #include "benchmark.config"
-#include "wifi.config"
 #include "network.config"
 #include "bt.config"
 BR2_CCACHE=y
 BR2_TARGET_GENERIC_HOSTNAME="rk3326_64"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3326 Buildroot"
-BR2_PACKAGE_RKWIFIBT_BTUART="ttyS1"
 BR2_PACKAGE_DOSFSTOOLS_FATLABEL=y
 BR2_PACKAGE_DOSFSTOOLS_FSCK_FAT=y
 BR2_PACKAGE_FATRESIZE=y

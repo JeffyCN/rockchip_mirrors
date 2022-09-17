@@ -3,14 +3,11 @@
 #include "base_extra.config"
 #include "audio.config"
 #include "bt.config"
-#include "wifi.config"
 #include "network.config"
 #include "test.config"
 BR2_CCACHE=y
 BR2_TARGET_GENERIC_HOSTNAME="rk3308_32"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3308 Buildroot"
-#wifibt
-BR2_PACKAGE_RKWIFIBT_BTUART="ttyS0"
 #EQ
 BR2_PACKAGE_EQ_DRC_PROCESS=y
 # base tools
