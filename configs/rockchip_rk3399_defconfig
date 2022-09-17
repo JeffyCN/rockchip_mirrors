@@ -8,6 +8,7 @@
 #include "weston.config"
 #include "chromium.config"
 #include "gpu.config"
+#include "powermanager.config"
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"

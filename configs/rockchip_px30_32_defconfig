@@ -4,6 +4,7 @@
 #include "base_extra.config"
 #include "gpu.config"
 #include "weston.config"
+#include "powermanager.config"
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "audio.config"
