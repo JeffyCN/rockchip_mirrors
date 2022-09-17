@@ -1,6 +1,5 @@
 config BR2_PACKAGE_QSETTING
 	bool "qsetting"
 	depends on BR2_PACKAGE_QT5
-	depends on BR2_PACKAGE_RKWIFIBT_APP
 	help
 	  Rockchip setting application based on Qt
