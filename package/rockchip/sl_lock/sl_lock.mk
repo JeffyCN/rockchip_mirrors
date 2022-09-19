@@ -10,7 +10,7 @@ ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKISP),y)
 endif
 
 ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ),y)
-    SL_LOCK_DEPENDENCIES += camera_engine_rkaiq
+    SL_LOCK_DEPENDENCIES += camera-engine-rkaiq
     SL_LOCK_CONF_OPTS += "-DCAMERA_ENGINE_RKAIQ=y"
 endif
 

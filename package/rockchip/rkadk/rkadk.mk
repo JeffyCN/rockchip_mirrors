@@ -11,7 +11,7 @@ RKADK_CONF_OPTS += -DUSE_ROCKIT=ON \
 endif
 
 ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ), y)
-RKADK_DEPENDENCIES += camera_engine_rkaiq
+RKADK_DEPENDENCIES += camera-engine-rkaiq
 RKADK_CONF_OPTS += -DUSE_RKAIQ=ON
 endif
 

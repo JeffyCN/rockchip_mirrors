@@ -15,7 +15,7 @@ ROCKIT_DEPENDENCIES += rockchip-mpp
 endif
 
 ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ), y)
-ROCKIT_DEPENDENCIES += camera_engine_rkaiq
+ROCKIT_DEPENDENCIES += camera-engine-rkaiq
 ROCKIT_CONF_OPTS += -DUSE_RKAIQ=ON
 endif
 

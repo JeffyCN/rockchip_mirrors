@@ -10,7 +10,7 @@ ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKISP),y)
 endif
 
 ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ),y)
-    MULT_UVC_DEMO_DEPENDENCIES += camera_engine_rkaiq
+    MULT_UVC_DEMO_DEPENDENCIES += camera-engine-rkaiq
     MULT_UVC_DEMO_CONF_OPTS += "-DCAMERA_ENGINE_RKAIQ=y"
 endif
 

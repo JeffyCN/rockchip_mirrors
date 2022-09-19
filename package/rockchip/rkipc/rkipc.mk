@@ -1,7 +1,7 @@
 RKIPC_SITE = $(TOPDIR)/../app/rkipc
 RKIPC_SITE_METHOD = local
 
-RKIPC_DEPENDENCIES = camera_engine_rkaiq
+RKIPC_DEPENDENCIES = camera-engine-rkaiq
 
 ifeq ($(BR2_PACKAGE_RK_OEM), y)
 RKIPC_INSTALL_TARGET_OPTS = DESTDIR=$(BR2_PACKAGE_RK_OEM_INSTALL_TARGET_DIR) install/fast
