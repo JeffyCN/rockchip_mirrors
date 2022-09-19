@@ -310,7 +310,7 @@ int main(int argc, char **argv)
 		if (!strcmp(argv[i], "-c") || !strcmp(argv[i], "-E") ||
 		    !strcmp(argv[i], "-s") ||
 		    !strcmp(argv[i], "--precompile")) {
-			if (!strcmp(basename, "clang"))
+			if (!strncmp(basename, "clang", strlen("clang")))
 				linker_args = 0;
 			break;
 		}
