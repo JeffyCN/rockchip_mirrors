@@ -1,0 +1,21 @@
+#include "rk3308_arm.config"
+#include "base.config"
+#include "base_extra.config"
+#include "audio.config"
+#include "network.config"
+#include "test.config"
+BR2_CCACHE=y
+BR2_TARGET_GENERIC_HOSTNAME="rk3308h_32"
+BR2_TARGET_GENERIC_ISSUE="Welcome to RK3308 Buildroot"
+#EQ
+BR2_PACKAGE_EQ_DRC_PROCESS=y
+# base tools
+BR2_PACKAGE_RECOVERY_USE_UPDATEENGINE=y
+BR2_PACKAGE_RECOVERY_UPDATEENGINEBIN=y
+# debug tools
+BR2_PACKAGE_COREUTILS=y
+BR2_PACKAGE_EVTEST=y
+BR2_PACKAGE_IO=y
+BR2_PACKAGE_I2C_TOOLS=y
+BR2_PACKAGE_IW=y
+BR2_PACKAGE_STRACE=y
