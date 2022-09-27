@@ -169,6 +169,7 @@ define SHADOW_PERMISSIONS
 endef
 
 define SHADOW_INSTALL_TARGET_CMDS
+	$(INSTALL) -m 0755 -D $(@D)/src/passwd $(TARGET_DIR)/usr/bin/passwd
 	$(INSTALL) -m 0755 -D $(@D)/src/useradd $(TARGET_DIR)/usr/bin/useradd
 	$(INSTALL) -m 0755 -D $(@D)/src/userdel $(TARGET_DIR)/usr/bin/userdel
 	$(INSTALL) -m 0755 -D $(@D)/src/usermod $(TARGET_DIR)/usr/bin/usermod
