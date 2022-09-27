@@ -1,6 +1,6 @@
 #include "base.config"
 #include "rk3588_aarch64.config"
-#include "rk3588_tee.config"
+#include "tee_aarch64_v2.config"
 
 # BR2_PACKAGE_RKSCRIPT is not set
 BR2_ROOTFS_OVERLAY="board/rockchip/common/security-ramdisk-overlay/"
