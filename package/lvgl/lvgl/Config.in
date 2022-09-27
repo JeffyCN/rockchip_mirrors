@@ -1,0 +1,5 @@
+config BR2_PACKAGE_LVGL
+	bool "Little VGL"
+	default n
+	help
+	  Little VGL
