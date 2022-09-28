@@ -1,6 +1,0 @@
-[Match]
-Name=FE1
-[Network]
-Address=192.168.2.171
-Gateway=192.168.2.254
-DNS=192.168.2.240
