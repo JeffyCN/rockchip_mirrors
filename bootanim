@@ -1,0 +1,81 @@
+#!/bin/sh
+#
+# Usage:
+# bootanim start [timeout]
+# bootanim stop
+#
+# Example hook:
+# root@RK3588:/# more /etc/bootanim.d/gst-bootanim.sh
+# #!/bin/sh
+# gst-play-1.0 /etc/bootanim.d/bootanim.mp4 -q --no-interactive
+
+HOOK_DIR=/etc/bootanim.d/
+PID_FILE=/tmp/bootanim.pid
+LOG_FILE=/tmp/bootanim.log
+TIMEOUT=${2:-5}
+
+alias pid_sid='ps x -o pid,sid | grep -w'
+
+bootanim_start() {
+	# Freeze display server
+	touch /dev/null $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
+
+	echo "Starting bootanim: $$..."
+
+	# Start bootanim hooks
+	for hook in $HOOK_DIR/*.sh ;do
+		echo "Starting hook: $hook..."
+		$hook&
+	done
+
+	# Save bootanim's pid
+	echo $$ > $PID_FILE
+}
+
+bootanim_stop() {
+	[ -f $PID_FILE ] || return
+
+	# Parse our sid (same as bootanim's pid)
+	SID=$(cat $PID_FILE; rm -rf $PID_FILE)
+	[ -n "$SID" ] || return
+
+	# Parse children pid
+	CPID=$(pid_sid $SID | xargs -n 2 | cut -d' ' -f1 | xargs)
+
+	echo "Stopping bootanim: ${CPID:-none} for $SID..."
+
+	# Pause children
+	[ -n "$CPID" ] && kill -STOP $CPID &>/dev/null
+
+	# Unfreeze display server
+	rm -f $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
+	sleep .1
+
+	# Kill children
+	[ -n "$CPID" ] && kill -9 $CPID &>/dev/null
+}
+
+case "$1" in
+	start)
+		# Make sure that we own this session (pid equals sid)
+		if ! pid_sid -q "$$$" ; then
+			setsid $0 $@
+			exit 0;
+		fi
+
+		$0 stop
+		bootanim_start 2>&1 | tee -a $LOG_FILE&
+
+		# Timeout killer
+		start-stop-daemon -S -q -b -n bootanim-stop -x /bin/sh -- \
+			-c "sleep $TIMEOUT; $0 stop"
+		;;
+	stop)
+		bootanim_stop 2>&1 | tee -a $LOG_FILE
+		;;
+	*)
+		echo "Usage: $0 [start|stop]"
+		;;
+esac
+
+:
