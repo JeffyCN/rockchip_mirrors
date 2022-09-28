@@ -12,6 +12,12 @@ config BR2_PACKAGE_RKSCRIPT_MOUNTALL
 	help
 	  Install S21mountall.sh
 
+config BR2_PACKAGE_RKSCRIPT_BOOTANIM
+	bool "rkscript bootanim"
+	default y
+	help
+	  Install S31bootanim.sh
+
 config BR2_PACKAGE_RKSCRIPT_EXTRA_USB_CONFIG
 	string "extra usb config"
 	help

@@ -72,6 +72,12 @@ define RKSCRIPT_INSTALL_INIT_SYSV_MOUNTALL
 endef
 endif
 
+ifeq ($(BR2_PACKAGE_RKSCRIPT_BOOTANIM),y)
+define RKSCRIPT_INSTALL_INIT_SYSV_BOOTANIM
+	$(INSTALL) -m 0755 -D $(@D)/S31bootanim.sh $(TARGET_DIR)/etc/init.d/
+endef
+endif
+
 define RKSCRIPT_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/init.d/
 	$(INSTALL) -m 0755 -D $(@D)/usbdevice $(TARGET_DIR)/usr/bin/
@@ -79,11 +85,17 @@ define RKSCRIPT_INSTALL_TARGET_CMDS
 
 	echo $(RKSCRIPT_USB_CONFIG) | xargs -n 1 > \
 		$(TARGET_DIR)/etc/init.d/.usb_config
+
+	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/bootanim.d/
+	$(INSTALL) -m 0755 -D $(@D)/bootanim $(TARGET_DIR)/usr/bin/
+	$(INSTALL) -m 0755 -D $(RKSCRIPT_PKGDIR)/gst-bootanim.sh \
+		$(TARGET_DIR)/etc/bootanim.d/
 endef
 
 define RKSCRIPT_INSTALL_INIT_SYSV
 	$(RKSCRIPT_INSTALL_INIT_SYSV_MOUNTALL)
 	$(RKSCRIPT_INSTALL_INIT_SYSV_IODOMAIN)
+	$(RKSCRIPT_INSTALL_INIT_SYSV_BOOTANIM)
 endef
 
 define RKSCRIPT_INSTALL_INIT_SYSTEMD
