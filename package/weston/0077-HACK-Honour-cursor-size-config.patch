@@ -1,4 +1,4 @@
-From 39e1b190c77540b56363f388bedcd48878f76143 Mon Sep 17 00:00:00 2001
+From be6fa16f61d027ded5f6bd73deefdc0bd4909d61 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
 Subject: [PATCH 77/77] HACK: Honour cursor-size config
@@ -15,10 +15,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 79 insertions(+), 12 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 3ca4a0a..a1c22ea 100644
+index 558537e..039307b 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
-@@ -3539,6 +3539,10 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3542,6 +3542,10 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  	wet.compositor->exit = handle_exit;
  	wet.compositor->warm_up = warm_up;
  

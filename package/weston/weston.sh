@@ -43,7 +43,7 @@ export WESTON_DRM_KEEP_RATIO=1
 # export WESTON_DRM_DISABLE_PLANE_SCALE=1
 
 # Tag file for freezing weston display
-# export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
+export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 
 # Set dynamic config file path
 # export WESTON_DRM_CONFIG=/tmp/.weston_drm.conf
