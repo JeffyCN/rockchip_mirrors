@@ -27,6 +27,16 @@ config BR2_PACKAGE_RKSCRIPT_BOOTANIM
 	help
 	  Install bootanim scripts.
 
+if BR2_PACKAGE_RKSCRIPT_BOOTANIM
+
+config BR2_PACKAGE_RKSCRIPT_BOOTANIM_TIMEOUT
+	int "bootanim timeout"
+	default 3
+	help
+	  Bootanim timeout.
+
+endif
+
 config BR2_PACKAGE_RKSCRIPT_USBDEVICE
 	bool "rkscript usbdevice"
 	default y

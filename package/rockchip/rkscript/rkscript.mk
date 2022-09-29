@@ -74,6 +74,8 @@ endif
 ifeq ($(BR2_PACKAGE_RKSCRIPT_BOOTANIM),y)
 define RKSCRIPT_INSTALL_BOOTANIM
 	$(INSTALL) -m 0755 -D $(@D)/bootanim $(TARGET_DIR)/usr/bin/
+	$(SED) "s/^\(TIMEOUT=\).*/\1$(BR2_PACKAGE_RKSCRIPT_BOOTANIM_TIMEOUT)/" \
+		$(TARGET_DIR)/usr/bin/bootanim
 
 	$(INSTALL) -m 0755 -d $(TARGET_DIR)/etc/bootanim.d/
 	$(INSTALL) -m 0755 -D $(RKSCRIPT_PKGDIR)/gst-bootanim.sh \
