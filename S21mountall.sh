@@ -100,15 +100,15 @@ format_ubifs()
 	fi
 }
 
+is_rootfs()
+{
+	[ $MOUNT_POINT = "/" ]
+}
+
 remount_part()
 {
 	mountpoint -q $MOUNT_POINT || return
-
-	if touch $MOUNT_POINT &>/dev/null; then
-		[ "$1" = ro ] && mount -o remount,ro $MOUNT_POINT
-	else
-		[ "$1" = rw ] && mount -o remount,rw $MOUNT_POINT
-	fi
+	mount -o remount,${1:-rw} $MOUNT_POINT
 }
 
 format_part()
@@ -152,63 +152,41 @@ format_part()
 
 format_resize()
 {
-	TEMP=$(mktemp -d)
-	$MOUNT $DEV $TEMP || return 1
-
-	USED_SIZE=$(df $TEMP|tail -1|awk '{ print $3 }')
-	TEMP_SIZE=$(df /tmp/|tail -1|awk '{ print $4 }')
-	if [ $USED_SIZE -gt $(($TEMP_SIZE - 4096)) ]; then
-		umount $TEMP
-		return 1
-	fi
+	BACKUP=$1
+	SRC=$(realpath $MOUNT_POINT)
 
 	echo "Format-resizing $DEV($FSTYPE)"
 
-	TARBALL=/tmp/${PART_NAME}.tar
-
 	# Backup original data
-	tar cf $TARBALL $TEMP
-	umount $TEMP
+	cp -a "$SRC" "$BACKUP/" || return 1
+	umount "$SRC" || return 1
 
-	format_part || { rm $TARBALL; return 1; }
+	# Format and mount rw
+	format_part || return 1
+	mount_part || return 1
+	remount_part rw
 
 	# Restore backup data
-	$MOUNT $DEV $TEMP
-	tar xf $TARBALL -C /
-	rm $TARBALL
-
-	umount $TEMP
+	cp -a "$BACKUP/$SRC" $(dirname "$SRC") || return 1
 }
 
 resize_ext2()
 {
 	check_tool resize2fs BR2_PACKAGE_E2FSPROGS_RESIZE2FS || return 1
 
-	# Force using online resize, see:
-	# https://bugs.launchpad.net/ubuntu/+source/e2fsprogs/+bug/1796788.
-	TEMP=$(mktemp -d)
-	$MOUNT $DEV $TEMP || return 1
-
-	resize2fs $DEV && tune2fs $DEV -L $PART_NAME
-	RET=$?
-
-	umount $TEMP
-	return $RET
+	resize2fs $DEV
 }
 
 resize_vfat()
 {
 	check_tool fatresize BR2_PACKAGE_FATRESIZE || return 1
 
-	# Make sure unmounted
-	umount $MOUNT_POINT &>/dev/null
-
 	SIZE=$(fatresize -i $DEV | grep "Size:" | grep -o "[0-9]*$")
 
 	# Somehow fatresize only works for 256M+ fat
 	[ "$SIZE" -gt $((256 * 1024 * 1024)) ] && return 1
 
-	MAX_SIZE=$(( $(cat ${SYS_PATH}/size) * 512))
+	MAX_SIZE=$(( $(cat $SYS_PATH/size) * 512))
 	MIN_SIZE=$(($MAX_SIZE - 16 * 1024 * 1024))
 	[ $MIN_SIZE -lt $SIZE ] && return 0 # Large enough!
 	while [ $MAX_SIZE -gt $MIN_SIZE ];do
@@ -216,10 +194,7 @@ resize_vfat()
 		MAX_SIZE=$(($MAX_SIZE - 512 * 1024))
 
 		# Try to resize with fatresize, not always work
-		if fatresize -s ${MAX_SIZE} $DEV; then
-			fatlabel $DEV $PART_NAME
-			return 0
-		fi
+		fatresize -s $MAX_SIZE $DEV && return
 	done
 	return 1
 }
@@ -227,23 +202,34 @@ resize_vfat()
 resize_ntfs()
 {
 	check_tool ntfsresize BR2_PACKAGE_NTFS_3G_NTFSPROGS || return 1
-	echo y | ntfsresize -f $DEV && ntfslabel $DEV $PART_NAME
+
+	echo y | ntfsresize -f $DEV
 }
 
 resize_part()
 {
-	# Already resized
-	# Use volume label to mark resized
-	[ "$FS_LABEL" = "$PART_NAME" ] && return
+	# Unable to resize
+	[ -z "$FSRESIZE" ] && return
+
+	# Fixed size or already resized
+	[ -f $MOUNT_POINT/.fixed -o -f $MOUNT_POINT/.resized ] && return
 
 	echo "Resizing $DEV($FSTYPE)"
 
-	# Resize needs read-write
+	# Online resize needs read-write
 	remount_part rw
-	eval resize_$FSGROUP && return
+	if eval $FSRESIZE; then
+		touch $MOUNT_POINT/.resized
+		return
+	fi
+
+	# Done with rootfs
+	is_rootfs && return
 
 	# Fallback to format resize
-	[ ! "$IS_ROOTDEV" ] && format_resize
+	TEMP_BACKUP=$(mktemp -d)
+	format_resize $TEMP_BACKUP && touch $MOUNT_POINT/.resized
+	rm -rf $TEMP_BACKUP
 }
 
 erase_oem_command()
@@ -253,7 +239,7 @@ erase_oem_command()
 
 	echo "OEM: Erasing $CMD in $FILE"
 
-	COUNT=$(echo $CMD|wc -c)
+	COUNT=$(echo $CMD | wc -c)
 	OFFSETS=$(strings -t d $FILE | grep -w "$CMD" | awk '{ print $1 }')
 
 	for offset in $OFFSETS; do
@@ -291,7 +277,7 @@ handle_oem_command()
 	for cmd in $OEM_CMD; do
 		case $cmd in
 			cmd_wipe_$PART_NAME)
-				[ "$IS_ROOTDEV" ] && continue
+				is_rootfs && continue
 
 				echo "OEM: $cmd - Wiping $DEV"
 				format_part && done_oem_command $cmd
@@ -303,14 +289,83 @@ handle_oem_command()
 convert_mount_opts()
 {
 	for opt in $@; do
-		echo $OPTS|grep -woE $opt
+		echo ${OPTS//,/ } | xargs -n 1 | grep -oE "^$opt$"
 	done | tr "\n" ","
 }
 
 prepare_part()
 {
-	# Try to umount the mounted partitions
-	[ "$IS_ROOTDEV" ] || umount $MOUNT_POINT &>/dev/null
+	# Make sure other partitions are unmounted.
+	is_rootfs || umount -l $MOUNT_POINT &>/dev/null
+
+	case $FSTYPE in
+		ext[234])
+			FSGROUP=ext2
+			FSCK_CONFIG=BR2_PACKAGE_E2FSPROGS_FSCK
+			FSRESIZE=resize_ext2
+
+			MOUNT="busybox mount"
+			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
+			;;
+		msdos|fat|vfat)
+			FSGROUP=vfat
+			FSCK_CONFIG=BR2_PACKAGE_DOSFSTOOLS_FSCK_FAT
+			FSRESIZE=resize_vfat
+
+			MOUNT="busybox mount"
+			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
+			;;
+		ntfs)
+			FSGROUP=ntfs
+			FSCK_CONFIG=BR2_PACKAGE_NTFS_3G_NTFSPROGS
+			FSRESIZE=resize_ntfs
+
+			MOUNT=ntfs-3g
+			check_tool ntfs-3g BR2_PACKAGE_NTFS_3G || return 1
+			MOUNT_OPTS=$(convert_mount_opts "$NTFS_3G_MOUNT_OPTS")
+			;;
+		ubi|ubifs)
+			FSGROUP=ubifs
+			# No fsck for ubifs
+			unset FSCK_CONFIG
+			# No resize for ubifs
+			unset FSRESIZE
+
+			MOUNT="busybox mount -t ubifs"
+			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
+			;;
+		squashfs)
+			FSGROUP=squashfs
+			# No fsck for squashfs
+			unset FSCK_CONFIG
+			# No resize for squashfs
+			unset FSRESIZE
+
+			MOUNT="busybox mount"
+			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
+			;;
+		auto)
+			FSGROUP=auto
+			# Running fsck on a random fs is dangerous
+			unset FSCK_CONFIG
+			# No resize for auto
+			unset FSRESIZE
+
+			MOUNT="busybox mount"
+			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
+			;;
+		*)
+			echo "Unsupported file system $FSTYPE for $DEV"
+			return
+	esac
+
+	# Will restore ro/rw at the end
+	MOUNT_RO_RW=rw
+	if echo $MOUNT_OPTS | grep -o "[^,]*ro\>" | grep "^ro$"; then
+		MOUNT_RO_RW=ro
+	fi
+
+	MOUNT_OPTS=${MOUNT_OPTS:+" -o ${MOUNT_OPTS%,}"}
 
 	# Prepare for ubi (consider /dev/mtdX as ubiblock)
 	if [ $FSGROUP == ubifs ] || echo $DEV | grep -q "/dev/mtd[0-9]";then
@@ -322,64 +377,6 @@ prepare_part()
 			format_ubifs || return 1
 		fi
 	fi
-
-	case $FSGROUP in
-		ext2)
-			MOUNT="busybox mount"
-			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
-
-			check_tool dumpe2fs BR2_PACKAGE_E2FSPROGS || return 1
-			LABEL=$(dumpe2fs -h $DEV 2>/dev/null| grep "name:")
-			;;
-		vfat)
-			MOUNT="busybox mount"
-			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
-
-			check_tool fatlabel BR2_PACKAGE_DOSFSTOOLS_FATLABE || return 1
-			LABEL=$(fatlabel $DEV)
-			;;
-		ntfs)
-			MOUNT=ntfs-3g
-			check_tool ntfs-3g BR2_PACKAGE_NTFS_3G || return 1
-			MOUNT_OPTS=$(convert_mount_opts "$NTFS_3G_MOUNT_OPTS")
-
-			check_tool ntfslabel BR2_PACKAGE_NTFS_3G_NTFSPROGS || return 1
-			LABEL=$(ntfslabel $DEV)
-			;;
-		ubifs)
-			MOUNT="busybox mount -t ubifs"
-			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
-
-			LABEL=$PART_NAME
-			;;
-		squashfs|auto)
-			MOUNT="busybox mount"
-			MOUNT_OPTS=$(convert_mount_opts "$BUSYBOX_MOUNT_OPTS")
-
-			LABEL=$PART_NAME
-			;;
-		*)
-			echo Unsupported file system $FSTYPE for $DEV
-			return 1
-			;;
-	esac
-
-	if [ $? -ne 0 ]; then
-		echo "Wrong fs type($FSTYPE) for $DEV"
-		if [ "$AUTO_MKFS" ]; then
-			echo "Auto formatting $DEV to $FSTYPE"
-			format_part && prepare_part && return 0
-		fi
-		return 1
-	fi
-
-	FS_LABEL="$(echo $LABEL|xargs -n 1|tail -1)"
-
-	MOUNT_OPTS=${MOUNT_OPTS:+" -o ${MOUNT_OPTS%,}"}
-
-	mountpoint -q $MOUNT_POINT || return 0
-	MOUNTED_RO_RW=$(touch $MOUNT_POINT &>/dev/null && echo rw || echo ro)
-	return 0
 }
 
 check_part()
@@ -389,10 +386,21 @@ check_part()
 
 	check_tool fsck.$FSGROUP $FSCK_CONFIG || return
 
-	# Fsck rootfs needs read-only
-	[ "$IS_ROOTDEV" ] && remount_part ro
+	# Fsck needs read-only
+	remount_part ro
 
 	fsck.$FSGROUP -y $DEV
+}
+
+mount_part()
+{
+	echo "Mounting $DEV($FSTYPE) on $MOUNT_POINT ${MOUNT_OPTS:+with$MOUNT_OPTS}"
+	$MOUNT $DEV $MOUNT_POINT $MOUNT_OPTS && return
+	[ "$AUTO_MKFS" ] || return
+
+	echo "Failed to mount $DEV, try to format it"
+	format_part && \
+		$MOUNT $DEV $MOUNT_POINT $MOUNT_OPTS
 }
 
 do_part()
@@ -401,7 +409,7 @@ do_part()
 	[ $# -lt 6 ] && return
 
 	# Ignore comments
-	echo $1 |grep -q "^#" && return
+	echo $1 | grep -q "^#" && return
 
 	DEV=$(echo $1 | sed "s#.*LABEL=#/dev/block/by-name/#")
 	MOUNT_POINT=$2
@@ -412,18 +420,16 @@ do_part()
 	# Ignore external storages
 	echo $MOUNT_POINT | grep -q "^\/mnt\/" && return
 
-	IS_ROOTDEV=$(echo $MOUNT_POINT | grep -w '/')
-
 	# Find real dev for root dev
-	if [ "$IS_ROOTDEV" ];then
-		DEV=$(mountpoint -n /|cut -d ' ' -f 1)
+	if is_rootfs; then
+		DEV=$(mountpoint -n / | cut -d ' ' -f 1)
 
 		# Fallback to the by-name link
 		[ "$DEV" ] || DEV=/dev/block/by-name/rootfs
 	fi
 
 	DEV=$(realpath $DEV 2>/dev/null)
-	PART_NO=$(echo $DEV|grep -oE "[0-9]*$")
+	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
 
 	# Unknown device
 	[ -b "$DEV" -o -c "$DEV" ] || return
@@ -438,70 +444,23 @@ do_part()
 
 	echo "Handling $PART_NAME: $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
 
-	case $FSTYPE in
-		ext[234])
-			FSGROUP=ext2
-			FSCK_CONFIG=BR2_PACKAGE_E2FSPROGS_FSCK
-			;;
-		msdos|fat|vfat)
-			FSGROUP=vfat
-			FSCK_CONFIG=BR2_PACKAGE_DOSFSTOOLS_FSCK_FAT
-			;;
-		ntfs)
-			FSGROUP=ntfs
-			FSCK_CONFIG=BR2_PACKAGE_NTFS_3G_NTFSPROGS
-			;;
-		ubi|ubifs)
-			FSGROUP=ubifs
-			# No fsck for ubifs
-			unset FSCK_CONFIG
-			;;
-		squashfs)
-			FSGROUP=squashfs
-			# No fsck for squashfs
-			unset FSCK_CONFIG
-			;;
-		auto)
-			FSGROUP=auto
-			# Running fsck on a random fs is dangerous
-			unset FSCK_CONFIG
-			;;
-		*)
-			echo "Unsupported file system $FSTYPE for $DEV"
-			return
-	esac
+	# Setup check/mount tools and do some prepare
+	prepare_part || return
 
 	# Handle OEM commands for current partition
 	handle_oem_command
 
-	# Setup check/mount tools and do some prepare
-	prepare_part || return
-
 	# Check and repair
 	check_part
+
+	# Mount partition
+	is_rootfs || mount_part || return
 
 	# Resize partition if needed
 	resize_part
 
 	# Restore ro/rw
-	remount_part $MOUNTED_RO_RW
-
-	# Done with rootdev
-	[ "$IS_ROOTDEV" ] && return
-
-	# Done with mounted partitions
-	if mountpoint -q $MOUNT_POINT; then
-		echo "Already mounted $DEV($MOUNT_POINT)"
-		return
-	fi
-
-	echo "Mounting $DEV($FSTYPE) on $MOUNT_POINT ${MOUNT_OPTS:+with$MOUNT_OPTS}"
-	$MOUNT $DEV $MOUNT_POINT $MOUNT_OPTS && return
-	[ "$AUTO_MKFS" ] || return
-
-	echo "Failed to mount $DEV, try to format it"
-	format_part && \
-		$MOUNT $DEV $MOUNT_POINT $MOUNT_OPTS
+	remount_part $MOUNT_RO_RW
 }
 
 prepare_mountall()
@@ -545,7 +504,7 @@ case "$1" in
 
 		LOGFILE=/tmp/mountall.log
 
-		mountall 2>&1 |tee $LOGFILE
+		mountall 2>&1 | tee $LOGFILE
 		echo "Log saved to $LOGFILE"
 		;;
 	restart|reload|force-reload)
