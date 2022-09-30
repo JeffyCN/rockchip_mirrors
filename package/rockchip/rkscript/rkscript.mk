@@ -107,6 +107,8 @@ endef
 endif
 
 define RKSCRIPT_INSTALL_TARGET_CMDS
+	$(INSTALL) -m 0755 -D $(@D)/*-helper $(TARGET_DIR)/usr/bin/
+
 	$(RKSCRIPT_INSTALL_BOOTANIM)
 	$(RKSCRIPT_INSTALL_USBDEVICE)
 endef
