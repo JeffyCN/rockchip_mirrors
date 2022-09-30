@@ -1,0 +1,66 @@
+#!/bin/sh
+
+# Uncomment below to see more logs
+# set -x
+
+source $(dirname $0)/disk-helper
+
+do_part()
+{
+	DEV=$1
+	MOUNT_POINT=$2
+	FSTYPE=$3
+	OPTS=$4
+
+	# Ignore external storages
+	echo $MOUNT_POINT | grep -q "^\/mnt\/" && return
+
+	# Find real dev for root dev
+	if is_rootfs; then
+		DEV=$(mountpoint -n / | cut -d ' ' -f 1)
+
+		# Fallback to the by-name link
+		[ "$DEV" ] || DEV=$(realpath /dev/block/by-name/rootfs)
+	fi
+
+	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
+
+	# Unknown device
+	[ -b "$DEV" -o -c "$DEV" ] || return
+
+	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
+	if [ -f "$SYS_PATH/name" ]; then
+		PART_NAME=$(cat $SYS_PATH/name)
+	else
+		PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
+	fi
+	PART_NAME=${PART_NAME:-${DEV##*/}}
+
+	echo "Handling $PART_NAME: $DEV $MOUNT_POINT $FSTYPE $OPTS"
+
+	# Setup check/mount tools and do some prepare
+	prepare_part || return
+
+	# Store ro/rw
+	MOUNTED_RO_RW=$(touch $MOUNT_POINT &>/dev/null && echo rw || echo ro)
+
+	# Resize partition if needed
+	resize_part
+
+	# Restore ro/rw
+	remount_part $MOUNTED_RO_RW
+}
+
+resizeall()
+{
+	echo "Will now resize all partitions in /proc/mounts"
+
+	while read LINE;do
+		do_part $LINE
+	done < /proc/mounts
+}
+
+LOGFILE=/tmp/resizeall.log
+
+resizeall 2>&1 | tee $LOGFILE
+echo "Log saved to $LOGFILE"

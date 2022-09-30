@@ -1,0 +1,117 @@
+#!/bin/sh
+
+# Uncomment below to see more logs
+# set -x
+
+source $(dirname $0)/disk-helper
+
+do_part()
+{
+	# Not enough args
+	[ $# -lt 6 ] && return
+
+	# Ignore comments
+	echo $1 | grep -q "^#" && return
+
+	DEV=$(echo $1 | sed "s#.*LABEL=#/dev/block/by-name/#")
+	MOUNT_POINT=$2
+	FSTYPE=$3
+	OPTS=$4
+	PASS=$6 # Skip fsck when pass is 0
+
+	# Ignore external storages
+	echo $MOUNT_POINT | grep -q "^\/mnt\/" && return
+
+	# Find real dev for root dev
+	if is_rootfs; then
+		DEV=$(mountpoint -n / | cut -d ' ' -f 1)
+
+		# Fallback to the by-name link
+		[ "$DEV" ] || DEV=/dev/block/by-name/rootfs
+	fi
+
+	DEV=$(realpath $DEV 2>/dev/null)
+	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
+
+	# Unknown device
+	[ -b "$DEV" -o -c "$DEV" ] || return
+
+	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
+	if [ -f "$SYS_PATH/name" ]; then
+		PART_NAME=$(cat $SYS_PATH/name)
+	else
+		PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
+	fi
+	PART_NAME=${PART_NAME:-${DEV##*/}}
+
+	echo "Handling $PART_NAME: $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
+
+	# Setup check/mount tools and do some prepare
+	prepare_part || return
+
+	# Parse ro/rw opt
+	MOUNT_RO_RW=rw
+	if echo $OPTS | grep -o "[^,]*ro\>" | grep "^ro$"; then
+		MOUNT_RO_RW=ro
+	fi
+
+	# Make sure other partitions are unmounted.
+	is_rootfs || umount $MOUNT_POINT &>/dev/null || return
+
+	# Handle OEM commands for current partition
+	handle_oem_command
+
+	# Check and repair
+	check_part
+
+	# Mount partition
+	is_rootfs || mount_part || return
+
+	# Resize partition if needed
+	resize_part
+
+	# Restore ro/rw
+	remount_part $MOUNT_RO_RW
+}
+
+prepare_mountall()
+{
+	OEM_CMD=$(strings "${MISC_DEV:-/}" | grep "^cmd_" | xargs)
+	[ "$OEM_CMD" ] && echo "Note: Found OEM commands - $OEM_CMD"
+
+	AUTO_MKFS="/.auto_mkfs"
+	if [ -f $AUTO_MKFS ];then
+		echo "Note: Will auto format partitons, remove $AUTO_MKFS to disable"
+	else
+		unset AUTO_MKFS
+	fi
+
+	SKIP_FSCK="/.skip_fsck"
+	if [ -f $SKIP_FSCK ];then
+		echo "Note: Will skip fsck, remove $SKIP_FSCK to enable"
+	else
+		echo "Note: Create $SKIP_FSCK to skip fsck"
+		echo " - The check might take a while if didn't shutdown properly!"
+		unset SKIP_FSCK
+	fi
+}
+
+mountall()
+{
+	echo "Will now mount all partitions in /etc/fstab"
+
+	# Set environments for mountall
+	prepare_mountall
+
+	while read LINE;do
+		do_part $LINE
+	done < /etc/fstab
+}
+
+# Mount basic file systems firstly
+mount -a -t "proc,devpts,tmpfs,sysfs,debugfs,pstore"
+
+LOGFILE=/tmp/mountall.log
+
+mountall 2>&1 | tee $LOGFILE
+echo "Log saved to $LOGFILE"
