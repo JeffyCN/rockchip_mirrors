@@ -12,4 +12,14 @@ define ROCKCHIP_TEST_INSTALL_TARGET_CMDS
 	$(INSTALL) -D -m 0755 $(@D)/auto_reboot/S99-auto-reboot $(TARGET_DIR)/etc/init.d/
 endef
 
+define ROCKCHIP_TEST_INSTALL_INIT_SYSV
+        $(INSTALL) -D -m 0755 $(@D)/auto_reboot/S99-auto-reboot \
+		$(TARGET_DIR)/etc/init.d/
+endef
+
+define ROCKCHIP_TEST_INSTALL_INIT_SYSTEMD
+	$(INSTALL) -D -m 0644 $(@D)/auto_reboot/autoreboot.service \
+		$(TARGET_DIR)/usr/lib/systemd/system/
+endef
+
 $(eval $(generic-package))
