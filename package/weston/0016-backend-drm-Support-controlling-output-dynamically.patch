@@ -1,7 +1,7 @@
-From 63835176e75981348af5f00ff0e30d06b8fff4e4 Mon Sep 17 00:00:00 2001
+From 02fd08a2e640ceb9dfa7d0fd2efde6a0ff3047ca Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 16/74] backend-drm: Support controlling output dynamically
+Subject: [PATCH 16/79] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/display-rectangle and prefer/primary output.
@@ -61,7 +61,7 @@ index 47bf540..a4f679a 100644
  		weston_log("Cannot configure an output using weston_drm_output_api.\n");
  		free(modeline);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 18bec12..e5c2f0c 100644
+index 18bec12..8b4ed45 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4254,7 +4254,7 @@ weston_view_set_initial_position(struct weston_view *view,
@@ -123,7 +123,7 @@ index 18bec12..e5c2f0c 100644
 +
 +		desktop_surface = shsurf->desktop_surface;
 +		if (weston_desktop_surface_get_fullscreen(desktop_surface)) {
-+			set_fullscreen(shsurf, true, NULL);
++			set_fullscreen(shsurf, true, output);
 +			dirty = true;
 +		}
 +		if (weston_desktop_surface_get_maximized(desktop_surface)) {
