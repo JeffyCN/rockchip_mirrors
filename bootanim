@@ -9,21 +9,28 @@
 # #!/bin/sh
 # gst-play-1.0 /etc/bootanim.d/bootanim.mp4 -q --no-interactive
 
+SCRIPT=/usr/bin/bootanim
 HOOK_DIR=/etc/bootanim.d/
 PID_FILE=/tmp/bootanim.pid
 LOG_FILE=/tmp/bootanim.log
 TIMEOUT=${2:-5}
 
-alias pid_sid='ps x -o pid,sid | grep -w'
+pid_sid()
+{
+	ps x -o pid,sid | grep -w $@
+}
 
-bootanim_start() {
-	# Freeze display server
-	touch /dev/null $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
+bootanim_start()
+{
+	[ -d $HOOK_DIR ] || return
 
 	echo "Starting bootanim: $$..."
 
+	# Freeze display server
+	touch /dev/null $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
+
 	# Start bootanim hooks
-	for hook in $HOOK_DIR/*.sh ;do
+	for hook in $(find $HOOK_DIR -maxdepth 1 -name "*.sh"); do
 		echo "Starting hook: $hook..."
 		$hook&
 	done
@@ -32,7 +39,8 @@ bootanim_start() {
 	echo $$ > $PID_FILE
 }
 
-bootanim_stop() {
+bootanim_stop()
+{
 	[ -f $PID_FILE ] || return
 
 	# Parse our sid (same as bootanim's pid)
@@ -56,19 +64,19 @@ bootanim_stop() {
 }
 
 case "$1" in
-	start)
+	start|"")
 		# Make sure that we own this session (pid equals sid)
-		if ! pid_sid -q "$$$" ; then
-			setsid $0 $@
-			exit 0;
+		if ! pid_sid -q "$$$" || [ $(realpath "$0") != $SCRIPT ] ; then
+			setsid $SCRIPT $@
+		else
+			# Run it
+			$SCRIPT stop
+			bootanim_start 2>&1 | tee -a $LOG_FILE&
+
+			# Timeout killer
+			start-stop-daemon -S -q -b -n bootanim-stop \
+				-x /bin/sh -- -c "sleep $TIMEOUT; $SCRIPT stop"
 		fi
-
-		$0 stop
-		bootanim_start 2>&1 | tee -a $LOG_FILE&
-
-		# Timeout killer
-		start-stop-daemon -S -q -b -n bootanim-stop -x /bin/sh -- \
-			-c "sleep $TIMEOUT; $0 stop"
 		;;
 	stop)
 		bootanim_stop 2>&1 | tee -a $LOG_FILE
