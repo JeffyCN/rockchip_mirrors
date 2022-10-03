@@ -1,9 +1,20 @@
 #!/bin/sh
+### BEGIN INIT INFO
+# Provides:       mountall
+# Default-Start:  S
+# Default-Stop:
+# Description:    Mount all internal partitions in /etc/fstab
+### END INIT INFO
+
+# Don't exit on error status
+set +e
 
 # Uncomment below to see more logs
 # set -x
 
 source $(dirname $0)/disk-helper
+
+LOGFILE=/tmp/mountall.log
 
 do_part()
 {
@@ -108,10 +119,18 @@ mountall()
 	done < /etc/fstab
 }
 
-# Mount basic file systems firstly
-mount -a -t "proc,devpts,tmpfs,sysfs,debugfs,pstore"
+case "$1" in
+	start|"")
+		# Mount basic file systems firstly
+		mount -a -t "proc,devpts,tmpfs,sysfs,debugfs,pstore"
 
-LOGFILE=/tmp/mountall.log
+		mountall 2>&1 | tee $LOGFILE
+		echo "Log saved to $LOGFILE"
+		;;
+	*)
+		echo "Usage: mount-helper start" >&2
+		exit 3
+		;;
+esac
 
-mountall 2>&1 | tee $LOGFILE
-echo "Log saved to $LOGFILE"
+:

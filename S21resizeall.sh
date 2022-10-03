@@ -1,14 +1,14 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:       mountall
+# Provides:       resizeall
 # Default-Start:  S
 # Default-Stop:
-# Description:    Mount all internal partitions in /etc/fstab
+# Description:    Resize all internal mounted partitions
 ### END INIT INFO
 
 case "$1" in
 	start|"")
-		mount-helper
+		resize-helper
 		;;
 	restart|reload|force-reload)
 		echo "Error: argument '$1' not supported" >&2
