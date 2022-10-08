@@ -314,6 +314,31 @@ convert_mount_opts()
 
 prepare_part()
 {
+	# Ignore external storages
+	echo $MOUNT_POINT | grep -q "^\/mnt\/" && return 1
+
+	# Find real dev for root dev
+	if is_rootfs; then
+		DEV=$(mountpoint -n / | cut -d ' ' -f 1)
+
+		# Fallback to the by-name link
+		[ "$DEV" ] || DEV=/dev/block/by-name/rootfs
+	fi
+
+	DEV=$(realpath $DEV 2>/dev/null)
+	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
+
+	# Unknown device
+	[ -b "$DEV" -o -c "$DEV" ] || return 1
+
+	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
+	if [ -f "$SYS_PATH/name" ]; then
+		PART_NAME=$(cat $SYS_PATH/name)
+	else
+		PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
+	fi
+	PART_NAME=${PART_NAME:-${DEV##*/}}
+
 	case $FSTYPE in
 		ext[234])
 			FSGROUP=ext2

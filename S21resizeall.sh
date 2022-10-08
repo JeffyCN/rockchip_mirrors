@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:       resizeall
+# Provides:       resize-all
 # Default-Start:  S
 # Default-Stop:
 # Description:    Resize all internal mounted partitions

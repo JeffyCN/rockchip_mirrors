@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:       mountall
+# Provides:       mount-all
 # Default-Start:  S
 # Default-Stop:
 # Description:    Mount all internal partitions in /etc/fstab
@@ -14,7 +14,7 @@ set +e
 
 source $(dirname $0)/disk-helper
 
-LOGFILE=/tmp/mountall.log
+LOGFILE=/tmp/mount-all.log
 
 do_part()
 {
@@ -30,32 +30,7 @@ do_part()
 	OPTS=$4
 	PASS=$6 # Skip fsck when pass is 0
 
-	# Ignore external storages
-	echo $MOUNT_POINT | grep -q "^\/mnt\/" && return
-
-	# Find real dev for root dev
-	if is_rootfs; then
-		DEV=$(mountpoint -n / | cut -d ' ' -f 1)
-
-		# Fallback to the by-name link
-		[ "$DEV" ] || DEV=/dev/block/by-name/rootfs
-	fi
-
-	DEV=$(realpath $DEV 2>/dev/null)
-	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
-
-	# Unknown device
-	[ -b "$DEV" -o -c "$DEV" ] || return
-
-	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
-	if [ -f "$SYS_PATH/name" ]; then
-		PART_NAME=$(cat $SYS_PATH/name)
-	else
-		PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
-	fi
-	PART_NAME=${PART_NAME:-${DEV##*/}}
-
-	echo "Handling $PART_NAME: $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
+	echo "Handling $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
 
 	# Setup check/mount tools and do some prepare
 	prepare_part || return
@@ -85,8 +60,10 @@ do_part()
 	remount_part $MOUNT_RO_RW
 }
 
-prepare_mountall()
+mount_all()
 {
+	echo "Will now mount all partitions in /etc/fstab"
+
 	OEM_CMD=$(strings "${MISC_DEV:-/}" | grep "^cmd_" | xargs)
 	[ "$OEM_CMD" ] && echo "Note: Found OEM commands - $OEM_CMD"
 
@@ -105,14 +82,6 @@ prepare_mountall()
 		echo " - The check might take a while if didn't shutdown properly!"
 		unset SKIP_FSCK
 	fi
-}
-
-mountall()
-{
-	echo "Will now mount all partitions in /etc/fstab"
-
-	# Set environments for mountall
-	prepare_mountall
 
 	while read LINE;do
 		do_part $LINE
@@ -124,7 +93,7 @@ case "$1" in
 		# Mount basic file systems firstly
 		mount -a -t "proc,devpts,tmpfs,sysfs,debugfs,pstore"
 
-		mountall 2>&1 | tee $LOGFILE
+		mount_all 2>&1 | tee $LOGFILE
 		echo "Log saved to $LOGFILE"
 		;;
 	*)

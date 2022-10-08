@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:       mountall
+# Provides:       mount-all
 # Default-Start:  S
 # Default-Stop:
 # Description:    Mount all internal partitions in /etc/fstab
