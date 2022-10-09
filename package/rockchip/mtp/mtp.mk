@@ -1,7 +1,16 @@
+################################################################################
+#
+# mtp
+#
+################################################################################
+
 MTP_VERSION = 71
 MTP_SITE = https://launchpad.net/mtp
 MTP_SITE_METHOD = bzr
 MTP_INSTALL_STAGING = YES
+
+MTP_LICENSE = Apache-2.0
+MTP_LICENSE_FILES = NOTICE
 
 MTP_DEPENDENCIES = boost dbus-cpp glog
 
