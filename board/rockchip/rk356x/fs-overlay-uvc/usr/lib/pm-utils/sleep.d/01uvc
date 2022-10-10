@@ -1,0 +1,16 @@
+#!/bin/sh
+
+. "${PM_FUNCTIONS}"
+
+case "$1" in
+	hibernate|suspend)
+		echo "uvc suspend"
+		/oem/RkLunch-suspend.sh
+		;;
+	thaw|resume)
+		echo "uvc resume"
+		source /etc/profile.d/RkEnv.sh && /oem/RkLunch.sh &
+		;;
+	*) exit $NA
+		;;
+esac
