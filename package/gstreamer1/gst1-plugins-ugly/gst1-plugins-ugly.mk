@@ -19,8 +19,6 @@ GST1_PLUGINS_UGLY_CONF_OPTS += \
 
 GST1_PLUGINS_UGLY_CONF_OPTS += \
 	-Da52dec=disabled \
-	-Damrnb=disabled \
-	-Damrwbdec=disabled \
 	-Dcdio=disabled \
 	-Dsidplay=disabled
 
@@ -31,6 +29,13 @@ GST1_PLUGINS_UGLY_CONF_OPTS += -Dorc=enabled
 GST1_PLUGINS_UGLY_DEPENDENCIES += orc
 else
 GST1_PLUGINS_UGLY_CONF_OPTS += -Dorc=disabled
+endif
+
+ifeq ($(BR2_PACKAGE_OPENCORE_AMR),y)
+GST1_PLUGINS_UGLY_CONF_OPTS += -Damrnb=enabled -Damrwbdec=enabled
+GST1_PLUGINS_UGLY_DEPENDENCIES += opencore-amr
+else
+GST1_PLUGINS_UGLY_CONF_OPTS += -Damrnb=disabled -Damrwbdec=disabled
 endif
 
 ifeq ($(BR2_PACKAGE_GST1_PLUGINS_UGLY_PLUGIN_ASFDEMUX),y)
