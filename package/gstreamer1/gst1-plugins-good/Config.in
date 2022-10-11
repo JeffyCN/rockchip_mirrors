@@ -67,6 +67,7 @@ config BR2_PACKAGE_GST1_PLUGINS_GOOD_PLUGIN_AUTODETECT
 
 config BR2_PACKAGE_GST1_PLUGINS_GOOD_PLUGIN_AVI
 	bool "avi (*.avi video)"
+	default y
 	help
 	  AVI stream handling
 
