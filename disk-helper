@@ -150,6 +150,9 @@ format_part()
 			# mksquashfs $DEV
 			echo "It's pointness to format a squashfs partition..."
 			;;
+		jffs2)
+			echo "It's pointness to format a jffs2 partition..."
+			;;
 		auto)
 			echo "Unable to format a auto partition..."
 			;;
@@ -365,6 +368,11 @@ prepare_part()
 			;;
 		squashfs)
 			FSGROUP=squashfs
+			unset FSCK
+			unset FSRESIZE
+			;;
+		jffs2)
+			FSGROUP=jffs2
 			unset FSCK
 			unset FSRESIZE
 			;;
