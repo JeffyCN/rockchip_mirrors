@@ -1,11 +1,12 @@
 [Unit]
-Description=usb devices init service
+Description=Manage USB device functions
+DefaultDependencies=no
+After=local-fs.target
 
 [Service]
 Type=forking
-User=root
-ExecStart=/etc/init.d/S50usbdevice start
-ExecStop=/etc/init.d/S50usbdevice stop
+ExecStart=/usr/bin/usbdevice start
+ExecStop=/usr/bin/usbdevice stop
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=sysinit.target
