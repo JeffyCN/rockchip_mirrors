@@ -79,6 +79,31 @@ config BR2_PACKAGE_RKSCRIPT_NTB
 	help
 	  Rockchip NTB.
 
+config BR2_PACKAGE_RKSCRIPT_UVC
+	bool "uvc"
+	help
+	  USB UVC.
+
+config BR2_PACKAGE_RKSCRIPT_UAC1
+	bool "uac1"
+	help
+	  USB UAC1.
+
+config BR2_PACKAGE_RKSCRIPT_UAC2
+	bool "uac2"
+	help
+	  USB UAC2.
+
+config BR2_PACKAGE_RKSCRIPT_HID
+	bool "hid"
+	help
+	  USB HID.
+
+config BR2_PACKAGE_RKSCRIPT_RNDIS
+	bool "rndis"
+	help
+	  USB RNDIS.
+
 config BR2_PACKAGE_RKSCRIPT_UMS
 	bool "ums"
 	help
@@ -86,21 +111,21 @@ config BR2_PACKAGE_RKSCRIPT_UMS
 
 if BR2_PACKAGE_RKSCRIPT_UMS
 
-config BR2_PACKAGE_RKSCRIPT_UMS_PATH
-	string "ums path"
+config BR2_PACKAGE_RKSCRIPT_UMS_FILE
+	string "ums file"
 	default "/userdata/ums_shared.img"
 	help
 	  Block device or image file to share through UMS.
 
 config BR2_PACKAGE_RKSCRIPT_UMS_SIZE
 	string "ums size"
-	default "8"
+	default "256M"
 	help
-	  UMS's size (MB).
+	  UMS's size.
 
 config BR2_PACKAGE_RKSCRIPT_UMS_FSTYPE
 	string "ums fstype"
-	default "fat"
+	default "vfat"
 	help
 	  UMS's filesystem type.
 
@@ -110,13 +135,20 @@ config BR2_PACKAGE_RKSCRIPT_UMS_RO
 	help
 	  UMS is read-only.
 
-config BR2_PACKAGE_RKSCRIPT_UMS_AUTO_MOUNT
-	bool "ums auto mount"
+config BR2_PACKAGE_RKSCRIPT_UMS_MOUNT
+	bool "ums mount"
+	default n
 	help
 	  Mount when USB disconnected, umount when connected.
 
 	  Warning:
 	  Umounting UMS may failed if it is still in use.
+
+config BR2_PACKAGE_RKSCRIPT_UMS_MOUNTPOINT
+	string "ums mountpoint"
+	default "/mnt/ums"
+	help
+	  UMS's mountpoint.
 
 endif # BR2_PACKAGE_RKSCRIPT_UMS
 
