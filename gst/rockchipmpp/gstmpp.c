@@ -35,6 +35,7 @@
 #include "gstmppvp8enc.h"
 #include "gstmppjpegenc.h"
 #include "gstmppjpegdec.h"
+#include "gstmppjpegdecodebin.h"
 #include "gstmppvideodec.h"
 #include "gstmppvpxalphadecodebin.h"
 
@@ -400,6 +401,7 @@ plugin_init (GstPlugin * plugin)
 
   gst_mpp_video_dec_register (plugin, GST_RANK_PRIMARY + 1);
   gst_mpp_jpeg_dec_register (plugin, GST_RANK_PRIMARY + 1);
+  gst_mpp_jpeg_decode_bin_register (plugin, GST_RANK_PRIMARY + 1);
 
 #ifdef USE_VPXALPHADEC
   gst_mpp_vpx_alpha_decode_bin_register (plugin,

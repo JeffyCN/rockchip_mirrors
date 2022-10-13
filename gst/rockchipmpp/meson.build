@@ -3,6 +3,7 @@ rockchipmpp_sources = [
   'gstmppallocator.c',
   'gstmppdec.c',
   'gstmppjpegdec.c',
+  'gstmppjpegdecodebin.c',
   'gstmppvideodec.c',
   'gstmppenc.c',
   'gstmppjpegenc.c',
