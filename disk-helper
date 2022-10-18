@@ -34,7 +34,7 @@ prepare_ubi()
 
 	[ "$PART_NO" ] || { echo "No valid part number!" && return 1; }
 
-	if [ "$FSGROUP" == ubifs ]; then
+	if [ "$FSGROUP" = ubifs ]; then
 		DEV=/dev/ubi${PART_NO}_0
 	else
 		DEV=/dev/ubiblock${PART_NO}_0
@@ -322,7 +322,7 @@ prepare_part()
 
 	# Find real dev for root dev
 	if is_rootfs; then
-		DEV=$(mountpoint -n / | cut -d ' ' -f 1)
+		DEV=$(findmnt -n -o source /)
 
 		# Fallback to the by-name link
 		[ "$DEV" ] || DEV=/dev/block/by-name/rootfs
@@ -406,7 +406,7 @@ prepare_part()
 	MOUNT_OPTS=${OPTS:+" -o ${OPTS%,}"}
 
 	# Prepare for ubi (consider /dev/mtdX as ubiblock)
-	if [ $FSGROUP == ubifs ] || echo $DEV | grep -q "/dev/mtd[0-9]";then
+	if [ "$FSGROUP" = ubifs ] || echo $DEV | grep -q "/dev/mtd[0-9]";then
 		if ! prepare_ubi; then
 			echo "Failed to prepare ubi for $DEV"
 			[ "$AUTO_MKFS" ] || return
