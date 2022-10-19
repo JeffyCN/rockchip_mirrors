@@ -6,6 +6,11 @@ config BR2_PACKAGE_RKSCRIPT
 
 if BR2_PACKAGE_RKSCRIPT
 
+config BR2_PACKAGE_RKSCRIPT_DEFAULT_PCM
+	string "default PCM"
+	help
+	  Alsa's default PCM
+
 config BR2_PACKAGE_RKSCRIPT_IODOMAIN
 	bool "rkscript iodomain"
 	default y if BR2_PACKAGE_RK3308
@@ -44,98 +49,98 @@ config BR2_PACKAGE_RKSCRIPT_BOOTANIM_TIMEOUT
 
 endif
 
-config BR2_PACKAGE_RKSCRIPT_USBDEVICE
+config BR2_PACKAGE_RKSCRIPT_USB
 	bool "rkscript usbdevice"
 	default y
 	help
 	  Install usbdevice scripts.
 
-if BR2_PACKAGE_RKSCRIPT_USBDEVICE
+if BR2_PACKAGE_RKSCRIPT_USB
 
-config BR2_PACKAGE_RKSCRIPT_EXTRA_USB_CONFIG
-	string "extra usb config"
+config BR2_PACKAGE_RKSCRIPT_USB_EXTRA_CONFIG
+	string "usb extra config"
 	help
 	  Extra usb configs.
 
-config BR2_PACKAGE_RKSCRIPT_ADBD
+config BR2_PACKAGE_RKSCRIPT_USB_ADBD
 	bool "adbd"
 	default y if BR2_PACKAGE_ANDROID_TOOLS_ADBD
 	help
 	  Android adbd.
 
-config BR2_PACKAGE_RKSCRIPT_MTP
+config BR2_PACKAGE_RKSCRIPT_USB_MTP
 	bool "mtp"
 	default y if BR2_PACKAGE_MTP
 	help
 	  Media Transfer Protocal (MTP).
 
-config BR2_PACKAGE_RKSCRIPT_ACM
+config BR2_PACKAGE_RKSCRIPT_USB_ACM
 	bool "acm"
 	help
 	  USB ACM.
 
-config BR2_PACKAGE_RKSCRIPT_NTB
+config BR2_PACKAGE_RKSCRIPT_USB_NTB
 	bool "ntb"
 	help
 	  Rockchip NTB.
 
-config BR2_PACKAGE_RKSCRIPT_UVC
+config BR2_PACKAGE_RKSCRIPT_USB_UVC
 	bool "uvc"
 	help
 	  USB UVC.
 
-config BR2_PACKAGE_RKSCRIPT_UAC1
+config BR2_PACKAGE_RKSCRIPT_USB_UAC1
 	bool "uac1"
 	help
 	  USB UAC1.
 
-config BR2_PACKAGE_RKSCRIPT_UAC2
+config BR2_PACKAGE_RKSCRIPT_USB_UAC2
 	bool "uac2"
 	help
 	  USB UAC2.
 
-config BR2_PACKAGE_RKSCRIPT_HID
+config BR2_PACKAGE_RKSCRIPT_USB_HID
 	bool "hid"
 	help
 	  USB HID.
 
-config BR2_PACKAGE_RKSCRIPT_RNDIS
+config BR2_PACKAGE_RKSCRIPT_USB_RNDIS
 	bool "rndis"
 	help
 	  USB RNDIS.
 
-config BR2_PACKAGE_RKSCRIPT_UMS
+config BR2_PACKAGE_RKSCRIPT_USB_UMS
 	bool "ums"
 	help
 	  USB mass storage (UMS).
 
-if BR2_PACKAGE_RKSCRIPT_UMS
+if BR2_PACKAGE_RKSCRIPT_USB_UMS
 
-config BR2_PACKAGE_RKSCRIPT_UMS_FILE
+config BR2_PACKAGE_RKSCRIPT_USB_UMS_FILE
 	string "ums file"
 	default "/userdata/ums_shared.img"
 	help
 	  Block device or image file to share through UMS.
 
-config BR2_PACKAGE_RKSCRIPT_UMS_SIZE
+config BR2_PACKAGE_RKSCRIPT_USB_UMS_SIZE
 	string "ums size"
 	default "256M"
 	help
 	  UMS's size.
 
-config BR2_PACKAGE_RKSCRIPT_UMS_FSTYPE
+config BR2_PACKAGE_RKSCRIPT_USB_UMS_FSTYPE
 	string "ums fstype"
 	default "vfat"
 	help
 	  UMS's filesystem type.
 
-config BR2_PACKAGE_RKSCRIPT_UMS_RO
+config BR2_PACKAGE_RKSCRIPT_USB_UMS_RO
 	bool "ums ro"
 	default n
 	help
 	  UMS is read-only.
 
-config BR2_PACKAGE_RKSCRIPT_UMS_MOUNT
+config BR2_PACKAGE_RKSCRIPT_USB_UMS_MOUNT
 	bool "ums mount"
 	default n
 	help
@@ -144,19 +149,14 @@ config BR2_PACKAGE_RKSCRIPT_UMS_MOUNT
 	  Warning:
 	  Umounting UMS may failed if it is still in use.
 
-config BR2_PACKAGE_RKSCRIPT_UMS_MOUNTPOINT
+config BR2_PACKAGE_RKSCRIPT_USB_UMS_MOUNTPOINT
 	string "ums mountpoint"
 	default "/mnt/ums"
 	help
 	  UMS's mountpoint.
 
-endif # BR2_PACKAGE_RKSCRIPT_UMS
+endif # BR2_PACKAGE_RKSCRIPT_USB_UMS
 
-endif # BR2_PACKAGE_RKSCRIPT_USBDEVICE
-
-config BR2_PACKAGE_RKSCRIPT_DEFAULT_PCM
-	string "default PCM"
-	help
-	  Alsa's default PCM
+endif # BR2_PACKAGE_RKSCRIPT_USB
 
 endif
