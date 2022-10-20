@@ -120,5 +120,13 @@ define ANDROID_TOOLS_INSTALL_TARGET_CMDS
 	$(ANDROID_TOOLS_INSTALL_RSAAUTH_ENV)
 endef
 
+ifeq ($(BR2_PACKAGE_BASH),y)
+define ANDROID_TOOLS_INSTALL_TARGET_SHELL_ENV
+        $(INSTALL) -D -m 0644 $(ANDROID_TOOLS_PKGDIR)/adbd_shell.sh \
+                $(TARGET_DIR)/etc/profile.d/adbd_shell.sh
+endef
+ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_SHELL_ENV
+endif
+
 $(eval $(generic-package))
 $(eval $(host-generic-package))
