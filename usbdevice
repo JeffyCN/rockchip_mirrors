@@ -78,16 +78,15 @@ usb_run_stage()
 usb_wait_files()
 {
 	for i in `seq 200`;do
-		fuser -s $@ &>/dev/null && break
+		fuser -s $@ 2>/dev/null && break
 		sleep .01
 	done
 }
 
 usb_release_files()
 {
-	fuser -s -k $@ &>/dev/null || return 0
 	for i in `seq 200`;do
-		fuser -s $@ &>/dev/null || break
+		fuser -s -k $@ 2>/dev/null || break
 		sleep .01
 	done
 }
@@ -139,6 +138,41 @@ usb_try_write()
 	usb_write $@ &>/dev/null || true
 }
 
+usb_start_daemon()
+{
+	NAME=$(echo $1 | sed "s#^[^ ]*/\([^ ]*\).*#\1#")
+	TAG_FILE=/tmp/.usb_$NAME
+
+	# Enable spawn
+	touch $TAG_FILE
+
+	# Already started
+	[ -z "$(usb_get_started)" ] || return 0
+
+	# Start and spawn background daemon
+	{
+		exec 3<&-
+
+		cd /
+		while usb_is_enabled; do
+			# Don't spawn after stopped
+			[ ! -f $TAG_FILE ] ||
+				start-stop-daemon -Sqx $@ || true
+			sleep .5
+		done
+	}&
+}
+
+usb_stop_daemon()
+{
+	NAME=$(echo $1 | sed "s#^[^ ]*/\([^ ]*\).*#\1#")
+	TAG_FILE=/tmp/.usb_$NAME
+
+	# Stop and disable spawn
+	rm -f $TAG_FILE
+	start-stop-daemon -Kqox $@
+}
+
 usb_load_config()
 {
 	USB_CONFIG_FILE=$(find /etc/ -name .usb_config | head -n 1)
@@ -163,14 +197,13 @@ ADB_INSTANCES=${ADB_INSTANCES:-ffs.adb}
 adb_prepare()
 {
 	usb_mount adb /dev/usb-ffs/adb -o uid=2000,gid=2000 -t functionfs
-
-	cd / && start-stop-daemon -S -q -o -b -x /usr/bin/adbd
-	usb_wait_files -m /dev/usb-ffs/adb/
+	usb_start_daemon /usr/bin/adbd
+	usb_wait_files -m /dev/usb-ffs/adb
 }
 
 adb_stop()
 {
-	usb_umount /dev/usb-ffs/adb
+	usb_stop_daemon /usr/bin/adbd
 }
 
 # ---- ntb
@@ -179,11 +212,6 @@ NTB_INSTANCES=${NTB_INSTANCES:-ffs.ntb}
 ntb_prepare()
 {
 	usb_mount ntb /dev/usb-ffs/ntb -o uid=2000,gid=2000 -t functionfs
-}
-
-ntb_stop()
-{
-	usb_umount /dev/usb-ffs/ntb
 }
 
 # ---- uac1
@@ -209,12 +237,13 @@ mtp_prepare()
 
 mtp_start()
 {
-	start-stop-daemon -S -q -o -b -x /usr/bin/mtp-server
+	usb_start_daemon /usr/bin/mtp-server
 	usb_wait_files /dev/mtp_usb
 }
 
 mtp_stop()
 {
+	usb_stop_daemon /usr/bin/mtp-server
 	usb_release_files /dev/mtp_usb
 
 	echo 0 > $USB_GADGET_DIR/os_desc/use
@@ -586,3 +615,6 @@ esac
 
 usb_msg "Done $ACTION request"
 echo
+
+# Unlock it
+flock -u 3
