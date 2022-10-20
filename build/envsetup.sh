@@ -53,6 +53,13 @@ function lunch_rockchip()
 	echo
 	echo "==========================================="
 
+	if [ $RK_DEFCONFIG_ARRAY_LEN -eq 0 ]; then
+		echo "Continue without defconfig..."
+		make -C ${BUILDROOT_DIR} O="$TARGET_OUTPUT_DIR" \
+			olddefconfig &>/dev/null
+		return 0
+	fi
+
 	make -C ${BUILDROOT_DIR} O="$TARGET_OUTPUT_DIR" \
 		"$RK_BUILD_CONFIG"_defconfig
 
@@ -87,7 +94,14 @@ function main()
 
 	case $RK_DEFCONFIG_ARRAY_LEN in
 		0)
-			echo No available configs${1:+" for: $1"}
+			BOARD="$(echo $1 | \
+				sed "s#^\(output/\|\)rockchip_\([^/]*\).*#\2#")"
+			RK_BUILD_CONFIG="${BOARD:+rockchip_$BOARD}"
+			CONFIG="$BUILDROOT_OUTPUT_DIR/$RK_BUILD_CONFIG/.config"
+			if [ ! -f "$CONFIG" ]; then
+				unset RK_BUILD_CONFIG
+				echo "No available configs${1:+" for: $1"}"
+			fi
 			;;
 		1)
 			RK_BUILD_CONFIG=${RK_DEFCONFIG_ARRAY[0]}
