@@ -51,7 +51,9 @@ define usb_env_fixup
 endef
 
 define RKSCRIPT_INSTALL_TARGET_USB_ENV
-	$(call usb_env_fixup,USB_FUNCS,$(RKSCRIPT_USB_CONFIG))
+	$(INSTALL) -D -m 0644 $(RKSCRIPT_PKGDIR)/usbdevice.sh \
+		$(TARGET_DIR)/etc/profile.d/usbdevice.sh
+$(call usb_env_fixup,USB_FUNCS,$(RKSCRIPT_USB_CONFIG))
 endef
 RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_USB_ENV
 
