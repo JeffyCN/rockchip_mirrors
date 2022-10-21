@@ -4,7 +4,7 @@
 
 start() {
 	printf "Starting input-event-daemon: "
-	input-event-daemon
+	input-event-daemon -v
 	echo "done"
 }
 
