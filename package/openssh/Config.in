@@ -25,6 +25,16 @@ config BR2_PACKAGE_OPENSSH_SERVER
 	help
 	  Server programs: sshd, sftp-server
 
+if BR2_PACKAGE_OPENSSH_SERVER
+
+config BR2_PACKAGE_OPENSSH_ENABLE_ROOT_LOGIN
+	bool "root login"
+	default y if BR2_TARGET_ENABLE_ROOT_LOGIN
+	help
+	  Set PermitRootLogin to yes.
+
+endif
+
 config BR2_PACKAGE_OPENSSH_KEY_UTILS
 	bool "key utilities"
 	default y
