@@ -9,3 +9,13 @@ config BR2_PACKAGE_TRIGGERHAPPY
 	  configuration.
 
 	  https://github.com/wertarbyte/triggerhappy
+
+if BR2_PACKAGE_TRIGGERHAPPY
+
+config BR2_PACKAGE_TRIGGERHAPPY_POWER_KEY
+	bool "power-key"
+	default y
+	help
+	  Handle power-key events (suspend/power-off).
+
+endif
