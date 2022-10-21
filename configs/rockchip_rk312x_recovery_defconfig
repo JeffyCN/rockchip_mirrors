@@ -1,0 +1,3 @@
+#include "chips/rk312x_arm.config"
+#include "base/base.config"
+#include "base/recovery.config"

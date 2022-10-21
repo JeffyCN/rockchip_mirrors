@@ -28,6 +28,12 @@ config BR2_PACKAGE_PX30
 	help
 	  Use rockchip's px30 chip
 
+config BR2_PACKAGE_RK312X
+	bool "rk312x chip"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
+	help
+	  Use rockchip's rk312x chip
+
 config BR2_PACKAGE_RK3288
 	bool "rk3288 chip"
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
