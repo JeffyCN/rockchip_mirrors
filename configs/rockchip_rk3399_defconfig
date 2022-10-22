@@ -18,8 +18,6 @@
 #include "bt.config"
 #include "ntfs.config"
 #include "exfat.config"
-BR2_TARGET_GENERIC_GETTY_PORT="ttyFIQ0"
-BR2_TARGET_GENERIC_GETTY_BAUDRATE_1500000=y
 BR2_ROOTFS_OVERLAY="board/rockchip/rk3399/fs-overlay-64/"
 BR2_TARGET_GENERIC_HOSTNAME="rk3399"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3399 Buildroot"
