@@ -5,7 +5,7 @@
 #include "rv1126_rv1109_arm.config"
 #include "camera.config"
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=y
-BR2_ROOTFS_OVERLAY="board/rockchip/rv1126_rv1109/fs-overlay-uvc-mult/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rv1126_rv1109/fs-overlay-uvc-mult/"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="os04a10_CMK-OT1607-FV1_M12-40IRC-4MP-F16.xml"
 BR2_PACKAGE_RK_OEM=y
 BR2_PACKAGE_RK_OEM_RESOURCE_DIR="$(TOPDIR)/../device/rockchip/oem/oem_empty"

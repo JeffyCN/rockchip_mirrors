@@ -7,7 +7,7 @@
 #include "rv1126_rv1109_arm.config"
 #include "camera.config"
 #include "updateEngine.config"
-BR2_ROOTFS_OVERLAY="board/rockchip/rv1126_rv1109/fs-overlay-robot/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rv1126_rv1109/fs-overlay-robot/"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="os04a10_CMK-OT1607-FV1_M12-40IRC-4MP-F16.xml"
 BR2_PACKAGE_RKMEDIA=y
 BR2_PACKAGE_RKMEDIA_V4L2_CAPTURE=y

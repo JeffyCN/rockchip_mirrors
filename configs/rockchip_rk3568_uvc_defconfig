@@ -14,7 +14,7 @@
 #include "video_mpp.config"
 #include "rk356x_aarch64.config"
 #include "test.config"
-BR2_ROOTFS_OVERLAY="board/rockchip/rk356x/fs-overlay-uvc/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rk356x/fs-overlay-uvc/"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FORCE_INSTALL_TO_ROOTFS=y
 BR2_PACKAGE_RK_OEM=y
 BR2_PACKAGE_RK_OEM_RESOURCE_DIR="$(TOPDIR)/../device/rockchip/oem/oem_uvcc"

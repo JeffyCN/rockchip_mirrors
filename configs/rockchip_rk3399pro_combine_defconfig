@@ -18,7 +18,7 @@
 #include "ntfs.config"
 #include "exfat.config"
 #include "rknn_demo.conf"
-BR2_ROOTFS_OVERLAY="board/rockchip/rk3399pro/fs-overlay-64/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rk3399pro/fs-overlay-64/"
 BR2_TARGET_GENERIC_HOSTNAME="rk3399pro"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3399PRO Buildroot"
 BR2_PACKAGE_NPU_POWERCTRL_COMBINE=y

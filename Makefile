@@ -1022,24 +1022,22 @@ defconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
 define percent_defconfig
 # Override the BR2_DEFCONFIG from COMMON_CONFIG_ENV with the new defconfig
 %_defconfig: $(BUILD_DIR)/buildroot-config/conf $(1)/configs/%_defconfig outputmakefile
-	$(TOPDIR)/build/defconfig_hook.py -m $(1)/configs/$$@ $(BASE_DIR)/.rockchipconfig
+	$(TOPDIR)/build/parse_defconfig.sh $(1)/configs/$$@ \
+		$(BASE_DIR)/.config.in
 	$$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$(1)/configs/$$@ \
-		$$< --defconfig=$(BASE_DIR)/.rockchipconfig $$(CONFIG_CONFIG_IN)
+		$$< --defconfig=$(BASE_DIR)/.config.in $$(CONFIG_CONFIG_IN)
 endef
 $(eval $(foreach d,$(call reverse,$(TOPDIR) $(BR2_EXTERNAL_DIRS)),$(call percent_defconfig,$(d))$(sep)))
 
-update-defconfig: savedefconfig
+update-defconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
+	$(TOPDIR)/build/update_defconfig.sh \
+		$(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig)
 
-CFG_ := $(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig)
 savedefconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
-	grep "#include" $(CFG_) > $(CFG_).split || true
-
-	@$(COMMON_CONFIG_ENV) $< --savedefconfig=$(CFG_) $(CONFIG_CONFIG_IN)
-	@$(SED) '/BR2_DEFCONFIG=/d' $(CFG_)
-
-	cat $(CFG_) >> $(CFG_).split
-	$(TOPDIR)/build/defconfig_hook.py -s $(CFG_).split $(CFG_)
-	rm $(CFG_).split
+	@$(COMMON_CONFIG_ENV) $< \
+		--savedefconfig=$(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig) \
+		$(CONFIG_CONFIG_IN)
+	@$(SED) '/^BR2_DEFCONFIG=/d' $(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig)
 
 .PHONY: defconfig savedefconfig update-defconfig
 
@@ -1148,7 +1146,7 @@ help:
 	@echo '  defconfig              - New config with default answer to all options;'
 	@echo '                             BR2_DEFCONFIG, if set on the command line, is used as input'
 	@echo '  savedefconfig          - Save current config to BR2_DEFCONFIG (minimal config)'
-	@echo '  update-defconfig       - Same as savedefconfig'
+	@echo '  update-defconfig       - Same as savedefconfig, but with fragments'
 	@echo '  allyesconfig           - New config where all options are accepted with yes'
 	@echo '  allnoconfig            - New config where all options are answered with no'
 	@echo '  alldefconfig           - New config where all options are set to default'

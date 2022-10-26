@@ -6,4 +6,4 @@
 #include "rk356x_aarch64.config"
 #include "gcc_arm_10_aarch64.config"
 
-BR2_ROOTFS_OVERLAY="board/rockchip/rk3588/fs-overlay-nvr/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rk3588/fs-overlay-nvr/"

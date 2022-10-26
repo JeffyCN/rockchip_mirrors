@@ -8,7 +8,7 @@
 #include "rv1126_rv1109_arm.config"
 #include "ubifs.config"
 #include "camera.config"
-BR2_ROOTFS_OVERLAY="board/rockchip/rv1126_rv1109/fs-overlay-sysv/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rv1126_rv1109/fs-overlay-sysv/"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="os04a10_CMK-OT1607-FV1_M12-40IRC-4MP-F16.xml"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_RKISP_DEMO=y
 BR2_PACKAGE_RECOVERY=y
