@@ -3,4 +3,4 @@
 #include "base_extra.config"
 #include "yx.config"
 BR2_arm=y
-BR2_ROOTFS_OVERLAY="board/rockchip/yx/fs-overlay/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/yx/fs-overlay/"

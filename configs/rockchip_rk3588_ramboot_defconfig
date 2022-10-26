@@ -3,7 +3,7 @@
 #include "tee_aarch64_v2.config"
 
 # BR2_PACKAGE_RKSCRIPT is not set
-BR2_ROOTFS_OVERLAY="board/rockchip/common/security-ramdisk-overlay/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/common/security-ramdisk-overlay/"
 BR2_PACKAGE_LUKSMETA=y
 BR2_PACKAGE_LVM2_STANDARD_INSTALL=y
 BR2_PACKAGE_E2FSPROGS=y
