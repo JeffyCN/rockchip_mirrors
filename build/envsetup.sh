@@ -86,7 +86,7 @@ function main()
 
 	RK_DEFCONFIG_ARRAY=(
 		$(cd ${BUILDROOT_DIR}/configs/; ls rockchip_* | \
-			sed "s/_defconfig$//" | grep "$1" | sort)
+			grep "$(basename $1)" | sed "s/_defconfig$//" | sort)
 	)
 
 	unset RK_BUILD_CONFIG
