@@ -20,6 +20,8 @@ RECOVERY_BUILD_OPTS+=-I$(PROJECT_DIR) -I$(STAGING_DIR)/usr/include/libdrm \
 	-lssl \
 	-lcrypto
 
+RECOVERY_DEPENDENCIES += libcurl openssl
+
 ifeq ($(BR2_PACKAGE_RECOVERY_NO_UI),y)
 	TARGET_MAKE_ENV += RecoveryNoUi=true
 else
