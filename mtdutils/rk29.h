@@ -30,15 +30,15 @@ extern "C" {
 #define WRITE_MASK (WRITE_SIZE - 1)
 
 int run(const char *filename, char *const argv[]);
-int rk_make_ext3fs(const char *filename);
 int rk_check_and_resizefs(const char *filename);
 int rk_check_and_resizefs_f2fs(const char *filename);
-int rk_make_ext2fs(const char *filename);
-int rk_make_ext4fs(const char *filename, long long len, const char *mountpoint);
 size_t rk29_fread(void *ptr, size_t size, size_t nmemb, FILE *stream);
 size_t rk29_fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
-int make_vfat(const char *filename,const char* volumelabel);
-int make_ntfs(const char *filename,const char* volumelabel);
+
+int make_ext2(const char *path, const char *label);
+int make_ext4(const char *path, const char *label);
+int make_vfat(const char *path, const char *label);
+int make_ntfs(const char *path, const char *label);
 
 #ifdef __cplusplus
 }
