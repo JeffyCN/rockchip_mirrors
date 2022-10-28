@@ -41,8 +41,10 @@ do_part()
 		MOUNT_RO_RW=ro
 	fi
 
-	# Make sure other partitions are unmounted.
-	is_rootfs || umount $MOUNT_POINT &>/dev/null || return
+	if mountpoint -q $MOUNT_POINT && ! is_rootfs; then
+		# Make sure other partitions are unmounted.
+		umount $MOUNT_POINT &>/dev/null || return
+	fi
 
 	# Handle OEM commands for current partition
 	handle_oem_command
