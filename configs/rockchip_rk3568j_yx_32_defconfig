@@ -1,6 +1,9 @@
-#include "rk356x.config"
-#include "base.config"
-#include "base_extra.config"
+#include "chips/rk356x.config"
+#include "base/base.config"
 #include "yx.config"
 BR2_arm=y
+BR2_CCACHE=
+BR2_cortex_a55=y
+BR2_PACKAGE_NTFS_3G_NTFSPROGS=
+BR2_PACKAGE_UPOWER=y
 BR2_ROOTFS_OVERLAY+="board/rockchip/yx/fs-overlay/"
