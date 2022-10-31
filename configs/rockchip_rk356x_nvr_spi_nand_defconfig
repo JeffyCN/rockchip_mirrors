@@ -1,8 +1,18 @@
-#include "base_nvr.config"
+#include "base/nvr.config"
 #include "audio.config"
 #include "gpu_nvr.config"
 #include "network_only_eth.config"
 #include "video_mpp.config"
-#include "rk356x_aarch64.config"
+#include "chips/rk356x_aarch64.config"
 #include "ubifs.config"
+BR2_CCACHE=
+BR2_PACKAGE_HOST_NTFS_3G=
+BR2_PACKAGE_HOST_PYTHON3=
+BR2_PACKAGE_HOST_PYTHON3_SSL=
+BR2_PACKAGE_HOST_QEMU=
+BR2_PACKAGE_INPUT_EVENT_DAEMON=
+BR2_PACKAGE_PM_UTILS=
+BR2_ROOTFS_MERGED_USR=
 BR2_ROOTFS_OVERLAY+="board/rockchip/rk356x/fs-overlay-nvr/"
+BR2_TARGET_ROOTFS_CPIO=
+BR2_TARGET_ROOTFS_CPIO_GZIP=
