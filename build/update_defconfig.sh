@@ -22,6 +22,7 @@ CONFIG="$OUTPUT_DIR/.config"
 ORIG_CONFIG="$OUTPUT_DIR/.config.orig"
 ORIG_DEFCONFIG="$OUTPUT_DIR/.defconfig"
 BASE_DEFCONFIG="$OUTPUT_DIR/.base_defconfig"
+NEW_DEFCONFIG="$OUTPUT_DIR/.new_defconfig"
 FRAGMENT="$OUTPUT_DIR/.fragment"
 
 if [ ! -r "$CONFIG" ]; then
@@ -98,4 +99,31 @@ for CFG in $CFG_LIST ; do
 done
 
 cat $FRAGMENT > $DEFCONFIG
+
+# Update defconfig fragment for dependency changes
+cat "$CONFIG" > "$ORIG_CONFIG"
+"$SCRIPT_DIR/parse_defconfig.sh" "$DEFCONFIG" "$CONFIG" > /dev/null
+make O="$OUTPUT_DIR" olddefconfig >/dev/null
+sed -i "s~\(^BR2_DEFCONFIG=\).*~\1\"$NEW_DEFCONFIG\"~" "$CONFIG"
+make O="$OUTPUT_DIR" savedefconfig >/dev/null
+cat "$ORIG_CONFIG" > "$CONFIG"
+
+CFG_LIST=$(diff "$ORIG_DEFCONFIG" "$NEW_DEFCONFIG" | \
+	sed -n -e "$SED_CONFIG_EXP1" -e "$SED_CONFIG_EXP2" | sort | uniq)
+for CFG in $CFG_LIST ; do
+	if ! grep -q -w $CFG $DEFCONFIG; then
+		echo "$CFG=" >> $DEFCONFIG
+	fi
+done
+
+# Verify defconfig fragment
+"$SCRIPT_DIR/parse_defconfig.sh" "$DEFCONFIG" "$CONFIG" > /dev/null
+make O="$OUTPUT_DIR" olddefconfig >/dev/null
+sed -i "s~\(^BR2_DEFCONFIG=\).*~\1\"$NEW_DEFCONFIG\"~" "$CONFIG"
+make O="$OUTPUT_DIR" savedefconfig >/dev/null
+cat "$ORIG_CONFIG" > "$CONFIG"
+if diff "$ORIG_DEFCONFIG" "$NEW_DEFCONFIG" | grep ""; then
+	echo "Configs unmatched, might be something wrong."
+fi
+
 echo "Done updating $DEFCONFIG."
