@@ -142,13 +142,14 @@ for MERGE_FILE in $MERGE_LIST ; do
 			else
 				ORIG_NEW_STR=$(echo "$ORIG_NEW_VAL" | \
 					sed "s/^.*=\"\(.*\)\"/\1/")
+				PREV_STR=$(echo "$PREV_VAL" | \
+					sed "s/^.*=\"\(.*\)\"/\1/")
 
 				NEW_STR=
 				for s in $ORIG_NEW_STR; do
-					echo "$PREV_VAL" | grep -wvq "$s" || \
-						continue
-
-					NEW_STR="$NEW_STR $s"
+					echo "$PREV_STR" | xargs -n 1 | \
+						grep "^$s$" >/dev/null || \
+						NEW_STR="$NEW_STR $s"
 				done
 
 				if [ -z "$NEW_STR" ]; then

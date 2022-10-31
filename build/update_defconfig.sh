@@ -77,13 +77,11 @@ for CFG in $CFG_LIST ; do
 				# Try to extract additional strings
 				for s in $BASE_STR; do
 					NEW_STR=$(echo "$NEW_STR" | \
-						xargs -n 1 | grep -wv "$s" | \
+						xargs -n 1 | grep -v "^$s$" | \
 						xargs)
 				done
 
-				if [ -n "$NEW_STR" ]; then
-					NEW_VAL="$CFG+=\"$NEW_STR\""
-				fi
+				NEW_VAL="${NEW_STR:+$CFG+=\"$NEW_STR\"}"
 			fi
 		fi
 	fi
