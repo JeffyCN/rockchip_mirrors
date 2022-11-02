@@ -10,16 +10,10 @@
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
 #include "ntfs.config"
+#include "exfat.config"
+#include "vfat.config"
 #include "benchmark.config"
 #include "debug.config"
 #include "test.config"
 #include "network.config"
 #include "bt.config"
-BR2_CCACHE=
-BR2_PACKAGE_DOSFSTOOLS=y
-BR2_PACKAGE_DOSFSTOOLS_MKFS_FAT=y
-BR2_PACKAGE_EXFAT=y
-BR2_PACKAGE_EXFAT_UTILS=y
-BR2_PACKAGE_UPOWER=y
-BR2_ROOTFS_MERGED_USR=
-
