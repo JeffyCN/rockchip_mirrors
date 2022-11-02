@@ -16,10 +16,6 @@
 #include "bt.config"
 #include "ntfs.config"
 #include "exfat.config"
-BR2_CCACHE=
-BR2_PACKAGE_DOSFSTOOLS=y
-BR2_PACKAGE_DOSFSTOOLS_MKFS_FAT=y
-BR2_PACKAGE_UPOWER=y
-BR2_ROOTFS_MERGED_USR=
+#include "vfat.config"
 BR2_TARGET_GENERIC_HOSTNAME="rk3288"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3288 Buildroot"

@@ -4,7 +4,6 @@
 #include "base/base.config"
 #include "camera.config"
 #include "gpu_dummy.config"
-BR2_CCACHE=
 BR2_PACKAGE_ANDROID_TOOLS=
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="ov5695_TongJu_CHT842-MD.xml"
 BR2_PACKAGE_INPUT_EVENT_DAEMON=
@@ -17,6 +16,4 @@ BR2_PACKAGE_USBMOUNT=
 BR2_PACKAGE_UTIL_LINUX_MOUNT=
 BR2_PACKAGE_VENDOR_STORAGE=
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=
-BR2_ROOTFS_MERGED_USR=
-BR2_ROOTFS_POST_BUILD_SCRIPT="../device/rockchip/common/post-build.sh board/rockchip/rk356x/post-script-bsp.sh"
-BR2_TARGET_GENERIC_ROOT_PASSWD=
+BR2_ROOTFS_POST_BUILD_SCRIPT+="board/rockchip/rk356x/post-script-bsp.sh"

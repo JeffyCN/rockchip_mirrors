@@ -5,10 +5,8 @@
 #include "video_mpp.config"
 #include "chips/rk356x_aarch64.config"
 #include "gcc_arm_10_aarch64.config"
-BR2_CCACHE=
 BR2_PACKAGE_INPUT_EVENT_DAEMON=
 BR2_PACKAGE_PM_UTILS=
-BR2_ROOTFS_MERGED_USR=
 BR2_ROOTFS_OVERLAY+="board/rockchip/rk3588/fs-overlay-nvr/"
 BR2_TARGET_ROOTFS_CPIO=
 BR2_TARGET_ROOTFS_CPIO_GZIP=

@@ -11,11 +11,6 @@
 #include "benchmark.config"
 #include "network.config"
 #include "bt.config"
-BR2_CCACHE=
-BR2_PACKAGE_DOSFSTOOLS=y
-BR2_PACKAGE_DOSFSTOOLS_MKFS_FAT=y
-BR2_PACKAGE_UPOWER=y
-BR2_PACKAGE_UTIL_LINUX_MOUNT=
-BR2_ROOTFS_MERGED_USR=
+#include "vfat.config"
 BR2_TARGET_GENERIC_HOSTNAME="rk3128h"
 BR2_TARGET_GENERIC_ISSUE="Welcome to RK3128H Buildroot"

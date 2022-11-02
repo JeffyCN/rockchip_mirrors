@@ -12,16 +12,12 @@
 #include "network.config"
 #include "ntfs.config"
 #include "exfat.config"
+#include "vfat.config"
 #include "video_mpp.config"
 #include "video_gst.config"
 #include "video_gst_rtsp.config"
 #include "chips/rk3588_aarch64.config"
 #include "test.config"
-BR2_CCACHE=
-BR2_PACKAGE_DOSFSTOOLS=y
-BR2_PACKAGE_DOSFSTOOLS_MKFS_FAT=y
 BR2_PACKAGE_PULSEAUDIO=y
 BR2_PACKAGE_PULSEAUDIO_DAEMON=y
 BR2_PACKAGE_RKNPU2=y
-BR2_PACKAGE_UPOWER=y
-BR2_ROOTFS_MERGED_USR=
