@@ -118,8 +118,6 @@ function main()
 
 	[ -n "$RK_BUILD_CONFIG" ] || return
 
-	source ${TOP_DIR}/device/rockchip/.BoardConfig.mk
-
 	lunch_rockchip
 
 	# Set alias
