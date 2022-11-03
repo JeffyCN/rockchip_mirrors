@@ -1,7 +1,7 @@
-From e08df8e9e55ab7c9def0bb28cd2d4c684f1d6d0f Mon Sep 17 00:00:00 2001
+From 88a61ee8da70073c50f70b544ad51d8f80f36f29 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 30 Jun 2022 09:16:58 +0800
-Subject: [PATCH 73/74] backend-drm: Don't try to prepare non-cursor view in
+Subject: [PATCH 73/79] backend-drm: Don't try to prepare non-cursor view in
  renderer-only mode
 
 It would fail out in the later check anyway.

@@ -1,4 +1,4 @@
-From f240b3455269e4b441128a40ccdd17ff2e8716eb Mon Sep 17 00:00:00 2001
+From e0cbe1a1e704639c40de2c82f1547b0b5a5d4052 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 3 Oct 2022 21:03:04 +0800
 Subject: [PATCH 79/79] desktop-shell: Fix crash when hotplugging screens

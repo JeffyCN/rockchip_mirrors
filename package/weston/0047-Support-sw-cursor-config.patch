@@ -1,7 +1,7 @@
-From d1f18faf5fbe1de6bd468a1c8bbdc69573effbc3 Mon Sep 17 00:00:00 2001
+From 77f9ebdfd31791471add2ec7228f4d47558d68cd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 13 Jul 2021 10:56:56 +0800
-Subject: [PATCH 47/74] Support sw-cursor config
+Subject: [PATCH 47/79] Support sw-cursor config
 
 Tested with:
 [core]
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 6 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 3824404..c89598b 100644
+index 2010c02..33dd4e5 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -2685,6 +2685,8 @@ load_drm_backend(struct weston_compositor *c,

@@ -1,4 +1,4 @@
-From 02fd08a2e640ceb9dfa7d0fd2efde6a0ff3047ca Mon Sep 17 00:00:00 2001
+From ea9254bbf829ea582c004aeff0058c24f7bb1080 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 16/79] backend-drm: Support controlling output dynamically

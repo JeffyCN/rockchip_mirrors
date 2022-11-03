@@ -1,7 +1,7 @@
-From 134abc9308dc93578d981200ae0ba4e3a7b58158 Mon Sep 17 00:00:00 2001
+From 6339c12d59e740347c9c6a5922e3a9acf4def32c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 7 May 2022 16:41:20 +0800
-Subject: [PATCH 23/74] Avoid adding views to other outputs
+Subject: [PATCH 23/79] Avoid adding views to other outputs
 
 The outputs can be overlapped now.
 

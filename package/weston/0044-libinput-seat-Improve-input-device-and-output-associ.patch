@@ -1,7 +1,7 @@
-From ef1deb5c9e572341d7fd8c948bbbaa02d393048a Mon Sep 17 00:00:00 2001
+From 3b70a8c738bf618d59fd20328882648490562487 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 09:49:09 +0800
-Subject: [PATCH 44/74] libinput-seat: Improve input device and output
+Subject: [PATCH 44/79] libinput-seat: Improve input device and output
  associating
 
 An input device can associate with an output using udev rules's

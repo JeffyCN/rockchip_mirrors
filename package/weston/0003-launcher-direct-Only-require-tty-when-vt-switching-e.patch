@@ -1,7 +1,7 @@
-From 2cec6d27217c8b7767f39a16d2ca802865abc8d1 Mon Sep 17 00:00:00 2001
+From 8ffe3afb0f41f07c69efa17bfce969d0d2255c9d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 Jan 2021 03:38:36 +0800
-Subject: [PATCH 03/74] launcher-direct: Only require tty when vt switching
+Subject: [PATCH 03/79] launcher-direct: Only require tty when vt switching
  enabled
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>

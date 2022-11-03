@@ -1,7 +1,7 @@
-From a0023491315f738add3b34478ac581c38396ed16 Mon Sep 17 00:00:00 2001
+From eaa1f13dfdd0679fbb6d48e3521a0a1d50fe9f07 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 7 Mar 2022 18:22:04 +0800
-Subject: [PATCH 59/74] pixel-formats: Support NV15/YU08/YU10
+Subject: [PATCH 59/79] pixel-formats: Support NV15/YU08/YU10
 
 Only for importing dmabuf to drm fb.
 
