@@ -1,7 +1,7 @@
-From 2279df460ebe9f55747d8e69aaf60d19600b0b1a Mon Sep 17 00:00:00 2001
+From 9e3e9e3585879693df47719afa7bbd06f712e86b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 24 Jun 2022 16:25:11 +0800
-Subject: [PATCH 72/74] desktop-shell: Avoid lowering the requested fullscreen
+Subject: [PATCH 72/79] desktop-shell: Avoid lowering the requested fullscreen
  surface
 
 Don't lower itself.
@@ -27,7 +27,7 @@ index c7c064b..0981f1a 100644
  	weston_keyboard_start_grab(keyboard,
  	                           &shell->exposay.grab_kbd);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index cc0246e..dbb62e9 100644
+index bea4d1d..d4879b2 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -3747,7 +3747,8 @@ rotate_binding(struct weston_pointer *pointer, const struct timespec *time,

@@ -1,7 +1,7 @@
-From d7f5695dac0a1fbf8efbab65f40ff0b83f16e922 Mon Sep 17 00:00:00 2001
+From 15243cd3aec009b59b4b6aa4698b56ed3506c304 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 15/74] backend-drm: Support mirror mode
+Subject: [PATCH 15/79] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -702,7 +702,7 @@ index 6fb4bed..ec7e416 100644
  						   x, y, NULL))
  			return;
 diff --git a/meson.build b/meson.build
-index 0d53c1b..c9c58e0 100644
+index f5aa460..feecd45 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -145,6 +145,11 @@ if get_option('deprecated-wl-shell')

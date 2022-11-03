@@ -1,7 +1,7 @@
-From 71609da1857b693f7dcc5ba4ac1a3bc323b31fcc Mon Sep 17 00:00:00 2001
+From ec0fb9badef0c305907e9fdc462c5b24f9327dfb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 24 Feb 2022 09:25:54 +0800
-Subject: [PATCH 56/74] backend-drm: Remove fb destroy listener before freeing
+Subject: [PATCH 56/79] backend-drm: Remove fb destroy listener before freeing
  it
 
 Fix use-after-free.

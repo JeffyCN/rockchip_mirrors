@@ -1,7 +1,7 @@
-From 0cd9a65497b91722f684cf176c42e9cc67dcdcb3 Mon Sep 17 00:00:00 2001
+From 1ae29ca69d05cb28e60488ba90811ff9fe5fadbf Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 7 Mar 2022 15:56:19 +0800
-Subject: [PATCH 57/74] backend-drm: Support getting drm fb from dmabuf
+Subject: [PATCH 57/79] backend-drm: Support getting drm fb from dmabuf
  directly
 
 Try to import dmabuf to drm fb directly when GBM fd-import not working.

@@ -1,7 +1,7 @@
-From 10645cfbd525058545ca9121e9ec73aecd4f307a Mon Sep 17 00:00:00 2001
+From f938f8c7d225535ad41058e38b699cb712a3eb03 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 1 Jun 2022 11:28:24 +0800
-Subject: [PATCH 66/74] desktop-shell: Delay locking when having pending
+Subject: [PATCH 66/79] desktop-shell: Delay locking when having pending
  fade-out animations
 
 Avoid "unexpectedly large timestamp jump" warning when resuming with
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 748df7d..1fc2f3b 100644
+index 0643418..eca22c6 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4018,18 +4018,24 @@ shell_fade_done_for_output(struct weston_view_animation *animation, void *data)

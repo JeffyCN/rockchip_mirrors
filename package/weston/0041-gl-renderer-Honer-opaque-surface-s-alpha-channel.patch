@@ -1,7 +1,7 @@
-From 8b1e9c137ec1a8c16e045cccdfb27265d61c97a5 Mon Sep 17 00:00:00 2001
+From 4a65c4e8863abd774415905daad201340b7cb1f5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Mar 2021 03:09:33 +0800
-Subject: [PATCH 41/74] gl-renderer: Honer opaque surface's alpha channel
+Subject: [PATCH 41/79] gl-renderer: Honer opaque surface's alpha channel
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

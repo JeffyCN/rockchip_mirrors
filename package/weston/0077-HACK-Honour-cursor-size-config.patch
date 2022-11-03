@@ -1,7 +1,7 @@
-From be6fa16f61d027ded5f6bd73deefdc0bd4909d61 Mon Sep 17 00:00:00 2001
+From 48c41795fe5f02f7f4051b0e0849e36a2fb8edee Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
-Subject: [PATCH 77/77] HACK: Honour cursor-size config
+Subject: [PATCH 77/79] HACK: Honour cursor-size config
 
 By scaling the cursor surface.
 
