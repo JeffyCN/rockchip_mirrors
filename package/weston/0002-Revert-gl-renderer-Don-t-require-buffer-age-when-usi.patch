@@ -1,4 +1,4 @@
-From c46b2c426ff4f364a9ca6b849fa3f91d679b9af3 Mon Sep 17 00:00:00 2001
+From db9bdd20e256924b6bd78b1028ecc3caf320a0fc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 11 Jan 2022 16:08:40 +0800
 Subject: [PATCH 02/79] Revert "gl-renderer: Don't require buffer age when
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index a5f5eae..7231f73 100644
+index 0f2dab5a..3a525698 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
-@@ -1404,7 +1404,7 @@ output_get_damage(struct weston_output *output,
+@@ -1366,7 +1366,7 @@ output_get_damage(struct weston_output *output,
  	EGLBoolean ret;
  	int i;
  
@@ -26,7 +26,7 @@ index a5f5eae..7231f73 100644
  		ret = eglQuerySurface(gr->egl_display, go->egl_surface,
  				      EGL_BUFFER_AGE_EXT, &buffer_age);
  		if (ret == EGL_FALSE) {
-@@ -1444,7 +1444,7 @@ output_rotate_damage(struct weston_output *output,
+@@ -1406,7 +1406,7 @@ output_rotate_damage(struct weston_output *output,
  	struct gl_output_state *go = get_output_state(output);
  	struct gl_renderer *gr = get_renderer(output->compositor);
  
