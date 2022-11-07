@@ -1,4 +1,4 @@
-From 4d1097515ec7fff444c8f1ff743341547537bc4e Mon Sep 17 00:00:00 2001
+From c10088a686f911e67a0688a42362e33651707568 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
 Subject: [PATCH 53/79] HACK: pixman-renderer: Support passing dma fd to pixman
@@ -84,10 +84,10 @@ index 4cb2cbe1..8c4c49cd 100644
  	drmModeRmFB(device->drm.fd, fb->fb_id);
  err_bo:
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 795f4424..2577c3be 100644
+index d53fe42d..22edaa52 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -857,6 +857,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -881,6 +881,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  					     data->ptr + attributes->offset[0],
  					     attributes->stride[0]);
  

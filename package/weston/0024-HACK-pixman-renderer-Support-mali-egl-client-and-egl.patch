@@ -1,4 +1,4 @@
-From 4a6bb1c5ef1e1a05f45975c8766a722be9020a33 Mon Sep 17 00:00:00 2001
+From ea11c75ddd6fd176ddc63d3d565cba23268fd26d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:53:52 +0800
 Subject: [PATCH 24/79] HACK: pixman-renderer: Support mali egl client and egl
@@ -35,7 +35,7 @@ index 313a84f6..6a845cc8 100644
  
  lib_weston = shared_library(
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 8e80bd8f..eb6ae482 100644
+index 29d2b606..5ab4b55c 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -47,6 +47,19 @@
@@ -206,7 +206,7 @@ index 8e80bd8f..eb6ae482 100644
  
  	buffer->width = attributes->width;
  	buffer->height = attributes->height;
-@@ -731,11 +849,7 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -755,11 +873,7 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  #endif
  	default:
  		weston_log("Unsupported dmabuf format\n");
@@ -219,7 +219,7 @@ index 8e80bd8f..eb6ae482 100644
  	break;
  	}
  
-@@ -748,6 +862,11 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -772,6 +886,11 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  		buffer_state_handle_buffer_destroy;
  	wl_signal_add(&buffer->destroy_signal,
  		      &ps->buffer_destroy_listener);
@@ -231,7 +231,7 @@ index 8e80bd8f..eb6ae482 100644
  }
  
  static void
-@@ -755,7 +874,6 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
+@@ -779,7 +898,6 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
  {
  	struct pixman_surface_state *ps = get_surface_state(es);
  	struct wl_shm_buffer *shm_buffer;
@@ -239,7 +239,7 @@ index 8e80bd8f..eb6ae482 100644
  	const struct pixel_format_info *pixel_info;
  
  	weston_buffer_reference(&ps->buffer_ref, buffer,
-@@ -789,17 +907,40 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
+@@ -813,17 +931,40 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
  		return;
  	}
  
@@ -290,7 +290,7 @@ index 8e80bd8f..eb6ae482 100644
  		return;
  	}
  
-@@ -828,6 +969,70 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
+@@ -852,6 +993,70 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
  		      &ps->buffer_destroy_listener);
  }
  
@@ -361,7 +361,7 @@ index 8e80bd8f..eb6ae482 100644
  static void
  pixman_renderer_surface_state_destroy(struct pixman_surface_state *ps)
  {
-@@ -907,6 +1112,21 @@ pixman_renderer_destroy(struct weston_compositor *ec)
+@@ -931,6 +1136,21 @@ pixman_renderer_destroy(struct weston_compositor *ec)
  {
  	struct pixman_renderer *pr = get_renderer(ec);
  
@@ -383,7 +383,7 @@ index 8e80bd8f..eb6ae482 100644
  	wl_signal_emit(&pr->destroy_signal, pr);
  	weston_binding_destroy(pr->debug_binding);
  
-@@ -970,80 +1190,11 @@ debug_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+@@ -994,80 +1214,11 @@ debug_binding(struct weston_keyboard *keyboard, const struct timespec *time,
  	}
  }
  
@@ -465,7 +465,7 @@ index 8e80bd8f..eb6ae482 100644
  }
  
  static const struct weston_drm_format_array *
-@@ -1099,6 +1250,89 @@ out:
+@@ -1123,6 +1274,89 @@ out:
  	return ret;
  }
  
@@ -555,7 +555,7 @@ index 8e80bd8f..eb6ae482 100644
  WL_EXPORT int
  pixman_renderer_init(struct weston_compositor *ec)
  {
-@@ -1120,6 +1354,9 @@ pixman_renderer_init(struct weston_compositor *ec)
+@@ -1144,6 +1378,9 @@ pixman_renderer_init(struct weston_compositor *ec)
  	renderer->base.destroy = pixman_renderer_destroy;
  	renderer->base.surface_copy_content =
  		pixman_renderer_surface_copy_content;
@@ -565,7 +565,7 @@ index 8e80bd8f..eb6ae482 100644
  	ec->renderer = &renderer->base;
  	ec->capabilities |= WESTON_CAP_ROTATION_ANY;
  	ec->capabilities |= WESTON_CAP_VIEW_CLIP_MASK;
-@@ -1160,6 +1397,10 @@ pixman_renderer_init(struct weston_compositor *ec)
+@@ -1184,6 +1421,10 @@ pixman_renderer_init(struct weston_compositor *ec)
  	renderer->base.get_supported_formats =
  		pixman_renderer_get_supported_formats;
  
