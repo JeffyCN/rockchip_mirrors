@@ -1,4 +1,4 @@
-From 8e9f67c6dbd048817606e2d6ec60bc15327fbd8c Mon Sep 17 00:00:00 2001
+From 4e47db84d2504772cc0a077547aa3e0fdf0c8d38 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:43:49 +0800
 Subject: [PATCH 20/79] pixman-renderer: Support linux dmabuf
@@ -7,11 +7,11 @@ NOTE: Only support contig dmabuf.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/pixman-renderer.c | 263 +++++++++++++++++++++++++++++++++++-
- 1 file changed, 257 insertions(+), 6 deletions(-)
+ libweston/pixman-renderer.c | 287 +++++++++++++++++++++++++++++++++++-
+ 1 file changed, 281 insertions(+), 6 deletions(-)
 
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 22e7a428..8e80bd8f 100644
+index 22e7a428..29d2b606 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -37,9 +37,16 @@
@@ -65,7 +65,7 @@ index 22e7a428..8e80bd8f 100644
  		wl_shm_buffer_end_access(ps->buffer_ref.buffer->shm_buffer);
  
  	if (pr->repaint_debug)
-@@ -656,11 +672,90 @@ pixman_renderer_surface_set_color(struct weston_surface *es,
+@@ -656,11 +672,114 @@ pixman_renderer_surface_set_color(struct weston_surface *es,
  	ps->image = pixman_image_create_solid_fill(&color);
  }
  
@@ -99,11 +99,35 @@ index 22e7a428..8e80bd8f 100644
 +			attributes->stride[0];
 +
 +	switch (attributes->format) {
++	case DRM_FORMAT_RGBA8888:
++		pixman_format = PIXMAN_r8g8b8a8;
++		break;
++	case DRM_FORMAT_RGBX8888:
++		pixman_format = PIXMAN_r8g8b8x8;
++		break;
++	case DRM_FORMAT_BGRA8888:
++		pixman_format = PIXMAN_b8g8r8a8;
++		break;
++	case DRM_FORMAT_BGRX8888:
++		pixman_format = PIXMAN_b8g8r8x8;
++		break;
++	case DRM_FORMAT_ABGR8888:
++		pixman_format = PIXMAN_a8b8g8r8;
++		break;
++	case DRM_FORMAT_XBGR8888:
++		pixman_format = PIXMAN_x8b8g8r8;
++		break;
++	case DRM_FORMAT_BGR888:
++		pixman_format = PIXMAN_b8g8r8;
++		break;
 +	case DRM_FORMAT_ARGB8888:
 +		pixman_format = PIXMAN_a8r8g8b8;
 +		break;
 +	case DRM_FORMAT_XRGB8888:
 +		pixman_format = PIXMAN_x8r8g8b8;
++		break;
++	case DRM_FORMAT_RGB888:
++		pixman_format = PIXMAN_r8g8b8;
 +		break;
 +	case DRM_FORMAT_YUYV:
 +		pixman_format = PIXMAN_yuy2;
@@ -156,7 +180,7 @@ index 22e7a428..8e80bd8f 100644
  	const struct pixel_format_info *pixel_info;
  
  	weston_buffer_reference(&ps->buffer_ref, buffer,
-@@ -695,10 +790,16 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
+@@ -695,10 +814,16 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
  	}
  
  	if (buffer->type != WESTON_BUFFER_SHM) {
@@ -177,7 +201,7 @@ index 22e7a428..8e80bd8f 100644
  		return;
  	}
  
-@@ -795,6 +896,9 @@ pixman_renderer_create_surface(struct weston_surface *surface)
+@@ -795,6 +920,9 @@ pixman_renderer_create_surface(struct weston_surface *surface)
  	wl_signal_add(&pr->destroy_signal,
  		      &ps->renderer_destroy_listener);
  
@@ -187,7 +211,7 @@ index 22e7a428..8e80bd8f 100644
  	return 0;
  }
  
-@@ -805,6 +909,9 @@ pixman_renderer_destroy(struct weston_compositor *ec)
+@@ -805,6 +933,9 @@ pixman_renderer_destroy(struct weston_compositor *ec)
  
  	wl_signal_emit(&pr->destroy_signal, pr);
  	weston_binding_destroy(pr->debug_binding);
@@ -197,7 +221,7 @@ index 22e7a428..8e80bd8f 100644
  	free(pr);
  
  	ec->renderer = NULL;
-@@ -863,12 +970,142 @@ debug_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+@@ -863,12 +994,142 @@ debug_binding(struct weston_keyboard *keyboard, const struct timespec *time,
  	}
  }
  
@@ -340,7 +364,7 @@ index 22e7a428..8e80bd8f 100644
  
  	renderer = zalloc(sizeof *renderer);
  	if (renderer == NULL)
-@@ -887,6 +1124,15 @@ pixman_renderer_init(struct weston_compositor *ec)
+@@ -887,6 +1148,15 @@ pixman_renderer_init(struct weston_compositor *ec)
  	ec->capabilities |= WESTON_CAP_ROTATION_ANY;
  	ec->capabilities |= WESTON_CAP_VIEW_CLIP_MASK;
  
@@ -356,7 +380,7 @@ index 22e7a428..8e80bd8f 100644
  	renderer->debug_binding =
  		weston_compositor_add_debug_binding(ec, KEY_R,
  						    debug_binding, ec);
-@@ -909,6 +1155,11 @@ pixman_renderer_init(struct weston_compositor *ec)
+@@ -909,6 +1179,11 @@ pixman_renderer_init(struct weston_compositor *ec)
  
  	wl_signal_init(&renderer->destroy_signal);
  
