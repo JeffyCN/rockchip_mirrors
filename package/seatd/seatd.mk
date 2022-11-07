@@ -37,8 +37,8 @@ define SEATD_USERS
 endef
 
 define SEATD_INSTALL_INIT_SYSV
-	$(INSTALL) -m 0755 -D $(SEATD_PKGDIR)/S70seatd \
-		$(TARGET_DIR)/etc/init.d/S70seatd
+	$(INSTALL) -m 0755 -D $(SEATD_PKGDIR)/S40seatd \
+		$(TARGET_DIR)/etc/init.d/S40seatd
 endef
 
 define SEATD_INSTALL_INIT_SYSTEMD
