@@ -28,6 +28,12 @@ config BR2_PACKAGE_PX30
 	help
 	  Use rockchip's px30 chip
 
+config BR2_PACKAGE_RK3288
+	bool "rk3288 chip"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
+	help
+	  Use rockchip's rk3288 chip
+
 config BR2_PACKAGE_RK3308
 	bool "rk3308 chip"
 	help
@@ -50,6 +56,12 @@ config BR2_PACKAGE_RK3399
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
 	help
 	  Use Rockchip's rk3399 SoC
+
+config BR2_PACKAGE_RK3399PRO
+	bool "rk3399pro chip"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
+	help
+	  Use Rockchip's rk3399pro SoC
 
 config BR2_PACKAGE_RK356X
 	bool "rk356x chip"
