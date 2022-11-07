@@ -125,6 +125,7 @@ function main()
 	alias broot="cd ${BUILDROOT_DIR}"
 	alias bpkg="cd ${BUILDROOT_DIR}/package"
 	alias bout="cd ${TARGET_OUTPUT_DIR}"
+	alias bmake="make -f ${TARGET_OUTPUT_DIR}/Makefile"
 }
 
 if [ "${BASH_SOURCE}" == "$0" ];then
