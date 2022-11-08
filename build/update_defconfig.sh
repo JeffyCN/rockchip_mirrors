@@ -14,7 +14,7 @@ savedefconfig()
 	[ -z "$2" ] || \
 		"$SCRIPT_DIR/parse_defconfig.sh" "$2" "$CONFIG" > /dev/null
 
-	sed -i "s~\(^BR2_DEFCONFIG=\).*~\1\"$1\"~" "$CONFIG"
+	echo "BR2_DEFCONFIG=\"$1\"" >> "$CONFIG"
 	make O="$OUTPUT_DIR" savedefconfig >/dev/null
 
 	# Restore original .config
