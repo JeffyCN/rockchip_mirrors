@@ -18,12 +18,14 @@ PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 start_qlauncher()
 {
 	# Wait for weston ready
-	[ "${QT_QPA_PLATFORM}" == wayland ] && \
-		while [ ! -e ${XDG_RUNTIME_DIR}/wayland-0 ]; do
+	if [ "${QT_QPA_PLATFORM}" == wayland ]; then
+		for i in `seq 50`;do
+			[ -e ${XDG_RUNTIME_DIR}/wayland-0 ] || continue
 			sleep .1
 		done
+	fi
 
-	/usr/bin/QLauncher&
+	/usr/bin/QLauncher
 }
 
 stop_qlauncher()
@@ -33,9 +35,8 @@ stop_qlauncher()
 
 case "$1" in
 	start)
-		echo -n "starting qlauncher... "
-		start_qlauncher
-		echo "done."
+		echo "starting qlauncher... "
+		start_qlauncher&
 		;;
 	stop)
 		echo -n "stoping qlauncher... "
@@ -47,9 +48,8 @@ case "$1" in
 		stop_qlauncher && sleep .3
 		echo "done."
 
-		echo -n "starting qlauncher... "
-		start_qlauncher
-		echo "done."
+		echo "starting qlauncher... "
+		start_qlauncher&
 		;;
 	*)
 		echo "Usage: $0 {start|stop|restart}"
