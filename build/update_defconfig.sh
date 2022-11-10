@@ -18,7 +18,7 @@ savedefconfig()
 	make O="$OUTPUT_DIR" savedefconfig >/dev/null
 
 	# Restore original .config
-	gzip -fk "$CONFIG.gz"
+	gunzip -fk "$CONFIG.gz"
 }
 
 BOARD="$(basename "${1%_defconfig}")"
