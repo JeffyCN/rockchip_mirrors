@@ -2,6 +2,8 @@
 #include "base/base.config"
 #include "audio.config"
 #include "audio_gst.config"
+#include "camera.config"
+#include "camera_gst.config"
 #include "weston.config"
 #include "chromium.config"
 #include "gpu.config"
