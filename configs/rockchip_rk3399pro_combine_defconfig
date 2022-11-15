@@ -1,0 +1,23 @@
+#include "chips/rk3399pro_aarch64.config"
+#include "base/base.config"
+#include "gpu.config"
+#include "weston.config"
+#include "video_mpp.config"
+#include "video_gst.config"
+#include "video_gst_rtsp.config"
+#include "audio.config"
+#include "audio_gst.config"
+#include "camera.config"
+#include "camera_gst.config"
+#include "test.config"
+#include "debug.config"
+#include "benchmark.config"
+#include "network.config"
+#include "bt.config"
+#include "ntfs.config"
+#include "exfat.config"
+#include "vfat.config"
+#include "rknn_demo.conf"
+BR2_PACKAGE_NPU_POWERCTRL_COMBINE=y
+BR2_PACKAGE_RKNPU_FW=y
+BR2_PACKAGE_RKNPU_PCIE=y
