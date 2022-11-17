@@ -22,9 +22,12 @@ define USBMOUNT_INSTALL_TARGET_CMDS
 	$(INSTALL) -m 0644 -D $(@D)/usbmount.rules $(TARGET_DIR)/lib/udev/rules.d/usbmount.rules
 	$(INSTALL) -m 0644 -D $(@D)/usbmount.conf $(TARGET_DIR)/etc/usbmount/usbmount.conf
 
-	mkdir -p $(addprefix $(TARGET_DIR)/media/storage,0 1 2 3)
-	mkdir -p $(addprefix $(TARGET_DIR)/media/udisk,0 1 2 3)
-	mkdir -p $(addprefix $(TARGET_DIR)/media/sdcard,0 1 2 3)
+	for type in storage udisk sdcard; do \
+		mkdir -p $(addprefix $(TARGET_DIR)/media/$${type},1 2 3); \
+		mkdir -p $(TARGET_DIR)/mnt/$$type; \
+		rm -rf $(TARGET_DIR)/media/$${type}0; \
+		ln -sf /mnt/$$type $(TARGET_DIR)/media/$${type}0; \
+	done
 endef
 
 ifeq ($(BR2_PACKAGE_USBMOUNT_SYNC_MOUNT),)
