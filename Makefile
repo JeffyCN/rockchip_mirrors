@@ -459,7 +459,13 @@ HOST_DIR = $(if $(PKG),$(PER_PACKAGE_DIR)/$($(PKG)_NAME)/host,$(call qstrip,$(BR
 TARGET_DIR = $(if $(ROOTFS),$(ROOTFS_$(ROOTFS)_TARGET_DIR),$(if $(PKG),$(PER_PACKAGE_DIR)/$($(PKG)_NAME)/target,$(BASE_TARGET_DIR)))
 else
 HOST_DIR := $(call qstrip,$(BR2_HOST_DIR))
-TARGET_DIR = $(if $(ROOTFS),$(ROOTFS_$(ROOTFS)_TARGET_DIR),$(BASE_TARGET_DIR))
+TARGET_DIR = $(if $(ROOTFS),$(ROOTFS_$(ROOTFS)_TARGET_DIR),$(BASE_TARGET_DIR))$(if $($(PKG)_OEM_INSTALL),/oem)
+
+ifeq ($(BR2_PACKAGE_OEM),y)
+$(foreach pkg,$(call qstrip,$(BR2_PACKAGE_OEM_PACKAGES)),\
+	$(eval $(call UPPERCASE,$(pkg))_OEM_INSTALL := y)$(sep)\
+	$(eval OEM_DEPENDENCIES += $(pkg))$(sep))
+endif
 endif
 
 ifneq ($(HOST_DIR),$(BASE_DIR)/host)
