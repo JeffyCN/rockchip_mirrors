@@ -124,6 +124,9 @@ if [ "${ENC_EN}" = "true" ]; then
 else
 	/usr/sbin/veritysetup --hash-offset=${OFFSET} create vroot /dev/block/by-name/system  /dev/block/by-name/system ${HASH} > /dev/null 2>&1
 fi
+
+killall tee-supplicant
+
 mount /dev/mapper/vroot /mnt
 
 LABLE=$(dumpe2fs -h /dev/mapper/vroot | grep name | xargs -n 1 | tail -1)
