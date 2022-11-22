@@ -145,16 +145,19 @@ format_part()
 		ubifs)
 			format_ubifs
 			;;
+		jffs2)
+			check_tool mkfs.jffs2 BR2_PACKAGE_MTD_MKFSJFFS2 && \
+			mkfs.jffs2 -o $DEV 0x10000 --pad=0x400000 -s 0x1000 -n
+			;;
 		squashfs)
 			# check_tool mksquashfs BR2_PACKAGE_SQUASHFS && \
 			# mksquashfs $DEV
 			echo "It's pointness to format a squashfs partition..."
-			;;
-		jffs2)
-			echo "It's pointness to format a jffs2 partition..."
+			false
 			;;
 		auto)
 			echo "Unable to format a auto partition..."
+			false
 			;;
 		*)
 			echo Unsupported file system $FSTYPE for $DEV
