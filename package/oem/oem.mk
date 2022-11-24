@@ -25,4 +25,10 @@ define OEM_TARGET_FINALIZE_CLEAN_HOOK
 endef
 OEM_TARGET_FINALIZE_HOOKS += OEM_TARGET_FINALIZE_CLEAN_HOOK
 
+define OEM_INSTALL_TARGET_CMDS
+        mkdir -p $(TARGET_DIR)/usr/share/dbus-1/system.d
+        $(INSTALL) -D -m 0644 $(OEM_PKGDIR)/redirect_dbus4oem.conf \
+                $(TARGET_DIR)/usr/share/dbus-1/system.d
+endef
+
 $(eval $(generic-package))
