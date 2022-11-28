@@ -1,10 +1,10 @@
 #include "base/nvr.config"
-#include "audio.config"
-#include "gpu_nvr.config"
-#include "network_only_eth.config"
-#include "video_mpp.config"
 #include "chips/rk356x_aarch64.config"
-#include "gcc_arm_10_aarch64.config"
+#include "gpu/nvr.config"
+#include "multimedia/audio.config"
+#include "multimedia/mpp.config"
+#include "toolchain/arm_10_aarch64.config"
+#include "wifibt/network.config"
 BR2_PACKAGE_INPUT_EVENT_DAEMON=
 BR2_PACKAGE_PM_UTILS=
 BR2_ROOTFS_OVERLAY+="board/rockchip/rk3588/fs-overlay-nvr/"

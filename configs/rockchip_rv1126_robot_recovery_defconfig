@@ -1,6 +1,6 @@
 #include "base/base.config"
-#include "chips/rv1126_rv1109_arm.config"
 #include "base/recovery.config"
+#include "chips/rv1126_rv1109_arm.config"
 #include "update_engine.config"
 BR2_PACKAGE_RECOVERY_BOOTCONTROL=
 BR2_PACKAGE_RECOVERY_RECOVERYBIN=y

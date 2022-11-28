@@ -1,8 +1,8 @@
-#include "chips/rv1126_rv1109_arm.config"
 #include "base/common.config"
-#include "audio.config"
-#include "video_mpp.config"
-#include "camera.config"
+#include "chips/rv1126_rv1109_arm.config"
+#include "multimedia/audio.config"
+#include "multimedia/camera.config"
+#include "multimedia/mpp.config"
 BR2_ARM_INSTRUCTIONS_THUMB2=y
 # BR2_PACKAGE_ALSA_LIB_ALISP is not set
 # BR2_PACKAGE_ALSA_LIB_ALOAD is not set

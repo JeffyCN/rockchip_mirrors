@@ -1,6 +1,6 @@
 #include "base/tiny.config"
 #include "chips/rv1126_rv1109_arm.config"
-#include "camera.config"
+#include "multimedia/camera.config"
 # BR2_PACKAGE_ALSA_LIB_ALISP is not set
 # BR2_PACKAGE_ALSA_LIB_ALOAD is not set
 # BR2_PACKAGE_ALSA_LIB_HWDEP is not set

@@ -1,6 +1,6 @@
 #include "base/tiny.config"
 #include "chips/rv1126_rv1109_arm.config"
-#include "camera.config"
+#include "multimedia/camera.config"
 BR2_PACKAGE_CAMERA_ENGINE=
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE="os04c10_DW-RV04C_2G2P650IR-F21.xml"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="os04c10_DW-RV04C_2G2P650IR-F21.xml"

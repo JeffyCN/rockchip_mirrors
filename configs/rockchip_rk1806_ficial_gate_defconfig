@@ -1,12 +1,12 @@
-#include "chips/rk1806_arm.config"
 #include "base/base.config"
-#include "debug.config"
-#include "audio.config"
-#include "network.config"
-#include "video_mpp.config"
+#include "chips/rk1806_arm.config"
 #include "chips/rk1806_webserver.config"
-#include "camera.config"
-#include "vfat.config"
+#include "fs/vfat.config"
+#include "multimedia/audio.config"
+#include "multimedia/camera.config"
+#include "multimedia/mpp.config"
+#include "wifibt/wireless.config"
+#include "debug.config"
 BR2_PACKAGE_CAMERA_ENGINE=
 # BR2_PACKAGE_CAMERA_ENGINE_RKISP_3A_SERVICE is not set
 BR2_PACKAGE_FICIAL_GATE=y

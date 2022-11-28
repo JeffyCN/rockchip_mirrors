@@ -1,5 +1,5 @@
-#include "chips/rk3399_aarch64.config"
 #include "base/base.config"
 #include "base/recovery.config"
-#include "ntfs.config"
-#include "exfat.config"
+#include "chips/rk3399_aarch64.config"
+#include "fs/exfat.config"
+#include "fs/ntfs.config"

@@ -1,10 +1,10 @@
 #include "base/base.config"
-#include "debug.config"
-#include "debug2.config"
 #include "chips/rk3588_aarch64.config"
+#include "fs/vfat.config"
+#include "gpu/dummy.config"
+#include "multimedia/mpp.config"
+#include "debug2.config"
+#include "debug.config"
 #include "test.config"
-#include "video_mpp.config"
-#include "gpu_dummy.config"
-#include "vfat.config"
 BR2_PACKAGE_RKNPU=y
 BR2_PACKAGE_RKNPU_USE_RKNN_API=y

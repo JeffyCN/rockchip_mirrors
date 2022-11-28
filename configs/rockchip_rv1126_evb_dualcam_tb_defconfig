@@ -1,6 +1,6 @@
 #include "base/tiny.config"
 #include "chips/rv1126_rv1109_arm.config"
-#include "camera.config"
+#include "multimedia/camera.config"
 BR2_PACKAGE_CAMERA_ENGINE=
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="ov2718_YT-RV1109-3-V1_M43-4IR-2MP-F2.xml gc2053_YT-RV1109-2-V1_40IR-2MP-F20.xml"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE_USE_BIN=y

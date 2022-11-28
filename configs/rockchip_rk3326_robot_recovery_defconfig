@@ -1,5 +1,5 @@
-#include "chips/rk3326_aarch64.config"
 #include "base/recovery.config"
+#include "chips/rk3326_aarch64.config"
 BR2_PACKAGE_ANDROID_TOOLS=y
 BR2_PACKAGE_RECOVERY_NO_UI=y
 BR2_PACKAGE_VENDOR_STORAGE=y

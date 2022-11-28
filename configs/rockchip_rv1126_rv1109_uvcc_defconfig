@@ -1,9 +1,9 @@
 #include "base/base.config"
-#include "debug.config"
-#include "audio.config"
-#include "video_mpp.config"
 #include "chips/rv1126_rv1109_arm.config"
-#include "camera.config"
+#include "multimedia/audio.config"
+#include "multimedia/camera.config"
+#include "multimedia/mpp.config"
+#include "debug.config"
 BR2_PACKAGE_AISERVER=y
 BR2_PACKAGE_AISERVER_SHM_SERVER=y
 BR2_PACKAGE_AISERVER_USE_ROCKX=y

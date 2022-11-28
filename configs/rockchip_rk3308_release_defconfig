@@ -1,7 +1,7 @@
 #include "base/common.config"
 #include "chips/rk3308_aarch64.config"
-#include "ntfs.config"
-#include "exfat.config"
+#include "fs/exfat.config"
+#include "fs/ntfs.config"
 BR2_FORTIFY_SOURCE_2=y
 BR2_GCC_ENABLE_OPENMP=y
 BR2_JLEVEL=24

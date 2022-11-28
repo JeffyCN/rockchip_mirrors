@@ -1,6 +1,6 @@
 #include "base/base.config"
 #include "chips/rk3399pro_npu_aarch64.config"
-#include "camera.config"
+#include "multimedia/camera.config"
 BR2_PACKAGE_ANDROID_TOOLS=
 BR2_PACKAGE_E2FSPROGS=
 BR2_PACKAGE_E2FSPROGS_RESIZE2FS=

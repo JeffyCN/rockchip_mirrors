@@ -1,9 +1,9 @@
 #include "base/base.config"
-#include "debug.config"
-#include "video_mpp.config"
 #include "chips/rv1126_rv1109_arm.config"
-#include "camera.config"
-#include "vfat.config"
+#include "fs/vfat.config"
+#include "multimedia/camera.config"
+#include "multimedia/mpp.config"
+#include "debug.config"
 BR2_PACKAGE_CAMERA_ENGINE=
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="ov02k10_ORCF-0249-00-PD-V1_xuye.xml"
 BR2_PACKAGE_GDB=y

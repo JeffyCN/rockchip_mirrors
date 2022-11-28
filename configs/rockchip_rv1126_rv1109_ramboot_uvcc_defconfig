@@ -1,7 +1,7 @@
 #include "base/base.config"
-#include "video_mpp.config"
 #include "chips/rv1126_rv1109_arm.config"
-#include "camera.config"
+#include "multimedia/camera.config"
+#include "multimedia/mpp.config"
 BR2_PACKAGE_CALLFUNIPC=y
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="os04a10_CMK-OT1607-FV1_M12-40IRC-4MP-F16.xml"
 BR2_PACKAGE_DBUS_GLIB=y

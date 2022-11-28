@@ -1,9 +1,9 @@
-#include "chips/rk356x_aarch64.config"
-#include "audio.config"
-#include "video_mpp.config"
 #include "base/base.config"
-#include "camera.config"
-#include "gpu_dummy.config"
+#include "chips/rk356x_aarch64.config"
+#include "gpu/dummy.config"
+#include "multimedia/audio.config"
+#include "multimedia/camera.config"
+#include "multimedia/mpp.config"
 BR2_PACKAGE_ANDROID_TOOLS=
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="ov5695_TongJu_CHT842-MD.xml"
 BR2_PACKAGE_INPUT_EVENT_DAEMON=

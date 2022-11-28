@@ -1,10 +1,10 @@
 #include "base/base.config"
-#include "audio.config"
-#include "network.config"
-#include "video_mpp.config"
 #include "chips/rv1126_rv1109_arm.config"
-#include "ubifs.config"
-#include "camera.config"
+#include "fs/ubifs.config"
+#include "multimedia/audio.config"
+#include "multimedia/camera.config"
+#include "multimedia/mpp.config"
+#include "wifibt/wireless.config"
 #include "update_engine.config"
 BR2_PACKAGE_CALLFUNIPC=y
 BR2_PACKAGE_CAMERA_ENGINE=

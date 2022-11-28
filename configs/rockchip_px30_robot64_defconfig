@@ -1,8 +1,8 @@
-#include "chips/rk3326_aarch64.config"
-#include "audio.config"
 #include "base/base.config"
-#include "network.config"
-#include "camera.config"
+#include "chips/rk3326_aarch64.config"
+#include "multimedia/audio.config"
+#include "multimedia/camera.config"
+#include "wifibt/wireless.config"
 BR2_PACKAGE_CAMERA_ENGINE_RKISP_IQFILE="ov5695_TongJu_CHT842-MD.xml"
 BR2_PACKAGE_COREUTILS=y
 # BR2_PACKAGE_EUDEV_ENABLE_HWDB is not set
