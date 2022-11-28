@@ -45,12 +45,6 @@ endef
 ROCKCHIP_MPP_POST_INSTALL_TARGET_HOOKS += ROCKCHIP_MPP_H265_SUPPORTED_FIRMWARE
 endif
 
-ifeq ($(BR2_PACKAGE_RK_OEM), y)
-ifneq ($(BR2_PACKAGE_THUNDERBOOT), y)
-ROCKCHIP_MPP_INSTALL_TARGET_OPTS = DESTDIR=$(BR2_PACKAGE_RK_OEM_INSTALL_TARGET_DIR) install/fast
-endif
-endif
-
 define ROCKCHIP_MPP_REMOVE_NOISY_LOGS
 	sed -i -e "/pp_enable %d/d" \
 		$(@D)/mpp/hal/vpu/jpegd/hal_jpegd_vdpu2.c || true

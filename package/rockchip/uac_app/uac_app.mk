@@ -6,9 +6,7 @@ ifeq ($(BR2_PACKAGE_UAC_APP), y)
     $(eval $(cmake-package))
 endif
 
-ifeq ($(BR2_PACKAGE_RK_OEM), y)
-UAC_APP_INSTALL_TARGET_OPTS = DESTDIR=$(BR2_PACKAGE_RK_OEM_INSTALL_TARGET_DIR) install/fast
-UAC_APP_DEPENDENCIES += rk_oem
+ifneq ($(UAC_APP_OEM_INSTALL),)
 UAC_APP_CONF_OPTS += -DUAC_APP_CONF_PREFIX="\"/oem\""
 endif
 
