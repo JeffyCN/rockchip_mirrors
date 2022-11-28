@@ -1,5 +1,5 @@
-#include "chips/rk356x.config"
 #include "base/base.config"
+#include "chips/rk356x.config"
 #include "yx.config"
 BR2_arm=y
 BR2_cortex_a55=y

@@ -1,5 +1,5 @@
-#include "chips/rk3326_arm.config"
 #include "base/base.config"
+#include "chips/rk3326_arm.config"
 #include "yx.config"
 BR2_PACKAGE_NTFS_3G_NTFSPROGS=
 BR2_ROOTFS_OVERLAY+="board/rockchip/yx/fs-overlay/"
