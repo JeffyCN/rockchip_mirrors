@@ -29,6 +29,14 @@ config BR2_PACKAGE_LIBCAMERA_V4L2
 	help
 	  libcamera v4l2 compatibility layer
 
+config BR2_PACKAGE_LIBCAMERA_GST
+	bool "libcamera gstreamer compatibility layer"
+	depends on BR2_PACKAGE_GST1_PLUGINS_BASE
+	select BR2_PACKAGE_LIBGLIB2
+	default y
+	help
+	  libcamera gstreamer compatibility layer
+
 config BR2_PACKAGE_LIBCAMERA_HAS_PIPELINE
 	bool
 
@@ -71,6 +79,12 @@ config BR2_PACKAGE_LIBCAMERA_PIPELINE_VIMC
 	select BR2_PACKAGE_LIBCAMERA_HAS_PIPELINE
 	help
 	  Pipeline for the vimc device.
+
+config BR2_PACKAGE_LIBCAMERA_PIPELINE_CUSTOM
+	bool "custom pipeline"
+	select BR2_PACKAGE_LIBCAMERA_HAS_PIPELINE
+	help
+	  Pipeline for custom device.
 
 config BR2_PACKAGE_LIBCAMERA_COMPLIANCE
 	bool "lc-compliance test application"
