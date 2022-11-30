@@ -27,6 +27,7 @@ if BR2_PACKAGE_LIBCAMERA
 
 config BR2_PACKAGE_LIBCAMERA_V4L2
 	bool "libcamera v4l2 compatibility layer"
+	default y
 	help
 	  libcamera v4l2 compatibility layer
 
@@ -84,8 +85,31 @@ config BR2_PACKAGE_LIBCAMERA_PIPELINE_VIMC
 config BR2_PACKAGE_LIBCAMERA_PIPELINE_CUSTOM
 	bool "custom pipeline"
 	select BR2_PACKAGE_LIBCAMERA_HAS_PIPELINE
+	default y
 	help
 	  Pipeline for custom device.
+
+if BR2_PACKAGE_LIBCAMERA_PIPELINE_CUSTOM
+
+config BR2_PACKAGE_LIBCAMERA_CUSTOM_DRIVERS
+	string "custom pipeline drivers"
+	default "has:rkisp"
+
+config BR2_PACKAGE_LIBCAMERA_CUSTOM_DEFAULT_ENTITY
+	string "custom pipeline default media entity"
+	default "has:mainpath"
+
+config BR2_PACKAGE_LIBCAMERA_CUSTOM_FORMAT
+	string "custom pipeline pixel format"
+	default "NV12"
+	help
+	  NV12|YUV420|NV16|YUYV|ANY
+
+config BR2_PACKAGE_LIBCAMERA_CUSTOM_BUFFER_COUNT
+	int "custom pipeline buffer count"
+	default 4
+
+endif
 
 config BR2_PACKAGE_LIBCAMERA_COMPLIANCE
 	bool "lc-compliance test application"

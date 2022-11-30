@@ -133,4 +133,20 @@ endef
 
 LIBCAMERA_POST_BUILD_HOOKS += LIBCAMERA_BUILD_STRIP_IPA_SO
 
+ifeq ($(BR2_PACKAGE_LIBCAMERA_PIPELINE_CUSTOM),y)
+define LIBCAMERA_INSTALL_TARGET_CUSTOM_ENV
+	$(INSTALL) -D -m 0644 $(LIBCAMERA_PKGDIR)/libcamera.sh \
+		$(TARGET_DIR)/etc/profile.d/libcamera.sh
+	$(SED) 's/\(DRIVERS=\).*/\1${BR2_PACKAGE_LIBCAMERA_CUSTOM_DRIVERS}/' \
+		$(TARGET_DIR)/etc/profile.d/libcamera.sh
+	$(SED) 's/\(DEFAULT=\).*/\1${BR2_PACKAGE_LIBCAMERA_CUSTOM_DEFAULT_ENTITY}/' \
+		$(TARGET_DIR)/etc/profile.d/libcamera.sh
+	$(SED) 's/\(FORMAT=\).*/\1${BR2_PACKAGE_LIBCAMERA_CUSTOM_FORMAT}/' \
+		$(TARGET_DIR)/etc/profile.d/libcamera.sh
+	$(SED) 's/\(BUF_CNT=\).*/\1${BR2_PACKAGE_LIBCAMERA_CUSTOM_BUFFER_COUNT}/' \
+		$(TARGET_DIR)/etc/profile.d/libcamera.sh
+endef
+LIBCAMERA_POST_INSTALL_TARGET_HOOKS += LIBCAMERA_INSTALL_TARGET_CUSTOM_ENV
+endif
+
 $(eval $(meson-package))
