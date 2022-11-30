@@ -462,9 +462,9 @@ HOST_DIR := $(call qstrip,$(BR2_HOST_DIR))
 TARGET_DIR = $(if $(ROOTFS),$(ROOTFS_$(ROOTFS)_TARGET_DIR),$(BASE_TARGET_DIR))$(if $($(PKG)_OEM_INSTALL),/oem)
 
 ifeq ($(BR2_PACKAGE_OEM),y)
-$(foreach pkg,$(call qstrip,$(BR2_PACKAGE_OEM_PACKAGES)),\
-	$(eval $(call UPPERCASE,$(pkg))_OEM_INSTALL := y)$(sep)\
-	$(eval OEM_DEPENDENCIES += $(pkg))$(sep))
+$(eval $(foreach pkg,$(call qstrip,$(BR2_PACKAGE_OEM_PACKAGES)), \
+	$(eval $(call UPPERCASE,$(pkg))_OEM_INSTALL := y)$(sep) \
+	$(eval OEM_DEPENDENCIES += $(pkg))$(sep)))
 endif
 endif
 
