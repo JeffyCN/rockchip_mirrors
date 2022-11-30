@@ -34,38 +34,38 @@ state.rockchiprk809co {
 			item.3 'BT Sco Mic'
 		}
 	}
-	control.3 {
-		iface MIXER
-		name 'Digital Capture Volume'
-		value.0 72
-		value.1 72
-		comment {
-			access 'read write user'
-			type INTEGER
-			count 2
-			range '0 - 120'
-			tlv '0000000100000008fffff44800000029'
-			dbmin -3000
-			dbmax 1920
-			dbvalue.0 -48
-			dbvalue.1 -48
-		}
-	}
-	control.4 {
+	control.6 {
 		iface MIXER
 		name 'Master Playback Volume'
-		value.0 255
-		value.1 255
+		value.0 100
+		value.1 100
 		comment {
 			access 'read write user'
 			type INTEGER
 			count 2
-			range '0 - 255'
-			tlv '0000000100000008fffff83000000003'
-			dbmin -2000
-			dbmax -1235
-			dbvalue.0 -1235
-			dbvalue.1 -1235
+			range '0 - 100'
+			tlv '0000000100000008ffffec7800000032'
+			dbmin -5000
+			dbmax 0
+			dbvalue.0 0
+			dbvalue.1 0
+		}
+	}
+	control.7 {
+		iface MIXER
+		name 'Master Capture Volume'
+		value.0 100
+		value.1 100
+		comment {
+			access 'read write user'
+			type INTEGER
+			count 2
+			range '0 - 100'
+			tlv '0000000100000008ffffec7800000032'
+			dbmin -5000
+			dbmax 0
+			dbvalue.0 0
+			dbvalue.1 0
 		}
 	}
 }
