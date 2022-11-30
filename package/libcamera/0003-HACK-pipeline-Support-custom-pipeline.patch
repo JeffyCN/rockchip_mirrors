@@ -1,23 +1,25 @@
-From 956275f74e4813d9e34d60bd0a818e701a17685f Mon Sep 17 00:00:00 2001
+From 5a2566de4567404f57b70af4c6fbb09f6f617313 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 29 Nov 2022 17:18:23 +0800
 Subject: [PATCH 3/3] HACK: pipeline: Support custom pipeline
 
 Tested on RK3588 EVB with:
-export LIBCAMERA_CUSTOM_DRIVERS=rkisp0-vir0
-export LIBCAMERA_CUSTOM_DEFAULT=rkisp_mainpath
+export LIBCAMERA_CUSTOM_DRIVERS=has:rkisp
+export LIBCAMERA_CUSTOM_DEFAULT=has:mainpath
 export LIBCAMERA_CUSTOM_FORMAT=NV12
+export LIBCAMERA_CUSTOM_BUF_CNT=4
 gst-launch-1.0 libcamerasrc ! waylandsink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  meson_options.txt                             |   2 +-
- src/libcamera/pipeline/custom/custom.cpp      | 402 ++++++++++++++++++
+ src/libcamera/device_enumerator.cpp           |   8 +-
+ src/libcamera/pipeline/custom/custom.cpp      | 415 ++++++++++++++++++
  src/libcamera/pipeline/custom/meson.build     |   5 +
  test/pipeline/custom/custom_pipeline_test.cpp | 110 +++++
  test/pipeline/custom/meson.build              |  14 +
  test/pipeline/meson.build                     |   1 +
- 6 files changed, 533 insertions(+), 1 deletion(-)
+ 7 files changed, 552 insertions(+), 3 deletions(-)
  create mode 100644 src/libcamera/pipeline/custom/custom.cpp
  create mode 100644 src/libcamera/pipeline/custom/meson.build
  create mode 100644 test/pipeline/custom/custom_pipeline_test.cpp
@@ -36,12 +38,31 @@ index 7a9aecf..65f3ffc 100644
          description : 'Select which pipeline handlers to include')
  
  option('qcam',
+diff --git a/src/libcamera/device_enumerator.cpp b/src/libcamera/device_enumerator.cpp
+index d125805..06d1707 100644
+--- a/src/libcamera/device_enumerator.cpp
++++ b/src/libcamera/device_enumerator.cpp
+@@ -93,8 +93,12 @@ void DeviceMatch::add(const std::string &entity)
+  */
+ bool DeviceMatch::match(const MediaDevice *device) const
+ {
+-	if (driver_ != device->driver())
+-		return false;
++	const std::string driver = device->driver();
++	if (driver_ != driver) {
++		if (driver_.find("has:") != 0 ||
++		    (driver.find(driver_.substr(4)) == std::string::npos))
++			return false;
++	}
+ 
+ 	for (const std::string &name : entities_) {
+ 		bool found = false;
 diff --git a/src/libcamera/pipeline/custom/custom.cpp b/src/libcamera/pipeline/custom/custom.cpp
 new file mode 100644
-index 0000000..033d035
+index 0000000..bbf5259
 --- /dev/null
 +++ b/src/libcamera/pipeline/custom/custom.cpp
-@@ -0,0 +1,402 @@
+@@ -0,0 +1,415 @@
 +/* SPDX-License-Identifier: LGPL-2.1-or-later */
 +/*
 + * Copyright (C) 2019, Google Inc.
@@ -75,6 +96,7 @@ index 0000000..033d035
 +#define CUSTOM_DEFAULT_ENV "LIBCAMERA_CUSTOM_DEFAULT"
 +#define CUSTOM_BUF_CNT_ENV "LIBCAMERA_CUSTOM_BUF_CNT"
 +#define CUSTOM_FORMAT_ENV "LIBCAMERA_CUSTOM_FORMAT"
++#define CUSTOM_FORMAT_NONE formats::R8
 +
 +using namespace std;
 +
@@ -90,6 +112,7 @@ index 0000000..033d035
 +	{
 +	}
 +
++	MediaEntity *getEntity(MediaDevice *media);
 +	int init(MediaDevice *media);
 +	void bufferReady(FrameBuffer *buffer);
 +
@@ -205,7 +228,8 @@ index 0000000..033d035
 +}
 +
 +PipelineHandlerCustom::PipelineHandlerCustom(CameraManager *manager)
-+	: PipelineHandler(manager), bufferCount_(4), pixelFormat_(formats::YUV420)
++	: PipelineHandler(manager), bufferCount_(4),
++	pixelFormat_(CUSTOM_FORMAT_NONE)
 +{
 +	const char *bufferCount = utils::secure_getenv(CUSTOM_BUF_CNT_ENV);
 +	if (bufferCount)
@@ -237,14 +261,20 @@ index 0000000..033d035
 +	std::map<PixelFormat, std::vector<SizeRange>> deviceFormats;
 +	for (const auto &format : v4l2Formats) {
 +		PixelFormat pixelFormat = format.first.toPixelFormat();
-+		if (pixelFormat.isValid() && pixelFormat == pixelFormat_)
++		if (pixelFormat.isValid() &&
++		    (pixelFormat_ == CUSTOM_FORMAT_NONE ||
++		     pixelFormat == pixelFormat_))
 +			deviceFormats[pixelFormat] = format.second;
 +	}
 +
 +	StreamFormats formats(deviceFormats);
 +	StreamConfiguration cfg(formats);
 +
-+	cfg.pixelFormat = pixelFormat_;
++	if (pixelFormat_ != CUSTOM_FORMAT_NONE)
++		cfg.pixelFormat = pixelFormat_;
++	else
++		cfg.pixelFormat = formats::NV12;
++
 +	cfg.size = formats.sizes(cfg.pixelFormat).back();
 +	cfg.bufferCount = bufferCount_;
 +
@@ -374,35 +404,39 @@ index 0000000..033d035
 +	return found;
 +}
 +
++MediaEntity *CustomCameraData::getEntity(MediaDevice *media)
++{
++	const std::vector<MediaEntity *> &entities = media->entities();
++
++	if (utils::secure_getenv(CUSTOM_DEFAULT_ENV)) {
++		auto iter = std::find_if(entities.begin(), entities.end(),
++					 [](MediaEntity *e) {
++					 string name = utils::secure_getenv(CUSTOM_DEFAULT_ENV);
++					 if (e->name() == name) return true;
++					 if (name.find("has:") != 0) return false;
++					 return e->name().find(name.substr(4)) != string::npos;
++					 });
++		return iter == entities.end() ? NULL : *iter;
++	} else {
++		auto iter = std::find_if(entities.begin(), entities.end(),
++					 [](MediaEntity *e) {
++					 return e->function() == MEDIA_ENT_F_IO_V4L;
++					 });
++		return iter == entities.end() ? NULL : *iter;
++	}
++}
++
 +int CustomCameraData::init(MediaDevice *media)
 +{
-+	const char *defaultEntity = utils::secure_getenv(CUSTOM_DEFAULT_ENV);
-+
 +	/* Locate and initialise the camera data with the default video node. */
-+	const std::vector<MediaEntity *> &entities = media->entities();
-+	auto entity = std::find_if(entities.begin(), entities.end(),
-+				   [](MediaEntity *e) {
-+					   return e->function() == MEDIA_ENT_F_IO_V4L;
-+				   });
-+
-+	if (defaultEntity) {
-+		entity = std::find_if(entities.begin(), entities.end(),
-+				      [](MediaEntity *e) {
-+				      return e->name() == utils::secure_getenv(CUSTOM_DEFAULT_ENV);
-+				      });
-+		if (entity == entities.end()) {
-+			LOG(Custom, Error) << "Could not find video device: " << defaultEntity;
-+			return -ENODEV;
-+		}
-+	}
-+
-+	if (entity == entities.end()) {
++	MediaEntity *entity = getEntity(media);
++	if (!entity) {
 +		LOG(Custom, Error) << "Could not find default video device";
 +		return -ENODEV;
 +	}
 +
 +	/* Create and open the video device. */
-+	video_ = std::make_unique<V4L2VideoDevice>(*entity);
++	video_ = std::make_unique<V4L2VideoDevice>(entity);
 +	int ret = video_->open();
 +	if (ret)
 +		return ret;
