@@ -5,7 +5,7 @@ if [ -z "${BASH_SOURCE}" ];then
 	bash -c "$0 $@"
 fi
 
-function choose_board()
+choose_board()
 {
 	echo
 	echo "You're building on Linux"
@@ -38,7 +38,7 @@ function choose_board()
 	done
 }
 
-function lunch_rockchip()
+lunch_rockchip()
 {
 	TARGET_DIR_NAME="$RK_BUILD_CONFIG"
 	export TARGET_OUTPUT_DIR="$BUILDROOT_OUTPUT_DIR/$TARGET_DIR_NAME"
@@ -75,7 +75,7 @@ function lunch_rockchip()
 	fi
 }
 
-function main()
+main()
 {
 	SCRIPT_PATH=$(realpath ${BASH_SOURCE})
 	SCRIPT_DIR=$(dirname ${SCRIPT_PATH})
@@ -121,11 +121,19 @@ function main()
 	lunch_rockchip
 
 	# Set alias
-	alias croot="cd ${TOP_DIR}"
-	alias broot="cd ${BUILDROOT_DIR}"
-	alias bpkg="cd ${BUILDROOT_DIR}/package"
-	alias bout="cd ${TARGET_OUTPUT_DIR}"
-	alias bmake="make -f ${TARGET_OUTPUT_DIR}/Makefile"
+	alias croot='cd ${TOP_DIR}'
+	alias broot='cd ${BUILDROOT_DIR}'
+	alias bout='cd ${TARGET_OUTPUT_DIR}'
+	alias bmake='make -f ${TARGET_OUTPUT_DIR}/Makefile'
+	alias bpkg='echo $PWD | grep -oE "$TARGET_OUTPUT_DIR/build/[^/]*" || \
+		echo "not in a pkg build dir." >&2'
+	alias bconfig='[ -d "$(bpkg)" ] && $(bpkg)/.configure.sh'
+	alias bbuild='[ -d "$(bpkg)" ] && $(bpkg)/.build.sh'
+	alias binstall='[ -d "$(bpkg)" ] && $(bpkg)/.target_install.sh'
+	alias bdeploy='[ -d "$(bpkg)" ] && $(bpkg)/.deploy.sh'
+	alias bupdate='[ -d "$(bpkg)" ] && $(bpkg)/.configure.sh && \
+		$(bpkg)/.build.sh && $(bpkg)/.target_install.sh && \
+		$(bpkg)/.deploy.sh'
 }
 
 if [ "${BASH_SOURCE}" == "$0" ];then
