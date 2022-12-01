@@ -387,6 +387,16 @@ $(BUILD_DIR)/%/.stamp_images_installed:
 	$(Q)touch $@
 
 # Install to target dir
+define PRE_INSTALL_TARGET
+	$(Q)touch $($(PKG)_DIR)/.stamp_installed
+	$(Q)if [ -r $(@D)/.files-list-target.txt ]; then \
+		cd $(TARGET_DIR); \
+		cat $(@D)/.files-list-target.txt | \
+			xargs md5sum /dev/null > $(@D)/.md5 2>/dev/null || true; \
+		cd -; \
+	fi
+endef
+
 define POST_INSTALL_TARGET
 	$(Q)if test -n "$($(PKG)_CONFIG_SCRIPTS)" ; then \
 		$(RM) -f $(addprefix $(TARGET_DIR)/usr/bin/,$($(PKG)_CONFIG_SCRIPTS)) ; \
@@ -397,13 +407,39 @@ define POST_INSTALL_TARGET
 		tee $(@D)/.files-list-target.txt | \
 		$(TAR) --no-recursion --ignore-failed-read \
 			-cf $(@D)/$($(PKG)_BASENAME).tar -T -; true;
+
+	$(Q)cd $(TARGET_DIR); if [ -r $(@D)/.md5 ]; then \
+		md5sum -c $(@D)/.md5 2>&1 | grep "FAILED$$" | \
+			cut -d':' -f1 > $(@D)/.files-list-target-update.txt; \
+	fi
+endef
+
+define DEPLOY_CMDS
+	cd $(TARGET_DIR)
+	$(TAR) --no-recursion --ignore-failed-read \
+		-cf $(@D)/$($(PKG)_BASENAME).tar \
+		-T $(@D)/.files-list-target.txt
+	adb shell true >/dev/null
+	adb push $(@D)/$($(PKG)_BASENAME).tar /tmp/
+	adb shell tar xvf /tmp/$($(PKG)_BASENAME).tar
+endef
+
+define UPDATE_CMDS
+	[ -r $(@D)/.files-list-target-update.txt ] || exit 0
+	cd $(TARGET_DIR)
+	$(TAR) --no-recursion --ignore-failed-read \
+		-cf $(@D)/$($(PKG)_BASENAME)-update.tar \
+		-T $(@D)/.files-list-target-update.txt
+	adb shell true >/dev/null
+	adb push $(@D)/$($(PKG)_BASENAME)-update.tar /tmp/
+	adb shell tar xvf /tmp/$($(PKG)_BASENAME)-update.tar
 endef
 $(BUILD_DIR)/%/.stamp_target_installed:
 	$(Q)touch $($(PKG)_DIR)/.stamp_installed
 
 	@$(call step_start,install-target)
 	@$(call MESSAGE,"Installing to target")
-	$(Q)$(call run_commands,target_install, \
+	$(Q)$(call run_commands,target_install, PRE_INSTALL_TARGET \
 		$($(PKG)_PRE_INSTALL_TARGET_HOOKS) \
 		$(PKG)_INSTALL_TARGET_CMDS \
 		$(if $(BR2_INIT_SYSTEMD),$(PKG)_INSTALL_INIT_SYSTEMD) \
@@ -413,6 +449,9 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 		$($(PKG)_POST_INSTALL_TARGET_HOOKS) POST_INSTALL_TARGET)
 	@$(call step_end,install-target)
 	$(Q)touch $@
+
+	@$(call log_commands,deploy,DEPLOY_CMDS)
+	@$(call log_commands,update,UPDATE_CMDS)
 
 # Final installation step, completed when all installation steps
 # (host, images, staging, target) have completed
