@@ -90,6 +90,23 @@ endif
 #######################################
 # Helper functions
 
+define log_commands
+	$(Q)$(eval SCRIPT := $(@D)/.$(1).sh)
+	$(Q)$(file > $(SCRIPT),#!/bin/sh -e)
+	$(Q)$(file >> $(SCRIPT),[ -z "$$DEBUG" ] || set -x)
+	$(Q)$(file >> $(SCRIPT), \
+		echo "########## $($(PKG)_BASENAME): $(subst _, ,$(1)) ##########")
+	$(Q)$(foreach cmd,$(2),$(file >> $(SCRIPT),cd $(TOPDIR))
+		$(file >> $(SCRIPT),$($(cmd)))$(sep))
+	$(Q)$(SED) 's/^[ \t]*[@-]*//' -e '/^$$/d' $(SCRIPT)
+	$(Q)chmod +x $(SCRIPT)
+endef
+
+define run_commands
+	@$(call log_commands,$(1),$(2))
+	+$(foreach cmd,$(2),$(call $(cmd))$(sep))
+endef
+
 ifeq ($(BR2_PER_PACKAGE_DIRECTORIES),y)
 
 define PPD_FIXUP_PATHS
@@ -134,7 +151,7 @@ define pkg_size_after
 		| LC_ALL=C sort > $($(PKG)_DIR)/.files-list$(2).after
 	LC_ALL=C comm -13 \
 		$($(PKG)_DIR)/.files-list$(2).before \
-		$($(PKG)_DIR)/.files-list$(2).after \
+		$($(PKG)_DIR)/.files-list$(2).after 2>/dev/null \
 		| sed -r -e 's/^[^,]+/$($(PKG)_NAME)/' \
 		> $($(PKG)_DIR)/.files-list$(2).txt
 	rm -f $($(PKG)_DIR)/.files-list$(2).before
@@ -274,9 +291,8 @@ $(BUILD_DIR)/%/.stamp_configured:
 	@$(call pkg_size_before,$(STAGING_DIR),-staging)
 	@$(call pkg_size_before,$(BINARIES_DIR),-images)
 	@$(call pkg_size_before,$(HOST_DIR),-host)
-	$(foreach hook,$($(PKG)_PRE_CONFIGURE_HOOKS),$(call $(hook))$(sep))
-	$($(PKG)_CONFIGURE_CMDS)
-	$(foreach hook,$($(PKG)_POST_CONFIGURE_HOOKS),$(call $(hook))$(sep))
+	$(Q)$(call run_commands,configure,$($(PKG)_PRE_CONFIGURE_HOOKS) \
+		$(PKG)_CONFIGURE_CMDS $($(PKG)_POST_CONFIGURE_HOOKS))
 	@$(call step_end,configure)
 	$(Q)touch $@
 
@@ -284,9 +300,8 @@ $(BUILD_DIR)/%/.stamp_configured:
 $(BUILD_DIR)/%/.stamp_built::
 	@$(call step_start,build)
 	@$(call MESSAGE,"Building")
-	$(foreach hook,$($(PKG)_PRE_BUILD_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_BUILD_CMDS)
-	$(foreach hook,$($(PKG)_POST_BUILD_HOOKS),$(call $(hook))$(sep))
+	$(Q)$(call run_commands,build,$($(PKG)_PRE_BUILD_HOOKS) \
+		$(PKG)_BUILD_CMDS $($(PKG)_POST_BUILD_HOOKS))
 	@$(call step_end,build)
 	$(Q)touch $@
 
@@ -294,9 +309,8 @@ $(BUILD_DIR)/%/.stamp_built::
 $(BUILD_DIR)/%/.stamp_host_installed:
 	@$(call step_start,install-host)
 	@$(call MESSAGE,"Installing to host directory")
-	$(foreach hook,$($(PKG)_PRE_INSTALL_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_INSTALL_CMDS)
-	$(foreach hook,$($(PKG)_POST_INSTALL_HOOKS),$(call $(hook))$(sep))
+	$(Q)$(call run_commands,host_install,$($(PKG)_PRE_INSTALL_HOOKS) \
+		$(PKG)_INSTALL_CMDS $($(PKG)_POST_INSTALL_HOOKS))
 	@$(call step_end,install-host)
 	$(Q)touch $@
 
@@ -320,12 +334,7 @@ $(BUILD_DIR)/%/.stamp_host_installed:
 # can be under @BASE_DIR@ when it's a downloaded toolchain, and can be
 # empty when we use an internal toolchain.
 #
-$(BUILD_DIR)/%/.stamp_staging_installed:
-	@$(call step_start,install-staging)
-	@$(call MESSAGE,"Installing to staging directory")
-	$(foreach hook,$($(PKG)_PRE_INSTALL_STAGING_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_INSTALL_STAGING_CMDS)
-	$(foreach hook,$($(PKG)_POST_INSTALL_STAGING_HOOKS),$(call $(hook))$(sep))
+define POST_INSTALL_STAGING
 	$(Q)if test -n "$($(PKG)_CONFIG_SCRIPTS)" ; then \
 		$(call MESSAGE,"Fixing package configuration files") ;\
 			$(SED)  "s,$(HOST_DIR),@HOST_DIR@,g" \
@@ -358,6 +367,13 @@ $(BUILD_DIR)/%/.stamp_staging_installed:
 			mv "$${la}.fixed" "$${la}"; \
 		fi || exit 1; \
 	done
+endef
+$(BUILD_DIR)/%/.stamp_staging_installed:
+	@$(call step_start,install-staging)
+	@$(call MESSAGE,"Installing to staging directory")
+	$(Q)$(call run_commands,staging_install,$($(PKG)_PRE_INSTALL_STAGING_HOOKS) \
+		$(PKG)_INSTALL_STAGING_CMDS $($(PKG)_POST_INSTALL_STAGING_HOOKS) \
+		POST_INSTALL_STAGING)
 	@$(call step_end,install-staging)
 	$(Q)touch $@
 
@@ -365,26 +381,13 @@ $(BUILD_DIR)/%/.stamp_staging_installed:
 $(BUILD_DIR)/%/.stamp_images_installed:
 	@$(call step_start,install-image)
 	@$(call MESSAGE,"Installing to images directory")
-	$(foreach hook,$($(PKG)_PRE_INSTALL_IMAGES_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_INSTALL_IMAGES_CMDS)
-	$(foreach hook,$($(PKG)_POST_INSTALL_IMAGES_HOOKS),$(call $(hook))$(sep))
+	$(Q)$(call run_commands,image_install,$($(PKG)_PRE_INSTALL_IMAGES_HOOKS) \
+		$(PKG)_INSTALL_IMAGES_CMDS $($(PKG)_POST_INSTALL_IMAGES_HOOKS))
 	@$(call step_end,install-image)
 	$(Q)touch $@
 
 # Install to target dir
-$(BUILD_DIR)/%/.stamp_target_installed:
-	@$(call step_start,install-target)
-	@$(call MESSAGE,"Installing to target")
-	$(foreach hook,$($(PKG)_PRE_INSTALL_TARGET_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_INSTALL_TARGET_CMDS)
-	$(if $(BR2_INIT_SYSTEMD),\
-		$($(PKG)_INSTALL_INIT_SYSTEMD))
-	$(if $(BR2_INIT_SYSV)$(BR2_INIT_BUSYBOX),\
-		$($(PKG)_INSTALL_INIT_SYSV))
-	$(if $(BR2_INIT_OPENRC), \
-		$(or $($(PKG)_INSTALL_INIT_OPENRC), \
-			$($(PKG)_INSTALL_INIT_SYSV)))
-	$(foreach hook,$($(PKG)_POST_INSTALL_TARGET_HOOKS),$(call $(hook))$(sep))
+define POST_INSTALL_TARGET
 	$(Q)if test -n "$($(PKG)_CONFIG_SCRIPTS)" ; then \
 		$(RM) -f $(addprefix $(TARGET_DIR)/usr/bin/,$($(PKG)_CONFIG_SCRIPTS)) ; \
 	fi
@@ -394,7 +397,20 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 		tee $(@D)/.files-list-target.txt | \
 		$(TAR) --no-recursion --ignore-failed-read \
 			-cf $(@D)/$($(PKG)_BASENAME).tar -T -; true;
+endef
+$(BUILD_DIR)/%/.stamp_target_installed:
+	$(Q)touch $($(PKG)_DIR)/.stamp_installed
 
+	@$(call step_start,install-target)
+	@$(call MESSAGE,"Installing to target")
+	$(Q)$(call run_commands,target_install, \
+		$($(PKG)_PRE_INSTALL_TARGET_HOOKS) \
+		$(PKG)_INSTALL_TARGET_CMDS \
+		$(if $(BR2_INIT_SYSTEMD),$(PKG)_INSTALL_INIT_SYSTEMD) \
+		$(if $(BR2_INIT_SYSV)$(BR2_INIT_BUSYBOX),$(PKG)_INSTALL_INIT_SYSV) \
+		$(if $(BR2_INIT_OPENRC),$(or $(PKG)_INSTALL_INIT_OPENRC,\
+		$(PKG)_INSTALL_INIT_SYSV)) \
+		$($(PKG)_POST_INSTALL_TARGET_HOOKS) POST_INSTALL_TARGET)
 	@$(call step_end,install-target)
 	$(Q)touch $@
 
