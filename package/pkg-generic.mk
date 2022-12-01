@@ -90,6 +90,16 @@ endif
 #######################################
 # Helper functions
 
+define run_commands
+	$(Q)$(eval SCRIPT := $(@D)/.$(1).sh)
+	$(Q)$(file > $(SCRIPT),#!/bin/sh -ex)
+	$(Q)$(file >> $(SCRIPT),cd $(TOPDIR))
+	$(Q)$(foreach cmd,$(2),$(file >> $(SCRIPT),$($(cmd)))$(sep)\
+		$(call $(cmd))$(sep))
+	$(Q)$(SED) 's/^[ \t@]*//' -e '/^$$/d' $(SCRIPT)
+	$(Q)chmod +x $(SCRIPT)
+endef
+
 ifeq ($(BR2_PER_PACKAGE_DIRECTORIES),y)
 
 # Ensure files like .la, .pc, .pri, .cmake, and so on, point to the
@@ -281,9 +291,8 @@ $(BUILD_DIR)/%/.stamp_configured:
 	@$(call pkg_size_before,$(STAGING_DIR),-staging)
 	@$(call pkg_size_before,$(BINARIES_DIR),-images)
 	@$(call pkg_size_before,$(HOST_DIR),-host)
-	$(foreach hook,$($(PKG)_PRE_CONFIGURE_HOOKS),$(call $(hook))$(sep))
-	$($(PKG)_CONFIGURE_CMDS)
-	$(foreach hook,$($(PKG)_POST_CONFIGURE_HOOKS),$(call $(hook))$(sep))
+	@$(call run_commands,configure,$($(PKG)_PRE_CONFIGURE_HOOKS) \
+		$(PKG)_CONFIGURE_CMDS $($(PKG)_POST_CONFIGURE_HOOKS))
 	@$(call step_end,configure)
 	$(Q)touch $@
 
@@ -291,9 +300,8 @@ $(BUILD_DIR)/%/.stamp_configured:
 $(BUILD_DIR)/%/.stamp_built::
 	@$(call step_start,build)
 	@$(call MESSAGE,"Building")
-	$(foreach hook,$($(PKG)_PRE_BUILD_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_BUILD_CMDS)
-	$(foreach hook,$($(PKG)_POST_BUILD_HOOKS),$(call $(hook))$(sep))
+	@$(call run_commands,build,$($(PKG)_PRE_BUILD_HOOKS) \
+		$(PKG)_BUILD_CMDS $($(PKG)_POST_BUILD_HOOKS))
 	@$(call step_end,build)
 	$(Q)touch $@
 
@@ -384,27 +392,35 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 
 	@$(call step_start,install-target)
 	@$(call MESSAGE,"Installing to target")
-	$(foreach hook,$($(PKG)_PRE_INSTALL_TARGET_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_INSTALL_TARGET_CMDS)
-	$(if $(BR2_INIT_SYSTEMD),\
-		$($(PKG)_INSTALL_INIT_SYSTEMD))
-	$(if $(BR2_INIT_SYSV)$(BR2_INIT_BUSYBOX),\
-		$($(PKG)_INSTALL_INIT_SYSV))
-	$(if $(BR2_INIT_OPENRC), \
-		$(or $($(PKG)_INSTALL_INIT_OPENRC), \
-			$($(PKG)_INSTALL_INIT_SYSV)))
-	$(foreach hook,$($(PKG)_POST_INSTALL_TARGET_HOOKS),$(call $(hook))$(sep))
+	@$(call run_commands,target_install,$($(PKG)_PRE_INSTALL_TARGET_HOOKS) \
+		$(PKG)_INSTALL_TARGET_CMDS \
+		$(if $(BR2_INIT_SYSTEMD),$(PKG)_INSTALL_INIT_SYSTEMD) \
+		$(if $(BR2_INIT_SYSV)$(BR2_INIT_BUSYBOX),$(PKG)_INSTALL_INIT_SYSV) \
+		$(if $(BR2_INIT_OPENRC),$(or $(PKG)_INSTALL_INIT_OPENRC,\
+		$(PKG)_INSTALL_INIT_SYSV)) \
+		$($(PKG)_POST_INSTALL_TARGET_HOOKS))
 	$(Q)if test -n "$($(PKG)_CONFIG_SCRIPTS)" ; then \
 		$(RM) -f $(addprefix $(TARGET_DIR)/usr/bin/,$($(PKG)_CONFIG_SCRIPTS)) ; \
 	fi
 	@$(call step_end,install-target)
 	$(Q)touch $@
 
+	$(Q)$(eval $(PKG)_TARBALL := $($(PKG)_BASENAME).tar)
+
 	$(Q)cd $(TARGET_DIR); find . \( -type f -o -type l \) \
-		-cnewer $($(PKG)_DIR)/.stamp_installed | \
-		tee $($(PKG)_DIR)/.files-list-target.txt | \
+		-cnewer $(@D)/.stamp_installed | \
+		tee $(@D)/.files-list-target.txt | \
 		$(TAR) --no-recursion --ignore-failed-read \
-			-cf $($(PKG)_DIR)/$($(PKG)_BASENAME).tar -T -; true;
+			-cf $(@D)/$($(PKG)_TARBALL) -T -; true;
+
+	$(Q)$(eval SCRIPT := $(@D)/.deploy.sh)
+	$(Q)$(file > $(SCRIPT),#!/bin/sh -ex)
+	$(Q)$(file >> $(SCRIPT),cd $(TARGET_DIR))
+	$(Q)$(file >> $(SCRIPT),$(TAR) --no-recursion --ignore-failed-read \
+		-cf $(@D)/$($(PKG)_TARBALL) -T $(@D)/.files-list-target.txt)
+	$(Q)$(file >> $(SCRIPT),adb push $(@D)/$($(PKG)_TARBALL) /tmp/)
+	$(Q)$(file >> $(SCRIPT),adb shell tar xvf /tmp/$($(PKG)_TARBALL))
+	$(Q)chmod +x $(SCRIPT)
 
 # Final installation step, completed when all installation steps
 # (host, images, staging, target) have completed
