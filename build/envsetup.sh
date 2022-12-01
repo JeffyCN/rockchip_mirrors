@@ -134,6 +134,23 @@ main()
 	alias bupdate='[ -d "$(bpkg)" ] && $(bpkg)/.configure.sh && \
 		$(bpkg)/.build.sh && $(bpkg)/.target_install.sh && \
 		$(bpkg)/.deploy.sh'
+
+	# The new buildroot Makefile needs make (>= 4.0)
+	if "$BUILDROOT_DIR/support/dependencies/check-host-make.sh" 4.0 make >/dev/null; then
+		return 0
+	fi
+
+	echo -e "\e[35mYour make is too old: $(make -v | head -n 1)\e[0m"
+	echo "Please update it:"
+	echo "git clone https://github.com/mirror/make.git"
+	echo "cd make"
+	echo "git checkout 4.2"
+	echo "git am $BUILDROOT_DIR/package/make/*.patch"
+	echo "autoreconf -f -i"
+	echo "./configure"
+	echo "make make -j8"
+	echo "install -m 0755 make /usr/local/bin/make"
+	return 1
 }
 
 if [ "${BASH_SOURCE}" == "$0" ];then
