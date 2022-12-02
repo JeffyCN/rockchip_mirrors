@@ -1,8 +1,8 @@
 #!/bin/bash -e
 
-if [ -z "${BASH_SOURCE}" ];then
-	echo Not in bash, switching to it...
-	bash -c "$0 $@"
+if [ -z "$BASH_SOURCE" ];then
+	echo "Not in bash, switching to it..."
+	"$(find . -maxdepth 3 -name envsetup.sh | head -n 1 || echo /bin/bash)"
 fi
 
 choose_board()
@@ -43,7 +43,7 @@ lunch_rockchip()
 	TARGET_DIR_NAME="$RK_BUILD_CONFIG"
 	export TARGET_OUTPUT_DIR="$BUILDROOT_OUTPUT_DIR/$TARGET_DIR_NAME"
 
-	mkdir -p $TARGET_OUTPUT_DIR || return
+	mkdir -p "$TARGET_OUTPUT_DIR" || return 0
 
 	echo "==========================================="
 	echo
@@ -55,23 +55,23 @@ lunch_rockchip()
 
 	if [ $RK_DEFCONFIG_ARRAY_LEN -eq 0 ]; then
 		echo "Continue without defconfig..."
-		make -C ${BUILDROOT_DIR} O="$TARGET_OUTPUT_DIR" \
+		make -C "$BUILDROOT_DIR" O="$TARGET_OUTPUT_DIR" \
 			olddefconfig &>/dev/null
 		return 0
 	fi
 
-	make -C ${BUILDROOT_DIR} O="$TARGET_OUTPUT_DIR" \
-		"$RK_BUILD_CONFIG"_defconfig
+	make -C "$BUILDROOT_DIR" O="$TARGET_OUTPUT_DIR" \
+		"${RK_BUILD_CONFIG}_defconfig"
 
-	CONFIG=${TARGET_OUTPUT_DIR}/.config
-	cp ${CONFIG}{,.new}
-	mv ${CONFIG}{.old,} &>/dev/null || return 0
+	CONFIG="$TARGET_OUTPUT_DIR/.config"
+	cp "$CONFIG" "$CONFIG.new"
+	mv "$CONFIG.old" "$CONFIG" &>/dev/null || return 0
 
-	make -C ${BUILDROOT_DIR} O="$TARGET_OUTPUT_DIR" olddefconfig &>/dev/null
+	make -C "$BUILDROOT_DIR" O="$TARGET_OUTPUT_DIR" olddefconfig &>/dev/null
 
-	if ! diff ${CONFIG}{,.new}; then
+	if ! diff "$CONFIG" "$CONFIG.new"; then
 		read -t 10 -p "Found old config, override it? (y/n):" YES
-		[ "$YES" = "n" ] || cp ${CONFIG}{.new,}
+		[ "$YES" = "n" ] || cp "$CONFIG.new" "$CONFIG"
 	fi
 }
 
@@ -117,16 +117,15 @@ bpkg()
 
 main()
 {
-	SCRIPT_PATH=$(realpath ${BASH_SOURCE})
-	SCRIPT_DIR=$(dirname ${SCRIPT_PATH})
-	BUILDROOT_DIR=$(dirname ${SCRIPT_DIR})
-	BUILDROOT_OUTPUT_DIR=${BUILDROOT_DIR}/output
-	TOP_DIR=$(dirname ${BUILDROOT_DIR})
-	echo Top of tree: ${TOP_DIR}
+	SCRIPTS_DIR="$(dirname "$(realpath "$BASH_SOURCE")")"
+	BUILDROOT_DIR="$(dirname "$SCRIPTS_DIR")"
+	BUILDROOT_OUTPUT_DIR="$BUILDROOT_DIR/output"
+	TOP_DIR="$(dirname "$BUILDROOT_DIR")"
+	echo "Top of tree: $TOP_DIR"
 
 	RK_DEFCONFIG_ARRAY=(
-		$(cd ${BUILDROOT_DIR}/configs/; ls rockchip_* | \
-			grep "$(basename $1)" | sed "s/_defconfig$//" | sort)
+		$(cd "$BUILDROOT_DIR/configs/"; ls rockchip_* | \
+			grep "$(basename "$1")" | sed "s/_defconfig$//" | sort)
 	)
 
 	unset RK_BUILD_CONFIG
@@ -134,7 +133,7 @@ main()
 
 	case $RK_DEFCONFIG_ARRAY_LEN in
 		0)
-			BOARD="$(echo $1 | \
+			BOARD="$(echo "$1" | \
 				sed "s#^\(output/\|\)rockchip_\([^/]*\).*#\2#")"
 			RK_BUILD_CONFIG="${BOARD:+rockchip_$BOARD}"
 			CONFIG="$BUILDROOT_OUTPUT_DIR/$RK_BUILD_CONFIG/.config"
@@ -149,7 +148,7 @@ main()
 		*)
 			if [ "$1" = ${RK_DEFCONFIG_ARRAY[0]} ]; then
 				# Prefer exact-match
-				RK_BUILD_CONFIG=$1
+				RK_BUILD_CONFIG="$1"
 			else
 				choose_board
 			fi
@@ -161,10 +160,10 @@ main()
 	lunch_rockchip
 
 	# Set alias
-	alias croot='cd ${TOP_DIR}'
-	alias broot='cd ${BUILDROOT_DIR}'
-	alias bout='cd ${TARGET_OUTPUT_DIR}'
-	alias bmake='make -f ${TARGET_OUTPUT_DIR}/Makefile'
+	alias croot='cd "$TOP_DIR"'
+	alias broot='cd "$BUILDROOT_DIR"'
+	alias bout='cd "$TARGET_OUTPUT_DIR"'
+	alias bmake='make -f "$TARGET_OUTPUT_DIR/Makefile"'
 
 	alias bconfig='bpkg configure'
 	alias bbuild='bpkg build'
@@ -194,9 +193,15 @@ main()
 	return 1
 }
 
-if [ "${BASH_SOURCE}" == "$0" ];then
-	echo This script is executed directly...
-	bash -c "source \"$0\" \"$@\"; bash"
-else
-	main "$@"
+IN_BUILDROOT_ENV="${TARGET_OUTPUT_DIR:+1}"
+
+main "$@"
+
+if [ "$BASH_SOURCE" == "$0" ];then
+	# This script is executed directly
+	[ -z "$IN_BUILDROOT_ENV" ] || exit 0
+
+	echo -e "\e[35mEnter $BUILDROOT_DIR environment.\e[0m"
+	/bin/bash
+	echo -e "\e[35mExit from $BUILDROOT_DIR environment.\e[0m"
 fi
