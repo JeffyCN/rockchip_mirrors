@@ -75,6 +75,46 @@ lunch_rockchip()
 	fi
 }
 
+bpkg()
+{
+	unset SCRIPT
+	case "${1:-dir}" in
+		configure|build|target_install|deploy)
+			SCRIPT=.$1.sh
+			DIR=$(bpkg dir $2)
+			[ -x "$DIR/$SCRIPT" ] && "$DIR/$SCRIPT"
+			;;
+		dir)
+			if [ -n "$2" ]; then
+				find "$TARGET_OUTPUT_DIR/build/" -maxdepth 1 \
+					-type d -name "*$2*" | head -n 1 || \
+					echo "no pkg build dir for $2." >&2
+			else
+				echo $(realpath "$PWD") | \
+					grep -oE "*/output/[^/]*/build/[^/]*" || \
+					echo "not in a pkg build dir." >&2
+			fi
+			;;
+		reconfig)
+			shift
+			bpkg configure $@ && bpkg build $@ && \
+				bpkg target_install $@ && bpkg deploy $@
+			;;
+		rebuild)
+			shift
+			bpkg build $@ && bpkg target_install $@ && \
+				bpkg deploy $@
+			;;
+		reinstall)
+			shift
+			bpkg target_install $@ && bpkg deploy $@
+			;;
+		*)
+			bpkg dir $1
+			;;
+	esac
+}
+
 main()
 {
 	SCRIPT_PATH=$(realpath ${BASH_SOURCE})
@@ -125,15 +165,16 @@ main()
 	alias broot='cd ${BUILDROOT_DIR}'
 	alias bout='cd ${TARGET_OUTPUT_DIR}'
 	alias bmake='make -f ${TARGET_OUTPUT_DIR}/Makefile'
-	alias bpkg='echo $PWD | grep -oE "$TARGET_OUTPUT_DIR/build/[^/]*" || \
-		echo "not in a pkg build dir." >&2'
-	alias bconfig='[ -d "$(bpkg)" ] && $(bpkg)/.configure.sh'
-	alias bbuild='[ -d "$(bpkg)" ] && $(bpkg)/.build.sh'
-	alias binstall='[ -d "$(bpkg)" ] && $(bpkg)/.target_install.sh'
-	alias bdeploy='[ -d "$(bpkg)" ] && $(bpkg)/.deploy.sh'
-	alias bupdate='[ -d "$(bpkg)" ] && $(bpkg)/.configure.sh && \
-		$(bpkg)/.build.sh && $(bpkg)/.target_install.sh && \
-		$(bpkg)/.deploy.sh'
+
+	alias bconfig='bpkg configure'
+	alias bbuild='bpkg build'
+	alias binstall='bpkg target_install'
+	alias bdeploy='bpkg deploy'
+
+	alias breconfig='bpkg reconfig'
+	alias brebuild='bpkg rebuild'
+	alias breinstall='bpkg reinstall'
+	alias bupdate='bpkg reconfig'
 
 	# The new buildroot Makefile needs make (>= 4.0)
 	if "$BUILDROOT_DIR/support/dependencies/check-host-make.sh" 4.0 make >/dev/null; then

@@ -420,6 +420,7 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 	$(Q)$(file >> $(SCRIPT),cd $(TARGET_DIR))
 	$(Q)$(file >> $(SCRIPT),$(TAR) --no-recursion --ignore-failed-read \
 		-cf $(@D)/$($(PKG)_TARBALL) -T $(@D)/.files-list-target.txt)
+	$(Q)$(file >> $(SCRIPT),adb shell true >/dev/null)
 	$(Q)$(file >> $(SCRIPT),adb push $(@D)/$($(PKG)_TARBALL) /tmp/)
 	$(Q)$(file >> $(SCRIPT),adb shell tar xvf /tmp/$($(PKG)_TARBALL))
 	$(Q)chmod +x $(SCRIPT)
