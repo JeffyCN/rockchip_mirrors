@@ -1,36 +1,19 @@
 RKIPC_SITE = $(TOPDIR)/../app/rkipc
 RKIPC_SITE_METHOD = local
 
-RKIPC_DEPENDENCIES = camera-engine-rkaiq
-
-ifeq ($(BR2_PACKAGE_RKIPC_LOW_MEMORY), y)
-    RKIPC_CONF_OPTS += -DCOMPILE_FOR_LOW_MEMORY=ON
-	RKIPC_DEPENDENCIES += rockit
-endif
+RKIPC_DEPENDENCIES = camera-engine-rkaiq wpa_supplicant freetype common_algorithm
 
 ifeq ($(BR2_PACKAGE_RKIPC_RK3588), y)
     RKIPC_CONF_OPTS += -DCOMPILE_FOR_RK3588=ON
-	RKIPC_DEPENDENCIES += rockit wpa_supplicant
 endif
 
 ifeq ($(BR2_PACKAGE_RKIPC_RK3588_MULTI_IPC), y)
     RKIPC_CONF_OPTS += -DCOMPILE_FOR_RK3588_MULTI_IPC=ON
-	RKIPC_DEPENDENCIES += rockit wpa_supplicant
 endif
 
 ifeq ($(BR2_PACKAGE_RKIPC_RV1126), y)
-    RKIPC_CONF_OPTS += -DCOMPILE_FOR_RV1126=ON
-	RKIPC_DEPENDENCIES += rockit wpa_supplicant
-endif
-
-ifeq ($(BR2_PACKAGE_RKIPC_RV1126_BATTERY_IPC), y)
-    RKIPC_CONF_OPTS += -DCOMPILE_FOR_RV1126_BATTERY_IPC=ON
-        RKIPC_DEPENDENCIES += rockit rktoolkit
-endif
-
-ifeq ($(BR2_PACKAGE_RKIPC_RV1126_SNAPSHOT), y)
-    RKIPC_CONF_OPTS += -DCOMPILE_FOR_RV1126_SNAPSHOT=ON
-        RKIPC_DEPENDENCIES += rkmedia
+    RKIPC_DEPENDENCIES += rkmedia
+    RKIPC_CONF_OPTS += -DCOMPILE_FOR_RV1126_RKMEDIA=ON
 endif
 
 $(eval $(cmake-package))
