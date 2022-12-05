@@ -16,4 +16,3 @@
 #include "test.config"
 #include "weston.config"
 BR2_TARGET_GENERIC_HOSTNAME="rk3358_64"
-BR2_TARGET_GENERIC_ISSUE="Welcome to RK3358 Buildroot"

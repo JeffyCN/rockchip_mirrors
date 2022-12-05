@@ -11,5 +11,3 @@
 #include "multimedia/mpp.config"
 #include "wifibt/wireless.config"
 #include "weston.config"
-BR2_TARGET_GENERIC_HOSTNAME="rk3126c"
-BR2_TARGET_GENERIC_ISSUE="Welcome to RK3126C Buildroot"
