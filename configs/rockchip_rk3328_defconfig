@@ -16,5 +16,3 @@
 #include "test.config"
 #include "weston.config"
 BR2_PACKAGE_RKSCRIPT_DEFAULT_PCM="rockchiphdmi"
-BR2_TARGET_GENERIC_HOSTNAME="rk3328"
-BR2_TARGET_GENERIC_ISSUE="Welcome to RK3328 Buildroot"

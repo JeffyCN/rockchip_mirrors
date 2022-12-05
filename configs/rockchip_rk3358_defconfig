@@ -15,5 +15,3 @@
 #include "test.config"
 #include "weston.config"
 BR2_ROOTFS_OVERLAY+="board/rockchip/rk3358/fs-overlay-64/"
-BR2_TARGET_GENERIC_HOSTNAME="rk3358"
-BR2_TARGET_GENERIC_ISSUE="Welcome to RK3358 Buildroot"

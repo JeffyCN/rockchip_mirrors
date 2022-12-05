@@ -8,4 +8,3 @@
 #include "debug.config"
 BR2_ROOTFS_OVERLAY+="board/rockchip/px30/fs-overlay-64/"
 BR2_TARGET_GENERIC_HOSTNAME="px30_robot"
-BR2_TARGET_GENERIC_ISSUE="Welcome to PX30 Buildroot"

@@ -1,12 +1,12 @@
 #include "base/base.config"
 #include "chips/rk1806_arm.config"
-#include "chips/rk1806_webserver.config"
 #include "fs/vfat.config"
 #include "multimedia/audio.config"
 #include "multimedia/camera.config"
 #include "multimedia/mpp.config"
 #include "wifibt/wireless.config"
 #include "debug.config"
+#include "webserver.config"
 BR2_PACKAGE_CAMERA_ENGINE=
 # BR2_PACKAGE_CAMERA_ENGINE_RKISP_3A_SERVICE is not set
 BR2_PACKAGE_FICIAL_GATE=y
@@ -16,7 +16,6 @@ BR2_PACKAGE_MINIGUI_ENABLE_RGA=y
 BR2_PACKAGE_RKFACIAL_USE_WEB_SERVER=y
 BR2_PACKAGE_ROCKCHIP_MPP=
 BR2_PACKAGE_ROCKCHIP_RGA=
-BR2_TARGET_GENERIC_HOSTNAME="rk1806"
-BR2_TARGET_GENERIC_ISSUE="Welcome to RK1806 Buildroot"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rk1806/fs-overlay-sysv/"
 BR2_TOOLCHAIN_GLIBC_GCONV_LIBS_COPY=y
 BR2_TOOLCHAIN_GLIBC_GCONV_LIBS_LIST="GBK"
