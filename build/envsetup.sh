@@ -77,13 +77,7 @@ lunch_rockchip()
 
 bpkg()
 {
-	unset SCRIPT
 	case "${1:-dir}" in
-		configure|build|target_install|deploy)
-			SCRIPT=.$1.sh
-			DIR=$(bpkg dir $2)
-			[ -x "$DIR/$SCRIPT" ] && "$DIR/$SCRIPT"
-			;;
 		dir)
 			if [ -n "$2" ]; then
 				find "$TARGET_OUTPUT_DIR/build/" -maxdepth 1 \
@@ -91,28 +85,63 @@ bpkg()
 					echo "no pkg build dir for $2." >&2
 			else
 				echo $(realpath "$PWD") | \
-					grep -oE "*/output/[^/]*/build/[^/]*" || \
+					grep -oE ".*/output/[^/]*/build/[^/]*" || \
 					echo "not in a pkg build dir." >&2
 			fi
-			;;
-		reconfig)
-			shift
-			bpkg configure $@ && bpkg build $@ && \
-				bpkg target_install $@ && bpkg deploy $@
-			;;
-		rebuild)
-			shift
-			bpkg build $@ && bpkg target_install $@ && \
-				bpkg deploy $@
-			;;
-		reinstall)
-			shift
-			bpkg target_install $@ && bpkg deploy $@
 			;;
 		*)
 			bpkg dir $1
 			;;
 	esac
+}
+
+bpkg_run()
+{
+	DIR=$(bpkg dir $2)
+	[ -d "$DIR" ] || return 1
+
+	for stage in $1; do
+		case "$stage" in
+			reconfig) bpkg_run "configure build install deploy" $2 ;;
+			rebuild) bpkg_run "build install deploy" $2 ;;
+			reinstall) bpkg_run "install deploy" $2 ;;
+			configure|build|deploy)
+				SCRIPT="$DIR/.$stage.sh"
+				[ -x "$SCRIPT" ] || return 1
+				"$SCRIPT"
+				;;
+			install)
+				SCRIPT="$DIR/.staging_install.sh"
+				if [ -x "$SCRIPT" ]; then
+					"$SCRIPT" || return 1
+				fi
+
+				SCRIPT="$DIR/.target_install.sh"
+				if [ -x "$SCRIPT" ]; then
+					"$SCRIPT" || return 1
+
+					SCRIPT="$DIR/.image_install.sh"
+					if [ -x "$SCRIPT" ]; then
+						"$SCRIPT" || return 1
+					fi
+
+					continue
+				fi
+
+				SCRIPT="$DIR/.host_install.sh"
+				if [ -x "$SCRIPT" ]; then
+					"$SCRIPT" || return 1
+					continue
+				fi
+
+				return 1
+				;;
+			*)
+				echo "Unknown stage: $stage"
+				return 1
+				;;
+		esac
+	done
 }
 
 main()
@@ -165,15 +194,15 @@ main()
 	alias bout='cd "$TARGET_OUTPUT_DIR"'
 	alias bmake='make -f "$TARGET_OUTPUT_DIR/Makefile"'
 
-	alias bconfig='bpkg configure'
-	alias bbuild='bpkg build'
-	alias binstall='bpkg target_install'
-	alias bdeploy='bpkg deploy'
+	alias bconfig='bpkg_run configure'
+	alias bbuild='bpkg_run build'
+	alias binstall='bpkg_run install'
+	alias bdeploy='bpkg_run deploy'
 
-	alias breconfig='bpkg reconfig'
-	alias brebuild='bpkg rebuild'
-	alias breinstall='bpkg reinstall'
-	alias bupdate='bpkg reconfig'
+	alias breconfig='bpkg_run reconfig'
+	alias brebuild='bpkg_run rebuild'
+	alias breinstall='bpkg_run reinstall'
+	alias bupdate='bpkg_run reconfig'
 
 	# The new buildroot Makefile needs make (>= 4.0)
 	if "$BUILDROOT_DIR/support/dependencies/check-host-make.sh" 4.0 make >/dev/null; then

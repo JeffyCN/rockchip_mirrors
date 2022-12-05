@@ -90,14 +90,21 @@ endif
 #######################################
 # Helper functions
 
-define run_commands
+define log_commands
 	$(Q)$(eval SCRIPT := $(@D)/.$(1).sh)
-	$(Q)$(file > $(SCRIPT),#!/bin/sh -ex)
+	$(Q)$(file > $(SCRIPT),#!/bin/sh -e)
+	$(Q)$(file >> $(SCRIPT),[ -z "$$DEBUG" ] || set -x)
+	$(Q)$(file >> $(SCRIPT), \
+		echo "########## $($(PKG)_BASENAME): $(subst _, ,$(1)) ##########")
 	$(Q)$(file >> $(SCRIPT),cd $(TOPDIR))
-	$(Q)$(foreach cmd,$(2),$(file >> $(SCRIPT),$($(cmd)))$(sep)\
-		$(call $(cmd))$(sep))
+	$(Q)$(foreach cmd,$(2),$(file >> $(SCRIPT),$($(cmd)))$(sep))
 	$(Q)$(SED) 's/^[ \t@]*//' -e '/^$$/d' $(SCRIPT)
 	$(Q)chmod +x $(SCRIPT)
+endef
+
+define run_commands
+	@$(call log_commands,$(1),$(2))
+	$(foreach cmd,$(2),$(call $(cmd))$(sep))
 endef
 
 # Make sure .la files only reference the current per-package
@@ -243,6 +250,7 @@ $(BUILD_DIR)/%/.stamp_rsynced:
 	$(foreach hook,$($(PKG)_POST_RSYNC_HOOKS),$(call $(hook))$(sep))
 	@$(call step_end,rsync)
 	$(Q)touch $@
+
 	@test -d $(SRCDIR)/.git && (cd $(SRCDIR) && git status --ignored -s | \
 		grep "" && echo "WARN: $(SRCDIR) is dirty!") || true
 
@@ -311,9 +319,8 @@ $(BUILD_DIR)/%/.stamp_built::
 $(BUILD_DIR)/%/.stamp_host_installed:
 	@$(call step_start,install-host)
 	@$(call MESSAGE,"Installing to host directory")
-	$(foreach hook,$($(PKG)_PRE_INSTALL_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_INSTALL_CMDS)
-	$(foreach hook,$($(PKG)_POST_INSTALL_HOOKS),$(call $(hook))$(sep))
+	@$(call run_commands,host_install,$($(PKG)_PRE_INSTALL_HOOKS) \
+		$(PKG)_INSTALL_CMDS $($(PKG)_POST_INSTALL_HOOKS))
 	@$(call step_end,install-host)
 	$(Q)touch $@
 
@@ -337,12 +344,7 @@ $(BUILD_DIR)/%/.stamp_host_installed:
 # can be under @BASE_DIR@ when it's a downloaded toolchain, and can be
 # empty when we use an internal toolchain.
 #
-$(BUILD_DIR)/%/.stamp_staging_installed:
-	@$(call step_start,install-staging)
-	@$(call MESSAGE,"Installing to staging directory")
-	$(foreach hook,$($(PKG)_PRE_INSTALL_STAGING_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_INSTALL_STAGING_CMDS)
-	$(foreach hook,$($(PKG)_POST_INSTALL_STAGING_HOOKS),$(call $(hook))$(sep))
+define POST_INSTALL_STAGING
 	$(Q)if test -n "$($(PKG)_CONFIG_SCRIPTS)" ; then \
 		$(call MESSAGE,"Fixing package configuration files") ;\
 			$(SED)  "s,$(HOST_DIR),@HOST_DIR@,g" \
@@ -375,6 +377,13 @@ $(BUILD_DIR)/%/.stamp_staging_installed:
 			mv "$${la}.fixed" "$${la}"; \
 		fi || exit 1; \
 	done
+endef
+$(BUILD_DIR)/%/.stamp_staging_installed:
+	@$(call step_start,install-staging)
+	@$(call MESSAGE,"Installing to staging directory")
+	@$(call run_commands,staging_install,$($(PKG)_PRE_INSTALL_STAGING_HOOKS) \
+		$(PKG)_INSTALL_STAGING_CMDS $($(PKG)_POST_INSTALL_STAGING_HOOKS) \
+		POST_INSTALL_STAGING)
 	@$(call step_end,install-staging)
 	$(Q)touch $@
 
@@ -382,13 +391,33 @@ $(BUILD_DIR)/%/.stamp_staging_installed:
 $(BUILD_DIR)/%/.stamp_images_installed:
 	@$(call step_start,install-image)
 	@$(call MESSAGE,"Installing to images directory")
-	$(foreach hook,$($(PKG)_PRE_INSTALL_IMAGES_HOOKS),$(call $(hook))$(sep))
-	+$($(PKG)_INSTALL_IMAGES_CMDS)
-	$(foreach hook,$($(PKG)_POST_INSTALL_IMAGES_HOOKS),$(call $(hook))$(sep))
+	@$(call run_commands,image_install,$($(PKG)_PRE_INSTALL_IMAGES_HOOKS) \
+		$(PKG)_INSTALL_IMAGES_CMDS $($(PKG)_POST_INSTALL_IMAGES_HOOKS))
 	@$(call step_end,install-image)
 	$(Q)touch $@
 
 # Install to target dir
+define POST_INSTALL_TARGET
+	$(Q)if test -n "$($(PKG)_CONFIG_SCRIPTS)" ; then \
+		$(RM) -f $(addprefix $(TARGET_DIR)/usr/bin/,$($(PKG)_CONFIG_SCRIPTS)) ; \
+	fi
+
+	$(Q)cd $(TARGET_DIR); find . \( -type f -o -type l \) \
+		-cnewer $(@D)/.stamp_installed | \
+		tee $(@D)/.files-list-target.txt | \
+		$(TAR) --no-recursion --ignore-failed-read \
+			-cf $(@D)/$($(PKG)_BASENAME).tar -T -; true;
+endef
+
+define DEPLOY_CMDS
+	$(Q)cd $(TARGET_DIR)
+	$(Q)$(TAR) --no-recursion --ignore-failed-read \
+		-cf $(@D)/$($(PKG)_BASENAME).tar \
+		-T $(@D)/.files-list-target.txt
+	$(Q)adb shell true >/dev/null
+	$(Q)adb push $(@D)/$($(PKG)_BASENAME).tar /tmp/
+	$(Q)adb shell tar xvf /tmp/$($(PKG)_BASENAME).tar
+endef
 $(BUILD_DIR)/%/.stamp_target_installed:
 	$(Q)touch $($(PKG)_DIR)/.stamp_installed
 
@@ -400,30 +429,11 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 		$(if $(BR2_INIT_SYSV)$(BR2_INIT_BUSYBOX),$(PKG)_INSTALL_INIT_SYSV) \
 		$(if $(BR2_INIT_OPENRC),$(or $(PKG)_INSTALL_INIT_OPENRC,\
 		$(PKG)_INSTALL_INIT_SYSV)) \
-		$($(PKG)_POST_INSTALL_TARGET_HOOKS))
-	$(Q)if test -n "$($(PKG)_CONFIG_SCRIPTS)" ; then \
-		$(RM) -f $(addprefix $(TARGET_DIR)/usr/bin/,$($(PKG)_CONFIG_SCRIPTS)) ; \
-	fi
+		$($(PKG)_POST_INSTALL_TARGET_HOOKS) POST_INSTALL_TARGET)
 	@$(call step_end,install-target)
 	$(Q)touch $@
 
-	$(Q)$(eval $(PKG)_TARBALL := $($(PKG)_BASENAME).tar)
-
-	$(Q)cd $(TARGET_DIR); find . \( -type f -o -type l \) \
-		-cnewer $(@D)/.stamp_installed | \
-		tee $(@D)/.files-list-target.txt | \
-		$(TAR) --no-recursion --ignore-failed-read \
-			-cf $(@D)/$($(PKG)_TARBALL) -T -; true;
-
-	$(Q)$(eval SCRIPT := $(@D)/.deploy.sh)
-	$(Q)$(file > $(SCRIPT),#!/bin/sh -ex)
-	$(Q)$(file >> $(SCRIPT),cd $(TARGET_DIR))
-	$(Q)$(file >> $(SCRIPT),$(TAR) --no-recursion --ignore-failed-read \
-		-cf $(@D)/$($(PKG)_TARBALL) -T $(@D)/.files-list-target.txt)
-	$(Q)$(file >> $(SCRIPT),adb shell true >/dev/null)
-	$(Q)$(file >> $(SCRIPT),adb push $(@D)/$($(PKG)_TARBALL) /tmp/)
-	$(Q)$(file >> $(SCRIPT),adb shell tar xvf /tmp/$($(PKG)_TARBALL))
-	$(Q)chmod +x $(SCRIPT)
+	@$(call log_commands,deploy,DEPLOY_CMDS)
 
 # Final installation step, completed when all installation steps
 # (host, images, staging, target) have completed
