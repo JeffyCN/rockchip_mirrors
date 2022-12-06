@@ -104,7 +104,7 @@ endef
 
 define run_commands
 	@$(call log_commands,$(1),$(2))
-	$(foreach cmd,$(2),$(call $(cmd))$(sep))
+	+$(foreach cmd,$(2),$(call $(cmd))$(sep))
 endef
 
 ifeq ($(BR2_PER_PACKAGE_DIRECTORIES),y)
