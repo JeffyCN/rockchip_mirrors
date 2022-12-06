@@ -58,7 +58,7 @@ uvc_pre_prepare_hook()
 		uvc.gs2)	UVC_NAME="UVC RGB";;
 		uvc.gs3)	UVC_NAME="UVC IR";;
 	esac
-	usb_try_write device_name "UVC_NAME"
+	usb_try_write device_name "$UVC_NAME"
 
 	usb_try_write streaming_bulk 1
 }
