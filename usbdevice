@@ -506,6 +506,9 @@ usb_prepare()
 		usb_msg "Functions changed $OLD_FUNCS -> $USB_FUNCS"
 		usb_stop
 	fi
+
+	# Update USB PID
+	echo "$(usb_pid "$USB_FUNCS")" > $USB_GADGET_DIR/idProduct
 }
 
 usb_start()
