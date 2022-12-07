@@ -105,7 +105,11 @@ bpkg_run()
 			reconfig) bpkg_run "configure build install deploy" $2 ;;
 			rebuild) bpkg_run "build install deploy" $2 ;;
 			reinstall) bpkg_run "install deploy" $2 ;;
-			configure|build|deploy)
+			reconfig-update)
+				bpkg_run "configure build install update" $2 ;;
+			rebuild-update) bpkg_run "build install update" $2 ;;
+			reinstall-update) bpkg_run "install update" $2 ;;
+			configure|build|deploy|update)
 				SCRIPT="$DIR/.$stage.sh"
 				[ -x "$SCRIPT" ] || return 1
 				"$SCRIPT"
@@ -198,11 +202,14 @@ main()
 	alias bbuild='bpkg_run build'
 	alias binstall='bpkg_run install'
 	alias bdeploy='bpkg_run deploy'
+	alias bupdate='bpkg_run update'
 
 	alias breconfig='bpkg_run reconfig'
 	alias brebuild='bpkg_run rebuild'
 	alias breinstall='bpkg_run reinstall'
-	alias bupdate='bpkg_run reconfig'
+	alias breconfig-update='bpkg_run reconfig-update'
+	alias brebuild-update='bpkg_run rebuild-update'
+	alias breinstall-update='bpkg_run reinstall-update'
 
 	# The new buildroot Makefile needs make (>= 4.0)
 	if "$BUILDROOT_DIR/support/dependencies/check-host-make.sh" 4.0 make >/dev/null; then
