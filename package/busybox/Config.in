@@ -32,6 +32,10 @@ config BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES
 	  A space-separated list of configuration fragment files,
 	  that will be merged to the main BusyBox configuration file.
 
+config BR2_PACKAGE_BUSYBOX_UNICODE
+	bool "Enable unicode support"
+	default y
+
 # This option is not an option of Busybox, it can be selected even
 # if Busybox is not enabled.
 config BR2_PACKAGE_BUSYBOX_SHOW_OTHERS
