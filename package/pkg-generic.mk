@@ -398,6 +398,7 @@ $(BUILD_DIR)/%/.stamp_images_installed:
 
 # Install to target dir
 define PRE_INSTALL_TARGET
+	$(Q)touch $($(PKG)_DIR)/.stamp_installed
 	$(Q)if [ -r $(@D)/.files-list-target.txt ]; then \
 		cd $(TARGET_DIR); \
 		cat $(@D)/.files-list-target.txt | \
