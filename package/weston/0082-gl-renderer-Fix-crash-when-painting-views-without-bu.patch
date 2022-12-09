@@ -1,7 +1,7 @@
-From 56b00d0f3702a07cba49cce5a060d20d0da267d6 Mon Sep 17 00:00:00 2001
+From f94b563aa1c65b5613c7439edf548f1b94153150 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 5 Dec 2022 16:48:12 +0800
-Subject: [PATCH 82/82] gl-renderer: Fix crash when painting views without
+Subject: [PATCH 82/92] gl-renderer: Fix crash when painting views without
  buffer
 
 By adding a sanity check for gb.
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index c6c0942..9b63c24 100644
+index c6c09424..9b63c240 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -1064,6 +1064,9 @@ draw_paint_node(struct weston_paint_node *pnode,

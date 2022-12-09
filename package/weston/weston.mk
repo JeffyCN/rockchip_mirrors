@@ -56,6 +56,17 @@ WESTON_CONF_OPTS += \
 	-Dpipewire=false
 endif
 
+ifeq ($(BR2_PACKAGE_WESTON_VNC),y)
+ifeq ($(BR2_PACKAGE_LINUX_PAM),y)
+WESTON_DEPENDENCIES += linux-pam
+endif
+
+WESTON_DEPENDENCIES += neatvnc
+WESTON_CONF_OPTS += -Dbackend-vnc=true
+else
+WESTON_CONF_OPTS += -Dbackend-vnc=false
+endif
+
 ifeq ($(BR2_PACKAGE_WESTON_RDP),y)
 WESTON_DEPENDENCIES += freerdp
 WESTON_CONF_OPTS += -Dbackend-rdp=true

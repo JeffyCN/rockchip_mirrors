@@ -67,6 +67,10 @@ config BR2_PACKAGE_WESTON_DEFAULT_COMPOSITOR
 config BR2_PACKAGE_WESTON_DRM
 	bool "DRM compositor"
 
+config BR2_PACKAGE_WESTON_VNC
+	bool "VNC compositor"
+	select BR2_PACKAGE_NEATVNC
+
 # FreeRDP needs threads and !static, already the case for weston
 config BR2_PACKAGE_WESTON_RDP
 	bool "RDP compositor"
