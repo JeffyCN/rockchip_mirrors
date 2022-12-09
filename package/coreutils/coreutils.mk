@@ -99,6 +99,14 @@ COREUTILS_CONF_OPTS += --with-openssl=yes
 COREUTILS_DEPENDENCIES += openssl
 endif
 
+ifeq ($(BR2_PACKAGE_COREUTILS_UNICODE_BYPASS),y)
+define COREUTILS_UNICODE_BYPASS
+	$(SED) "s%\(printable =\) \(isprint\)%\1 c >= ' '; // \2%" \
+		$(@D)/lib/quotearg.c || true
+endef
+COREUTILS_PRE_BUILD_HOOKS += COREUTILS_UNICODE_BYPASS
+endif
+
 ifeq ($(BR2_ROOTFS_MERGED_USR),)
 # We want to move a few binaries from /usr/bin to /bin. In the case of
 # coreutils being built as multi-call binary, we do so by re-creating
