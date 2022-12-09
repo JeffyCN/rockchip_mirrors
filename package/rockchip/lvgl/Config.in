@@ -3,3 +3,9 @@ config BR2_PACKAGE_LVGL
 	default n
 	help
 	  lvgl
+
+if BR2_PACKAGE_LVGL
+	config BR2_PACKAGE_LVGL_CONF
+		string "Lvgl configuration file"
+		default "lv_conf_default.h"
+endif
