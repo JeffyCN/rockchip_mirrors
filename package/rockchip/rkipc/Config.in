@@ -26,4 +26,10 @@ config BR2_PACKAGE_RKIPC_RV1126
 	bool "Compile for rv1126 ipc"
 	select BR2_PACKAGE_RKMEDIA
 	depends on BR2_PACKAGE_RKIPC
+
+config BR2_PACKAGE_RKIPC_RV1126_BATTERY_IPC
+	bool "Compile for rv1126 battery ipc"
+	select BR2_PACKAGE_ROCKIT
+	select BR2_PACKAGE_VENDOR_STORAGE
+	depends on BR2_PACKAGE_RKIPC
 endchoice
