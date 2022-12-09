@@ -4,11 +4,13 @@
 lunch_start()
 {
 	echo "Now we are ready to start your first application" > /dev/kmsg
+	rkmedia_vi_vo_test -a /etc/iqfiles &
 }
 
 lunch_stop()
 {
 	echo "All applications have been stopped"
+	killall rkmedia_vi_vo_test
 }
 
 case "$1" in
