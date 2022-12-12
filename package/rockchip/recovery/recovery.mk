@@ -18,7 +18,8 @@ RECOVERY_BUILD_OPTS+=-I$(PROJECT_DIR) -I$(STAGING_DIR)/usr/include/libdrm \
 	-lpthread \
 	-lcurl \
 	-lssl \
-	-lcrypto
+	-lcrypto \
+	-lbz2
 
 RECOVERY_DEPENDENCIES += libcurl openssl
 

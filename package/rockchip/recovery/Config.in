@@ -11,6 +11,7 @@ config BR2_PACKAGE_RECOVERY
 	select BR2_PACKAGE_E2FSPROGS_RESIZE2FS
 	select BR2_PACKAGE_LIBCURL
 	select BR2_PACKAGE_OPENSSL
+	select BR2_PACKAGE_BZIP2
 	help
 	  Rockchip recovery for linux.
 
