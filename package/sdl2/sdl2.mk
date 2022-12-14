@@ -12,62 +12,45 @@ SDL2_LICENSE_FILES = LICENSE.txt
 SDL2_CPE_ID_VENDOR = libsdl
 SDL2_CPE_ID_PRODUCT = simple_directmedia_layer
 SDL2_INSTALL_STAGING = YES
-SDL2_CONFIG_SCRIPTS = sdl2-config
+SDL2_SUPPORTS_IN_SOURCE_BUILD = NO
 
 SDL2_CONF_OPTS += \
-	--disable-rpath \
-	--disable-arts \
-	--disable-esd \
-	--disable-dbus \
-	--disable-pulseaudio
-
-# We are using autotools build system for sdl2, so the sdl2-config.cmake
-# include path are not resolved like for sdl2-config script.
-# Change the absolute /usr path to resolve relatively to the sdl2-config.cmake location.
-# https://bugzilla.libsdl.org/show_bug.cgi?id=4597
-define SDL2_FIX_SDL2_CONFIG_CMAKE
-	$(SED) '2iget_filename_component(PACKAGE_PREFIX_DIR "$${CMAKE_CURRENT_LIST_DIR}/../../../" ABSOLUTE)\n' \
-		$(STAGING_DIR)/usr/lib/cmake/SDL2/sdl2-config.cmake
-	$(SED) 's%"/usr"%$${PACKAGE_PREFIX_DIR}%' \
-		$(STAGING_DIR)/usr/lib/cmake/SDL2/sdl2-config.cmake
-endef
-SDL2_POST_INSTALL_STAGING_HOOKS += SDL2_FIX_SDL2_CONFIG_CMAKE
+	-DSDL_RPATH=OFF
+	-DSDL_ARTS=OFF
+	-DSDL_ESD=OFF
+	-DSDL_PULSEAUDIO=OFF
 
 # We must enable static build to get compilation successful.
-SDL2_CONF_OPTS += --enable-static
+SDL2_CONF_OPTS += -DSDL_STATIC=ON
 
 ifeq ($(BR2_PACKAGE_HAS_UDEV),y)
 SDL2_DEPENDENCIES += udev
-SDL2_CONF_OPTS += --enable-libudev
-else
-SDL2_CONF_OPTS += --disable-libudev
 endif
 
 ifeq ($(BR2_X86_CPU_HAS_SSE),y)
-SDL2_CONF_OPTS += --enable-sse
+SDL2_CONF_OPTS += -DSDL_SSE=ON
 else
-SDL2_CONF_OPTS += --disable-sse
+SDL2_CONF_OPTS += -DSDL_SSE=OFF
 endif
 
 ifeq ($(BR2_X86_CPU_HAS_3DNOW),y)
-SDL2_CONF_OPTS += --enable-3dnow
+SDL2_CONF_OPTS += -DSDL_3DNOW=ON
 else
-SDL2_CONF_OPTS += --disable-3dnow
+SDL2_CONF_OPTS += -DSDL_3DNOW=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_SDL2_DIRECTFB),y)
 SDL2_DEPENDENCIES += directfb
-SDL2_CONF_OPTS += --enable-video-directfb
-SDL2_CONF_ENV = ac_cv_path_DIRECTFBCONFIG=$(STAGING_DIR)/usr/bin/directfb-config
+SDL2_CONF_OPTS += -DSDL_DIRECTFB=ON
 else
-SDL2_CONF_OPTS += --disable-video-directfb
+SDL2_CONF_OPTS += -DSDL_DIRECTFB=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_SDL2_OPENGLES)$(BR2_PACKAGE_RPI_USERLAND),yy)
 SDL2_DEPENDENCIES += rpi-userland
-SDL2_CONF_OPTS += --enable-video-rpi
+SDL2_CONF_OPTS += -DSDL_RPI=ON
 else
-SDL2_CONF_OPTS += --disable-video-rpi
+SDL2_CONF_OPTS += -DSDL_RPI=OFF
 endif
 
 # x-includes and x-libraries must be set for cross-compiling
@@ -77,92 +60,89 @@ ifeq ($(BR2_PACKAGE_SDL2_X11),y)
 SDL2_DEPENDENCIES += xlib_libX11 xlib_libXext
 
 # X11/extensions/shape.h is provided by libXext.
-SDL2_CONF_OPTS += --enable-video-x11 \
-	--with-x=$(STAGING_DIR) \
-	--x-includes=$(STAGING_DIR)/usr/include \
-	--x-libraries=$(STAGING_DIR)/usr/lib \
-	--enable-video-x11-xshape
+SDL2_CONF_OPTS += -DSDL_X11=ON
+	-DSDL_X11_XSHAPE=ON
 
 ifeq ($(BR2_PACKAGE_XLIB_LIBXCURSOR),y)
 SDL2_DEPENDENCIES += xlib_libXcursor
-SDL2_CONF_OPTS += --enable-video-x11-xcursor
+SDL2_CONF_OPTS += -DSDL_X11_XCURSOR=ON
 else
-SDL2_CONF_OPTS += --disable-video-x11-xcursor
+SDL2_CONF_OPTS += -DSDL_X11_XCURSOR=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_XLIB_LIBXINERAMA),y)
 SDL2_DEPENDENCIES += xlib_libXinerama
-SDL2_CONF_OPTS += --enable-video-x11-xinerama
+SDL2_CONF_OPTS += -DSDL_X11_XINERAMA=ON
 else
-SDL2_CONF_OPTS += --disable-video-x11-xinerama
+SDL2_CONF_OPTS += -DSDL_X11_XINERAMA=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_XLIB_LIBXI),y)
 SDL2_DEPENDENCIES += xlib_libXi
-SDL2_CONF_OPTS += --enable-video-x11-xinput
+SDL2_CONF_OPTS += -DSDL_X11_XINPUT=ON
 else
-SDL2_CONF_OPTS += --disable-video-x11-xinput
+SDL2_CONF_OPTS += -DSDL_X11_XINPUT=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_XLIB_LIBXRANDR),y)
 SDL2_DEPENDENCIES += xlib_libXrandr
-SDL2_CONF_OPTS += --enable-video-x11-xrandr
+SDL2_CONF_OPTS += -DSDL_X11_XRANDR=ON
 else
-SDL2_CONF_OPTS += --disable-video-x11-xrandr
+SDL2_CONF_OPTS += -DSDL_X11_XRANDR=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_XLIB_LIBXSCRNSAVER),y)
 SDL2_DEPENDENCIES += xlib_libXScrnSaver
-SDL2_CONF_OPTS += --enable-video-x11-scrnsaver
+SDL2_CONF_OPTS += -DSDL_X11_XSCRNSAVER=ON
 else
-SDL2_CONF_OPTS += --disable-video-x11-scrnsaver
+SDL2_CONF_OPTS += -DSDL_X11_XSCRNSAVER=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_XLIB_LIBXXF86VM),y)
 SDL2_DEPENDENCIES += xlib_libXxf86vm
-SDL2_CONF_OPTS += --enable-video-x11-vm
+SDL2_CONF_OPTS += -DSDL_X11_XVM=ON
 else
-SDL2_CONF_OPTS += --disable-video-x11-vm
+SDL2_CONF_OPTS += -DSDL_X11_XVM=OFF
 endif
 
 else
-SDL2_CONF_OPTS += --disable-video-x11 --without-x
+SDL2_CONF_OPTS += -DSDL_X11=OFF
 SDL2_CONF_ENV += CFLAGS=" -DMESA_EGL_NO_X11_HEADERS "
 endif
 
 ifeq ($(BR2_PACKAGE_SDL2_OPENGL),y)
-SDL2_CONF_OPTS += --enable-video-opengl
+SDL2_CONF_OPTS += -DSDL_OPENGL=ON
 SDL2_DEPENDENCIES += libgl
 else
-SDL2_CONF_OPTS += --disable-video-opengl
+SDL2_CONF_OPTS += -DSDL_OPENGL=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_SDL2_OPENGLES),y)
-SDL2_CONF_OPTS += --enable-video-opengles
+SDL2_CONF_OPTS += -DSDL_OPENGLES=ON
 SDL2_DEPENDENCIES += libgles
 else
-SDL2_CONF_OPTS += --disable-video-opengles
+SDL2_CONF_OPTS += -DSDL_OPENGLES=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_ALSA_LIB),y)
 SDL2_DEPENDENCIES += alsa-lib
-SDL2_CONF_OPTS += --enable-alsa
+SDL2_CONF_OPTS += -DSDL_ALSA=ON
 else
-SDL2_CONF_OPTS += --disable-alsa
+SDL2_CONF_OPTS += -DSDL_ALSA=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_SDL2_KMSDRM),y)
 SDL2_DEPENDENCIES += libdrm libgbm
-SDL2_CONF_OPTS += --enable-video-kmsdrm
+SDL2_CONF_OPTS += -DSDL_KMSDRM=ON
 else
-SDL2_CONF_OPTS += --disable-video-kmsdrm
+SDL2_CONF_OPTS += -DSDL_KMSDRM=OFF
 endif
 
 ifeq ($(BR2_PACKAGE_SDL2_WAYLAND),y)
 SDL2_DEPENDENCIES += wayland
-SDL2_CONF_OPTS += --enable-video-wayland
+SDL2_CONF_OPTS += -DSDL_WAYLAND=ON
 else
-SDL2_CONF_OPTS += --disable-video-wayland
+SDL2_CONF_OPTS += -DSDL_WAYLAND=OFF
 endif
 
-$(eval $(autotools-package))
+$(eval $(cmake-package))
