@@ -1,4 +1,23 @@
 #!/bin/sh -e
+#
+# Usage:
+# usbdevice [start|update|stop]
+#
+# Hookable stages:
+# usb [init|prepare|start|stop|restart]
+# <usb function> [prepare|start|stop]
+#
+# Example hook:
+# root@RK3588:/# more /etc/usbdevice.d/usb_init.sh
+# #!/bin/sh
+# usb_pre_init_hook()
+# {
+#	echo "usb pre-init hook"
+# }
+#
+# root@RK3588:/# more /etc/usbdevice.d/uvc.sh
+# #!/bin/sh
+# UVC_INSTANCES="uvc.gs1 uvc.gs2"
 
 # Uncomment below to see more logs
 # set -x
@@ -44,16 +63,16 @@ usb_msg()
 usb_pid()
 {
 	case $1 in
-		ums)		echo 0x0000;;
-		mtp)		echo 0x0001;;
-		uvc)		echo 0x0005;;
-		adb)		echo 0x0006;;
-		adb_mtp)	echo 0x0011;;
-		adb_ums)	echo 0x0018;;
-		uvc_adb)	echo 0x0015;;
-		uvc_ntb)	echo 0x0017;;
-		acm)		echo 0x1005;;
-		*)		echo 0x0019;;
+		ums)			echo 0x0000;;
+		mtp)			echo 0x0001;;
+		uvc)			echo 0x0005;;
+		adb)			echo 0x0006;;
+		adb_mtp | mtp_adb)	echo 0x0011;;
+		adb_ums | ums_adb)	echo 0x0018;;
+		adb_uvc | uvc_adb)	echo 0x0015;;
+		ntb_uvc | uvc_ntb)	echo 0x0017;;
+		acm)			echo 0x1005;;
+		*)			echo 0x0019;;
 	esac
 }
 
