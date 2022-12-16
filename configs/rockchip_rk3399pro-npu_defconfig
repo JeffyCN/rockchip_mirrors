@@ -1,7 +1,6 @@
 #include "base/base.config"
 #include "chips/rk3399pro_npu_aarch64.config"
 BR2_PACKAGE_E2FSPROGS=
-BR2_PACKAGE_E2FSPROGS_RESIZE2FS=
 BR2_PACKAGE_IO=y
 BR2_PACKAGE_LIBUSB=y
 BR2_PACKAGE_LIBXML2=y
