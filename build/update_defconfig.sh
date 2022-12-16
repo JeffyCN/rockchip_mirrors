@@ -9,7 +9,7 @@ set -e
 savedefconfig()
 {
 	# Save original .config
-	gzip -fk "$CONFIG"
+	gzip -fk "$CONFIG" &>/dev/null || true
 
 	[ -z "$2" ] || \
 		"$SCRIPT_DIR/parse_defconfig.sh" "$2" "$CONFIG" > /dev/null
@@ -18,7 +18,7 @@ savedefconfig()
 	make O="$OUTPUT_DIR" savedefconfig >/dev/null
 
 	# Restore original .config
-	gunzip -fk "$CONFIG.gz"
+	gunzip -fk "$CONFIG.gz" &>/dev/null || true
 }
 
 BOARD="$(basename "${1%_defconfig}")"
@@ -111,7 +111,7 @@ savedefconfig "$NEW_DEFCONFIG" "$FRAGMENT"
 CFG_LIST=$(diff "$ORIG_DEFCONFIG" "$NEW_DEFCONFIG" | \
 	sed -n -e "$SED_CONFIG_EXP1" -e "$SED_CONFIG_EXP2" | sort | uniq)
 for CFG in $CFG_LIST ; do
-	grep -q -w $CFG "$FRAGMENT" || echo "$CFG=" >> $FRAGMENT
+	grep -wq $CFG "$FRAGMENT" || echo "$CFG=" >> $FRAGMENT
 done
 
 cat $FRAGMENT > $DEFCONFIG
@@ -120,6 +120,17 @@ cat $FRAGMENT > $DEFCONFIG
 savedefconfig "$NEW_DEFCONFIG" "$DEFCONFIG"
 if diff "$ORIG_DEFCONFIG" "$NEW_DEFCONFIG" | grep ""; then
 	echo "Configs unmatched, might be something wrong."
+	exit 1
 fi
+
+# Strip unneeded config resets
+TEMP_FILE=$(mktemp)
+for CFG in $(grep "=$" "$DEFCONFIG") ; do
+	grep -wv "$CFG" "$DEFCONFIG" > $TEMP_FILE
+	savedefconfig "$NEW_DEFCONFIG" $TEMP_FILE
+	if ! diff "$ORIG_DEFCONFIG" "$NEW_DEFCONFIG" | grep -q ""; then
+		cat $TEMP_FILE > "$DEFCONFIG"
+	fi
+done
 
 echo "Done updating $DEFCONFIG."
