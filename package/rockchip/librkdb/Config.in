@@ -5,13 +5,3 @@ menuconfig BR2_PACKAGE_LIBRKDB
 	select BR2_PACKAGE_JSON_C
 	help
 	  rockchip database library
-
-if BR2_PACKAGE_LIBRKDB
-
-config BR2_PACKAGE_LIBRKDB_FORCE_INSTALL_TO_ROOTFS
-	bool "rockchip librkdb install to rootfs"
-	default n
-	help
-	  rockchip database library install to rootfs.
-
-endif

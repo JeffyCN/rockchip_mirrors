@@ -24,12 +24,6 @@ config BR2_PACKAGE_ISP2_IPC_MINILOGGER
     help
       Enable ispserver miniloger print.
 
-config BR2_PACKPAG_ISP2_IPC_FORCE_INSTALL_TO_ROOTFS
-    bool "ispserver install to rootfs"
-    default n
-    help
-      Ispserver install to rootfs.
-
 config BR2_PACKPAG_ISP2_IPC_CALL_FUNC
     bool "enable ispserver call func"
     default n

@@ -13,9 +13,4 @@ config BR2_PACKAGE_LIBIPCPROTOCOL_DEMO
 	help
 	  provide demo to show the usage of libIPCProtocol
 
-config BR2_PACKAGE_LIBIPCPROTOCOL_FORCE_INSTALL_TO_ROOTFS
-        bool "rockchip libIPCProtocol install to rootfs"
-        default n
-        help
-          Rockchip libIPCProtocol install to rootfs.
 endif
