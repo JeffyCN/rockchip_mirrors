@@ -3,7 +3,6 @@
 #include "fs/vfat.config"
 #include "multimedia/camera.config"
 #include "debug.config"
-BR2_PACKAGE_CAMERA_ENGINE=
 BR2_PACKAGE_CAMERA_ENGINE_RKISP_3A_SPEEDUP_DIR_ETC=y
 BR2_PACKAGE_CAMERA_ENGINE_RKISP_IQFILE="ps5268_default_default.xml"
 BR2_PACKAGE_FACE_DETECT=y
