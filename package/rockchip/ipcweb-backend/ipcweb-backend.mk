@@ -30,7 +30,7 @@ endif
 define IPCWEB_BACKEND_INSTALL_TARGET_CMDS
 	rm -rf $(TARGET_DIR)/usr/www
 	mkdir -p $(TARGET_DIR)/usr/www
-	cp -rfp $(IPCWEB_BACKEND_WWW_DIR) $(TARGET_DIR)/usr/www
+	cp -rfp $(IPCWEB_BACKEND_WWW_DIR)/* $(TARGET_DIR)/usr/www
 	mkdir -p  $(TARGET_DIR)/usr/www/cgi-bin/
 	cp -rfp $(@D)/src/entry.cgi $(TARGET_DIR)/usr/www/cgi-bin/
 endef
