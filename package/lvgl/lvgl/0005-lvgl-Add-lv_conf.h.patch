@@ -1,20 +1,20 @@
-From b6e58f952732d00958e8a56e96865219413fb40a Mon Sep 17 00:00:00 2001
+From 6f311641b7bdfa8db3afd1ffb9d473abe64a2d13 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 27 Sep 2022 16:07:10 +0800
-Subject: [PATCH 5/8] lvgl: Add lv_conf.h
+Subject: [PATCH 05/11] lvgl: Add lv_conf.h
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---
- lv_conf.h | 769 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 file changed, 769 insertions(+)
+ lv_conf.h | 771 ++++++++++++++++++++++++++++++++++++++++++++++++++++++
+ 1 file changed, 771 insertions(+)
  create mode 100644 lv_conf.h
 
 diff --git a/lv_conf.h b/lv_conf.h
 new file mode 100644
-index 000000000..929fbc138
+index 000000000..e9d494407
 --- /dev/null
 +++ b/lv_conf.h
-@@ -0,0 +1,769 @@
+@@ -0,0 +1,771 @@
 +/**
 + * @file lv_conf.h
 + * Configuration file for v8.3.0
@@ -222,7 +222,9 @@ index 000000000..929fbc138
 +#define LV_USE_GPU_NXP_VG_LITE 0
 +
 +/*Use SDL renderer API*/
-+#define LV_USE_GPU_SDL 1
++#ifndef LV_USE_GPU_SDL
++#define LV_USE_GPU_SDL 0
++#endif
 +#if LV_USE_GPU_SDL
 +    #define LV_GPU_SDL_INCLUDE_PATH <SDL2/SDL.h>
 +    /*Texture cache size, 8MB by default*/

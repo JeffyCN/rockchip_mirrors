@@ -1,7 +1,7 @@
-From 2e8e9d41bf94902f9b1cdca82b8521f95968bb09 Mon Sep 17 00:00:00 2001
+From 0b4d4d99d1e2aba86b62d20785fedced28039728 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 27 Sep 2022 16:14:23 +0800
-Subject: [PATCH 3/3] lv_drivers: Add lv_conf.h and lv_drv_conf.h
+Subject: [PATCH 3/6] lv_drivers: Add lv_conf.h and lv_drv_conf.h
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---
@@ -20,7 +20,7 @@ index 0000000..1d5f183
 +#include "lvgl/lv_conf.h"
 diff --git a/lv_drv_conf.h b/lv_drv_conf.h
 new file mode 100644
-index 0000000..c29220c
+index 0000000..6dd6af1
 --- /dev/null
 +++ b/lv_drv_conf.h
 @@ -0,0 +1,494 @@
@@ -117,7 +117,7 @@ index 0000000..c29220c
 +
 +/* Hardware accelerated SDL driver */
 +#ifndef USE_SDL_GPU
-+# define USE_SDL_GPU 1
++# define USE_SDL_GPU 0
 +#endif
 +
 +#if USE_SDL || USE_SDL_GPU

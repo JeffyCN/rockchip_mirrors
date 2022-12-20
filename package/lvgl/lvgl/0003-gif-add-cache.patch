@@ -1,7 +1,7 @@
 From fd308297b374be5b3f3b070d0aec5db9958bd769 Mon Sep 17 00:00:00 2001
 From: Jinkun Hong <jinkun.hong@rock-chips.com>
 Date: Mon, 6 Jun 2022 09:46:49 +0800
-Subject: [PATCH 3/8] gif add cache
+Subject: [PATCH 03/11] gif add cache
 
 Signed-off-by: Jinkun Hong <jinkun.hong@rock-chips.com>
 ---

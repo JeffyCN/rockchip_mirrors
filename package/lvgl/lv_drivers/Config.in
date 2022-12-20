@@ -3,3 +3,19 @@ config BR2_PACKAGE_LV_DRIVERS
 	default n
 	help
 	  lv drivers
+
+choice
+	prompt "LV drivers select"
+	depends on BR2_PACKAGE_LV_DRIVERS
+
+	config BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
+		bool "sdl"
+		help
+		  Enbale sdl renderer
+
+	config BR2_PACKAGE_LV_DRIVERS_USE_DRM
+		bool "drm"
+		help
+		  Enbale drm renderer
+
+endchoice

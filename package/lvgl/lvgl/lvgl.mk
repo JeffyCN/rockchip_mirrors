@@ -32,4 +32,8 @@ ifeq ($(BR2_PACKAGE_LVGL_DEMO_CUSTOM), y)
 LVGL_CONF_OPTS += -DLV_USE_DEMO_CUSTOM=1
 endif
 
+ifeq ($(BR2_PACKAGE_SDL2), y)
+LVGL_CONF_OPTS += -DLV_USE_GPU_SDL=1
+endif
+
 $(eval $(cmake-package))

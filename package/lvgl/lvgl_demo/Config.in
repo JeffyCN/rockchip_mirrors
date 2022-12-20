@@ -9,37 +9,31 @@ choice
 	depends on BR2_PACKAGE_LVGL_DEMO
 	config BR2_PACKAGE_LVGL_DEMO_WIDGETS
 		bool "lvgl demo widgets"
-		default n
 		help
 		  Enbale lvgl demo widgets
 
 	config BR2_PACKAGE_LVGL_DEMO_KEYPAD_AND_ENCODER
 		bool "lvgl demo keypad and encoder"
-		default n
 		help
 		  Enbale lvgl demo keypad and encoder
 
 	config BR2_PACKAGE_LVGL_DEMO_BENCHMARK
 		bool "lvgl demo benchmark"
-		default n
 		help
 		  Enbale lvgl demo benchmark
 
 	config BR2_PACKAGE_LVGL_DEMO_STRESS
 		bool "lvgl demo stress"
-		default n
 		help
 		  Enbale lvgl demo stress
 
 	config BR2_PACKAGE_LVGL_DEMO_MUSIC
 		bool "lvgl demo music"
-		default n
 		help
 		  Enbale lvgl demo music
 
 	config BR2_PACKAGE_LVGL_DEMO_CUSTOM
 		bool "lvgl demo custom"
-		default n
 		help
 		  Enbale lvgl demo custom
 

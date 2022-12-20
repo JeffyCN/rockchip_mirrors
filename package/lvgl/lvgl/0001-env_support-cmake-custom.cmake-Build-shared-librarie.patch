@@ -1,8 +1,8 @@
 From 3bc1738b8166bb86ffe15d32226ebb9d22cbcd7d Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 27 Sep 2022 16:00:50 +0800
-Subject: [PATCH 1/8] env_support: cmake: custom.cmake: Build shared libraries
- ON
+Subject: [PATCH 01/11] env_support: cmake: custom.cmake: Build shared
+ libraries ON
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---

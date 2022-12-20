@@ -1,7 +1,7 @@
 From 12e0512ae268edcd0fd95ede47d9c90d1138a709 Mon Sep 17 00:00:00 2001
 From: Jinkun Hong <jinkun.hong@rock-chips.com>
 Date: Mon, 6 Jun 2022 09:47:20 +0800
-Subject: [PATCH 4/8] add _lv_img_cache_get_info
+Subject: [PATCH 04/11] add _lv_img_cache_get_info
 
 Signed-off-by: Jinkun Hong <jinkun.hong@rock-chips.com>
 ---

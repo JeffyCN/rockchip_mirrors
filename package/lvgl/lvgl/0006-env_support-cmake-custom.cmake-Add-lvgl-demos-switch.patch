@@ -1,7 +1,7 @@
-From 50db385e552a93621af3fb6e7b5f3f49b027e4fc Mon Sep 17 00:00:00 2001
+From a416c9522a22843abb2520afb1f81a3546dc5f91 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 27 Sep 2022 16:37:09 +0800
-Subject: [PATCH 6/8] env_support: cmake: custom.cmake: Add lvgl demos switch
+Subject: [PATCH 06/11] env_support: cmake: custom.cmake: Add lvgl demos switch
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---

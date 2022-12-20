@@ -1,7 +1,7 @@
-From 073c2c76733aa6a75ac7917f2a907e3e4e3fc132 Mon Sep 17 00:00:00 2001
+From 43a1d6cd2269049be7e9f95ba0359577c8d38832 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Thu, 15 Dec 2022 17:07:57 +0800
-Subject: [PATCH 7/8] HACK: disable too complicated demo
+Subject: [PATCH 07/11] HACK: disable too complicated demo
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---

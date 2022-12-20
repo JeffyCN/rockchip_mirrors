@@ -1,0 +1,62 @@
+From ceb5acd20db0c2840ed3e4c979dae3eb796c8c7b Mon Sep 17 00:00:00 2001
+From: Jiajian Wu <jair.wu@rock-chips.com>
+Date: Wed, 21 Dec 2022 14:53:52 +0800
+Subject: [PATCH 6/6] display: drm: add drm_disp_drv_init
+
+Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
+---
+ display/drm.c | 18 ++++++++++++++++++
+ display/drm.h |  1 +
+ 2 files changed, 19 insertions(+)
+
+diff --git a/display/drm.c b/display/drm.c
+index 9cec6e3..01f33ae 100644
+--- a/display/drm.c
++++ b/display/drm.c
+@@ -65,6 +65,7 @@ struct drm_dev {
+ 	drmModePropertyPtr plane_props[128];
+ 	drmModePropertyPtr crtc_props[128];
+ 	drmModePropertyPtr conn_props[128];
++	struct drm_buffer draw_buf;
+ 	struct drm_buffer drm_bufs[2]; /* DUMB buffers */
+ 	struct drm_buffer *cur_bufs[2]; /* double buffering handling */
+ } drm_dev;
+@@ -792,6 +793,23 @@ void drm_init(void)
+ 	info("DRM subsystem and buffer mapped successfully");
+ }
+ 
++void drm_disp_drv_init(lv_disp_drv_t * disp_drv)
++{
++	int ret;
++
++	lv_disp_drv_init(disp_drv);
++	disp_drv->direct_mode = 1;
++	disp_drv->flush_cb = drm_flush;
++	disp_drv->hor_res = drm_dev.width;
++	disp_drv->ver_res = drm_dev.height;
++	lv_disp_draw_buf_t *disp_buf = lv_mem_alloc(sizeof(lv_disp_draw_buf_t));
++	ret = drm_allocate_dumb(&drm_dev.draw_buf);
++	lv_disp_draw_buf_init(disp_buf, drm_dev.draw_buf.map, NULL,
++			      drm_dev.width * drm_dev.height);
++	disp_drv->draw_buf = disp_buf;
++	disp_drv->antialiasing = 1;
++}
++
+ void drm_exit(void)
+ {
+ 	close(drm_dev.fd);
+diff --git a/display/drm.h b/display/drm.h
+index ebf2e28..c227323 100644
+--- a/display/drm.h
++++ b/display/drm.h
+@@ -41,6 +41,7 @@ extern "C" {
+  * GLOBAL PROTOTYPES
+  **********************/
+ void drm_init(void);
++void drm_disp_drv_init(lv_disp_drv_t * disp_drv);
+ void drm_get_sizes(lv_coord_t *width, lv_coord_t *height, uint32_t *dpi);
+ void drm_exit(void);
+ void drm_flush(lv_disp_drv_t * drv, const lv_area_t * area, lv_color_t * color_p);
+-- 
+2.25.1
+
