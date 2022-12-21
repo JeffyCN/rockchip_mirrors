@@ -400,7 +400,7 @@ define PRE_INSTALL_TARGET
 	$(Q)if [ -r $(@D)/.files-list-target.txt ]; then \
 		cd $(TARGET_DIR); \
 		cat $(@D)/.files-list-target.txt | \
-			xargs md5sum > $(@D)/.md5 2>/dev/null || true; \
+			xargs md5sum /dev/null > $(@D)/.md5 2>/dev/null || true; \
 		cd -; \
 	fi
 endef
