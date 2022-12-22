@@ -103,6 +103,11 @@ config BR2_PACKAGE_RKMEDIA_RKRGA
     help
       wrapped function of librga
 
+config BR2_PACKAGE_RKMEDIA_RKIEP
+    bool "rkiep"
+    help
+      wrapped function of iep
+
 config BR2_PACKAGE_RKMEDIA_RKNN
     bool "rknn"
     select BR2_PACKAGE_RKNPU
