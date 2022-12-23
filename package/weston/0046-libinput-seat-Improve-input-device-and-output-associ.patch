@@ -1,7 +1,7 @@
-From 891499367bfddf16c07ed207a15e26bcd1b0bee2 Mon Sep 17 00:00:00 2001
+From e68b4829ce68731839c5dcf91040a99b67f08662 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 09:49:09 +0800
-Subject: [PATCH 46/79] libinput-seat: Improve input device and output
+Subject: [PATCH 46/93] libinput-seat: Improve input device and output
  associating
 
 An input device can associate with an output using udev rules's
@@ -26,10 +26,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 79 insertions(+), 44 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 50a01199..479f39b3 100644
+index 41483e9..93f5212 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1750,6 +1750,7 @@ setup_output_seat_constraint(struct drm_backend *b,
+@@ -1743,6 +1743,7 @@ setup_output_seat_constraint(struct drm_backend *b,
  			return;
  
  		seat->base.output = output;
@@ -38,7 +38,7 @@ index 50a01199..479f39b3 100644
  		pointer = weston_seat_get_pointer(&seat->base);
  		if (pointer)
 diff --git a/libweston/libinput-seat.c b/libweston/libinput-seat.c
-index a9c7d6f3..57ff1817 100644
+index a9c7d6f..57ff181 100644
 --- a/libweston/libinput-seat.c
 +++ b/libweston/libinput-seat.c
 @@ -89,12 +89,54 @@ output_find_by_head_name(struct weston_compositor *compositor,
@@ -215,7 +215,7 @@ index a9c7d6f3..57ff1817 100644
  	free(seat);
  }
 diff --git a/libweston/libinput-seat.h b/libweston/libinput-seat.h
-index 315980dc..636636fb 100644
+index 315980d..636636f 100644
 --- a/libweston/libinput-seat.h
 +++ b/libweston/libinput-seat.h
 @@ -37,8 +37,11 @@ struct libinput_device;
