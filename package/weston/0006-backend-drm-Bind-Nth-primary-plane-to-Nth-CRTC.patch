@@ -1,21 +1,37 @@
-From 2a8eb40ab78867890b2728380019a0e19bc1258e Mon Sep 17 00:00:00 2001
+From 32628352a5925d8f0ac359efb5686faf8509c4fc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 11:23:36 +0800
-Subject: [PATCH 06/79] backend-drm: Bind Nth primary plane to Nth CRTC
+Subject: [PATCH 06/93] backend-drm: Bind Nth primary plane to Nth CRTC
 
 The vop2 allows primary planes to bind with random CRTC, but we need to
 use the same pair as the driver registered.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/backend-drm/drm.c | 16 ++++++++++++++++
- 1 file changed, 16 insertions(+)
+ libweston/backend-drm/drm.c | 25 +++++++++++++++++--------
+ 1 file changed, 17 insertions(+), 8 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 962cc284..663c4c33 100644
+index 962cc28..ce4326c 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -873,10 +873,26 @@ drm_output_find_special_plane(struct drm_device *device,
+@@ -839,14 +839,7 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
+ 
+ 	weston_plane_init(&plane->base, compositor, 0, 0);
+ 
+-	wl_list_for_each(tmp, &device->plane_list, link) {
+-		if (tmp->zpos_max < plane->zpos_max) {
+-			wl_list_insert(tmp->link.prev, &plane->link);
+-			break;
+-		}
+-	}
+-	if (plane->link.next == NULL)
+-		wl_list_insert(device->plane_list.prev, &plane->link);
++	wl_list_insert(device->plane_list.prev, &plane->link);
+ 
+ 	return plane;
+ 
+@@ -873,10 +866,26 @@ drm_output_find_special_plane(struct drm_device *device,
  {
  	struct drm_backend *b = device->backend;
  	struct drm_plane *plane;

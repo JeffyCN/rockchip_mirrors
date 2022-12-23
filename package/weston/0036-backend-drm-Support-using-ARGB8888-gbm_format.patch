@@ -1,7 +1,7 @@
-From 71c1f2c410259e0c98842fc8149acbf77440c507 Mon Sep 17 00:00:00 2001
+From ab453aa94bc7297bac8518192854c7b8f9bd68ef Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Oct 2020 17:37:04 +0800
-Subject: [PATCH 36/79] backend-drm: Support using ARGB8888 gbm_format
+Subject: [PATCH 36/93] backend-drm: Support using ARGB8888 gbm_format
 
 Tested with:
 /etc/xdg/weston/weston.ini:
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-gbm.c b/libweston/backend-drm/drm-gbm.c
-index f998178c..03e1b6db 100644
+index f998178..03e1b6d 100644
 --- a/libweston/backend-drm/drm-gbm.c
 +++ b/libweston/backend-drm/drm-gbm.c
 @@ -292,8 +292,10 @@ drm_output_render_gl(struct drm_output_state *state, pixman_region32_t *damage)
@@ -43,10 +43,10 @@ index f998178c..03e1b6db 100644
  		weston_log("failed to get drm_fb for bo\n");
  		gbm_surface_release_buffer(output->gbm_surface, bo);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index dcfae635..2c14eee0 100644
+index 072ea54..0f4c724 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1606,6 +1606,9 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
+@@ -1599,6 +1599,9 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
  	};
  
  	switch (format) {

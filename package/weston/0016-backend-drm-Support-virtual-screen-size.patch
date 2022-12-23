@@ -1,7 +1,7 @@
-From 80cb5c2da6670a3ac828f0f9051a2b762cfe1161 Mon Sep 17 00:00:00 2001
+From 360337672d680d5a4e2def3c27a249321db43dc8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 24 Jun 2020 11:59:42 +0800
-Subject: [PATCH 16/79] backend-drm: Support virtual screen size
+Subject: [PATCH 16/93] backend-drm: Support virtual screen size
 
 Support setting virtual screen size, for example:
 export WESTON_DRM_VIRTUAL_SIZE=1024x768
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 155 insertions(+), 26 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 184679e6..f2f5d2aa 100644
+index 184679e..f2f5d2a 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -166,6 +166,7 @@ enum wdrm_plane_property {
@@ -83,7 +83,7 @@ index 184679e6..f2f5d2aa 100644
  drm_property_get_range_values(struct drm_property_info *info,
  			      const drmModeObjectProperties *props);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index b4bffeb3..0f1a1fea 100644
+index 7e98a19..f78898e 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -326,6 +326,11 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
@@ -141,7 +141,7 @@ index b4bffeb3..0f1a1fea 100644
  	zpos_range_values =
  		drm_property_get_range_values(&plane->props[WDRM_PLANE_ZPOS],
  					      props);
-@@ -3409,6 +3421,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3402,6 +3414,10 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	b->head_matches = drm_head_matches[head_mode];
  
@@ -153,7 +153,7 @@ index b4bffeb3..0f1a1fea 100644
  	if (buf)
  		b->resize_freeze_ms = atoi(buf);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 4e9b4d7f..fb51bcf5 100644
+index 4e9b4d7..fb51bcf 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -56,6 +56,15 @@ struct drm_property_enum_info plane_type_enums[] = {
@@ -336,7 +336,7 @@ index 4e9b4d7f..fb51bcf5 100644
  	drm_debug(backend, "\t[CRTC:%u, PLANE:%u] FORMAT: %s\n",
  			   crtc->crtc_id, scanout_state->plane->plane_id,
 diff --git a/libweston/backend-drm/modes.c b/libweston/backend-drm/modes.c
-index ae3a35d8..7e7865bd 100644
+index ae3a35d..7e7865b 100644
 --- a/libweston/backend-drm/modes.c
 +++ b/libweston/backend-drm/modes.c
 @@ -398,6 +398,7 @@ drm_refresh_rate_mHz(const drmModeModeInfo *info)
