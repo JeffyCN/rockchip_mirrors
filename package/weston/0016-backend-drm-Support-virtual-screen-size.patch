@@ -1,4 +1,4 @@
-From 360337672d680d5a4e2def3c27a249321db43dc8 Mon Sep 17 00:00:00 2001
+From 14ed80528ac19e4d443ab27e66b12545a0394e80 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 24 Jun 2020 11:59:42 +0800
 Subject: [PATCH 16/93] backend-drm: Support virtual screen size
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 155 insertions(+), 26 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 184679e..f2f5d2a 100644
+index e72a90e..ed4f721 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -166,6 +166,7 @@ enum wdrm_plane_property {
@@ -61,7 +61,7 @@ index 184679e..f2f5d2a 100644
  };
  
  struct drm_connector {
-@@ -610,6 +625,9 @@ struct drm_output {
+@@ -612,6 +627,9 @@ struct drm_output {
  	submit_frame_cb virtual_submit_frame;
  
  	bool state_invalid;
@@ -71,7 +71,7 @@ index 184679e..f2f5d2a 100644
  };
  
  void
-@@ -723,6 +741,10 @@ uint64_t
+@@ -725,6 +743,10 @@ uint64_t
  drm_property_get_value(struct drm_property_info *info,
  		       const drmModeObjectProperties *props,
  		       uint64_t def);
@@ -83,10 +83,10 @@ index 184679e..f2f5d2a 100644
  drm_property_get_range_values(struct drm_property_info *info,
  			      const drmModeObjectProperties *props);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 7e98a19..f78898e 100644
+index c99e319..b984796 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -326,6 +326,11 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
+@@ -331,6 +331,11 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
  		output->state_last = NULL;
  	}
  
@@ -98,7 +98,7 @@ index 7e98a19..f78898e 100644
  	if (output->destroy_pending) {
  		output->destroy_pending = false;
  		output->disable_pending = false;
-@@ -406,6 +411,7 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -411,6 +416,7 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  	struct drm_property_info *damage_info =
  		&scanout_plane->props[WDRM_PLANE_FB_DAMAGE_CLIPS];
  	struct drm_backend *b = device->backend;
@@ -106,7 +106,7 @@ index 7e98a19..f78898e 100644
  	struct drm_fb *fb;
  	pixman_region32_t scanout_damage;
  	pixman_box32_t *rects;
-@@ -449,10 +455,11 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -454,10 +460,11 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  	scanout_state->src_w = fb->width << 16;
  	scanout_state->src_h = fb->height << 16;
  
@@ -120,7 +120,7 @@ index 7e98a19..f78898e 100644
  
  	pixman_region32_subtract(&c->primary_plane.damage,
  				 &c->primary_plane.damage, damage);
-@@ -516,7 +523,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -521,7 +528,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
  	now_ms = timespec_to_msec(&now);
@@ -129,7 +129,7 @@ index 7e98a19..f78898e 100644
  		/* Resize fullscreen/maxmium views(not always success) */
  		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
  			wl_signal_emit(&b->compositor->output_resized_signal,
-@@ -874,6 +881,11 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
+@@ -879,6 +886,11 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
  				       props,
  				       WDRM_PLANE_TYPE__COUNT);
  
@@ -141,7 +141,7 @@ index 7e98a19..f78898e 100644
  	zpos_range_values =
  		drm_property_get_range_values(&plane->props[WDRM_PLANE_ZPOS],
  					      props);
-@@ -3402,6 +3414,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3414,6 +3426,10 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	b->head_matches = drm_head_matches[head_mode];
  

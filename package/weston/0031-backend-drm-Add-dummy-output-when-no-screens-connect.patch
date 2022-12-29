@@ -1,7 +1,7 @@
-From 644ae6cff10b142846301bc94146c6d3a8ffbb1d Mon Sep 17 00:00:00 2001
+From ea970510db526f3d6f473f41e889d196d7f17460 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 30/93] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 31/93] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -55,7 +55,7 @@ index 463c64e..e48db31 100644
  		shell->lock_surface->committed(shell->lock_surface, 0, 0);
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 690d338..9aa1a88 100644
+index 59154ed..37ee4cb 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -370,6 +370,9 @@ struct drm_backend {
@@ -68,7 +68,7 @@ index 690d338..9aa1a88 100644
  };
  
  struct drm_mode {
-@@ -664,6 +667,8 @@ void
+@@ -666,6 +669,8 @@ void
  drm_output_destroy(struct weston_output *output_base);
  void
  drm_virtual_output_destroy(struct weston_output *output_base);
@@ -77,7 +77,7 @@ index 690d338..9aa1a88 100644
  
  static inline struct drm_output *
  to_drm_output(struct weston_output *base)
-@@ -672,6 +677,7 @@ to_drm_output(struct weston_output *base)
+@@ -674,6 +679,7 @@ to_drm_output(struct weston_output *base)
  #ifdef BUILD_DRM_VIRTUAL
  	    base->destroy != drm_virtual_output_destroy &&
  #endif
@@ -86,7 +86,7 @@ index 690d338..9aa1a88 100644
  		return NULL;
  	return container_of(base, struct drm_output, base);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c5fdf44..7975259 100644
+index eab3915..c548242 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -211,8 +211,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -105,18 +105,18 @@ index c5fdf44..7975259 100644
  
  	primary = b->primary_head->base.output;
  
-@@ -1259,6 +1265,10 @@ drm_output_find_special_plane(struct drm_device *device,
+@@ -1268,6 +1274,10 @@ drm_output_find_special_plane(struct drm_device *device,
+ 		struct weston_output *base;
  		bool found_elsewhere = false;
- 		bool is_primary = plane->type == WDRM_PLANE_TYPE_PRIMARY;
  
 +		/* Ignore non-real planes */
 +		if (!plane->plane_id)
 +			continue;
 +
- 		if (is_primary)
- 			num_primary ++;
- 
-@@ -2684,11 +2694,15 @@ drm_head_destroy(struct weston_head *base)
+ 		if (plane->type != type)
+ 			continue;
+ 		if (!drm_plane_is_available(plane, output))
+@@ -2697,11 +2707,15 @@ drm_head_destroy(struct weston_head *base)
  
  	weston_head_release(&head->base);
  
@@ -132,7 +132,7 @@ index c5fdf44..7975259 100644
  	free(head);
  }
  
-@@ -2925,8 +2939,9 @@ drm_backend_update_connectors(struct drm_device *device,
+@@ -2938,8 +2952,9 @@ drm_backend_update_connectors(struct drm_device *device,
  	wl_list_for_each_safe(base, base_next,
  			      &b->compositor->head_list, compositor_link) {
  		head = to_drm_head(base);
@@ -143,7 +143,7 @@ index c5fdf44..7975259 100644
  		connector_id = head->connector.connector_id;
  
  		if (head->connector.device != device)
-@@ -2974,6 +2989,9 @@ drm_backend_update_connectors(struct drm_device *device,
+@@ -2987,6 +3002,9 @@ drm_backend_update_connectors(struct drm_device *device,
  				continue;
  
  			head = to_drm_head(base);
@@ -153,7 +153,7 @@ index c5fdf44..7975259 100644
  			conn = head->connector.conn;
  
  			if (conn->connection != DRM_MODE_CONNECTED ||
-@@ -3003,6 +3021,8 @@ drm_backend_update_connectors(struct drm_device *device,
+@@ -3016,6 +3034,8 @@ drm_backend_update_connectors(struct drm_device *device,
  	}
  match_done:
  
@@ -162,7 +162,7 @@ index c5fdf44..7975259 100644
  	drm_backend_update_outputs(b);
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
-@@ -3178,6 +3198,11 @@ drm_destroy(struct weston_compositor *ec)
+@@ -3191,6 +3211,11 @@ drm_destroy(struct weston_compositor *ec)
  	struct drm_crtc *crtc, *crtc_tmp;
  	struct drm_writeback *writeback, *writeback_tmp;
  
@@ -174,7 +174,7 @@ index c5fdf44..7975259 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->config_timer);
-@@ -3881,6 +3906,182 @@ config_timer_handler(void *data)
+@@ -3897,6 +3922,182 @@ config_timer_handler(void *data)
  	return 0;
  }
  
@@ -357,7 +357,7 @@ index c5fdf44..7975259 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4118,6 +4319,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4134,6 +4335,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  

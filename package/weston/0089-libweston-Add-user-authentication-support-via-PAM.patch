@@ -1,7 +1,7 @@
-From 510083c367ae0843f7b685db2baec2e7b02a25cc Mon Sep 17 00:00:00 2001
+From 3bcd12cef7a19f8e4bb9040ea36d3040b50c1e1b Mon Sep 17 00:00:00 2001
 From: Philipp Zabel <philipp.zabel@gmail.com>
 Date: Sat, 19 Nov 2022 09:52:01 +0100
-Subject: [PATCH 89/92] libweston: Add user authentication support via PAM
+Subject: [PATCH 89/93] libweston: Add user authentication support via PAM
 
 Add user authentication support for remote backends via PAM.
 This requires a configuration file /etc/pam.d/weston.
@@ -23,7 +23,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 
 diff --git a/libweston/auth.c b/libweston/auth.c
 new file mode 100644
-index 00000000..2133abbe
+index 0000000..2133abb
 --- /dev/null
 +++ b/libweston/auth.c
 @@ -0,0 +1,116 @@
@@ -144,10 +144,10 @@ index 00000000..2133abbe
 +	return authenticated;
 +}
 diff --git a/libweston/libweston-internal.h b/libweston/libweston-internal.h
-index fc427e5e..217f8d97 100644
+index bcfb153..ea5c478 100644
 --- a/libweston/libweston-internal.h
 +++ b/libweston/libweston-internal.h
-@@ -499,4 +499,9 @@ wl_data_device_manager_init(struct wl_display *display);
+@@ -502,4 +502,9 @@ wl_data_device_manager_init(struct wl_display *display);
  bool
  weston_output_set_color_outcome(struct weston_output *output);
  
@@ -158,7 +158,7 @@ index fc427e5e..217f8d97 100644
 +
  #endif
 diff --git a/libweston/meson.build b/libweston/meson.build
-index 6906244a..6f0b6240 100644
+index 6906244..6f0b624 100644
 --- a/libweston/meson.build
 +++ b/libweston/meson.build
 @@ -10,6 +10,7 @@ deps_libweston = [
@@ -189,7 +189,7 @@ index 6906244a..6f0b6240 100644
  	'weston-@0@'.format(libweston_major),
  	srcs_libweston,
 diff --git a/meson.build b/meson.build
-index 086d599d..a22aee6f 100644
+index 086d599..a22aee6 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -44,6 +44,7 @@ dir_data_pc = join_paths(dir_data, 'pkgconfig')
@@ -210,7 +210,7 @@ index 086d599d..a22aee6f 100644
  
 diff --git a/pam/meson.build b/pam/meson.build
 new file mode 100644
-index 00000000..7b7eff8d
+index 0000000..7b7eff8
 --- /dev/null
 +++ b/pam/meson.build
 @@ -0,0 +1,8 @@
@@ -224,7 +224,7 @@ index 00000000..7b7eff8d
 +)
 diff --git a/pam/weston-remote-access b/pam/weston-remote-access
 new file mode 100644
-index 00000000..d3014dd8
+index 0000000..d3014dd
 --- /dev/null
 +++ b/pam/weston-remote-access
 @@ -0,0 +1,3 @@

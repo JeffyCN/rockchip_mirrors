@@ -1,7 +1,7 @@
-From 08c5d830a9c17a6c2aea9b3a47c16a3aa411fe88 Mon Sep 17 00:00:00 2001
+From 0dab8adb878bd5c1d7d1c103cae4e3d546ed2fc1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 2 Jul 2020 14:58:49 +0800
-Subject: [PATCH 07/79] HACK: backend-drm: Avoid random crash when suspending
+Subject: [PATCH 07/93] HACK: backend-drm: Avoid random crash when suspending
 
 Skip the repaint_status check since the weston_output_finish_frame()
 could also be called when turning off dpms.
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 4 insertions(+), 4 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 663c4c33..2eb2e0bb 100644
+index c783f5d..448f763 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -282,8 +282,10 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
+@@ -287,8 +287,10 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
  	wl_list_for_each(ps, &output->state_cur->plane_list, link)
  		ps->complete = true;
  
@@ -30,7 +30,7 @@ index 663c4c33..2eb2e0bb 100644
  	if (output->destroy_pending) {
  		output->destroy_pending = false;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 7b157695..e166911e 100644
+index 7b15769..e166911 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3515,8 +3515,6 @@ weston_output_finish_frame(struct weston_output *output,

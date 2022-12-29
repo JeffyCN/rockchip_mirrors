@@ -1,7 +1,7 @@
-From 78e5dd887013b9154c3abf4627286cfe8b73ca91 Mon Sep 17 00:00:00 2001
+From a139b39da2bb05477f9b33db0a9d0441ef5145b7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 26 Oct 2020 17:50:06 +0800
-Subject: [PATCH 39/79] HACK: backend-drm: Workaround atomic flip for BSP 4.4
+Subject: [PATCH 40/93] HACK: backend-drm: Workaround atomic flip for BSP 4.4
  kernel
 
 The Rockchip BSP 4.4 kernel might generate unexpected flip events
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 45e6005e..1d433384 100644
+index 45e6005..1d43338 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1526,7 +1526,11 @@ atomic_flip_handler(int fd, unsigned int frame, unsigned int sec,

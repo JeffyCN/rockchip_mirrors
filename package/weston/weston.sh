@@ -54,13 +54,18 @@ export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 # echo "compositor:state:freeze" > /tmp/.weston_drm.conf # no input + freeze
 # echo "compositor:state:off" > /tmp/.weston_drm.conf # no input + off
 # echo "compositor:state:on" > /tmp/.weston_drm.conf
-# echo "output:DSI-1:off" >> /tmp/.weston_drm.conf
-# echo "output:eDP-1:freeze" >> /tmp/.weston_drm.conf
-# echo "output:DSI-1:on" >> /tmp/.weston_drm.conf
-# echo "output:all:rotate90" >> /tmp/.weston_drm.conf
-# echo "output:all:rect=<100,20,1636,2068>" >> /tmp/.weston_drm.conf
-# echo "output:HDMI-A-1:mode=800x600" >> /tmp/.weston_drm.conf
-# echo "output:HDMI-A-1:pos=100,200" >> /tmp/.weston_drm.conf
-# echo "output:HDMI-A-1:size=1920x1080" >> /tmp/.weston_drm.conf
-# echo "output:HDMI-A-1:prefer" >> /tmp/.weston_drm.conf
-# echo "output:HDMI-A-1:primary" >> /tmp/.weston_drm.conf
+# echo "output:DSI-1:off" > /tmp/.weston_drm.conf
+# echo "output:eDP-1:freeze" > /tmp/.weston_drm.conf
+# echo "output:DSI-1:on" > /tmp/.weston_drm.conf
+# echo "output:all:rotate90" > /tmp/.weston_drm.conf
+# echo "output:all:rect=<100,20,1636,2068>" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:mode=800x600" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:pos=100,200" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:size=1920x1080" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:prefer" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:primary" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:input=*" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:input=" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:input=event6" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:input=goodix*" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:input=goodix-ts" > /tmp/.weston_drm.conf

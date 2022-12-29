@@ -1,7 +1,7 @@
-From 112585f68c5756057c1d38df2cb72f79127d57e5 Mon Sep 17 00:00:00 2001
+From 09d63240a4f6c870d53e0cbf4becc5a20af8d7a0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 22 Nov 2019 12:06:35 +0800
-Subject: [PATCH 21/79] gl-renderer: Support NV16 shmem format
+Subject: [PATCH 22/93] gl-renderer: Support NV16 shmem format
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 12 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 3437bf20..bbd1cd45 100644
+index 3437bf2..bbd1cd4 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -271,6 +271,17 @@ struct yuv_format_descriptor yuv_formats[] = {

@@ -1,4 +1,4 @@
-From 6d384499bcd443957cad95738dca24eee4406561 Mon Sep 17 00:00:00 2001
+From 8be7add8c8a3ad73f1278fe16a758b94f21e5aa5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
 Subject: [PATCH 77/93] HACK: Honour cursor-size config
@@ -10,9 +10,9 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  compositor/main.c             |  4 +++
  include/libweston/libweston.h |  6 +++-
  libweston/backend-drm/drm.c   |  5 +++
- libweston/compositor.c        | 64 +++++++++++++++++++++++------------
+ libweston/compositor.c        | 66 +++++++++++++++++++++++------------
  libweston/input.c             | 37 +++++++++++++++++---
- 5 files changed, 89 insertions(+), 27 deletions(-)
+ 5 files changed, 90 insertions(+), 28 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 0fe3d40..c8c07dc 100644
@@ -61,10 +61,10 @@ index 9d9c5c6..f6f4ecc 100644
  		/*
  		 * If src_width != wl_fixed_from_int(-1),
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 265ab3e..b8f7249 100644
+index ae227e4..0e145ab 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -4343,6 +4343,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4360,6 +4360,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
@@ -73,11 +73,11 @@ index 265ab3e..b8f7249 100644
 +		device->cursor_height = compositor->cursor_size;
 +	}
 +
- 	wl_list_init(&device->plane_list);
- 	create_sprites(b->drm);
- 
+ 	res = drmModeGetResources(b->drm->drm.fd);
+ 	if (!res) {
+ 		weston_log("Failed to get drmModeRes\n");
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 038c312..750704d 100644
+index 038c312..8d3a147 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -710,11 +710,11 @@ weston_view_to_global_float(struct weston_view *view,
@@ -114,14 +114,16 @@ index 038c312..750704d 100644
  /** Transform a rectangle to buffer coordinates
   *
   * \param width Surface width.
-@@ -774,19 +784,19 @@ weston_transformed_coord(int width, int height,
+@@ -773,20 +783,20 @@ weston_transformed_coord(int width, int height,
+  * The given width and height must be the result of inverse scaled and
   * inverse transformed buffer size.
   */
- WL_EXPORT pixman_box32_t
+-WL_EXPORT pixman_box32_t
 -weston_transformed_rect(int width, int height,
 -			enum wl_output_transform transform,
 -			int32_t scale,
 -			pixman_box32_t rect)
++static pixman_box32_t
 +weston_transformed_rect_float(int width, int height,
 +			      enum wl_output_transform transform,
 +			      float scale,

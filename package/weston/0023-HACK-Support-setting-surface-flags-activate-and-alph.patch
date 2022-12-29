@@ -1,7 +1,7 @@
-From 49b7664d5acd47ac58c37b0ff3d66f7953e46d56 Mon Sep 17 00:00:00 2001
+From 73b50badae9184219e408d5fd0cb18d8be004f53 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 08:55:42 +0800
-Subject: [PATCH 22/79] HACK: Support setting surface flags activate and alpha
+Subject: [PATCH 23/93] HACK: Support setting surface flags activate and alpha
 
 Support setting surface flags activate and alpha through app_id or
 title, for example:
@@ -20,7 +20,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 244 insertions(+), 3 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index be36b70f..463c64e6 100644
+index be36b70..463c64e 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -1431,6 +1431,11 @@ shell_surface_update_layer(struct shell_surface *shsurf)
@@ -130,7 +130,7 @@ index be36b70f..463c64e6 100644
  	wl_list_init(&shell->seat_list);
  
 diff --git a/desktop-shell/shell.h b/desktop-shell/shell.h
-index e9e123e9..6876cf3c 100644
+index e9e123e..6876cf3 100644
 --- a/desktop-shell/shell.h
 +++ b/desktop-shell/shell.h
 @@ -100,6 +100,8 @@ struct desktop_shell {
@@ -143,7 +143,7 @@ index e9e123e9..6876cf3c 100644
  	struct wl_listener pointer_focus_listener;
  	struct weston_surface *grab_surface;
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 84b16fe8..a41ffbad 100644
+index 84b16fe..a41ffba 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1635,6 +1635,14 @@ struct weston_pointer_constraint {
@@ -174,7 +174,7 @@ index 84b16fe8..a41ffbad 100644
  
  struct weston_subsurface {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 877e7a75..09d48057 100644
+index 877e7a7..09d4805 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -415,7 +415,7 @@ weston_view_create(struct weston_surface *surface)
@@ -209,7 +209,7 @@ index 877e7a75..09d48057 100644
  		*vy = view_y;
  		return view;
 diff --git a/libweston/desktop/surface.c b/libweston/desktop/surface.c
-index 54e493cf..aeac8f7c 100644
+index 54e493c..aeac8f7 100644
 --- a/libweston/desktop/surface.c
 +++ b/libweston/desktop/surface.c
 @@ -705,12 +705,202 @@ weston_desktop_surface_set_position(struct weston_desktop_surface *surface,

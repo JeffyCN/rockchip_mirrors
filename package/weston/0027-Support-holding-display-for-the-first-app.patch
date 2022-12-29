@@ -1,7 +1,7 @@
-From 0989227166c37ee2dda8a37868753a823cfc7068 Mon Sep 17 00:00:00 2001
+From 0f7014b9e27af61e80842aecc2abe4f382942e49 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 10:20:40 +0800
-Subject: [PATCH 26/79] Support holding display for the first app
+Subject: [PATCH 27/93] Support holding display for the first app
 
 Use '-w' or '--warm-up' to enable it.
 
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 37 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 805e05a0..ea3c61fa 100644
+index 805e05a..ea3c61f 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -675,6 +675,7 @@ usage(int error_code)
@@ -50,7 +50,7 @@ index 805e05a0..ea3c61fa 100644
  	weston_compositor_log_capabilities(wet.compositor);
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index a41ffbad..bf8e20a8 100644
+index a41ffba..bf8e20a 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1340,6 +1340,8 @@ struct weston_compositor {
@@ -63,7 +63,7 @@ index a41ffbad..bf8e20a8 100644
  
  struct weston_solid_buffer_values {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 3da5f187..8ca0c274 100644
+index 3da5f18..8ca0c27 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -179,6 +179,24 @@ weston_compositor_is_static_layer(struct weston_layer *layer)

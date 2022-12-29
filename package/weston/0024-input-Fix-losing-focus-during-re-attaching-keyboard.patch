@@ -1,7 +1,7 @@
-From 333bc5c767c324335798de7cdfaeaf6640baa6c3 Mon Sep 17 00:00:00 2001
+From 8bbb70fb1cd8207bb4ab6236e0ac14a82032b69a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 12 May 2020 15:35:40 +0800
-Subject: [PATCH 23/79] input: Fix losing focus during re-attaching keyboard
+Subject: [PATCH 24/93] input: Fix losing focus during re-attaching keyboard
 
 Call notify_keyboard_focus_out() when releasing the last keyboard to
 pair with the notify_keyboard_focus_in().
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/libweston/input.c b/libweston/input.c
-index 263225d8..7be63e70 100644
+index 263225d..7be63e7 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
 @@ -3343,8 +3343,11 @@ weston_seat_release_keyboard(struct weston_seat *seat)

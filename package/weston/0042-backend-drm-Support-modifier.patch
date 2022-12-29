@@ -1,20 +1,20 @@
-From d44da4b2efb6480841d01a9d7151c64404dbf04c Mon Sep 17 00:00:00 2001
+From 07fab41ec9071ed48c8707a3da2a658a4649547b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
-Subject: [PATCH 41/93] backend-drm: Support modifier
+Subject: [PATCH 42/93] backend-drm: Support modifier
 
 Tested on rk356x with ARM AFBC modifier.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/backend-drm/drm-internal.h |  1 +
- libweston/backend-drm/drm.c          | 84 +++++++++++++++++++++++-----
- libweston/backend-drm/kms.c          |  3 +-
- libweston/pixel-formats.c            |  1 +
- 4 files changed, 75 insertions(+), 14 deletions(-)
+ libweston/backend-drm/drm-internal.h |   1 +
+ libweston/backend-drm/drm.c          | 100 +++++++++++++++++++++------
+ libweston/backend-drm/kms.c          |   3 +-
+ libweston/pixel-formats.c            |   1 +
+ 4 files changed, 84 insertions(+), 21 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 9aa1a88..f4cc31c 100644
+index 37ee4cb..4bf5074 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -534,6 +534,7 @@ struct drm_plane {
@@ -26,10 +26,10 @@ index 9aa1a88..f4cc31c 100644
  
  struct drm_connector {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 9b98aa0..41483e9 100644
+index 4e91562..7c5ccca 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1246,6 +1246,42 @@ err:
+@@ -1258,6 +1258,42 @@ err:
  	return NULL;
  }
  
@@ -72,28 +72,18 @@ index 9b98aa0..41483e9 100644
  /**
   * Find, or create, a special-purpose plane
   *
-@@ -1260,8 +1296,11 @@ drm_output_find_special_plane(struct drm_device *device,
+@@ -1272,7 +1308,10 @@ drm_output_find_special_plane(struct drm_device *device,
  {
  	struct drm_backend *b = device->backend;
  	struct drm_plane *plane;
 +	bool prefer_modifier =
 +		device->fb_modifiers && type == WDRM_PLANE_TYPE_PRIMARY;
- 	int num_primary;
  
 +retry:
- 	num_primary = 0;
  	wl_list_for_each(plane, &device->plane_list, link) {
  		struct weston_output *base;
-@@ -1285,8 +1324,6 @@ drm_output_find_special_plane(struct drm_device *device,
- 		    num_primary - 1 != output->crtc->pipe)
- 			continue;
- 
--		if (plane->type != type)
--			continue;
- 		if (!drm_plane_is_available(plane, output))
- 			continue;
- 
-@@ -1308,10 +1345,22 @@ drm_output_find_special_plane(struct drm_device *device,
+ 		bool found_elsewhere = false;
+@@ -1304,10 +1343,22 @@ drm_output_find_special_plane(struct drm_device *device,
  		if (found_elsewhere)
  			continue;
  
@@ -116,7 +106,7 @@ index 9b98aa0..41483e9 100644
  	return NULL;
  }
  
-@@ -4246,9 +4295,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4262,9 +4313,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	compositor->backend = &b->base;
  
@@ -126,12 +116,24 @@ index 9b98aa0..41483e9 100644
  	/* Check if we run drm-backend using a compatible launcher */
  	compositor->launcher = weston_launcher_connect(compositor, seat_id, true);
  	if (compositor->launcher == NULL) {
-@@ -4281,15 +4327,30 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4297,15 +4345,42 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
++	res = drmModeGetResources(b->drm->drm.fd);
++	if (!res) {
++		weston_log("Failed to get drmModeRes\n");
++		goto err_udev_dev;
++	}
++
++	wl_list_init(&b->drm->crtc_list);
++	if (drm_backend_create_crtc_list(b->drm, res) == -1) {
++		weston_log("Failed to create CRTC list for DRM-backend\n");
++		goto err_create_crtc_list;
++	}
++
 +	wl_list_init(&device->plane_list);
-+	create_sprites(b->drm);
++	create_sprites(b->drm, res);
 +
 +	if (!drm_planes_have_modifier(b->drm))
 +		device->fb_modifiers = false;
@@ -159,38 +161,28 @@ index 9b98aa0..41483e9 100644
  		}
  	}
  
-@@ -4306,7 +4367,7 @@ drm_backend_create(struct weston_compositor *compositor,
- 	res = drmModeGetResources(b->drm->drm.fd);
- 	if (!res) {
- 		weston_log("Failed to get drmModeRes\n");
+@@ -4319,21 +4394,6 @@ drm_backend_create(struct weston_compositor *compositor,
+ 
+ 	weston_setup_vt_switch_bindings(compositor);
+ 
+-	res = drmModeGetResources(b->drm->drm.fd);
+-	if (!res) {
+-		weston_log("Failed to get drmModeRes\n");
 -		goto err_udev_dev;
-+		goto err_sprite;
- 	}
- 
- 	wl_list_init(&b->drm->crtc_list);
-@@ -4315,9 +4376,6 @@ drm_backend_create(struct weston_compositor *compositor,
- 		goto err_create_crtc_list;
- 	}
- 
+-	}
+-
+-	wl_list_init(&b->drm->crtc_list);
+-	if (drm_backend_create_crtc_list(b->drm, res) == -1) {
+-		weston_log("Failed to create CRTC list for DRM-backend\n");
+-		goto err_create_crtc_list;
+-	}
+-
 -	wl_list_init(&device->plane_list);
--	create_sprites(b->drm);
+-	create_sprites(b->drm, res);
 -
  	if (udev_input_init(&b->input,
  			    compositor, b->udev, seat_id,
  			    config->configure_device) < 0) {
-@@ -4449,10 +4507,10 @@ err_drm_source:
- 	wl_event_source_remove(b->drm_source);
- err_udev_input:
- 	udev_input_destroy(&b->input);
--err_sprite:
--	destroy_sprites(b->drm);
- err_create_crtc_list:
- 	drmModeFreeResources(res);
-+err_sprite:
-+	destroy_sprites(b->drm);
- err_udev_dev:
- 	udev_device_unref(drm_device);
- err_udev:
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
 index 6737b67..30bb637 100644
 --- a/libweston/backend-drm/kms.c
