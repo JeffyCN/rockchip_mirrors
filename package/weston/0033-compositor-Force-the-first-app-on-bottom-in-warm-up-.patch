@@ -1,7 +1,7 @@
-From e4d67fbe4af3a461667f81c64036f9d2ccd01f54 Mon Sep 17 00:00:00 2001
+From 071bf07edb0b7d85874b553343cd7fcfb96767f1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Oct 2020 12:43:00 +0800
-Subject: [PATCH 32/79] compositor: Force the first app on bottom in warm-up
+Subject: [PATCH 33/93] compositor: Force the first app on bottom in warm-up
  mode
 
 When warm-up enabled, assume the first app is a launcher and put it on
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 6 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index b0a95e3e..475d1e7d 100644
+index b0a95e3..475d1e7 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -3781,6 +3781,9 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
@@ -28,7 +28,7 @@ index b0a95e3e..475d1e7d 100644
  	wet.compositor->default_pointer_grab = NULL;
  	wet.compositor->exit = handle_exit;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index fa211bd6..2ea19672 100644
+index fa211bd..2ea1967 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3258,6 +3258,9 @@ weston_compositor_build_view_list(struct weston_compositor *compositor,

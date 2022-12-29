@@ -1,10 +1,10 @@
-From d12573b07a301c5d1fb337692765dde313fb0668 Mon Sep 17 00:00:00 2001
+From e92682324c67799d432d817c17ea58e8e98bfd21 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 18/93] backend-drm: Support controlling output dynamically
+Subject: [PATCH 19/93] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
-freeze/display-rectangle and prefer/primary output.
+freeze/input/display-rectangle and prefer/primary output.
 
 Default config file is "/tmp/.weston_drm.conf", can override with
 "WESTON_DRM_CONFIG" environment.
@@ -21,6 +21,11 @@ echo "output:HDMI-A-1:size=1920x1080" >> /tmp/.weston_drm.conf
 echo "output:HDMI-A-1:prefer" >> /tmp/.weston_drm.conf
 echo "output:HDMI-A-1:primary" >> /tmp/.weston_drm.conf
 echo "output:HDMI-A-1:down-scale=0.5" >> /tmp/.weston_drm.conf
+echo "output:HDMI-A-1:input=*" >> /tmp/.weston_drm.conf
+echo "output:HDMI-A-1:input=" >> /tmp/.weston_drm.conf
+echo "output:HDMI-A-1:input=event6" >> /tmp/.weston_drm.conf
+echo "output:HDMI-A-1:input=goodix*" >> /tmp/.weston_drm.conf
+echo "output:HDMI-A-1:input=goodix-ts" >> /tmp/.weston_drm.conf
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -28,12 +33,14 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                |  58 +++++-
  include/libweston/libweston.h        |   7 +
  libweston/backend-drm/drm-internal.h |  16 ++
- libweston/backend-drm/drm.c          | 262 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 265 ++++++++++++++++++++++++++-
  libweston/backend-drm/modes.c        |  20 +-
  libweston/compositor.c               |  30 ++-
+ libweston/libinput-seat.c            |  43 +++++
+ libweston/libweston-internal.h       |   3 +
  libweston/pixman-renderer.c          |   3 +
  libweston/renderer-gl/gl-renderer.c  |   4 +
- 9 files changed, 388 insertions(+), 26 deletions(-)
+ 11 files changed, 437 insertions(+), 26 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 8e608a6..805e05a 100644
@@ -191,7 +198,7 @@ index a8ec105..84b16fe 100644
  
  struct weston_solid_buffer_values {
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index e238126..690d338 100644
+index abfc846..59154ed 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -115,6 +115,9 @@
@@ -214,7 +221,7 @@ index e238126..690d338 100644
  };
  
  struct drm_mode {
-@@ -638,6 +644,9 @@ struct drm_output {
+@@ -640,6 +646,9 @@ struct drm_output {
  	bool is_mirror;
  
  	pixman_box32_t plane_bounds;
@@ -224,7 +231,7 @@ index e238126..690d338 100644
  };
  
  void
-@@ -736,6 +745,13 @@ drm_mode_list_destroy(struct drm_device *device, struct wl_list *mode_list);
+@@ -738,6 +747,13 @@ drm_mode_list_destroy(struct drm_device *device, struct wl_list *mode_list);
  void
  drm_output_print_modes(struct drm_output *output);
  
@@ -239,7 +246,7 @@ index e238126..690d338 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 7c0b80e..ee74c61 100644
+index a7df017..53e4a85 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -41,6 +41,7 @@
@@ -259,7 +266,7 @@ index 7c0b80e..ee74c61 100644
  static inline bool
  drm_head_is_external(struct drm_head *head)
  {
-@@ -503,6 +506,12 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
+@@ -508,6 +511,12 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
  		return;
  	}
  
@@ -272,7 +279,7 @@ index 7c0b80e..ee74c61 100644
  	ts.tv_sec = sec;
  	ts.tv_nsec = usec * 1000;
  
-@@ -682,8 +691,8 @@ out:
+@@ -687,8 +696,8 @@ out:
  		return;
  	}
  
@@ -283,7 +290,7 @@ index 7c0b80e..ee74c61 100644
  
  	dx = output->plane_bounds.x1;
  	dy = output->plane_bounds.y1;
-@@ -825,7 +834,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -830,7 +839,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
  	now_ms = timespec_to_msec(&now);
@@ -293,7 +300,7 @@ index 7c0b80e..ee74c61 100644
  		/* Resize fullscreen/maxmium views(not always success) */
  		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
  			wl_signal_emit(&b->compositor->output_resized_signal,
-@@ -834,7 +844,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -839,7 +849,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  		weston_output_damage(output_base);
  		weston_output_finish_frame(output_base, NULL,
  					   WP_PRESENTATION_FEEDBACK_INVALID);
@@ -302,7 +309,7 @@ index 7c0b80e..ee74c61 100644
  	}
  
  	/* If planes have been disabled in the core, we might not have
-@@ -865,7 +875,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -870,7 +880,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  err:
  	drm_output_state_free(state);
@@ -312,7 +319,7 @@ index 7c0b80e..ee74c61 100644
  }
  
  /* Determine the type of vblank synchronization to use for the output.
-@@ -2275,6 +2286,8 @@ drm_output_enable(struct weston_output *base)
+@@ -2288,6 +2299,8 @@ drm_output_enable(struct weston_output *base)
  	output->base.switch_mode = drm_output_switch_mode;
  	output->base.set_gamma = drm_output_set_gamma;
  
@@ -321,7 +328,7 @@ index 7c0b80e..ee74c61 100644
  	output->state_invalid = true;
  
  	weston_log("Output %s (crtc %d) video modes:\n",
-@@ -3167,6 +3180,7 @@ drm_destroy(struct weston_compositor *ec)
+@@ -3180,6 +3193,7 @@ drm_destroy(struct weston_compositor *ec)
  
  	udev_input_destroy(&b->input);
  
@@ -329,7 +336,7 @@ index 7c0b80e..ee74c61 100644
  	wl_event_source_remove(b->hotplug_timer);
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
-@@ -3587,6 +3601,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -3600,6 +3614,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -340,7 +347,7 @@ index 7c0b80e..ee74c61 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -3596,6 +3614,236 @@ static const struct weston_drm_output_api api = {
+@@ -3609,6 +3627,239 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_max_bpc,
  };
  
@@ -522,6 +529,9 @@ index 7c0b80e..ee74c61 100644
 +			output->plane_bounds.x2 = x2;
 +			output->plane_bounds.y2 = y2;
 +			weston_output_schedule_repaint(&output->base);
++		} else if (!strncmp(config, "input=", strlen("input="))) {
++			weston_output_bind_input(&output->base,
++						 config + strlen("input="));
 +		}
 +	}
 +}
@@ -529,7 +539,7 @@ index 7c0b80e..ee74c61 100644
 +static int
 +config_timer_handler(void *data)
 +{
-+#define MAX_CONF_LEN 32
++#define MAX_CONF_LEN 512
 +#define _STR(x) #x
 +#define STR(x) _STR(x)
 +
@@ -562,7 +572,7 @@ index 7c0b80e..ee74c61 100644
 +	while (3 == fscanf(conf_fp,
 +			   "%" STR(MAX_CONF_LEN) "[^:]:"
 +			   "%" STR(MAX_CONF_LEN) "[^:]:"
-+			   "%" STR(MAX_CONF_LEN) "s ", type, key, value)) {
++			   "%" STR(MAX_CONF_LEN) "[^\n]%*c", type, key, value)) {
 +		if (!strcmp(type, "output"))
 +			config_handle_output(b, key, value);
 +	}
@@ -577,7 +587,7 @@ index 7c0b80e..ee74c61 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3939,6 +4187,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3952,6 +4203,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b->drm);
  
@@ -738,6 +748,71 @@ index 07743ff..877e7a7 100644
  
  	wl_list_init(&output->animation_list);
  	wl_list_init(&output->feedback_list);
+diff --git a/libweston/libinput-seat.c b/libweston/libinput-seat.c
+index 57ff181..100b47d 100644
+--- a/libweston/libinput-seat.c
++++ b/libweston/libinput-seat.c
+@@ -534,3 +534,46 @@ udev_seat_get_named(struct udev_input *input, const char *seat_name)
+ 
+ 	return udev_seat_create(input, seat_name);
+ }
++
++void
++weston_output_bind_input(struct weston_output *output, const char *match)
++{
++	struct weston_compositor *compositor = output->compositor;
++	struct evdev_device *device;
++	struct udev_seat *seat;
++	const char *sysname, *name;
++	int len = strlen(match);
++	int clear = !len;
++
++	/* Handle pattern match */
++	if (len && match[len - 1] == '*')
++		len--;
++
++	wl_list_for_each(seat, &compositor->seat_list, base.link) {
++		wl_list_for_each(device, &seat->devices_list, link) {
++			if (clear) {
++				/* Clear all bounded inputs */
++				if (!device->output_name ||
++				    strcmp(device->output_name, output->name))
++					continue;
++
++				free(device->output_name);
++				device->output_name = NULL;
++				continue;
++			}
++
++			sysname = libinput_device_get_sysname(device->device);
++			name = libinput_device_get_name(device->device);
++
++			if (!len || !strncmp(name, match, len) ||
++			    !strncmp(sysname, match, len)) {
++				if (device->output_name)
++					free(device->output_name);
++
++				device->output_name = strdup(output->name);
++			}
++		}
++
++		udev_seat_update_output(seat);
++	}
++}
+diff --git a/libweston/libweston-internal.h b/libweston/libweston-internal.h
+index 8bdac33..39d9e85 100644
+--- a/libweston/libweston-internal.h
++++ b/libweston/libweston-internal.h
+@@ -193,6 +193,9 @@ weston_output_disable_planes_incr(struct weston_output *output);
+ void
+ weston_output_disable_planes_decr(struct weston_output *output);
+ 
++void
++weston_output_bind_input(struct weston_output *output, const char *name);
++
+ /* weston_plane */
+ 
+ void
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
 index 62c2cb1..22e7a42 100644
 --- a/libweston/pixman-renderer.c

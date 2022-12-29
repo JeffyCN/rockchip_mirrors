@@ -1,4 +1,4 @@
-From bfa8556947c18551058a8c0a9cf498e5eae2cba0 Mon Sep 17 00:00:00 2001
+From d4612f3194074c49f2a61b63ae3821082f7dcb2d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
 Subject: [PATCH 17/93] backend-drm: Support mirror mode
@@ -88,7 +88,7 @@ index 76fa79f..d10cc40 100644
  	}
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index f2f5d2a..e238126 100644
+index ed4f721..abfc846 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -362,6 +362,8 @@ struct drm_backend {
@@ -100,7 +100,7 @@ index f2f5d2a..e238126 100644
  };
  
  struct drm_mode {
-@@ -614,6 +616,10 @@ struct drm_output {
+@@ -616,6 +618,10 @@ struct drm_output {
  	int current_image;
  	pixman_region32_t previous_damage;
  
@@ -111,7 +111,7 @@ index f2f5d2a..e238126 100644
  	struct vaapi_recorder *recorder;
  	struct wl_listener recorder_frame_listener;
  
-@@ -628,6 +634,10 @@ struct drm_output {
+@@ -630,6 +636,10 @@ struct drm_output {
  
  	/* The dummy framebuffer for SET_CRTC. */
  	struct drm_fb *fb_dummy;
@@ -123,7 +123,7 @@ index f2f5d2a..e238126 100644
  
  void
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index f78898e..7c0b80e 100644
+index b984796..1e0f053 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -68,6 +68,11 @@
@@ -286,7 +286,7 @@ index f78898e..7c0b80e 100644
  	if (!primary)
  		return;
  
-@@ -400,6 +539,69 @@ drm_output_render_pixman(struct drm_output_state *state,
+@@ -405,6 +544,69 @@ drm_output_render_pixman(struct drm_output_state *state,
  	return drm_fb_ref(output->dumb[output->current_image]);
  }
  
@@ -356,7 +356,7 @@ index f78898e..7c0b80e 100644
  void
  drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  {
-@@ -412,10 +614,13 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -417,10 +619,13 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  		&scanout_plane->props[WDRM_PLANE_FB_DAMAGE_CLIPS];
  	struct drm_backend *b = device->backend;
  	struct drm_mode *mode;
@@ -371,7 +371,7 @@ index f78898e..7c0b80e 100644
  
  	/* If we already have a client buffer promoted to scanout, then we don't
  	 * want to render. */
-@@ -423,6 +628,35 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -428,6 +633,35 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  	if (scanout_state->fb)
  		return;
  
@@ -407,7 +407,7 @@ index f78898e..7c0b80e 100644
  	/*
  	 * If we don't have any damage on the primary plane, and we already
  	 * have a renderer buffer active, we can reuse it; else we pass
-@@ -442,24 +676,86 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -447,24 +681,86 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  		fb = drm_output_render_gl(state, damage);
  	}
  
@@ -501,7 +501,7 @@ index f78898e..7c0b80e 100644
  
  	pixman_region32_subtract(&c->primary_plane.damage,
  				 &c->primary_plane.damage, damage);
-@@ -495,6 +791,12 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -500,6 +796,12 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  				  &scanout_state->damage_blob_id);
  
  	pixman_region32_fini(&scanout_damage);
@@ -514,7 +514,7 @@ index f78898e..7c0b80e 100644
  }
  
  static int
-@@ -1335,8 +1637,8 @@ drm_output_fini_pixman(struct drm_output *output)
+@@ -1347,8 +1649,8 @@ drm_output_fini_pixman(struct drm_output *output)
  	/* Destroying the Pixman surface will destroy all our buffers,
  	 * regardless of refcount. Ensure we destroy them here. */
  	if (!b->shutting_down &&
@@ -525,7 +525,7 @@ index f78898e..7c0b80e 100644
  		drm_plane_reset_state(output->scanout_plane);
  	}
  
-@@ -2049,6 +2351,8 @@ drm_output_destroy(struct weston_output *base)
+@@ -2061,6 +2363,8 @@ drm_output_destroy(struct weston_output *base)
  
  	assert(output->hdr_output_metadata_blob_id == 0);
  
@@ -534,7 +534,7 @@ index f78898e..7c0b80e 100644
  	free(output);
  }
  
-@@ -3424,6 +3728,12 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3436,6 +3740,12 @@ drm_backend_create(struct weston_compositor *compositor,
  	else
  		b->resize_freeze_ms = DRM_RESIZE_FREEZE_MS;
  

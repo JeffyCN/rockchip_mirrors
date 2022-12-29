@@ -1,7 +1,7 @@
-From 4e47db84d2504772cc0a077547aa3e0fdf0c8d38 Mon Sep 17 00:00:00 2001
+From 513955aea8ab9f1deab792521f5c155f6434503a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:43:49 +0800
-Subject: [PATCH 20/79] pixman-renderer: Support linux dmabuf
+Subject: [PATCH 21/93] pixman-renderer: Support linux dmabuf
 
 NOTE: Only support contig dmabuf.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 281 insertions(+), 6 deletions(-)
 
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 22e7a428..29d2b606 100644
+index 22e7a42..29d2b60 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -37,9 +37,16 @@

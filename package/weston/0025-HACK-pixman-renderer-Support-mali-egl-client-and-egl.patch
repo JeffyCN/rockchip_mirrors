@@ -1,7 +1,7 @@
-From ea11c75ddd6fd176ddc63d3d565cba23268fd26d Mon Sep 17 00:00:00 2001
+From baec9753c2eea0e9da28ae05311fa26c5813774b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:53:52 +0800
-Subject: [PATCH 24/79] HACK: pixman-renderer: Support mali egl client and egl
+Subject: [PATCH 25/93] HACK: pixman-renderer: Support mali egl client and egl
  buffer attaching
 
 The mali clients requires mali_buffer_sharing extension, and it needs
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 338 insertions(+), 99 deletions(-)
 
 diff --git a/libweston/meson.build b/libweston/meson.build
-index 313a84f6..6a845cc8 100644
+index 313a84f..6a845cc 100644
 --- a/libweston/meson.build
 +++ b/libweston/meson.build
 @@ -73,12 +73,10 @@ srcs_libweston = [
@@ -35,7 +35,7 @@ index 313a84f6..6a845cc8 100644
  
  lib_weston = shared_library(
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 29d2b606..5ab4b55c 100644
+index 29d2b60..5ab4b55 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -47,6 +47,19 @@

@@ -1,7 +1,7 @@
-From f7c5b7e04e2ecbdb9d4ad628c873aea63f007f77 Mon Sep 17 00:00:00 2001
+From bfe256589e86245451ed05ce5181ee77c123b60c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:23:45 +0800
-Subject: [PATCH 19/79] pixman-renderer: Support yuv formats
+Subject: [PATCH 20/93] pixman-renderer: Support yuv formats
 
 Support yuy2/yv12/i420/nv12/nv16.
 
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 21 insertions(+)
 
 diff --git a/libweston/pixel-formats.c b/libweston/pixel-formats.c
-index fc33997d..75901713 100644
+index fc33997..7590171 100644
 --- a/libweston/pixel-formats.c
 +++ b/libweston/pixel-formats.c
 @@ -440,6 +440,7 @@ static const struct pixel_format_info pixel_format_table[] = {
@@ -62,7 +62,7 @@ index fc33997d..75901713 100644
  	{
  		DRM_FORMAT(YUV422),
 diff --git a/meson.build b/meson.build
-index 396d158a..086d599d 100644
+index 396d158..086d599 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -157,6 +157,16 @@ dep_libdrm = dependency('libdrm', version: '>= 2.4.108')
