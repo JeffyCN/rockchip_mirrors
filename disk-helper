@@ -446,6 +446,5 @@ mount_part()
 	[ "$AUTO_MKFS" ] || return
 
 	echo "Failed to mount $DEV, try to format it"
-	format_part && \
-		$MOUNT $DEV $MOUNT_POINT $MOUNT_OPTS
+	format_part && $MOUNT $DEV $MOUNT_POINT $MOUNT_OPTS
 }
