@@ -1,5 +1,5 @@
 #include "base/base.config"
-#include "chips/rk356x_aarch64.config"
+#include "chips/rk3566_rk3568_aarch64.config"
 #include "tee_aarch64_v2.config"
 BR2_PACKAGE_ANDROID_TOOLS=
 BR2_PACKAGE_INPUT_EVENT_DAEMON=
