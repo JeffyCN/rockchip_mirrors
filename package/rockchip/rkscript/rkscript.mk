@@ -181,6 +181,8 @@ define RKSCRIPT_INSTALL_TARGET_UDEV_RULES
 		$(TARGET_DIR)/lib/udev/rules.d/
 	$(INSTALL) -m 0644 -D $(@D)/88-rockchip-camera.rules \
 		$(TARGET_DIR)/lib/udev/rules.d/
+	$(INSTALL) -m 0644 -D $(@D)/99-rockchip-permissions.rules \
+		$(TARGET_DIR)/lib/udev/rules.d/
 endef
 RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_UDEV_RULES
 endif # UDEV
