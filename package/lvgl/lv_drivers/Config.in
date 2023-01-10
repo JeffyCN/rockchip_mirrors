@@ -2,7 +2,14 @@ config BR2_PACKAGE_LV_DRIVERS
 	bool "lv-drivers"
 	default n
 	help
-	  lv drivers
+	  lv drivers The concrete implementation of hardware
+
+	config BR2_PACKAGE_LV_DRIVERS_USE_RGA
+	depends on BR2_PACKAGE_LV_DRIVERS
+		bool "rga"                                                                                               
+	default n
+	help
+		Enbale rga
 
 choice
 	prompt "LV drivers select"
