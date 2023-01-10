@@ -1,7 +1,7 @@
-From f0e5a5b320a7272e174596d0c8275f6a1e1310a9 Mon Sep 17 00:00:00 2001
+From b99bf50cc8b9e5850695fa8280fd0fe229402253 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 7 Apr 2021 08:25:57 +0800
-Subject: [PATCH 47/79] config-parser: Support loading multiple configs
+Subject: [PATCH 47/93] config-parser: Support loading multiple configs
 
 Try loading .ini configs under "<config>.d/".
 
@@ -14,11 +14,11 @@ And strip leading spaces.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- shared/config-parser.c | 124 ++++++++++++++++++++++++++++++++++-------
- 1 file changed, 105 insertions(+), 19 deletions(-)
+ shared/config-parser.c | 129 +++++++++++++++++++++++++++++++++++------
+ 1 file changed, 110 insertions(+), 19 deletions(-)
 
 diff --git a/shared/config-parser.c b/shared/config-parser.c
-index 30779ae4..7f86efef 100644
+index 30779ae..8ad9ceb 100644
 --- a/shared/config-parser.c
 +++ b/shared/config-parser.c
 @@ -31,6 +31,7 @@
@@ -59,27 +59,32 @@ index 30779ae4..7f86efef 100644
  	section = zalloc(sizeof *section);
  	if (section == NULL)
  		return NULL;
-@@ -359,6 +376,19 @@ section_add_entry(struct weston_config_section *section,
+@@ -359,6 +376,24 @@ section_add_entry(struct weston_config_section *section,
  {
  	struct weston_config_entry *entry;
  
 +	/* hack for removing entry */
 +	if (key[0] == '-') {
-+		entry = config_section_get_entry(section, key + 1);
-+		if (!entry)
-+			return NULL;
++		key ++;
++		value = NULL;
++	}
 +
++	/* drop old entry */
++	entry = config_section_get_entry(section, key);
++	if (entry) {
 +		wl_list_remove(&entry->link);
 +		free(entry->key);
 +		free(entry->value);
 +		free(entry);
-+		return NULL;
 +	}
++
++	if (!value || value[0] == '\0')
++		return NULL;
 +
  	entry = zalloc(sizeof *entry);
  	if (entry == NULL)
  		return NULL;
-@@ -388,8 +418,6 @@ weston_config_parse_internal(struct weston_config *config, FILE *fp)
+@@ -388,8 +423,6 @@ weston_config_parse_internal(struct weston_config *config, FILE *fp)
  	char line[512], *p;
  	int i;
  
@@ -88,7 +93,7 @@ index 30779ae4..7f86efef 100644
  	while (fgets(line, sizeof line, fp)) {
  		switch (line[0]) {
  		case '#':
-@@ -438,6 +466,7 @@ weston_config_parse_fp(FILE *file)
+@@ -438,6 +471,7 @@ weston_config_parse_fp(FILE *file)
  	if (config == NULL)
  		return NULL;
  
@@ -96,7 +101,7 @@ index 30779ae4..7f86efef 100644
  	if (!weston_config_parse_internal(config, file)) {
  		weston_config_destroy(config);
  		return NULL;
-@@ -446,48 +475,105 @@ weston_config_parse_fp(FILE *file)
+@@ -446,48 +480,105 @@ weston_config_parse_fp(FILE *file)
  	return config;
  }
  
