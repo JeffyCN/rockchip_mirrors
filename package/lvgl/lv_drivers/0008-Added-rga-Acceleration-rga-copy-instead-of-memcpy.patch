@@ -1,0 +1,169 @@
+From 0e7900e215ad7ea6a9b3233701de801f31af45c4 Mon Sep 17 00:00:00 2001
+From: ZiHan Huang <zack.huang@rock-chips.com>
+Date: Fri, 6 Jan 2023 21:08:44 +0800
+Subject: [PATCH 3/3] Added rga Acceleration: rga copy instead of memcpy
+
+Signed-off-by: ZiHan Huang <zack.huang@rock-chips.com>
+---
+ CMakeLists.txt |  7 +++---
+ display/drm.c  | 68 +++++++++++++++++++++++++++++++++++++++++++++++---
+ display/drm.h  |  5 ++++
+ 3 files changed, 74 insertions(+), 6 deletions(-)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index d1d80e7..70ae0df 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,11 +22,13 @@ if (LV_DRV_USE_SDL_GPU)
+ endif()
+ if (LV_DRV_USE_DRM)
+     add_definitions(-DUSE_DRM=1)
++endif()
++
+ if (LV_DRV_USE_RGA)
+     add_definitions(-DUSE_RGA=1)
+     include_directories(${CMAKE_SYSROOT}/usr/include/rga/)
+ endif()
+-endif()
++
+ add_definitions(-g -DLV_CONF_INCLUDE_SIMPLE)
+ include_directories(${CMAKE_SYSROOT}/usr/include/libdrm/)
+ 
+@@ -36,11 +38,9 @@ find_package(PkgConfig)
+ pkg_check_modules(PKG_WAYLAND wayland-client wayland-cursor wayland-protocols xkbcommon)
+ target_link_libraries(lv_drivers PUBLIC lvgl ${PKG_WAYLAND_LIBRARIES})
+ 
+-if (LV_DRV_USE_DRM)
+ if (LV_DRV_USE_RGA)
+     target_link_libraries(lv_drivers PUBLIC rga)
+ endif()
+-endif()
+ 
+ if("${LIB_INSTALL_DIR}" STREQUAL "")
+   set(LIB_INSTALL_DIR "lib")
+@@ -76,3 +76,4 @@ install(
+   LIBRARY DESTINATION "${LIB_INSTALL_DIR}"
+   RUNTIME DESTINATION "${LIB_INSTALL_DIR}"
+   PUBLIC_HEADER DESTINATION "${INC_INSTALL_DIR}")
++
+diff --git a/display/drm.c b/display/drm.c
+index ff3e3bc..9215975 100644
+--- a/display/drm.c
++++ b/display/drm.c
+@@ -866,24 +866,86 @@ static void *drm_thread(void *arg)
+             draw_update = 0;
+         }
+         pthread_mutex_unlock(&draw_mutex);
+-        usleep(10000);
++        usleep(1000);
+     }
+     return NULL;
+ }
+ 
++// long getCurrentTimeMsec() {
++//   long msec = 0;
++//   char str[20] = {0};
++//   struct timeval stuCurrentTime;
++//   gettimeofday(&stuCurrentTime, NULL);\
++//   sprintf(str, "%ld%03ld", stuCurrentTime.tv_sec, (stuCurrentTime.tv_usec)/1000);
++//   for(size_t i=0; i<strlen(str); i++) {
++//     msec =msec*10 + (str[i]-'0');
++//   }
++//   return msec;
++// }
++
+ void drm_flush(lv_disp_drv_t *disp_drv, const lv_area_t *area, lv_color_t *color_p)
+ {
++	//long time1 = getCurrentTimeMsec();
+    /*The most simple case (but also the slowest) to put all pixels to the screen one-by-one*/
+     int32_t x;
+     int32_t y;
+-
++	lv_coord_t w = (area->x2 - area->x1 + 1);
++	lv_coord_t h = (area->y2 - area->y1 + 1);
++#if USE_RGA
++	int wstride = w;
++	int hstride = h;
++	int lcd_ws = lcd_w;
++	int lcd_hs = lcd_h;
++	int format = 0;
++	if(lcd_ws % 32 != 0) {
++		lcd_ws = (lcd_ws + 32) & (~31);
++	}
++	if(lcd_hs % 32 != 0) {
++		lcd_hs = (lcd_hs + 32) & (~31);
++	}
++	if (LV_COLOR_DEPTH == 16) {
++		format = RK_FORMAT_RGB_565;
++	}else if (LV_COLOR_DEPTH == 32) {
++		format = RK_FORMAT_ARGB_8888;	
++	}else {
++		format = -1;
++		printf("drm_flush rga not supported format\n");
++		return;
++	}
++#endif
+     pthread_mutex_lock(&draw_mutex);
++//#if 0
++#if USE_RGA
++	rga_info_t src;
++	rga_info_t dst;
++	int area_w = area->x2 - area->x1 + 1;
++	int area_h = area->y2 - area->y1 + 1;
++	memset(&src, 0, sizeof(rga_info_t));
++	memset(&dst, 0, sizeof(rga_info_t));
++	src.virAddr = color_p;
++	src.mmuFlag = 1;
++	//dst.virAddr = gbo->ptr;
++	dst.fd = gbo->buf_fd;
++	dst.mmuFlag = 1;
++	//printf("rga_set_src_rect: 0, 0, %d, %d, %d, %d\n", area_w, area_h, wstride, hstride);
++	//printf("rga_set_dst_rect: %d, %d, %d, %d, %d, %d\n", area->x1, area->y1, area_w, area_h, lcd_ws, lcd_hs);
++	rga_set_rect(&src.rect, 0, 0, area_w, area_h, wstride, hstride, format);
++	rga_set_rect(&dst.rect, area->x1, area->y1, area_w, area_h, lcd_ws, lcd_hs, format);
++	int ret = c_RkRgaBlit(&src, &dst, NULL);
++	if (ret)
++		printf("c_RkRgaBlit2 error : %s\n", strerror(errno));
++	//long time2 = getCurrentTimeMsec();
++	//printf("time1 = %ld time2 = %ld rga cost time = %ld\n", time1, time2, time2 - time1);        
++#else
+     for(y = area->y1; y <= area->y2; y++) {
+         int area_w = area->x2 - area->x1 + 1;
+         lv_color_t *disp = (lv_color_t*)(drm_buff + (y * lcd_sw + area->x1) * 4);
+         memcpy(disp, color_p, area_w * 4);
+         color_p += area_w;
+     }
++    //long time2 = getCurrentTimeMsec();
++    //printf("time1 = %ld time2 = %ld cpu cost time = %ld\n", time1, time2, time2 - time1);
++#endif
+     draw_update = 1;
+     pthread_mutex_unlock(&draw_mutex);
+     /*IMPORTANT!!!
+@@ -938,7 +1000,7 @@ void drm_disp_drv_init(int rot)
+     /* Example for 1) */
+     static lv_disp_draw_buf_t draw_buf_dsc_1;
+     buf_1 = memalign(64, lcd_w * lcd_h * 4);
+-
++    //buf_1 = malloc_drm_bo(lcd_w, lcd_h, DRM_FORMAT_ARGB8888);
+     lv_disp_draw_buf_init(&draw_buf_dsc_1, buf_1, NULL, lcd_w * lcd_h);   /*Initialize the display buffer*/
+ 
+     /*-----------------------------------
+diff --git a/display/drm.h b/display/drm.h
+index 74695a9..1b98217 100644
+--- a/display/drm.h
++++ b/display/drm.h
+@@ -29,6 +29,11 @@ extern "C" {
+ #include "lvgl/lvgl.h"
+ #endif
+ 
++#if USE_RGA
++#include <rga/im2d.h>
++#include <rga/rga.h>
++#include <rga/RgaApi.h>
++#endif
+ /*********************
+  *      DEFINES
+  *********************/
+-- 
+2.17.1
+

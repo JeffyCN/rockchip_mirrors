@@ -1,0 +1,41 @@
+From 5d13bf7bba9387f94364e5426fc91613842226d5 Mon Sep 17 00:00:00 2001
+From: ZiHan Huang <zack.huang@rock-chips.com>
+Date: Thu, 5 Jan 2023 14:25:03 +0800
+Subject: [PATCH 2/3] CMakeLists.txt: add rga
+
+Signed-off-by: ZiHan Huang <zack.huang@rock-chips.com>
+---
+ CMakeLists.txt | 10 ++++++++++
+ 1 file changed, 10 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 278e964..d1d80e7 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,6 +22,10 @@ if (LV_DRV_USE_SDL_GPU)
+ endif()
+ if (LV_DRV_USE_DRM)
+     add_definitions(-DUSE_DRM=1)
++if (LV_DRV_USE_RGA)
++    add_definitions(-DUSE_RGA=1)
++    include_directories(${CMAKE_SYSROOT}/usr/include/rga/)
++endif()
+ endif()
+ add_definitions(-g -DLV_CONF_INCLUDE_SIMPLE)
+ include_directories(${CMAKE_SYSROOT}/usr/include/libdrm/)
+@@ -32,6 +36,12 @@ find_package(PkgConfig)
+ pkg_check_modules(PKG_WAYLAND wayland-client wayland-cursor wayland-protocols xkbcommon)
+ target_link_libraries(lv_drivers PUBLIC lvgl ${PKG_WAYLAND_LIBRARIES})
+ 
++if (LV_DRV_USE_DRM)
++if (LV_DRV_USE_RGA)
++    target_link_libraries(lv_drivers PUBLIC rga)
++endif()
++endif()
++
+ if("${LIB_INSTALL_DIR}" STREQUAL "")
+   set(LIB_INSTALL_DIR "lib")
+ endif()
+-- 
+2.17.1
+
