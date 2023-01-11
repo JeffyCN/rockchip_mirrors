@@ -79,11 +79,17 @@ config BR2_PACKAGE_RK3326
 	help
 	  Use rockchip's rk3326 chip
 
-config BR2_PACKAGE_RK356X
-	bool "rk356x chip"
+config BR2_PACKAGE_RK3562
+	bool "rk3562 chip"
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP2
 	help
-	  Use rockchip's rk356x chip
+	  Use Rockchip's rk3562 SoC
+
+config BR2_PACKAGE_RK3566_RK3568
+	bool "rk3566 or rk3568 chip"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP2
+	help
+	  Use Rockchip's rk3566 or rk3568 SoC
 
 config BR2_PACKAGE_PX30
 	bool "px30 chip"

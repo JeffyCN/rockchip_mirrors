@@ -15,7 +15,7 @@ config BR2_PACKAGE_RKSCRIPT_IODOMAIN
 	bool "rkscript iodomain"
 	default y if BR2_PACKAGE_RK3308
 	default y if BR2_PACKAGE_RV1126_RV1109
-	default y if BR2_PACKAGE_RK356X
+	default y if BR2_PACKAGE_RK3566_RK3568
 	help
 	  Install iodomain scripts.
 
