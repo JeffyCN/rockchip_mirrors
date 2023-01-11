@@ -1,5 +1,5 @@
 #include "base/base.config"
-#include "chips/rk356x_aarch64.config"
+#include "chips/rk3566_rk3568_aarch64.config"
 #include "gpu/dummy.config"
 #include "multimedia/audio.config"
 #include "multimedia/camera.config"
@@ -14,4 +14,4 @@ BR2_PACKAGE_UPDATE=
 BR2_PACKAGE_UTIL_LINUX_MOUNT=
 BR2_PACKAGE_VENDOR_STORAGE=
 BR2_ROOTFS_DEVICE_CREATION_DYNAMIC_EUDEV=
-BR2_ROOTFS_POST_BUILD_SCRIPT+="board/rockchip/rk356x/post-script-bsp.sh"
+BR2_ROOTFS_POST_BUILD_SCRIPT+="board/rockchip/rk3566_rk3568/post-script-bsp.sh"

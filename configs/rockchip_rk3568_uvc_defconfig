@@ -1,5 +1,5 @@
 #include "base/base.config"
-#include "chips/rk356x_aarch64.config"
+#include "chips/rk3566_rk3568_aarch64.config"
 #include "fs/exfat.config"
 #include "fs/ntfs.config"
 #include "fs/vfat.config"
@@ -27,4 +27,4 @@ BR2_PACKAGE_RKNPU2=y
 BR2_PACKAGE_ROCKIT_MPI=y
 BR2_PACKAGE_UAC_APP=y
 BR2_PACKAGE_UVC_APP=y
-BR2_ROOTFS_OVERLAY+="board/rockchip/rk356x/fs-overlay-uvc/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rk3566_rk3568/fs-overlay-uvc/"

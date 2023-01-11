@@ -1,10 +1,10 @@
 #include "base/nvr.config"
-#include "chips/rk356x_aarch64.config"
+#include "chips/rk3566_rk3568_aarch64.config"
 #include "gpu/nvr.config"
 #include "multimedia/audio.config"
 #include "multimedia/mpp.config"
 #include "wifibt/network.config"
 BR2_PACKAGE_INPUT_EVENT_DAEMON=
 BR2_PACKAGE_PM_UTILS=
-BR2_ROOTFS_OVERLAY+="board/rockchip/rk356x/fs-overlay-nvr/"
+BR2_ROOTFS_OVERLAY+="board/rockchip/rk3566_rk3568/fs-overlay-nvr/"
 BR2_TARGET_ROOTFS_CPIO=

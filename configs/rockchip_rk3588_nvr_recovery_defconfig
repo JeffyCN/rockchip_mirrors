@@ -1,4 +1,4 @@
 #include "base/nvr_recovery.config"
-#include "chips/rk356x_aarch64.config"
-BR2_ROOTFS_OVERLAY="board/rockchip/common/base board/rockchip/common/recovery board/rockchip/rk356x/fs-overlay/"
+#include "chips/rk3566_rk3568_aarch64.config"
+BR2_ROOTFS_OVERLAY="board/rockchip/common/base board/rockchip/common/recovery board/rockchip/rk3566_rk3568/fs-overlay/"
 BR2_TARGET_ROOTFS_SQUASHFS=
