@@ -21,7 +21,7 @@ EXPORT_PATH=$(PATH):$(TOPDIR)/../prebuilts/gcc/linux-x86/aarch64/gcc-arm-10.3-20
 NPU_PLATFORM_ARCH = aarch64
 endif
 
-ifeq ($(BR2_PACKAGE_RK356X),y)
+ifneq ($(BR2_PACKAGE_RK3566_RK3568)$(BR2_PACKAGE_RK3562),)
 NPU_PLATFORM_INFO = RK356X
 NPU_DEMO_BUILD = build-linux_RK356X.sh
 endif
