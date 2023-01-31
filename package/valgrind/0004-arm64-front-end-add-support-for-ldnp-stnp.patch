@@ -42,7 +42,7 @@ index 44a1c23..d406fcf 100644
        UInt bL     = INSN(22,22);
        UInt bX     = INSN(31,31);
 -      UInt bWBack = INSN(23,23);
-+      UInt bWBack = INSN(24,23) != BITS(1,0);
++      UInt bWBack = INSN(24,23) != BITS2(1,0);
        UInt rT1    = INSN(4,0);
        UInt rN     = INSN(9,5);
        UInt rT2    = INSN(14,10);
