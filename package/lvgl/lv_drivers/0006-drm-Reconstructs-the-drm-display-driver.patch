@@ -1,7 +1,7 @@
-From ce647203f7675f267a3021585dd93908d795bc85 Mon Sep 17 00:00:00 2001
+From bbe6d49bdcb7b6a53044f494e31a90f4eed65b0e Mon Sep 17 00:00:00 2001
 From: ZiHan Huang <zack.huang@rock-chips.com>
 Date: Fri, 6 Jan 2023 10:17:22 +0800
-Subject: [PATCH 1/3] drm: Reconstructs the drm display driver
+Subject: [PATCH 6/8] drm: Reconstructs the drm display driver
 
 Signed-off-by: ZiHan Huang <zack.huang@rock-chips.com>
 ---
@@ -10,7 +10,7 @@ Signed-off-by: ZiHan Huang <zack.huang@rock-chips.com>
  2 files changed, 832 insertions(+), 663 deletions(-)
 
 diff --git a/display/drm.c b/display/drm.c
-index 9cec6e3..ff3e3bc 100644
+index 9cec6e3..17af072 100644
 --- a/display/drm.c
 +++ b/display/drm.c
 @@ -22,780 +22,950 @@
@@ -1551,7 +1551,7 @@ index 9cec6e3..ff3e3bc 100644
 +    drm_buff = gbo->ptr;
 +    lcd_sw = gbo->pitch / 4;
 +
-+	printf("DRM subsystem and buffer mapped successfully\n");
++    printf("DRM subsystem and buffer mapped successfully\n");
  }
  
 -void drm_exit(void)
@@ -1643,5 +1643,5 @@ index ebf2e28..74695a9 100644
  
  /**********************
 -- 
-2.17.1
+2.25.1
 

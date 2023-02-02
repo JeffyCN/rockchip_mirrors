@@ -22,7 +22,7 @@ endif
 
 ifeq ($(BR2_PACKAGE_LV_DRIVERS_USE_RGA), y)
 LV_DRIVERS_CONF_OPTS += -DLV_DRV_USE_RGA=1
-LV_DRIVERS_DEPENDENCIES += librga
+LV_DRIVERS_DEPENDENCIES += rockchip-rga
 endif
 
 $(eval $(cmake-package))
