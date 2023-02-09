@@ -1,10 +1,36 @@
 config BR2_TARGET_ROOTFS_UBI
-	bool "ubi image containing an ubifs root filesystem"
-	select BR2_TARGET_ROOTFS_UBIFS
+	bool "ubi image containing an ubifs/squashfs root filesystem"
 	help
-	  Build an ubi image from the ubifs one (with ubinize).
+	  Build an ubi image from the ubifs/squashfs one (with ubinize).
 
 if BR2_TARGET_ROOTFS_UBI
+
+choice
+	prompt "UBI root filesystem"
+	help
+	  Select UBI root filesystem.
+
+config BR2_TARGET_ROOTFS_UBI_UBIFS
+	bool "ubifs"
+	select BR2_TARGET_ROOTFS_UBIFS
+	help
+	  Use ubifs.
+
+config BR2_TARGET_ROOTFS_UBI_SQUASHFS
+	bool "squashfs"
+	select BR2_TARGET_ROOTFS_SQUASHFS
+	help
+	  Use squashfs.
+
+endchoice
+
+config BR2_TARGET_ROOTFS_UBI_MINIOSIZE
+	hex "minimum I/O unit size"
+	default BR2_TARGET_ROOTFS_UBIFS_MINIOSIZE if BR2_TARGET_ROOTFS_UBI_UBIFS
+	default 0x800
+	help
+	  Minimum I/O unit size. The value provided here is passed
+	  to the -m/--min-io-size option of ubinize.
 
 config BR2_TARGET_ROOTFS_UBI_PEBSIZE
 	hex "physical eraseblock size"
@@ -34,9 +60,9 @@ config BR2_TARGET_ROOTFS_UBI_USE_CUSTOM_CONFIG
 	  create several volumes, specify volume types, etc.
 
 	  As a convenience, buildroot replaces the string
-	  "BR2_ROOTFS_UBIFS_PATH" with the path to the built ubifs file.
+	  "BR2_ROOTFS_UBI_PATH" with the path to the built ubi file.
 	  So the volume defined for the root filesystem can specify the
-	  image path as:  image=BR2_ROOTFS_UBIFS_PATH
+	  image path as:  image=BR2_ROOTFS_UBI_PATH
 
 	  Buildroot also replaces the string "BINARIES_DIR" with the
 	  value of $(BINARIES_DIR), so that it is possible to reference
