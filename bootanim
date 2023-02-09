@@ -7,7 +7,11 @@
 # Example hook:
 # root@RK3588:/# more /etc/bootanim.d/gst-bootanim.sh
 # #!/bin/sh
-# gst-play-1.0 /etc/bootanim.d/bootanim.mp4 -q --no-interactive
+# touch $TAG_FILE
+# gst-play-1.0 /etc/bootanim.d/bootanim.mp4 -q --no-interactive&
+
+export TAG_FILE=/tmp/.bootanim
+rm -f $TAG_FILE
 
 SCRIPT=/usr/bin/bootanim
 HOOK_DIR=/etc/bootanim.d/
@@ -32,11 +36,22 @@ bootanim_start()
 	# Start bootanim hooks
 	for hook in $(find $HOOK_DIR -maxdepth 1 -name "*.sh"); do
 		echo "Starting hook: $hook..."
-		$hook&
+		$hook
+		echo "Started hook: $hook..."
 	done
 
 	# Save bootanim's pid
 	echo $$ > $PID_FILE
+
+	# Exit when no animation started
+	if [ ! -e "$TAG_FILE" ]; then
+		bootanim_stop 2>&1 | tee -a $LOG_FILE
+		return
+	fi
+
+	# Timeout killer
+	start-stop-daemon -S -q -b -n bootanim-stop \
+		-x /bin/sh -- -c "sleep $TIMEOUT; $SCRIPT stop"
 }
 
 bootanim_stop()
@@ -53,14 +68,14 @@ bootanim_stop()
 	echo "Stopping bootanim: ${CPID:-none} for $SID..."
 
 	# Pause children
-	[ -n "$CPID" ] && kill -STOP $CPID &>/dev/null
+	[ -z "$CPID" ] || kill -STOP $CPID &>/dev/null
 
 	# Unfreeze display server
 	rm -f $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
 	sleep .1
 
 	# Kill children
-	[ -n "$CPID" ] && kill -9 $CPID &>/dev/null
+	[ -z "$CPID" ] || kill -9 $CPID &>/dev/null
 }
 
 case "$1" in
@@ -72,10 +87,6 @@ case "$1" in
 			# Run it
 			$SCRIPT stop
 			bootanim_start 2>&1 | tee -a $LOG_FILE&
-
-			# Timeout killer
-			start-stop-daemon -S -q -b -n bootanim-stop \
-				-x /bin/sh -- -c "sleep $TIMEOUT; $SCRIPT stop"
 		fi
 		;;
 	stop)
