@@ -37,8 +37,8 @@ config BR2_PACKAGE_ROCKCHIP_MALI_NVR_ARCH_DIR
 
 config BR2_PACKAGE_ROCKCHIP_MALI_NVR_NAME
 	string "mali library name"
-	default "libmali-valhall-g610-g6p0-without-cl-dummy-gbm.so" if BR2_PACKAGE_ROCKCHIP_MALI_NVR_G610
-	default "libmali-bifrost-g52-g2p0-dummy-gbm.so" if BR2_PACKAGE_ROCKCHIP_MALI_NVR_G52
+	default "libmali-valhall-g610-g13p0-without-cl-dummy-gbm.so" if BR2_PACKAGE_ROCKCHIP_MALI_NVR_G610
+	default "libmali-bifrost-g52-g13p0-dummy-gbm.so" if BR2_PACKAGE_ROCKCHIP_MALI_NVR_G52
 
 comment "mali-nvr API features"
 
