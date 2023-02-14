@@ -13,3 +13,4 @@
 #include "debug.config"
 #include "powermanager.config"
 #include "weston.config"
+# BR2_PREFER_ROCKCHIP_RGA is not set
