@@ -325,10 +325,7 @@ prepare_part()
 
 	# Find real dev for root dev
 	if is_rootfs; then
-		DEV=$(findmnt -n -o source /)
-
-		# Fallback to the by-name link
-		[ "$DEV" ] || DEV=/dev/block/by-name/rootfs
+		DEV=/dev/block/$(mountpoint -d /)
 	fi
 
 	DEV=$(realpath $DEV 2>/dev/null)
