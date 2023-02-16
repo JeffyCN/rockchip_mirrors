@@ -12,6 +12,8 @@ E2FSPROGS_LICENSE_FILES = NOTICE lib/ss/mit-sipb-copyright.h lib/et/internal.h
 E2FSPROGS_CPE_ID_VENDOR = e2fsprogs_project
 E2FSPROGS_INSTALL_STAGING = YES
 
+E2FSPROGS_MAKE = $(MAKE1)
+
 # 0001-libext2fs-add-sanity-check-to-extent-manipulation.patch
 E2FSPROGS_IGNORE_CVES += CVE-2022-1304
 
