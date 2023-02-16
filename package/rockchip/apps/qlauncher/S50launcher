@@ -20,7 +20,7 @@ start_qlauncher()
 	# Wait for weston ready
 	if [ "${QT_QPA_PLATFORM}" == wayland ]; then
 		for i in `seq 50`;do
-			[ -e ${XDG_RUNTIME_DIR}/wayland-0 ] || continue
+			[ ! -e ${XDG_RUNTIME_DIR}/wayland-0 ] || break
 			sleep .1
 		done
 	fi
