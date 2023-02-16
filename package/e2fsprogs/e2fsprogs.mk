@@ -12,6 +12,8 @@ E2FSPROGS_LICENSE_FILES = NOTICE lib/ss/mit-sipb-copyright.h lib/et/internal.h
 E2FSPROGS_CPE_ID_VALID = YES
 E2FSPROGS_INSTALL_STAGING = YES
 
+E2FSPROGS_MAKE = $(MAKE1)
+
 # Use libblkid and libuuid from util-linux for host and target packages.
 # This prevents overriding them with e2fsprogs' ones, which may cause
 # problems for other packages.
