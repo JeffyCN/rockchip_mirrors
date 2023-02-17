@@ -15,7 +15,7 @@ savedefconfig()
 		"$SCRIPT_DIR/parse_defconfig.sh" "$2" "$CONFIG" > /dev/null
 
 	echo "BR2_DEFCONFIG=\"$1\"" >> "$CONFIG"
-	make O="$OUTPUT_DIR" savedefconfig >/dev/null
+	HOSTCC=gcc make O="$OUTPUT_DIR" savedefconfig >/dev/null
 
 	# Restore original .config
 	gunzip -fk "$CONFIG.gz" &>/dev/null || true
@@ -50,7 +50,7 @@ fi
 echo "Original defconfig saved to $ORIG_DEFCONFIG"
 
 # Generate base defconfig
-grep "^#include " $DEFCONFIG > "$FRAGMENT"
+grep "^#include " $DEFCONFIG > "$FRAGMENT" || true
 savedefconfig "$BASE_DEFCONFIG" "$FRAGMENT"
 echo "Base defconfig saved to $BASE_DEFCONFIG"
 
@@ -68,7 +68,7 @@ for CFG in $CFG_LIST ; do
 
 	if [ -z "$ORIG_NEW_VAL" ]; then
 		# Reset to default
-		NEW_VAL="$CFG="
+		NEW_VAL="# $CFG is reset to default"
 	else
 		# Replace
 		NEW_VAL="$ORIG_NEW_VAL"
@@ -106,7 +106,8 @@ savedefconfig "$NEW_DEFCONFIG" "$FRAGMENT"
 CFG_LIST=$(diff "$ORIG_DEFCONFIG" "$NEW_DEFCONFIG" | \
 	sed -n -e "$SED_CONFIG_EXP1" -e "$SED_CONFIG_EXP2" | sort | uniq)
 for CFG in $CFG_LIST ; do
-	grep -wq $CFG "$FRAGMENT" || echo "$CFG=" >> $FRAGMENT
+	grep -wq $CFG "$FRAGMENT" || \
+		echo "# $CFG is reset to default" >> $FRAGMENT
 done
 
 cat $FRAGMENT > $DEFCONFIG
