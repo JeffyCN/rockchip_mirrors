@@ -4,7 +4,6 @@
 #include "multimedia/audio.config"
 #include "multimedia/mpp.config"
 #include "wifibt/network.config"
-BR2_PACKAGE_INPUT_EVENT_DAEMON=
-BR2_PACKAGE_PM_UTILS=
+# BR2_PACKAGE_INPUT_EVENT_DAEMON is reset to default
+# BR2_PACKAGE_PM_UTILS is reset to default
 BR2_ROOTFS_OVERLAY+="board/rockchip/rk3566_rk3568/fs-overlay-nvr/"
-BR2_TARGET_ROOTFS_CPIO=

@@ -2,6 +2,6 @@
 #include "base/recovery.config"
 #include "chips/rv1126_rv1109_arm.config"
 #include "update_engine.config"
-BR2_PACKAGE_RECOVERY_BOOTCONTROL=
+# BR2_PACKAGE_RECOVERY_BOOTCONTROL is reset to default
 BR2_PACKAGE_RECOVERY_RECOVERYBIN=y
 BR2_TARGET_ROOTFS_EXT2_MKFS_OPTIONS="-O ^64bit,^huge_file"

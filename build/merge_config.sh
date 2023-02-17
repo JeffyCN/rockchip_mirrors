@@ -107,6 +107,10 @@ fi
 MERGE_LIST=$*
 SED_CONFIG_EXP1="s/^\([a-zA-Z0-9_]*\)+\{0,1\}=.*/\1/p"
 SED_CONFIG_EXP2="s/^# \([a-zA-Z0-9_]*\) is not set$/\1/p"
+SED_CONFIG_EXP3="s/^# \([a-zA-Z0-9_]*\) is reset to default$/\1/p"
+
+SED_CLEAR_EXP1="s/^\([a-zA-Z0-9_]*\)+=/\1=/" # Append
+SED_CLEAR_EXP2="/^# \([a-zA-Z0-9_]*\) is reset to default$/d" # Reset
 
 TMP_FILE=$(mktemp ./.tmp.config.XXXXXXXXXX)
 TMP_MERGE_FILE=$(mktemp ./.merge_tmp.config.XXXXXXXXXX)
@@ -115,7 +119,7 @@ echo "Using $INITFILE as base"
 
 trap clean_up EXIT
 
-cat $INITFILE | sed -e "/=$/d" -e "s/+=/=/" >> $TMP_FILE
+cat $INITFILE | sed -e "$SED_CLEAR_EXP1" -e "$SED_CLEAR_EXP2" >> $TMP_FILE
 
 # Merge files, printing warnings on overridden values
 for MERGE_FILE in $MERGE_LIST ; do
@@ -124,7 +128,8 @@ for MERGE_FILE in $MERGE_LIST ; do
 		echo "The merge file '$MERGE_FILE' does not exist.  Exit." >&2
 		exit 1
 	fi
-	CFG_LIST=$(sed -n -e "$SED_CONFIG_EXP1" -e "$SED_CONFIG_EXP2" $MERGE_FILE)
+	CFG_LIST=$(sed -n -e "$SED_CONFIG_EXP1" -e "$SED_CONFIG_EXP2" \
+		-e "$SED_CONFIG_EXP3" $MERGE_FILE)
 
 	cat $MERGE_FILE > $TMP_MERGE_FILE
 	for CFG in $CFG_LIST ; do
@@ -132,10 +137,11 @@ for MERGE_FILE in $MERGE_LIST ; do
 		PREV_VAL=$(grep -w $CFG $TMP_FILE)
 		ORIG_NEW_VAL=$(grep -w $CFG $TMP_MERGE_FILE)
 
-		if [ "$ORIG_NEW_VAL" = "$CFG=" ]; then
+		if [ "$ORIG_NEW_VAL" = "# $CFG is reset to default" ]; then
 			# Reset
 			NEW_VAL=
 		elif [ "${ORIG_NEW_VAL%=*}" = "$CFG+" ]; then
+			# Append
 			if echo "$PREV_VAL" | grep -q "^#"; then
 				# Replace
 				NEW_VAL=${ORIG_NEW_VAL/+=/=}
@@ -181,7 +187,8 @@ for MERGE_FILE in $MERGE_LIST ; do
 		fi
 		sed -i "/\<$CFG[ =]/d" $TMP_FILE
 	done
-	cat $TMP_MERGE_FILE | sed -e "/=$/d" -e "s/+=/=/" >> $TMP_FILE
+	cat $TMP_MERGE_FILE | sed -e "$SED_CLEAR_EXP1" \
+		-e "$SED_CLEAR_EXP2" >> $TMP_FILE
 done
 
 if [ "$RUNMAKE" = "false" ]; then
