@@ -74,6 +74,11 @@ config BR2_PACKAGE_RK3399PRO
 	help
 	  Use Rockchip's rk3399pro SoC
 
+config BR2_PACKAGE_RK3528
+	bool "rk3528 chip"
+	help
+	  Use Rockchip's rk3528 SoC
+
 config BR2_PACKAGE_RK3562
 	bool "rk3562 chip"
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP2
