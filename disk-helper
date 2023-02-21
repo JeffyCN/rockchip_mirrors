@@ -405,8 +405,8 @@ prepare_part()
 	esac
 	MOUNT_OPTS=${OPTS:+" -o ${OPTS%,}"}
 
-	# Prepare for ubi (consider /dev/mtdX as ubiblock)
-	if [ "$FSGROUP" = ubifs ] || echo $DEV | grep -q "/dev/mtd[0-9]";then
+	# Prepare for UBI
+	if [ "$FSGROUP" = ubifs ]; then
 		if ! prepare_ubi; then
 			echo "Failed to prepare ubi for $DEV"
 			[ "$AUTO_MKFS" ] || return
