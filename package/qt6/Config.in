@@ -13,7 +13,7 @@ config BR2_PACKAGE_QT6_ARCH_SUPPORTS
 	depends on BR2_USE_MMU
 
 config BR2_PACKAGE_QT6_GL_SUPPORTS
-	bool
+	bool "OpenGL supports"
 	default y
 	depends on BR2_PACKAGE_HAS_LIBGL || BR2_PACKAGE_HAS_LIBGLES
 
