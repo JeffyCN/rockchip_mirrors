@@ -499,6 +499,7 @@ usb_prepare()
 	UMS_MOUNT=${UMS_MOUNT:-0}
 	UMS_MOUNTPOINT="${UMS_MOUNTPOINT:-/mnt/ums}"
 	UMS_RO=${UMS_RO:-0}
+	USB_FUNCS=${USB_FUNCS:-adb}
 
 	# Orders required by kernel
 	USB_FUNCS="$(usb_funcs_sort rndis uac uvc adb ntb ums mtp acm)"
