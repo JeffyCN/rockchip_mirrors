@@ -3,8 +3,6 @@
 # Uncomment below to see more logs
 # set -x
 
-MISC_DEV=$(realpath /dev/block/by-name/misc 2>/dev/null)
-
 BUSYBOX_MOUNT_OPTS="loop (a|)sync (no|)atime (no|)diratime (no|)relatime (no|)dev (no|)exec (no|)suid (r|)shared (r|)slave (r|)private (un|)bindable (r|)bind move remount ro"
 NTFS_3G_MOUNT_OPTS="ro uid=[0-9]* gid=[0-9]* umask=[0-9]* fmask=[0-9]* dmask=[0-9]*"
 
@@ -22,6 +20,11 @@ check_tool()
 		echo "Missing tool: $TOOL"
 	fi
 	return 1
+}
+
+device_from_attr()
+{
+	blkid | grep -w $@ | cut -d':' -f1 | head -n 1
 }
 
 prepare_ubi()
@@ -270,6 +273,8 @@ done_oem_command()
 	CMD=$1
 
 	echo "OEM: Done with $CMD"
+
+	MISC_DEV=$(device_from_attr misc)
 
 	if [ -b "$MISC_DEV" ]; then
 		erase_oem_command $CMD $MISC_DEV

@@ -24,7 +24,7 @@ do_part()
 	# Ignore comments
 	echo $1 | grep -q "^#" && return
 
-	DEV=$(echo $1 | sed "s#.*LABEL=#/dev/block/by-name/#")
+	DEV=$(device_from_attr ${1##*=})
 	MOUNT_POINT=$2
 	FSTYPE=$3
 	OPTS=$4
@@ -65,6 +65,8 @@ do_part()
 mount_all()
 {
 	echo "Will now mount all partitions in /etc/fstab"
+
+	MISC_DEV=$(device_from_attr misc)
 
 	OEM_CMD=$(strings "${MISC_DEV:-/}" | grep "^cmd_" | xargs)
 	[ "$OEM_CMD" ] && echo "Note: Found OEM commands - $OEM_CMD"
