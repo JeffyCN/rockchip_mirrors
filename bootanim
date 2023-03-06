@@ -7,7 +7,7 @@
 # Example hook:
 # root@RK3588:/# more /etc/bootanim.d/gst-bootanim.sh
 # #!/bin/sh
-# touch $TAG_FILE
+# touch ${TAG_FILE:-/dev/null}
 # gst-play-1.0 /etc/bootanim.d/bootanim.mp4 -q --no-interactive&
 
 export TAG_FILE=/tmp/.bootanim
@@ -17,7 +17,7 @@ SCRIPT=/usr/bin/bootanim
 HOOK_DIR=/etc/bootanim.d/
 PID_FILE=/tmp/bootanim.pid
 LOG_FILE=/tmp/bootanim.log
-TIMEOUT=${2:-5}
+TIMEOUT=${2:-${BOOTANIM_DEFAULT_TIMEOUT:-5}}
 
 pid_sid()
 {
