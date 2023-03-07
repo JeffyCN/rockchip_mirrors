@@ -1,12 +1,13 @@
-From d02f9027f0174c35920a45f294b49389df783935 Mon Sep 17 00:00:00 2001
+From d0409619b496f4f864ecd6471264ad2173caa5a7 Mon Sep 17 00:00:00 2001
 From: Ziyuan Xu <xzy.xu@rock-chips.com>
 Date: Thu, 4 Jun 2020 17:52:40 +0800
-Subject: [PATCH 19/19] support rsa key authentication
+Subject: [PATCH 19/20] adbd: Support rsa key authentication
 
 The auth key is /etc/adbkey.pub as default that should match with
 ~/.android/adbkey.pub on PC.
 
 Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  core/adbd/adb.c             |  6 ++++--
  core/adbd/adb_auth.h        |  2 +-
@@ -14,7 +15,7 @@ Signed-off-by: Ziyuan Xu <xzy.xu@rock-chips.com>
  3 files changed, 21 insertions(+), 30 deletions(-)
 
 diff --git a/core/adbd/adb.c b/core/adbd/adb.c
-index 0004f2c..aa308d0 100644
+index 32173f2..37d230c 100644
 --- a/core/adbd/adb.c
 +++ b/core/adbd/adb.c
 @@ -559,7 +559,9 @@ void handle_packet(apacket *p, atransport *t)

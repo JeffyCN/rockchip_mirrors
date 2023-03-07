@@ -1,7 +1,7 @@
-From f35504d9e30849ca0f0c8af1614f4498da76e055 Mon Sep 17 00:00:00 2001
+From 75a708d9345f057cf6c11635534ded7ccef4070a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 20 Oct 2022 12:03:16 +0800
-Subject: [PATCH] Support setting adb shell
+Subject: [PATCH 20/20] adbd: Support setting adb shell
 
 Tested with:
 cat /etc/profile.d/adbd.sh

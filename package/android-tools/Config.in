@@ -81,6 +81,10 @@ config BR2_PACKAGE_ANDROID_TOOLS_ADBD
 
 if BR2_PACKAGE_ANDROID_TOOLS_ADBD
 
+config BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT
+	int "adb tcp port"
+	default 5555
+
 config BR2_PACKAGE_ANDROID_TOOLS_AUTH_PASSWORD
 	string "adb auth password"
 	default ""

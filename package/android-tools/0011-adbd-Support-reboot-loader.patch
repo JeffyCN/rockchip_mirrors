@@ -1,9 +1,10 @@
-From f3b4929385988c7a21a60003bd3201415ddbe7eb Mon Sep 17 00:00:00 2001
+From b493c0ab51b621ac7aa88c89ae127d0bc8efd5bf Mon Sep 17 00:00:00 2001
 From: Eddie Cai <eddie.cai.linux@gmail.com>
 Date: Thu, 6 Sep 2018 17:58:09 +0800
-Subject: [PATCH 11/19] support reboot loader
+Subject: [PATCH 11/20] adbd: Support reboot loader
 
 Signed-off-by: Eddie Cai <eddie.cai.linux@gmail.com>
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  core/adbd/services.c | 5 +++++
  1 file changed, 5 insertions(+)
