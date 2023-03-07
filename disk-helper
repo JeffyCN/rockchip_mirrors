@@ -24,7 +24,26 @@ check_tool()
 
 device_from_attr()
 {
-	blkid | grep -w $@ | cut -d':' -f1 | head -n 1
+	# It's a block device
+	if [ -b "$1" ]; then
+		echo $1
+		return
+	fi
+
+	# Parse from blkid
+	blkid 2>/dev/null | grep -w "$1" | head -n 1 | \
+		grep -o "^[^:]*" && return
+
+	# Check mtdblock name
+	for d in /dev/mtdblock*; do
+		if grep -q "^$1$" /sys/block/${d#/dev/}/device/name; then
+			echo $d
+			return
+		fi
+	done
+
+	# Fallback to /dev/block/by-name
+	echo /dev/block/by-name/$1
 }
 
 prepare_ubi()
