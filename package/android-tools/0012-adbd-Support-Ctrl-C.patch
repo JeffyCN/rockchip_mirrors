@@ -1,9 +1,10 @@
-From c29c33cce548c0a56446c39696d4ffa4ccaa0524 Mon Sep 17 00:00:00 2001
+From 99dc61bd7825f2b4f982e272e60b3cafbba043cb Mon Sep 17 00:00:00 2001
 From: "jkand.huang" <jkand.huang@rock-chips.com>
 Date: Thu, 31 Jan 2019 17:17:00 +0800
-Subject: [PATCH 12/19] fix adb can't ctrl-c.
+Subject: [PATCH 12/20] adbd: Support Ctrl-C
 
 Signed-off-by: jkand.huang <jkand.huang@rock-chips.com>
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  core/adbd/adb.c | 1 +
  1 file changed, 1 insertion(+)

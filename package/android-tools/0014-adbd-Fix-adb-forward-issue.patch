@@ -1,12 +1,10 @@
-From 91be3404e94e08b5a2b8afb027978332279a94b5 Mon Sep 17 00:00:00 2001
+From 66d94d8c304240d0729bd3fd077ba61ade0a97e7 Mon Sep 17 00:00:00 2001
 From: Lin Huang <hl@rock-chips.com>
 Date: Thu, 16 May 2019 09:28:03 +0800
-Subject: [PATCH 14/19] package: android-tools: fix adb forward bug
+Subject: [PATCH 14/20] adbd: Fix adb forward issue
 
-rknn-toolkit need this patch to fix transfer bug
-
-Change-Id: I1e8cd4447b5d85202170ad0945e4311e1299ca22
 Signed-off-by: Lin Huang <hl@rock-chips.com>
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  core/adbd/services.c                 | 2 +-
  core/libcutils/socket_local_client.c | 2 +-

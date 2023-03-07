@@ -106,10 +106,10 @@ ifneq ($(ADBD_AUTH_PASSWORD),)
 ADBD_AUTH_PASSWORD_MD5=$(shell echo $(ADBD_AUTH_PASSWORD) | md5sum)
 
 define ANDROID_TOOLS_INSTALL_AUTH
-	$(INSTALL) -D -m 0755 $(ANDROID_TOOLS_PKGDIR)/adb_auth.sh \
-		$(TARGET_DIR)/usr/bin/adb_auth.sh
+	$(INSTALL) -D -m 0755 $(ANDROID_TOOLS_PKGDIR)/adbd_auth.sh \
+		$(TARGET_DIR)/usr/bin/adbd_auth.sh
 	sed -i "s/AUTH_PASSWORD/${ADBD_AUTH_PASSWORD_MD5}/g" \
-		$(TARGET_DIR)/usr/bin/adb_auth.sh
+		$(TARGET_DIR)/usr/bin/adbd_auth.sh
 endef
 endif
 
@@ -126,6 +126,16 @@ define ANDROID_TOOLS_INSTALL_TARGET_SHELL_ENV
                 $(TARGET_DIR)/etc/profile.d/adbd_shell.sh
 endef
 ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_SHELL_ENV
+endif
+
+ifneq ($(BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT),0)
+define ANDROID_TOOLS_INSTALL_TARGET_TCP_PORT
+	echo "export ADB_TCP_PORT=$(BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT)" > \
+		$(@D)/adbd_tcp_port.sh
+	$(INSTALL) -D -m 0644 $(@D)/adbd_tcp_port.sh \
+		$(TARGET_DIR)/etc/profile.d/adbd_tcp_port.sh
+endef
+ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_TCP_PORT
 endif
 
 $(eval $(generic-package))
