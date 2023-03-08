@@ -112,7 +112,7 @@ bpkg_run()
 			configure|build|deploy|update)
 				SCRIPT="$DIR/.$stage.sh"
 				[ -x "$SCRIPT" ] || return 1
-				"$SCRIPT"
+				"$SCRIPT" || return 1
 				;;
 			install)
 				SCRIPT="$DIR/.staging_install.sh"
