@@ -4,8 +4,8 @@ Date: Tue, 11 Oct 2022 09:21:10 +0800
 Subject: [PATCH] riff: Fix bps caculation error for ADPCM
 
 The bps shall be caculated according to:
-ADPCM: rate * blockalign / ((blockalign - ch * 7) * 2)
-DVI ADPCM: rate * blockalign / ((blockalign - ch * 4) * 2)
+ADPCM: rate * blockalign / ((blockalign - ch * 7) / ch * 2)
+DVI ADPCM: rate * blockalign / ((blockalign - ch * 4) / ch * 2)
 cus the sample size is 4bit in ADPCM witch is half
 of raw pcm.
 
@@ -23,7 +23,7 @@ index 21200a1..deb8e65 100644
          strf->av_bps = 0;
          if (strf->channels != 0 && strf->rate != 0 && strf->blockalign != 0) {
 -          int spb = ((strf->blockalign - strf->channels * 7) / 2) * 2;
-+          int spb = (strf->blockalign - strf->channels * 7) * 2;
++          int spb = ((strf->blockalign - strf->channels * 7) / strf->channels) * 2;
            strf->av_bps =
                gst_util_uint64_scale_int (strf->rate, strf->blockalign, spb);
            GST_DEBUG ("fixing av_bps to calculated value %d of MS ADPCM",
@@ -32,7 +32,7 @@ index 21200a1..deb8e65 100644
          strf->av_bps = 0;
          if (strf->channels != 0 && strf->rate != 0 && strf->blockalign != 0) {
 -          int spb = ((strf->blockalign - strf->channels * 4) / 2) * 2;
-+          int spb = (strf->blockalign - strf->channels * 4) * 2;
++          int spb = ((strf->blockalign - strf->channels * 4) / strf->channels) * 2;
            strf->av_bps =
                gst_util_uint64_scale_int (strf->rate, strf->blockalign, spb);
            GST_DEBUG ("fixing av_bps to calculated value %d of IMA DVI ADPCM",
