@@ -104,7 +104,7 @@ static int make_extfs(const char *path, const char *label, const char *type)
 
     // max-mount-counts(0) + time-dependent checking(0) + fslabel
     const char *const tune2fs[] = {
-        "/sbin/tune2fs", "-c", "0", "-i", "0", "-L", label, path,
+        "/sbin/tune2fs", "-c", "0", "-i", "0", "-L", label, path, NULL,
     };
     int result;
 

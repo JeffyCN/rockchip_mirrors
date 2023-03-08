@@ -34,7 +34,7 @@ static int num_volumes = 0;
 static Volume* device_volumes = NULL;
 static char mount_point[256] = {0};
 
-#define VOLUME_TO_LABEL(v) (strrchr(v->mount_point, '/') ? : "unknown")
+#define VOLUME_TO_LABEL(v) ((strrchr(v->mount_point, '/') ? : "/unknown") + 1)
 
 char * get_link_path(const char* linkpath, char * buf, int count)
 {
@@ -126,9 +126,9 @@ void load_volume_table() {
 		if (file_system[0] == '#') continue;
 		//printf("load_volume_table file_system:%s, mount_point:%s, fs_type:%s, option:%s, dump:%s, pass:%s\n", file_system, mount_point, fs_type, option, dump, pass);
 		/* HACK: Convert *LABEL to "by-name" symlink */
-		if (file_system == strstr(file_system, "LABEL="))
+		if (strstr(file_system, "LABEL="))
 			snprintf(device, sizeof(device), "/dev/block/by-name/%s",
-				 file_system + strlen("LABEL="));
+				 strstr(file_system, "LABEL=") + strlen("LABEL="));
 		else
 			strcpy(device, file_system);
 
