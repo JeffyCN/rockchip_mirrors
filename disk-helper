@@ -386,6 +386,7 @@ prepare_part()
 			FSRESIZE=resize_ntfs
 			;;
 		ubi|ubifs)
+			FSTYPE=ubifs
 			FSGROUP=ubifs
 			unset FSCK
 			unset FSRESIZE
@@ -418,12 +419,12 @@ prepare_part()
 			check_tool ntfs-3g BR2_PACKAGE_NTFS_3G || return 1
 			OPTS=$(convert_mount_opts "$NTFS_3G_MOUNT_OPTS")
 			;;
-		ubifs)
-			MOUNT="mount -t ubifs"
+		auto)
+			MOUNT=mount
 			OPTS=$(convert_mount_opts)
 			;;
 		*)
-			MOUNT=mount
+			MOUNT="mount -t $FSTYPE"
 			OPTS=$(convert_mount_opts)
 			;;
 	esac
