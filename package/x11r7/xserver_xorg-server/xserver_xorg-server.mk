@@ -56,7 +56,8 @@ XSERVER_XORG_SERVER_CONF_OPTS = \
 	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include/pixman-1 -O2" \
 	--with-fontrootdir=/usr/share/fonts/X11/ \
 	--$(if $(BR2_PACKAGE_XSERVER_XORG_SERVER_XEPHYR),en,dis)able-xephyr \
-	--$(if $(BR2_PACKAGE_XSERVER_XORG_SERVER_XVFB),en,dis)able-xvfb
+	--$(if $(BR2_PACKAGE_XSERVER_XORG_SERVER_XVFB),en,dis)able-xvfb \
+	--disable-xwayland
 
 ifeq ($(BR2_PACKAGE_SYSTEMD),y)
 XSERVER_XORG_SERVER_CONF_OPTS += \
