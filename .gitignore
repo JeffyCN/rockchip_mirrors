@@ -1,6 +1,5 @@
 /output
 /dl
-/download
 /.auto.deps
 /.config.cmd
 /.config.old
@@ -14,4 +13,3 @@
 *.rej
 *~
 *.pyc
-.BoardConfig.mk
