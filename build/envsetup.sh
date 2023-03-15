@@ -22,8 +22,8 @@ choose_board()
 
 		if [ "$INDEX" -eq -1 ]; then
 			echo "Lunching for non-rockchip boards..."
-			unset TARGET_OUTPUT_DIR
 			unset RK_BUILD_CONFIG
+			rm -rf "$BUILDROOT_BOARD_DIR"
 			break;
 		fi
 
@@ -40,34 +40,27 @@ choose_board()
 
 lunch_rockchip()
 {
-	TARGET_DIR_NAME="$RK_BUILD_CONFIG"
-	export TARGET_OUTPUT_DIR="$BUILDROOT_OUTPUT_DIR/$TARGET_DIR_NAME"
+	BUILDROOT_OUTPUT_DIR="$BUILDROOT_DIR/output/$RK_BUILD_CONFIG"
 
-	mkdir -p "$TARGET_OUTPUT_DIR" || return 0
+	mkdir -p "$BUILDROOT_OUTPUT_DIR"
+	rm -rf "$BUILDROOT_BOARD_DIR"
+	ln -rsf "$BUILDROOT_OUTPUT_DIR" "$BUILDROOT_BOARD_DIR"
 
-	echo "==========================================="
-	echo
-	echo "#TARGET_BOARD=`echo $RK_BUILD_CONFIG | cut -d '_' -f 2`"
-	echo "#OUTPUT_DIR=output/$TARGET_DIR_NAME"
-	echo "#CONFIG=${RK_BUILD_CONFIG}_defconfig"
-	echo
-	echo "==========================================="
+	echo "Output dir: $BUILDROOT_OUTPUT_DIR"
 
 	if [ $RK_DEFCONFIG_ARRAY_LEN -eq 0 ]; then
 		echo "Continue without defconfig..."
-		make -C "$BUILDROOT_DIR" O="$TARGET_OUTPUT_DIR" \
-			olddefconfig &>/dev/null
+		make -C "$BUILDROOT_DIR" olddefconfig &>/dev/null
 		return 0
 	fi
 
-	make -C "$BUILDROOT_DIR" O="$TARGET_OUTPUT_DIR" \
-		"${RK_BUILD_CONFIG}_defconfig"
+	make -C "$BUILDROOT_DIR" "${RK_BUILD_CONFIG}_defconfig"
 
-	CONFIG="$TARGET_OUTPUT_DIR/.config"
+	CONFIG="$BUILDROOT_OUTPUT_DIR/.config"
 	cp "$CONFIG" "$CONFIG.new"
 	mv "$CONFIG.old" "$CONFIG" &>/dev/null || return 0
 
-	make -C "$BUILDROOT_DIR" O="$TARGET_OUTPUT_DIR" olddefconfig &>/dev/null
+	make -C "$BUILDROOT_DIR" olddefconfig &>/dev/null
 
 	if ! diff "$CONFIG" "$CONFIG.new"; then
 		read -t 10 -p "Found old config, override it? (y/n):" YES
@@ -77,10 +70,11 @@ lunch_rockchip()
 
 bpkg()
 {
+	BUILDROOT_OUTPUT_DIR="$(realpath "$BUILDROOT_BOARD_DIR")"
 	case "${1:-dir}" in
 		dir)
 			if [ -n "$2" ]; then
-				find "$TARGET_OUTPUT_DIR/build/" -maxdepth 1 \
+				find "$BUILDROOT_OUTPUT_DIR/build/" -maxdepth 1 \
 					-type d -name "*$2*" | head -n 1 || \
 					echo "no pkg build dir for $2." >&2
 			else
@@ -152,7 +146,7 @@ main()
 {
 	SCRIPTS_DIR="$(dirname "$(realpath "$BASH_SOURCE")")"
 	BUILDROOT_DIR="$(dirname "$SCRIPTS_DIR")"
-	BUILDROOT_OUTPUT_DIR="$BUILDROOT_DIR/output"
+	BUILDROOT_BOARD_DIR="$BUILDROOT_DIR/output/.board"
 	TOP_DIR="$(dirname "$BUILDROOT_DIR")"
 	echo "Top of tree: $TOP_DIR"
 
@@ -166,10 +160,11 @@ main()
 
 	case $RK_DEFCONFIG_ARRAY_LEN in
 		0)
+			# Try existing output without defconfig
 			BOARD="$(echo "$1" | \
 				sed "s#^\(output/\|\)rockchip_\([^/]*\).*#\2#")"
 			RK_BUILD_CONFIG="${BOARD:+rockchip_$BOARD}"
-			CONFIG="$BUILDROOT_OUTPUT_DIR/$RK_BUILD_CONFIG/.config"
+			CONFIG="$BUILDROOT_DIR/output/$RK_BUILD_CONFIG/.config"
 			if [ ! -f "$CONFIG" ]; then
 				unset RK_BUILD_CONFIG
 				echo "No available configs${1:+" for: $1"}"
@@ -195,8 +190,7 @@ main()
 	# Set alias
 	alias croot='cd "$TOP_DIR"'
 	alias broot='cd "$BUILDROOT_DIR"'
-	alias bout='cd "$TARGET_OUTPUT_DIR"'
-	alias bmake='make -f "$TARGET_OUTPUT_DIR/Makefile"'
+	alias bmake='make -f "$BUILDROOT_BOARD_DIR/Makefile"'
 
 	alias bconfig='bpkg_run configure'
 	alias bbuild='bpkg_run build'
@@ -229,15 +223,9 @@ main()
 	return 1
 }
 
-IN_BUILDROOT_ENV="${TARGET_OUTPUT_DIR:+1}"
-
 main "$@"
 
 if [ "$BASH_SOURCE" == "$0" ];then
 	# This script is executed directly
-	[ -z "$IN_BUILDROOT_ENV" ] || exit 0
-
-	echo -e "\e[35mEnter $BUILDROOT_DIR environment.\e[0m"
 	/bin/bash
-	echo -e "\e[35mExit from $BUILDROOT_DIR environment.\e[0m"
 fi
