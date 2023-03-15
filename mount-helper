@@ -46,9 +46,6 @@ do_part()
 		umount $MOUNT_POINT &>/dev/null || return
 	fi
 
-	# Handle OEM commands for current partition
-	handle_oem_command
-
 	# Check and repair
 	check_part
 
@@ -65,11 +62,6 @@ do_part()
 mount_all()
 {
 	echo "Will now mount all partitions in /etc/fstab"
-
-	MISC_DEV=$(device_from_attr misc)
-
-	OEM_CMD=$(strings "${MISC_DEV:-/}" | grep "^cmd_" | xargs)
-	[ "$OEM_CMD" ] && echo "Note: Found OEM commands - $OEM_CMD"
 
 	AUTO_MKFS="/.auto_mkfs"
 	if [ -f $AUTO_MKFS ];then

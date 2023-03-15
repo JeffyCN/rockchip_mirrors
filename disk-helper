@@ -35,8 +35,8 @@ device_from_attr()
 		grep -o "^[^:]*" && return
 
 	# Check mtdblock name
-	for d in /dev/mtdblock*; do
-		if grep -q "^$1$" /sys/block/${d#/dev/}/device/name; then
+	for d in $(ls /dev/ | grep mtdblock); do
+		if grep -q "^$1$" /sys/block/$d/device/name; then
 			echo $d
 			return
 		fi
@@ -272,62 +272,6 @@ resize_part()
 	rm -rf $TEMP_BACKUP
 }
 
-erase_oem_command()
-{
-	CMD=$1
-	FILE=$2
-
-	echo "OEM: Erasing $CMD in $FILE"
-
-	COUNT=$(echo $CMD | wc -c)
-	OFFSETS=$(strings -t d $FILE | grep -w "$CMD" | awk '{ print $1 }')
-
-	for offset in $OFFSETS; do
-		dd if=/dev/zero of=$FILE bs=1 count=$COUNT seek=$offset conv=notrunc 2>/dev/null
-	done
-}
-
-done_oem_command()
-{
-	CMD=$1
-
-	echo "OEM: Done with $CMD"
-
-	MISC_DEV=$(device_from_attr misc)
-
-	if [ -b "$MISC_DEV" ]; then
-		erase_oem_command $CMD $MISC_DEV
-	else
-		echo "OEM: Erase $CMD from mtd device"
-
-		check_tool nanddump BR2_PACKAGE_MTD_NANDDUMP || return
-		check_tool nandwrite BR2_PACKAGE_MTD_NANDWRITE || return
-		check_tool flash_erase BR2_PACKAGE_MTD_FLASH_ERASE || return
-
-		TEMP=$(mktemp)
-		nanddump $MISC_DEV -f $TEMP
-		erase_oem_command $CMD $TEMP
-		flash_erase $MISC_DEV 0 0
-		nandwrite $MISC_DEV $TEMP
-	fi
-}
-
-handle_oem_command()
-{
-	[ "$OEM_CMD" ] || return
-
-	for cmd in $OEM_CMD; do
-		case $cmd in
-			cmd_wipe_$PART_NAME)
-				is_rootfs && continue
-
-				echo "OEM: $cmd - Wiping $DEV"
-				format_part && done_oem_command $cmd
-				;;
-		esac
-	done
-}
-
 convert_mount_opts()
 {
 	# Accept all opts by default for standard mount tool
@@ -355,8 +299,8 @@ prepare_part()
 	DEV=$(realpath $DEV 2>/dev/null)
 	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
 
-	# Unknown device
-	[ -b "$DEV" -o -c "$DEV" ] || return 1
+	# Only accept block device
+	[ -b "$DEV" ] || return 1
 
 	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
 	if [ -f "$SYS_PATH/name" ]; then
