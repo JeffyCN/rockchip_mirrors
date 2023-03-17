@@ -117,7 +117,7 @@ define $(2)_CONFIGURE_CMDS
 	$$(MESON) \
 		--prefix=/usr \
 		--libdir=lib \
-		--default-library=$(if $(BR2_STATIC_LIBS),static,shared) \
+		--default-library=$(if $(BR2_STATIC_LIBS),static,$(if $(BR2_SHARED_STATIC_LIBS),both,shared)) \
 		--buildtype=$(if $(BR2_ENABLE_RUNTIME_DEBUG),debug,release) \
 		--cross-file=$$($$(PKG)_SRCDIR)/build/cross-compilation.conf \
 		-Db_pie=false \
