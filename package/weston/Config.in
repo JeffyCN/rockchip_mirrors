@@ -21,6 +21,7 @@ config BR2_PACKAGE_WESTON
 	# Runtime dependency
 	select BR2_PACKAGE_XKEYBOARD_CONFIG
 	select BR2_PACKAGE_WESTON_SHELL_DESKTOP if !BR2_PACKAGE_WESTON_HAS_SHELL
+	select BR2_PACKAGE_SEATD if !BR2_PACKAGE_DBUS || !BR2_PACKAGE_SYSTEMD
 	help
 	  Weston is the reference implementation of a Wayland
 	  compositor, and a useful compositor in its own right.
