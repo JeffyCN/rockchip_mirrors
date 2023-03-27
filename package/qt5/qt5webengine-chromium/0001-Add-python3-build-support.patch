@@ -1,80 +1,76 @@
-From 8ec8fe43fdce1f2c3de280fe40797166e95fab59 Mon Sep 17 00:00:00 2001
+From bf94b834e9beb4e7bc25dbc4c61f5e2db39e7cdc Mon Sep 17 00:00:00 2001
 From: James Hilliard <james.hilliard1@gmail.com>
 Date: Fri, 4 Feb 2022 15:43:35 -0700
-Subject: [PATCH 01/14] Add python3 build support
+Subject: [PATCH] Add python3 build support
 
 Adapted from:
 https://github.com/archlinux/svntogit-packages/blob/6edf5f1aaea952d046aff89a2e0175258fe77361/trunk/qt5-webengine-chromium-python3.patch
 
 Signed-off-by: James Hilliard <james.hilliard1@gmail.com>
 ---
- .../protobufs/binary_proto_generator.py       |   8 +-
- .../tracing/generate_trace_viewer_grd.py      |   2 +-
- chromium/mojo/public/tools/bindings/BUILD.gn  |   2 +
- .../tools/bindings/gen_data_files_list.py     |   8 +-
- .../generators/mojom_java_generator.py        |   4 +
- .../tools/mojom/mojom/generate/generator.py   |  14 +-
- .../tools/mojom/mojom/generate/module.py      |   3 +-
- .../mojom/mojom/generate/template_expander.py |  12 +-
- .../scripts/bind_gen/blink_v8_bridge.py       |   6 +-
- .../scripts/bind_gen/callback_interface.py    |   2 +-
- .../bindings/scripts/bind_gen/code_node.py    |  10 +-
- .../bindings/scripts/bind_gen/codegen_expr.py |  15 +-
- .../scripts/bind_gen/codegen_format.py        |   2 +-
- .../scripts/bind_gen/codegen_utils.py         |   2 +-
- .../bindings/scripts/bind_gen/dictionary.py   |   2 +-
- .../bindings/scripts/bind_gen/interface.py    |  82 +--
- .../scripts/bind_gen/mako_renderer.py         |   2 +-
- .../bindings/scripts/bind_gen/style_format.py |   9 +-
- .../bindings/scripts/bind_gen/task_queue.py   |   5 +-
- .../bindings/scripts/code_generator.py        |  10 +
- .../scripts/generate_origin_trial_features.py |   4 +-
- .../bindings/scripts/idl_definitions.py       |   8 +-
- .../renderer/bindings/scripts/idl_reader.py   |   4 +-
- .../renderer/bindings/scripts/idl_types.py    |   2 +-
- .../renderer/bindings/scripts/utilities.py    |  28 +-
- .../renderer/bindings/scripts/v8_interface.py |   9 +-
- .../renderer/bindings/scripts/v8_methods.py   |   4 +
- .../renderer/bindings/scripts/v8_utilities.py |   2 +-
- .../scripts/web_idl/callback_interface.py     |  12 +-
- .../bindings/scripts/web_idl/database.py      |   2 +-
- .../bindings/scripts/web_idl/exposure.py      |   5 +-
- .../bindings/scripts/web_idl/function_like.py |  28 +-
- .../bindings/scripts/web_idl/idl_compiler.py  |  21 +-
- .../bindings/scripts/web_idl/interface.py     |  45 +-
- .../bindings/scripts/web_idl/ir_builder.py    |  29 +-
- .../bindings/scripts/web_idl/make_copy.py     |   7 +
- .../bindings/scripts/web_idl/namespace.py     |  12 +-
- .../bindings/templates/dictionary_v8.cc.tmpl  |   8 +-
- .../scripts/core/css/make_style_shorthands.py |  23 +-
- .../properties/make_css_property_instances.py |   4 +-
- .../blink/renderer/build/scripts/gperf.py     |   2 +-
- .../blink/renderer/build/scripts/in_file.py   |   2 +-
- .../renderer/build/scripts/in_generator.py    |   5 +
- .../build/scripts/make_runtime_features.py    |   2 +-
- .../scripts/templates/element_factory.cc.tmpl |   4 +-
- .../templates/element_type_helpers.cc.tmpl    |   4 +-
- .../templates/element_type_helpers.h.tmpl     |   2 +-
- .../build/scripts/templates/macros.tmpl       |   4 +-
- .../templates/make_qualified_names.h.tmpl     |   4 +-
- .../dawn/generator/generator_lib.py           |   4 +
- .../devtools-frontend/src/BUILD.gn            |   2 +
- .../scripts/build/build_inspector_overlay.py  |   3 +-
- .../build/build_release_applications.py       |   9 +-
- .../scripts/build/generate_devtools_grd.py    |   4 +-
- .../src/scripts/build/modular_build.py        |   6 +-
- chromium/third_party/jinja2/tests.py          |   2 +-
- .../internal/base_pcp_handler_test.cc.orig    | 538 ------------------
- .../offline_service_controller.h.orig         |  81 ---
- chromium/tools/metrics/ukm/gen_builders.py    |   5 +-
- .../ui/ozone/generate_constructor_list.py     |  13 +-
- .../ui/ozone/generate_ozone_platform_list.py  |  26 +-
- 61 files changed, 331 insertions(+), 848 deletions(-)
- delete mode 100644 chromium/third_party/nearby/src/cpp/core_v2/internal/base_pcp_handler_test.cc.orig
- delete mode 100644 chromium/third_party/nearby/src/cpp/core_v2/internal/offline_service_controller.h.orig
+ .../protobufs/binary_proto_generator.py       |  8 +-
+ .../tracing/generate_trace_viewer_grd.py      |  2 +-
+ chromium/mojo/public/tools/bindings/BUILD.gn  |  2 +
+ .../tools/bindings/gen_data_files_list.py     |  8 +-
+ .../generators/mojom_java_generator.py        |  4 +
+ .../tools/mojom/mojom/generate/generator.py   | 14 ++--
+ .../tools/mojom/mojom/generate/module.py      |  3 +-
+ .../mojom/mojom/generate/template_expander.py | 12 +--
+ .../scripts/bind_gen/blink_v8_bridge.py       |  6 +-
+ .../scripts/bind_gen/callback_interface.py    |  2 +-
+ .../bindings/scripts/bind_gen/code_node.py    | 10 +--
+ .../bindings/scripts/bind_gen/codegen_expr.py | 15 ++--
+ .../scripts/bind_gen/codegen_format.py        |  2 +-
+ .../scripts/bind_gen/codegen_utils.py         |  2 +-
+ .../bindings/scripts/bind_gen/dictionary.py   |  2 +-
+ .../bindings/scripts/bind_gen/interface.py    | 82 +++++++++++--------
+ .../scripts/bind_gen/mako_renderer.py         |  2 +-
+ .../bindings/scripts/bind_gen/style_format.py |  9 +-
+ .../bindings/scripts/bind_gen/task_queue.py   |  5 +-
+ .../bindings/scripts/code_generator.py        | 10 +++
+ .../scripts/generate_origin_trial_features.py |  4 +-
+ .../bindings/scripts/idl_definitions.py       |  8 +-
+ .../renderer/bindings/scripts/idl_reader.py   |  4 +-
+ .../renderer/bindings/scripts/idl_types.py    |  2 +-
+ .../renderer/bindings/scripts/utilities.py    | 28 +++----
+ .../renderer/bindings/scripts/v8_interface.py |  9 +-
+ .../renderer/bindings/scripts/v8_methods.py   |  4 +
+ .../renderer/bindings/scripts/v8_utilities.py |  2 +-
+ .../scripts/web_idl/callback_interface.py     | 12 +--
+ .../bindings/scripts/web_idl/database.py      |  2 +-
+ .../bindings/scripts/web_idl/exposure.py      |  5 +-
+ .../bindings/scripts/web_idl/function_like.py | 28 +++----
+ .../bindings/scripts/web_idl/idl_compiler.py  | 21 ++---
+ .../bindings/scripts/web_idl/interface.py     | 45 +++++-----
+ .../bindings/scripts/web_idl/ir_builder.py    | 29 ++++---
+ .../bindings/scripts/web_idl/make_copy.py     |  7 ++
+ .../bindings/scripts/web_idl/namespace.py     | 12 +--
+ .../bindings/templates/dictionary_v8.cc.tmpl  |  8 +-
+ .../scripts/core/css/make_style_shorthands.py | 23 +++---
+ .../properties/make_css_property_instances.py |  4 +-
+ .../blink/renderer/build/scripts/gperf.py     |  2 +-
+ .../blink/renderer/build/scripts/in_file.py   |  2 +-
+ .../renderer/build/scripts/in_generator.py    |  5 ++
+ .../build/scripts/make_runtime_features.py    |  2 +-
+ .../scripts/templates/element_factory.cc.tmpl |  4 +-
+ .../templates/element_type_helpers.cc.tmpl    |  4 +-
+ .../templates/element_type_helpers.h.tmpl     |  2 +-
+ .../build/scripts/templates/macros.tmpl       |  4 +-
+ .../templates/make_qualified_names.h.tmpl     |  4 +-
+ .../dawn/generator/generator_lib.py           |  4 +
+ .../devtools-frontend/src/BUILD.gn            |  2 +
+ .../scripts/build/build_inspector_overlay.py  |  3 +-
+ .../build/build_release_applications.py       |  9 +-
+ .../scripts/build/generate_devtools_grd.py    |  4 +-
+ .../src/scripts/build/modular_build.py        |  6 +-
+ chromium/third_party/jinja2/tests.py          |  2 +-
+ chromium/tools/metrics/ukm/gen_builders.py    |  5 +-
+ .../ui/ozone/generate_constructor_list.py     | 13 ++-
+ .../ui/ozone/generate_ozone_platform_list.py  | 26 ++++--
+ 59 files changed, 331 insertions(+), 229 deletions(-)
 
 diff --git a/chromium/components/resources/protobufs/binary_proto_generator.py b/chromium/components/resources/protobufs/binary_proto_generator.py
-index 7422ead96..16365515f 100755
+index 7422ead9697..16365515f26 100755
 --- a/chromium/components/resources/protobufs/binary_proto_generator.py
 +++ b/chromium/components/resources/protobufs/binary_proto_generator.py
 @@ -7,7 +7,7 @@
@@ -103,7 +99,7 @@ index 7422ead96..16365515f 100755
 +            (opts.infile, str(e), traceback.format_exc()))
        return 1
 diff --git a/chromium/content/browser/tracing/generate_trace_viewer_grd.py b/chromium/content/browser/tracing/generate_trace_viewer_grd.py
-index 037f9497d..be393d21f 100755
+index 037f9497dc2..be393d21f90 100755
 --- a/chromium/content/browser/tracing/generate_trace_viewer_grd.py
 +++ b/chromium/content/browser/tracing/generate_trace_viewer_grd.py
 @@ -74,7 +74,7 @@ def main(argv):
@@ -116,7 +112,7 @@ index 037f9497d..be393d21f 100755
  
  
 diff --git a/chromium/mojo/public/tools/bindings/BUILD.gn b/chromium/mojo/public/tools/bindings/BUILD.gn
-index fc04b5dd0..708958e43 100644
+index fc04b5dd0b1..708958e438b 100644
 --- a/chromium/mojo/public/tools/bindings/BUILD.gn
 +++ b/chromium/mojo/public/tools/bindings/BUILD.gn
 @@ -2,9 +2,11 @@
@@ -132,7 +128,7 @@ index fc04b5dd0..708958e43 100644
    sources = mojom_generator_sources
    sources += [
 diff --git a/chromium/mojo/public/tools/bindings/gen_data_files_list.py b/chromium/mojo/public/tools/bindings/gen_data_files_list.py
-index 79c9e50ef..8b78d0924 100644
+index 79c9e50efce..8b78d092418 100644
 --- a/chromium/mojo/public/tools/bindings/gen_data_files_list.py
 +++ b/chromium/mojo/public/tools/bindings/gen_data_files_list.py
 @@ -18,7 +18,6 @@ import os
@@ -159,7 +155,7 @@ index 79c9e50ef..8b78d0924 100644
  if __name__ == '__main__':
    sys.exit(main())
 diff --git a/chromium/mojo/public/tools/bindings/generators/mojom_java_generator.py b/chromium/mojo/public/tools/bindings/generators/mojom_java_generator.py
-index 96b2fdfae..00b9dccd0 100644
+index 96b2fdfae0c..00b9dccd00c 100644
 --- a/chromium/mojo/public/tools/bindings/generators/mojom_java_generator.py
 +++ b/chromium/mojo/public/tools/bindings/generators/mojom_java_generator.py
 @@ -25,6 +25,10 @@ sys.path.append(os.path.join(os.path.dirname(__file__), os.pardir,
@@ -174,7 +170,7 @@ index 96b2fdfae..00b9dccd0 100644
  GENERATOR_PREFIX = 'java'
  
 diff --git a/chromium/mojo/public/tools/mojom/mojom/generate/generator.py b/chromium/mojo/public/tools/mojom/mojom/generate/generator.py
-index de62260a5..4a1c73fcf 100644
+index de62260a5c9..4a1c73fcf82 100644
 --- a/chromium/mojo/public/tools/mojom/mojom/generate/generator.py
 +++ b/chromium/mojo/public/tools/mojom/mojom/generate/generator.py
 @@ -136,9 +136,14 @@ class Stylizer(object):
@@ -208,7 +204,7 @@ index de62260a5..4a1c73fcf 100644
  
  def AddComputedData(module):
 diff --git a/chromium/mojo/public/tools/mojom/mojom/generate/module.py b/chromium/mojo/public/tools/mojom/mojom/generate/module.py
-index ebbc9b322..3d026429b 100644
+index ebbc9b322ea..3d026429bbc 100644
 --- a/chromium/mojo/public/tools/mojom/mojom/generate/module.py
 +++ b/chromium/mojo/public/tools/mojom/mojom/generate/module.py
 @@ -398,7 +398,8 @@ class Field(object):
@@ -222,7 +218,7 @@ index ebbc9b322..3d026429b 100644
  
  class UnionField(Field):
 diff --git a/chromium/mojo/public/tools/mojom/mojom/generate/template_expander.py b/chromium/mojo/public/tools/mojom/mojom/generate/template_expander.py
-index 7a3005602..8d9e26fb7 100644
+index 7a300560246..8d9e26fb7f6 100644
 --- a/chromium/mojo/public/tools/mojom/mojom/generate/template_expander.py
 +++ b/chromium/mojo/public/tools/mojom/mojom/generate/template_expander.py
 @@ -75,9 +75,9 @@ def PrecompileTemplates(generator_modules, output_dir):
@@ -242,7 +238,7 @@ index 7a3005602..8d9e26fb7 100644
 +                                py_compile=sys.version_info.major < 3,
 +                                ignore_errors=False)
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/blink_v8_bridge.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/blink_v8_bridge.py
-index 3225ecca6..fc078d31b 100644
+index 3225ecca6e4..fc078d31b55 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/blink_v8_bridge.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/blink_v8_bridge.py
 @@ -344,7 +344,7 @@ def make_default_value_expr(idl_type, default_value):
@@ -273,7 +269,7 @@ index 3225ecca6..fc078d31b 100644
  
      pattern = ("auto&& ${{{_1}}} = "
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/callback_interface.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/callback_interface.py
-index 4a6df5130..8b51f23a4 100644
+index 4a6df513068..8b51f23a409 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/callback_interface.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/callback_interface.py
 @@ -177,7 +177,7 @@ def generate_callback_interface(callback_interface_identifier):
@@ -286,7 +282,7 @@ index 4a6df5130..8b51f23a4 100644
           operation_entries=[])
      (install_interface_template_decl, install_interface_template_def,
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/code_node.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/code_node.py
-index 52972fefe..e5ae9d962 100644
+index 52972fefe20..e5ae9d9629e 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/code_node.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/code_node.py
 @@ -503,13 +503,13 @@ class CompositeNode(CodeNode):
@@ -325,7 +321,7 @@ index 52972fefe..e5ae9d962 100644
                  lambda scope_chain: scope_chain[self_index + 1:], scope_chains)
              scope_to_likeliness = {}
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_expr.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_expr.py
-index a229a6c71..5fa288dab 100644
+index a229a6c71c9..5fa288dabf2 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_expr.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_expr.py
 @@ -109,7 +109,7 @@ def expr_and(terms):
@@ -372,7 +368,7 @@ index a229a6c71..5fa288dab 100644
              expr_and([_Expr("${context_feature_settings}"),
                        expr_or(terms)]))
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_format.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_format.py
-index 87d26eec3..f3e9d3824 100644
+index 87d26eec3ca..f3e9d38247e 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_format.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_format.py
 @@ -23,7 +23,7 @@ class _TemplateFormatter(string.Formatter):
@@ -385,7 +381,7 @@ index 87d26eec3..f3e9d3824 100644
          assert isinstance(key, str)
          if not key:
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_utils.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_utils.py
-index 2bcc4fed4..e72282aa6 100644
+index 2bcc4fed49a..e72282aa696 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_utils.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/codegen_utils.py
 @@ -116,4 +116,4 @@ def write_code_node_to_file(code_node, filepath):
@@ -395,7 +391,7 @@ index 2bcc4fed4..e72282aa6 100644
 -    web_idl.file_io.write_to_file_if_changed(filepath, rendered_text)
 +    web_idl.file_io.write_to_file_if_changed(filepath, rendered_text.encode('utf-8'))
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/dictionary.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/dictionary.py
-index b39f01004..4d6820229 100644
+index b39f0100410..4d68202296b 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/dictionary.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/dictionary.py
 @@ -993,7 +993,7 @@ def make_dict_trace_func(cg_context):
@@ -408,7 +404,7 @@ index b39f01004..4d6820229 100644
  
      return func_decl, func_def
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/interface.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/interface.py
-index 10ff30656..bfdf7128a 100644
+index 10ff30656ad..bfdf7128aac 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/interface.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/interface.py
 @@ -582,7 +582,7 @@ def _make_blink_api_call(code_node,
@@ -585,7 +581,7 @@ index 10ff30656..bfdf7128a 100644
       install_interface_template_trampoline) = make_install_interface_template(
           cg_context,
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/mako_renderer.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/mako_renderer.py
-index b4c705538..f3a2fcd77 100644
+index b4c70553863..f3a2fcd772d 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/mako_renderer.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/mako_renderer.py
 @@ -105,7 +105,7 @@ class MakoRenderer(object):
@@ -598,7 +594,7 @@ index b4c705538..f3a2fcd77 100644
              else:
                  self._caller_stack_on_error = list(self._caller_stack)
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/style_format.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/style_format.py
-index dc3493cc3..017d3d47b 100644
+index dc3493cc394..017d3d47bb3 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/style_format.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/style_format.py
 @@ -70,8 +70,13 @@ def gn_format(contents, filename=None):
@@ -618,7 +614,7 @@ index dc3493cc3..017d3d47b 100644
      exit_code = proc.wait()
  
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/task_queue.py b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/task_queue.py
-index 0d8f4c0f3..e666a9b66 100644
+index 0d8f4c0f303..e666a9b668e 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/task_queue.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/bind_gen/task_queue.py
 @@ -2,6 +2,7 @@
@@ -645,7 +641,7 @@ index 0d8f4c0f3..e666a9b66 100644
 -        apply(func, args, kwargs)
 +        func(*args, **kwargs)
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/code_generator.py b/chromium/third_party/blink/renderer/bindings/scripts/code_generator.py
-index e8280be72..e49e6eb96 100644
+index e8280be7213..e49e6eb965e 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/code_generator.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/code_generator.py
 @@ -13,6 +13,7 @@ import re
@@ -687,7 +683,7 @@ index e8280be72..e49e6eb96 100644
  
  
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/generate_origin_trial_features.py b/chromium/third_party/blink/renderer/bindings/scripts/generate_origin_trial_features.py
-index 130004eae..04c0fabce 100755
+index 130004eae83..04c0fabcef2 100755
 --- a/chromium/third_party/blink/renderer/bindings/scripts/generate_origin_trial_features.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/generate_origin_trial_features.py
 @@ -80,7 +80,7 @@ def read_idl_file(reader, idl_filename):
@@ -709,7 +705,7 @@ index 130004eae..04c0fabce 100755
      generate_origin_trial_features(info_provider, options, idl_filenames)
      return 0
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/idl_definitions.py b/chromium/third_party/blink/renderer/bindings/scripts/idl_definitions.py
-index 14e6e9d3f..b027818ae 100644
+index 14e6e9d3f87..b027818aef2 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/idl_definitions.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/idl_definitions.py
 @@ -394,7 +394,8 @@ class IdlInterface(object):
@@ -742,7 +738,7 @@ index 14e6e9d3f..b027818ae 100644
      Each exposure has two properties: exposed and runtime_enabled.
      Exposure(e, r) corresponds to [Exposed(e r)]. Exposure(e) corresponds to
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/idl_reader.py b/chromium/third_party/blink/renderer/bindings/scripts/idl_reader.py
-index 8d72865a6..b80eebdcd 100644
+index 8d72865a6ca..b80eebdcd61 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/idl_reader.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/idl_reader.py
 @@ -55,8 +55,8 @@ def validate_blink_idl_definitions(idl_filename, idl_file_basename,
@@ -757,7 +753,7 @@ index 8d72865a6..b80eebdcd 100644
      if number_of_targets > 1:
          raise Exception(
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/idl_types.py b/chromium/third_party/blink/renderer/bindings/scripts/idl_types.py
-index cd4f0c351..ab95e9c0b 100644
+index cd4f0c3513b..ab95e9c0b08 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/idl_types.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/idl_types.py
 @@ -349,7 +349,7 @@ class IdlUnionType(IdlTypeBase):
@@ -770,7 +766,7 @@ index cd4f0c351..ab95e9c0b 100644
              raise ValueError('%s is ambiguous.' % self.name)
          return matching_types[0] if matching_types else None
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/utilities.py b/chromium/third_party/blink/renderer/bindings/scripts/utilities.py
-index e1677ee7b..3c5006f06 100644
+index e1677ee7bd6..3c5006f064f 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/utilities.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/utilities.py
 @@ -196,8 +196,9 @@ class ComponentInfoProviderModules(ComponentInfoProvider):
@@ -837,7 +833,7 @@ index e1677ee7b..3c5006f06 100644
                  if pickle.load(pickle_file) == data:
                      return
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/v8_interface.py b/chromium/third_party/blink/renderer/bindings/scripts/v8_interface.py
-index a43260414..a85b03abe 100644
+index a43260414db..a85b03abe75 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/v8_interface.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/v8_interface.py
 @@ -189,7 +189,7 @@ def context_enabled_features(attributes):
@@ -872,7 +868,7 @@ index a43260414..a85b03abe 100644
      # We can’t do a single loop through all methods or simply sort them, because
      # a method may be listed in multiple steps of the resolution algorithm, and
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/v8_methods.py b/chromium/third_party/blink/renderer/bindings/scripts/v8_methods.py
-index 5f1f89a3d..6ee8a4077 100644
+index 5f1f89a3def..6ee8a407798 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/v8_methods.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/v8_methods.py
 @@ -46,6 +46,10 @@ import v8_types
@@ -887,7 +883,7 @@ index 5f1f89a3d..6ee8a4077 100644
  def method_is_visible(method, interface_is_partial):
      if 'overloads' in method:
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/v8_utilities.py b/chromium/third_party/blink/renderer/bindings/scripts/v8_utilities.py
-index 2ecd69233..fcfc48371 100644
+index 2ecd6923320..fcfc48371b1 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/v8_utilities.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/v8_utilities.py
 @@ -271,7 +271,7 @@ EXPOSED_WORKERS = set([
@@ -900,7 +896,7 @@ index 2ecd69233..fcfc48371 100644
  
      def __init__(self, exposures=None):
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/callback_interface.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/callback_interface.py
-index 13fb7c706..b73b77106 100644
+index 13fb7c7068d..b73b7710687 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/callback_interface.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/callback_interface.py
 @@ -91,11 +91,13 @@ class CallbackInterface(UserDefinedType, WithExtendedAttributes,
@@ -923,7 +919,7 @@ index 13fb7c706..b73b77106 100644
  
      @property
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/database.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/database.py
-index c92cf48eb..f5d591294 100644
+index c92cf48eb2a..f5d59129449 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/database.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/database.py
 @@ -156,4 +156,4 @@ class Database(object):
@@ -933,7 +929,7 @@ index c92cf48eb..f5d591294 100644
 -        return self._impl.find_by_kind(kind).values()
 +        return list(self._impl.find_by_kind(kind).values())
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/exposure.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/exposure.py
-index abaeef39c..e36cf7439 100644
+index abaeef39c30..e36cf7439ae 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/exposure.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/exposure.py
 @@ -8,8 +8,11 @@ from .runtime_enabled_features import RuntimeEnabledFeatures
@@ -950,7 +946,7 @@ index abaeef39c..e36cf7439 100644
              RuntimeEnabledFeatures.is_context_dependent(self))
  
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/function_like.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/function_like.py
-index 648c70d80..1712f19c6 100644
+index 648c70d803d..1712f19c672 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/function_like.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/function_like.py
 @@ -71,8 +71,9 @@ class FunctionLike(WithIdentifier):
@@ -1016,7 +1012,7 @@ index 648c70d80..1712f19c6 100644
              # the two types.
              if OverloadGroup.are_distinguishable_types(
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/idl_compiler.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/idl_compiler.py
-index c5ee2bd8a..583150724 100644
+index c5ee2bd8a3d..58315072480 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/idl_compiler.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/idl_compiler.py
 @@ -149,8 +149,8 @@ class IdlCompiler(object):
@@ -1083,7 +1079,7 @@ index c5ee2bd8a..583150724 100644
              assert not new_ir.legacy_window_aliases
              if new_ir.identifier != 'Window':
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/interface.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/interface.py
-index 65d24e529..067ef2eb0 100644
+index 65d24e529d1..067ef2eb0b2 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/interface.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/interface.py
 @@ -180,8 +180,9 @@ class Interface(UserDefinedType, WithExtendedAttributes, WithCodeGeneratorInfo,
@@ -1190,7 +1186,7 @@ index 65d24e529..067ef2eb0 100644
          ])
  
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/ir_builder.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/ir_builder.py
-index e9aeff4ab..d80554d60 100644
+index e9aeff4ab82..d80554d603e 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/ir_builder.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/ir_builder.py
 @@ -2,6 +2,8 @@
@@ -1300,7 +1296,7 @@ index e9aeff4ab..d80554d60 100644
                  extended_attributes=extended_attributes,
                  debug_info=self._build_debug_info(node))
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/make_copy.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/make_copy.py
-index a7a2b11f3..2f6b61300 100644
+index a7a2b11f3f0..2f6b61300ff 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/make_copy.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/make_copy.py
 @@ -3,6 +3,13 @@
@@ -1318,7 +1314,7 @@ index a7a2b11f3..2f6b61300 100644
      """
      Creates a copy of the given object, which should be an IR or part of IR.
 diff --git a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/namespace.py b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/namespace.py
-index eeabef97c..bd7e98907 100644
+index eeabef97cbe..bd7e98907f3 100644
 --- a/chromium/third_party/blink/renderer/bindings/scripts/web_idl/namespace.py
 +++ b/chromium/third_party/blink/renderer/bindings/scripts/web_idl/namespace.py
 @@ -107,11 +107,13 @@ class Namespace(UserDefinedType, WithExtendedAttributes, WithCodeGeneratorInfo,
@@ -1341,7 +1337,7 @@ index eeabef97c..bd7e98907 100644
  
      @property
 diff --git a/chromium/third_party/blink/renderer/bindings/templates/dictionary_v8.cc.tmpl b/chromium/third_party/blink/renderer/bindings/templates/dictionary_v8.cc.tmpl
-index 0add9c45a..dc910f6d2 100644
+index 0add9c45a38..dc910f6d227 100644
 --- a/chromium/third_party/blink/renderer/bindings/templates/dictionary_v8.cc.tmpl
 +++ b/chromium/third_party/blink/renderer/bindings/templates/dictionary_v8.cc.tmpl
 @@ -59,9 +59,9 @@ void {{v8_class}}::ToImpl(v8::Isolate* isolate, v8::Local<v8::Value> v8_value, {
@@ -1369,7 +1365,7 @@ index 0add9c45a..dc910f6d2 100644
    {% for member in member_list %}
    v8::Local<v8::Value> {{member.v8_value}};
 diff --git a/chromium/third_party/blink/renderer/build/scripts/core/css/make_style_shorthands.py b/chromium/third_party/blink/renderer/build/scripts/core/css/make_style_shorthands.py
-index 1799cd5a1..5f43ffabc 100755
+index 1799cd5a153..5f43ffabc26 100755
 --- a/chromium/third_party/blink/renderer/build/scripts/core/css/make_style_shorthands.py
 +++ b/chromium/third_party/blink/renderer/build/scripts/core/css/make_style_shorthands.py
 @@ -71,7 +71,7 @@ class Expansion(object):
@@ -1417,7 +1413,7 @@ index 1799cd5a1..5f43ffabc 100755
              for longhand_enum_key in property_['longhand_enum_keys']:
                  self._longhand_dictionary[longhand_enum_key].append(property_)
 diff --git a/chromium/third_party/blink/renderer/build/scripts/core/css/properties/make_css_property_instances.py b/chromium/third_party/blink/renderer/build/scripts/core/css/properties/make_css_property_instances.py
-index 75030ac57..f72aadee1 100755
+index 75030ac577e..f72aadee17d 100755
 --- a/chromium/third_party/blink/renderer/build/scripts/core/css/properties/make_css_property_instances.py
 +++ b/chromium/third_party/blink/renderer/build/scripts/core/css/properties/make_css_property_instances.py
 @@ -42,8 +42,8 @@ class CSSPropertyInstancesWriter(json5_generator.Writer):
@@ -1432,7 +1428,7 @@ index 75030ac57..f72aadee1 100755
          # Sort by enum value.
          self._property_classes_by_id.sort(key=lambda t: t.enum_value)
 diff --git a/chromium/third_party/blink/renderer/build/scripts/gperf.py b/chromium/third_party/blink/renderer/build/scripts/gperf.py
-index 5ee49056b..db72660d4 100644
+index 5ee49056be4..db72660d471 100644
 --- a/chromium/third_party/blink/renderer/build/scripts/gperf.py
 +++ b/chromium/third_party/blink/renderer/build/scripts/gperf.py
 @@ -95,7 +95,7 @@ def main():
@@ -1445,7 +1441,7 @@ index 5ee49056b..db72660d4 100644
  
  if __name__ == '__main__':
 diff --git a/chromium/third_party/blink/renderer/build/scripts/in_file.py b/chromium/third_party/blink/renderer/build/scripts/in_file.py
-index 28adc050f..58113483e 100644
+index 28adc050f1e..58113483e57 100644
 --- a/chromium/third_party/blink/renderer/build/scripts/in_file.py
 +++ b/chromium/third_party/blink/renderer/build/scripts/in_file.py
 @@ -66,7 +66,7 @@ class InFile(object):
@@ -1458,7 +1454,7 @@ index 28adc050f..58113483e 100644
      @classmethod
      def load_from_files(self, file_paths, defaults, valid_values,
 diff --git a/chromium/third_party/blink/renderer/build/scripts/in_generator.py b/chromium/third_party/blink/renderer/build/scripts/in_generator.py
-index e46740a2e..ab1981ad1 100644
+index e46740a2e85..ab1981ad1e3 100644
 --- a/chromium/third_party/blink/renderer/build/scripts/in_generator.py
 +++ b/chromium/third_party/blink/renderer/build/scripts/in_generator.py
 @@ -32,10 +32,15 @@ import os
@@ -1478,7 +1474,7 @@ index e46740a2e..ab1981ad1 100644
  #########################################################
  # This is now deprecated - use json5_generator.py instead
 diff --git a/chromium/third_party/blink/renderer/build/scripts/make_runtime_features.py b/chromium/third_party/blink/renderer/build/scripts/make_runtime_features.py
-index cafe8d94a..6925a4fa5 100755
+index cafe8d94a8e..6925a4fa580 100755
 --- a/chromium/third_party/blink/renderer/build/scripts/make_runtime_features.py
 +++ b/chromium/third_party/blink/renderer/build/scripts/make_runtime_features.py
 @@ -138,7 +138,7 @@ class RuntimeFeatureWriter(BaseRuntimeFeatureWriter):
@@ -1491,7 +1487,7 @@ index cafe8d94a..6925a4fa5 100755
  
      def _template_inputs(self):
 diff --git a/chromium/third_party/blink/renderer/build/scripts/templates/element_factory.cc.tmpl b/chromium/third_party/blink/renderer/build/scripts/templates/element_factory.cc.tmpl
-index dc3f44c5b..3eefcf9f0 100644
+index dc3f44c5b10..3eefcf9f0ee 100644
 --- a/chromium/third_party/blink/renderer/build/scripts/templates/element_factory.cc.tmpl
 +++ b/chromium/third_party/blink/renderer/build/scripts/templates/element_factory.cc.tmpl
 @@ -26,7 +26,7 @@ using {{namespace}}FunctionMap = HashMap<AtomicString, {{namespace}}ConstructorF
@@ -1513,7 +1509,7 @@ index dc3f44c5b..3eefcf9f0 100644
    {% endfor %}
    };
 diff --git a/chromium/third_party/blink/renderer/build/scripts/templates/element_type_helpers.cc.tmpl b/chromium/third_party/blink/renderer/build/scripts/templates/element_type_helpers.cc.tmpl
-index 9bfc489e0..5f86184e8 100644
+index 9bfc489e048..5f86184e879 100644
 --- a/chromium/third_party/blink/renderer/build/scripts/templates/element_type_helpers.cc.tmpl
 +++ b/chromium/third_party/blink/renderer/build/scripts/templates/element_type_helpers.cc.tmpl
 @@ -22,7 +22,7 @@ HTMLTypeMap CreateHTMLTypeMap() {
@@ -1535,7 +1531,7 @@ index 9bfc489e0..5f86184e8 100644
    if (tagName == "{{tag.name}}") {
      if (!RuntimeEnabledFeatures::{{tag.runtimeEnabled}}Enabled(document->GetExecutionContext())) {
 diff --git a/chromium/third_party/blink/renderer/build/scripts/templates/element_type_helpers.h.tmpl b/chromium/third_party/blink/renderer/build/scripts/templates/element_type_helpers.h.tmpl
-index 1b5297d52..edecc81d9 100644
+index 1b5297d52dc..edecc81d9d4 100644
 --- a/chromium/third_party/blink/renderer/build/scripts/templates/element_type_helpers.h.tmpl
 +++ b/chromium/third_party/blink/renderer/build/scripts/templates/element_type_helpers.h.tmpl
 @@ -15,7 +15,7 @@ namespace blink {
@@ -1548,7 +1544,7 @@ index 1b5297d52..edecc81d9 100644
  template <>
  inline bool IsElementOfType<const {{tag.interface}}>(const Node& node) {
 diff --git a/chromium/third_party/blink/renderer/build/scripts/templates/macros.tmpl b/chromium/third_party/blink/renderer/build/scripts/templates/macros.tmpl
-index 0244433af..dcdbb02a5 100644
+index 0244433af2e..dcdbb02a56c 100644
 --- a/chromium/third_party/blink/renderer/build/scripts/templates/macros.tmpl
 +++ b/chromium/third_party/blink/renderer/build/scripts/templates/macros.tmpl
 @@ -25,7 +25,7 @@
@@ -1570,7 +1566,7 @@ index 0244433af..dcdbb02a5 100644
  {% else %}
      {% if lowercase_data %}
 diff --git a/chromium/third_party/blink/renderer/build/scripts/templates/make_qualified_names.h.tmpl b/chromium/third_party/blink/renderer/build/scripts/templates/make_qualified_names.h.tmpl
-index cb05c6c43..bd5566b03 100644
+index cb05c6c4315..bd5566b03e7 100644
 --- a/chromium/third_party/blink/renderer/build/scripts/templates/make_qualified_names.h.tmpl
 +++ b/chromium/third_party/blink/renderer/build/scripts/templates/make_qualified_names.h.tmpl
 @@ -24,12 +24,12 @@ namespace {{cpp_namespace}} {
@@ -1589,7 +1585,7 @@ index cb05c6c43..bd5566b03 100644
  {% endfor %}
  
 diff --git a/chromium/third_party/dawn/generator/generator_lib.py b/chromium/third_party/dawn/generator/generator_lib.py
-index 5e3734d78..e3d46bd19 100644
+index 5e3734d7833..e3d46bd194f 100644
 --- a/chromium/third_party/dawn/generator/generator_lib.py
 +++ b/chromium/third_party/dawn/generator/generator_lib.py
 @@ -201,6 +201,10 @@ def _compute_python_dependencies(root_dir=None):
@@ -1604,7 +1600,7 @@ index 5e3734d78..e3d46bd19 100644
  
          if not path.startswith(root_dir):
 diff --git a/chromium/third_party/devtools-frontend/src/BUILD.gn b/chromium/third_party/devtools-frontend/src/BUILD.gn
-index cd488e88b..ea1dc3d9a 100644
+index cd488e88b60..ea1dc3d9a79 100644
 --- a/chromium/third_party/devtools-frontend/src/BUILD.gn
 +++ b/chromium/third_party/devtools-frontend/src/BUILD.gn
 @@ -2,6 +2,8 @@
@@ -1617,7 +1613,7 @@ index cd488e88b..ea1dc3d9a 100644
  import("./all_devtools_files.gni")
  import("./all_devtools_modules.gni")
 diff --git a/chromium/third_party/devtools-frontend/src/scripts/build/build_inspector_overlay.py b/chromium/third_party/devtools-frontend/src/scripts/build/build_inspector_overlay.py
-index d6666e8b7..0f7a661e6 100644
+index d6666e8b74f..0f7a661e632 100644
 --- a/chromium/third_party/devtools-frontend/src/scripts/build/build_inspector_overlay.py
 +++ b/chromium/third_party/devtools-frontend/src/scripts/build/build_inspector_overlay.py
 @@ -45,7 +45,8 @@ def rollup(input_path, output_path, filename, max_size, rollup_plugin):
@@ -1631,7 +1627,7 @@ index d6666e8b7..0f7a661e6 100644
      if not out:
          raise Exception("rollup failed: " + error)
 diff --git a/chromium/third_party/devtools-frontend/src/scripts/build/build_release_applications.py b/chromium/third_party/devtools-frontend/src/scripts/build/build_release_applications.py
-index fa8e73d34..7d0b84b21 100644
+index fa8e73d34af..7d0b84b2171 100644
 --- a/chromium/third_party/devtools-frontend/src/scripts/build/build_release_applications.py
 +++ b/chromium/third_party/devtools-frontend/src/scripts/build/build_release_applications.py
 @@ -10,7 +10,7 @@ Builds applications in release mode:
@@ -1665,7 +1661,7 @@ index fa8e73d34..7d0b84b21 100644
              output.write('Root.applicationDescriptor = %s;' % self.descriptors.application_json())
  
 diff --git a/chromium/third_party/devtools-frontend/src/scripts/build/generate_devtools_grd.py b/chromium/third_party/devtools-frontend/src/scripts/build/generate_devtools_grd.py
-index be510c48d..c6a59c902 100644
+index be510c48d76..c6a59c90298 100644
 --- a/chromium/third_party/devtools-frontend/src/scripts/build/generate_devtools_grd.py
 +++ b/chromium/third_party/devtools-frontend/src/scripts/build/generate_devtools_grd.py
 @@ -123,7 +123,7 @@ def main(argv):
@@ -1687,7 +1683,7 @@ index be510c48d..c6a59c902 100644
  
  
 diff --git a/chromium/third_party/devtools-frontend/src/scripts/build/modular_build.py b/chromium/third_party/devtools-frontend/src/scripts/build/modular_build.py
-index 0ba695d38..bb1da2f9f 100644
+index 0ba695d3810..bb1da2f9f8d 100644
 --- a/chromium/third_party/devtools-frontend/src/scripts/build/modular_build.py
 +++ b/chromium/third_party/devtools-frontend/src/scripts/build/modular_build.py
 @@ -7,6 +7,8 @@
@@ -1718,7 +1714,7 @@ index 0ba695d38..bb1da2f9f 100644
  
      def all_compiled_files(self):
 diff --git a/chromium/third_party/jinja2/tests.py b/chromium/third_party/jinja2/tests.py
-index 0adc3d4db..b14f85ff1 100644
+index 0adc3d4dbcb..b14f85ff148 100644
 --- a/chromium/third_party/jinja2/tests.py
 +++ b/chromium/third_party/jinja2/tests.py
 @@ -10,7 +10,7 @@
@@ -1730,639 +1726,8 @@ index 0adc3d4db..b14f85ff1 100644
  from jinja2.runtime import Undefined
  from jinja2._compat import text_type, string_types, integer_types
  import decimal
-diff --git a/chromium/third_party/nearby/src/cpp/core_v2/internal/base_pcp_handler_test.cc.orig b/chromium/third_party/nearby/src/cpp/core_v2/internal/base_pcp_handler_test.cc.orig
-deleted file mode 100644
-index c90094134..000000000
---- a/chromium/third_party/nearby/src/cpp/core_v2/internal/base_pcp_handler_test.cc.orig
-+++ /dev/null
-@@ -1,538 +0,0 @@
--#include "core_v2/internal/base_pcp_handler.h"
--
--#include <atomic>
--#include <memory>
--
--#include "core_v2/internal/base_endpoint_channel.h"
--#include "core_v2/internal/client_proxy.h"
--#include "core_v2/internal/encryption_runner.h"
--#include "core_v2/internal/offline_frames.h"
--#include "core_v2/listeners.h"
--#include "core_v2/options.h"
--#include "core_v2/params.h"
--#include "proto/connections/offline_wire_formats.pb.h"
--#include "platform_v2/base/byte_array.h"
--#include "platform_v2/public/count_down_latch.h"
--#include "platform_v2/public/pipe.h"
--#include "gmock/gmock.h"
--#include "gtest/gtest.h"
--#include "absl/time/time.h"
--
--namespace location {
--namespace nearby {
--namespace connections {
--namespace {
--
--using ::location::nearby::proto::connections::Medium;
--using ::testing::_;
--using ::testing::AtLeast;
--using ::testing::Invoke;
--using ::testing::MockFunction;
--using ::testing::Return;
--using ::testing::StrictMock;
--
--constexpr BooleanMediumSelector kTestCases[] = {
--    BooleanMediumSelector{},
--    BooleanMediumSelector{
--        .bluetooth = true,
--    },
--    BooleanMediumSelector{
--        .wifi_lan = true,
--    },
--    BooleanMediumSelector{
--        .bluetooth = true,
--        .wifi_lan = true,
--    },
--};
--
--class MockEndpointChannel : public BaseEndpointChannel {
-- public:
--  explicit MockEndpointChannel(Pipe* reader, Pipe* writer)
--      : BaseEndpointChannel("channel", &reader->GetInputStream(),
--                            &writer->GetOutputStream()) {}
--
--  ExceptionOr<ByteArray> DoRead() { return BaseEndpointChannel::Read(); }
--  Exception DoWrite(const ByteArray& data) {
--    return BaseEndpointChannel::Write(data);
--  }
--  absl::Time DoGetLastReadTimestamp() {
--    return BaseEndpointChannel::GetLastReadTimestamp();
--  }
--
--  MOCK_METHOD(ExceptionOr<ByteArray>, Read, (), (override));
--  MOCK_METHOD(Exception, Write, (const ByteArray& data), (override));
--  MOCK_METHOD(void, CloseImpl, (), (override));
--  MOCK_METHOD(proto::connections::Medium, GetMedium, (), (const override));
--  MOCK_METHOD(std::string, GetType, (), (const override));
--  MOCK_METHOD(std::string, GetName, (), (const override));
--  MOCK_METHOD(bool, IsPaused, (), (const override));
--  MOCK_METHOD(void, Pause, (), (override));
--  MOCK_METHOD(void, Resume, (), (override));
--  MOCK_METHOD(absl::Time, GetLastReadTimestamp, (), (const override));
--};
--
--class MockPcpHandler : public BasePcpHandler {
-- public:
--  using DiscoveredEndpoint = BasePcpHandler::DiscoveredEndpoint;
--
--  MockPcpHandler(EndpointManager* em, EndpointChannelManager* ecm)
--      : BasePcpHandler(em, ecm, Pcp::kP2pCluster) {}
--
--  // Expose protected inner types of a base type for mocking.
--  using BasePcpHandler::ConnectImplResult;
--  using BasePcpHandler::DiscoveredEndpoint;
--  using BasePcpHandler::StartOperationResult;
--
--  MOCK_METHOD(Strategy, GetStrategy, (), (const override));
--  MOCK_METHOD(Pcp, GetPcp, (), (const override));
--
--  MOCK_METHOD(bool, HasOutgoingConnections, (ClientProxy * client),
--              (const, override));
--  MOCK_METHOD(bool, HasIncomingConnections, (ClientProxy * client),
--              (const, override));
--
--  MOCK_METHOD(bool, CanSendOutgoingConnection, (ClientProxy * client),
--              (const, override));
--  MOCK_METHOD(bool, CanReceiveIncomingConnection, (ClientProxy * client),
--              (const, override));
--
--  MOCK_METHOD(StartOperationResult, StartAdvertisingImpl,
--              (ClientProxy * client, const string& service_id,
--               const string& local_endpoint_id,
--               const string& local_endpoint_name,
--               const ConnectionOptions& options),
--              (override));
--  MOCK_METHOD(Status, StopAdvertisingImpl, (ClientProxy * client), (override));
--  MOCK_METHOD(StartOperationResult, StartDiscoveryImpl,
--              (ClientProxy * client, const string& service_id,
--               const ConnectionOptions& options),
--              (override));
--  MOCK_METHOD(Status, StopDiscoveryImpl, (ClientProxy * client), (override));
--  MOCK_METHOD(ConnectImplResult, ConnectImpl,
--              (ClientProxy * client, DiscoveredEndpoint* endpoint), (override));
--  MOCK_METHOD(proto::connections::Medium, GetDefaultUpgradeMedium, (),
--              (override));
--
--  std::vector<proto::connections::Medium> GetConnectionMediumsByPriority()
--      override {
--    return GetDiscoveryMediums();
--  }
--
--  // Mock adapters for protected non-virtual methods of a base class.
--  void OnEndpointFound(ClientProxy* client,
--                       std::shared_ptr<DiscoveredEndpoint> endpoint) {
--    BasePcpHandler::OnEndpointFound(client, std::move(endpoint));
--  }
--  void OnEndpointLost(ClientProxy* client, const DiscoveredEndpoint& endpoint) {
--    BasePcpHandler::OnEndpointLost(client, endpoint);
--  }
--
--  std::vector<proto::connections::Medium> GetDiscoveryMediums() {
--    std::vector<proto::connections::Medium> mediums;
--    auto allowed =
--        BasePcpHandler::GetDiscoveryOptions().CompatibleOptions().allowed;
--    // Mediums are sorted in order of decreasing preference.
--    if (allowed.wifi_lan)
--      mediums.push_back(proto::connections::Medium::WIFI_LAN);
--    if (allowed.web_rtc) mediums.push_back(proto::connections::Medium::WEB_RTC);
--    if (allowed.bluetooth)
--      mediums.push_back(proto::connections::Medium::BLUETOOTH);
--    return mediums;
--  }
--
--  std::vector<BasePcpHandler::DiscoveredEndpoint*> GetDiscoveredEndpoints(
--      const std::string& endpoint_id) {
--    return BasePcpHandler::GetDiscoveredEndpoints(endpoint_id);
--  }
--};
--
--class MockContext {
-- public:
--  explicit MockContext(std::atomic_int* destroyed = nullptr) {
--    destroyed_ = destroyed;
--  }
--  MockContext(MockContext&&) = default;
--  MockContext& operator=(MockContext&&) = default;
--
--  ~MockContext() {
--    if (destroyed_) (*destroyed_)++;
--  }
--
-- private:
--  Swapper<std::atomic_int> destroyed_{nullptr};
--};
--
--struct MockDiscoveredEndpoint : public MockPcpHandler::DiscoveredEndpoint {
--  MockDiscoveredEndpoint(DiscoveredEndpoint endpoint, MockContext context)
--      : DiscoveredEndpoint(std::move(endpoint)), context(std::move(context)) {}
--
--  MockContext context;
--};
--
--class BasePcpHandlerTest
--    : public ::testing::TestWithParam<BooleanMediumSelector> {
-- protected:
--  struct MockConnectionListener {
--    StrictMock<MockFunction<void(const std::string& endpoint_id,
--                                 const ConnectionResponseInfo& info)>>
--        initiated_cb;
--    StrictMock<MockFunction<void(const std::string& endpoint_id)>> accepted_cb;
--    StrictMock<MockFunction<void(const std::string& endpoint_id,
--                                 const Status& status)>>
--        rejected_cb;
--    StrictMock<MockFunction<void(const std::string& endpoint_id)>>
--        disconnected_cb;
--    StrictMock<MockFunction<void(const std::string& endpoint_id,
--                                 std::int32_t quality)>>
--        bandwidth_changed_cb;
--  };
--  struct MockDiscoveryListener {
--    StrictMock<MockFunction<void(const std::string& endpoint_id,
--                                 const std::string& endpoint_name,
--                                 const std::string& service_id)>>
--        endpoint_found_cb;
--    StrictMock<MockFunction<void(const std::string& endpoint_id)>>
--        endpoint_lost_cb;
--    StrictMock<
--        MockFunction<void(const std::string& endpoint_id, DistanceInfo info)>>
--        endpoint_distance_changed_cb;
--  };
--
--  void StartAdvertising(ClientProxy* client, MockPcpHandler* pcp_handler,
--                        BooleanMediumSelector allowed = GetParam()) {
--    std::string service_id{"service"};
--    ConnectionOptions options{
--        .strategy = Strategy::kP2pCluster,
--        .allowed = allowed,
--        .auto_upgrade_bandwidth = true,
--        .enforce_topology_constraints = true,
--    };
--    ConnectionRequestInfo info{
--        .name = "remote_endpoint_name",
--        .listener = connection_listener_,
--    };
--    EXPECT_CALL(*pcp_handler,
--                StartAdvertisingImpl(client, service_id, _, info.name, _))
--        .WillOnce(Return(MockPcpHandler::StartOperationResult{
--            .status = {Status::kSuccess},
--            .mediums = {Medium::BLE},
--        }));
--    EXPECT_EQ(pcp_handler->StartAdvertising(client, service_id, options, info),
--              Status{Status::kSuccess});
--    EXPECT_TRUE(client->IsAdvertising());
--  }
--
--  void StartDiscovery(ClientProxy* client, MockPcpHandler* pcp_handler,
--                      BooleanMediumSelector allowed = GetParam()) {
--    std::string service_id{"service"};
--    ConnectionOptions options{
--        .strategy = Strategy::kP2pCluster,
--        .allowed = allowed,
--        .auto_upgrade_bandwidth = true,
--        .enforce_topology_constraints = true,
--    };
--    EXPECT_CALL(*pcp_handler, StartDiscoveryImpl(client, service_id, _))
--        .WillOnce(Return(MockPcpHandler::StartOperationResult{
--            .status = {Status::kSuccess},
--            .mediums = {Medium::BLE},
--        }));
--    EXPECT_EQ(pcp_handler->StartDiscovery(client, service_id, options,
--                                          discovery_listener_),
--              Status{Status::kSuccess});
--    EXPECT_TRUE(client->IsDiscovering());
--  }
--
--  std::pair<std::unique_ptr<MockEndpointChannel>,
--            std::unique_ptr<MockEndpointChannel>>
--  SetupConnection(Pipe& pipe_a, Pipe& pipe_b) {  // NOLINT
--    auto channel_a = std::make_unique<MockEndpointChannel>(&pipe_b, &pipe_a);
--    auto channel_b = std::make_unique<MockEndpointChannel>(&pipe_a, &pipe_b);
--    // On initiator (A) side, we drop the first write, since this is a
--    // connection establishment packet, and we don't have the peer entity, just
--    // the peer channel. The rest of the exchange must happen for the benefit of
--    // DH key exchange.
--    EXPECT_CALL(*channel_a, Read())
--        .WillRepeatedly(Invoke(
--            [channel = channel_a.get()]() { return channel->DoRead(); }));
--    EXPECT_CALL(*channel_a, Write(_))
--        .WillOnce(Return(Exception{Exception::kSuccess}))
--        .WillRepeatedly(
--            Invoke([channel = channel_a.get()](const ByteArray& data) {
--              return channel->DoWrite(data);
--            }));
--    EXPECT_CALL(*channel_a, GetMedium).WillRepeatedly(Return(Medium::BLE));
--    EXPECT_CALL(*channel_a, GetLastReadTimestamp)
--        .WillRepeatedly(Return(absl::Now()));
--    EXPECT_CALL(*channel_a, IsPaused).WillRepeatedly(Return(false));
--    EXPECT_CALL(*channel_b, Read())
--        .WillRepeatedly(Invoke(
--            [channel = channel_b.get()]() { return channel->DoRead(); }));
--    EXPECT_CALL(*channel_b, Write(_))
--        .WillRepeatedly(
--            Invoke([channel = channel_b.get()](const ByteArray& data) {
--              return channel->DoWrite(data);
--            }));
--    EXPECT_CALL(*channel_b, GetMedium).WillRepeatedly(Return(Medium::BLE));
--    EXPECT_CALL(*channel_b, GetLastReadTimestamp)
--        .WillRepeatedly(Return(absl::Now()));
--    EXPECT_CALL(*channel_b, IsPaused).WillRepeatedly(Return(false));
--    return std::make_pair(std::move(channel_a), std::move(channel_b));
--  }
--
--  void RequestConnection(const std::string& endpoint_id,
--                         std::unique_ptr<MockEndpointChannel> channel_a,
--                         MockEndpointChannel* channel_b, ClientProxy* client,
--                         MockPcpHandler* pcp_handler,
--                         std::atomic_int* flag = nullptr) {
--    ConnectionRequestInfo info{
--        .name = "ABCD",
--        .listener = connection_listener_,
--    };
--    EXPECT_CALL(mock_discovery_listener_.endpoint_found_cb, Call);
--    EXPECT_CALL(*pcp_handler, CanSendOutgoingConnection)
--        .WillRepeatedly(Return(true));
--    EXPECT_CALL(*pcp_handler, GetStrategy)
--        .WillRepeatedly(Return(Strategy::kP2pCluster));
--    EXPECT_CALL(mock_connection_listener_.initiated_cb, Call).Times(1);
--    // Simulate successful discovery.
--    auto encryption_runner = std::make_unique<EncryptionRunner>();
--    auto allowed_mediums = pcp_handler->GetDiscoveryMediums();
--
--    EXPECT_CALL(*pcp_handler, ConnectImpl)
--        .WillOnce(Invoke([&channel_a, medium = allowed_mediums[0]](
--                             ClientProxy* client,
--                             MockPcpHandler::DiscoveredEndpoint* endpoint) {
--          return MockPcpHandler::ConnectImplResult{
--              .medium = medium,
--              .status = {Status::kSuccess},
--              .endpoint_channel = std::move(channel_a),
--          };
--        }));
--
--    for (const auto& medium : allowed_mediums) {
--      pcp_handler->OnEndpointFound(
--          client,
--          std::make_shared<MockDiscoveredEndpoint>(MockDiscoveredEndpoint{
--              {
--                  endpoint_id,
--                  info.name,
--                  "service",
--                  medium,
--              },
--              MockContext{flag},
--          }));
--    }
--    auto other_client = std::make_unique<ClientProxy>();
--
--    // Run peer crypto in advance, if channel_b is provided.
--    // Otherwise stay in not-encrypted state.
--    if (channel_b != nullptr) {
--      encryption_runner->StartServer(other_client.get(), endpoint_id, channel_b,
--                                     {});
--    }
--    EXPECT_EQ(pcp_handler->RequestConnection(client, endpoint_id, info),
--              Status{Status::kSuccess});
--    NEARBY_LOG(INFO, "Stopping Encryption Runner");
--  }
--
--  Pipe pipe_a_;
--  Pipe pipe_b_;
--  MockConnectionListener mock_connection_listener_;
--  MockDiscoveryListener mock_discovery_listener_;
--  ConnectionListener connection_listener_{
--      .initiated_cb = mock_connection_listener_.initiated_cb.AsStdFunction(),
--      .accepted_cb = mock_connection_listener_.accepted_cb.AsStdFunction(),
--      .rejected_cb = mock_connection_listener_.rejected_cb.AsStdFunction(),
--      .disconnected_cb =
--          mock_connection_listener_.disconnected_cb.AsStdFunction(),
--      .bandwidth_changed_cb =
--          mock_connection_listener_.bandwidth_changed_cb.AsStdFunction(),
--  };
--  DiscoveryListener discovery_listener_{
--      .endpoint_found_cb =
--          mock_discovery_listener_.endpoint_found_cb.AsStdFunction(),
--      .endpoint_lost_cb =
--          mock_discovery_listener_.endpoint_lost_cb.AsStdFunction(),
--      .endpoint_distance_changed_cb =
--          mock_discovery_listener_.endpoint_distance_changed_cb.AsStdFunction(),
--  };
--};
--
--TEST_P(BasePcpHandlerTest, ConstructorDestructorWorks) {
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  SUCCEED();
--}
--
--TEST_P(BasePcpHandlerTest, StartAdvertisingChangesState) {
--  ClientProxy client;
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  StartAdvertising(&client, &pcp_handler);
--}
--
--TEST_P(BasePcpHandlerTest, StopAdvertisingChangesState) {
--  ClientProxy client;
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  StartAdvertising(&client, &pcp_handler);
--  EXPECT_CALL(pcp_handler, StopAdvertisingImpl(&client)).Times(1);
--  EXPECT_TRUE(client.IsAdvertising());
--  pcp_handler.StopAdvertising(&client);
--  EXPECT_FALSE(client.IsAdvertising());
--}
--
--TEST_P(BasePcpHandlerTest, StartDiscoveryChangesState) {
--  ClientProxy client;
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  StartDiscovery(&client, &pcp_handler);
--}
--
--TEST_P(BasePcpHandlerTest, StopDiscoveryChangesState) {
--  ClientProxy client;
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  StartDiscovery(&client, &pcp_handler);
--  EXPECT_CALL(pcp_handler, StopDiscoveryImpl(&client)).Times(1);
--  EXPECT_TRUE(client.IsDiscovering());
--  pcp_handler.StopDiscovery(&client);
--  EXPECT_FALSE(client.IsDiscovering());
--}
--
--TEST_P(BasePcpHandlerTest, RequestConnectionChangesState) {
--  std::string endpoint_id{"1234"};
--  ClientProxy client;
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  StartDiscovery(&client, &pcp_handler);
--  auto channel_pair = SetupConnection(pipe_a_, pipe_b_);
--  auto& channel_a = channel_pair.first;
--  auto& channel_b = channel_pair.second;
--  EXPECT_CALL(*channel_a, CloseImpl).Times(1);
--  EXPECT_CALL(*channel_b, CloseImpl).Times(1);
--  EXPECT_CALL(mock_connection_listener_.rejected_cb, Call).Times(AtLeast(0));
--  RequestConnection(endpoint_id, std::move(channel_a), channel_b.get(), &client,
--                    &pcp_handler);
--  NEARBY_LOG(INFO, "RequestConnection complete");
--  channel_b->Close();
--  pcp_handler.DisconnectFromEndpointManager();
--}
--
--TEST_P(BasePcpHandlerTest, AcceptConnectionChangesState) {
--  std::string endpoint_id{"1234"};
--  ClientProxy client;
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  StartDiscovery(&client, &pcp_handler);
--  auto channel_pair = SetupConnection(pipe_a_, pipe_b_);
--  auto& channel_a = channel_pair.first;
--  auto& channel_b = channel_pair.second;
--  EXPECT_CALL(*channel_a, CloseImpl).Times(1);
--  EXPECT_CALL(*channel_b, CloseImpl).Times(1);
--  RequestConnection(endpoint_id, std::move(channel_a), channel_b.get(), &client,
--                    &pcp_handler);
--  NEARBY_LOG(INFO, "Attempting to accept connection: id=%s",
--             endpoint_id.c_str());
--  EXPECT_EQ(pcp_handler.AcceptConnection(&client, endpoint_id, {}),
--            Status{Status::kSuccess});
--  EXPECT_CALL(mock_connection_listener_.rejected_cb, Call).Times(AtLeast(0));
--  NEARBY_LOGS(INFO) << "Closing connection: id=" << endpoint_id;
--  channel_b->Close();
--  pcp_handler.DisconnectFromEndpointManager();
--}
--
--TEST_P(BasePcpHandlerTest, RejectConnectionChangesState) {
--  std::string endpoint_id{"1234"};
--  ClientProxy client;
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  StartDiscovery(&client, &pcp_handler);
--  auto channel_pair = SetupConnection(pipe_a_, pipe_b_);
--  auto& channel_b = channel_pair.second;
--  EXPECT_CALL(mock_connection_listener_.rejected_cb, Call).Times(1);
--  RequestConnection(endpoint_id, std::move(channel_pair.first), channel_b.get(),
--                    &client, &pcp_handler);
--  NEARBY_LOGS(INFO) << "Attempting to reject connection: id=" << endpoint_id;
--  EXPECT_EQ(pcp_handler.RejectConnection(&client, endpoint_id),
--            Status{Status::kSuccess});
--  NEARBY_LOGS(INFO) << "Closing connection: id=" << endpoint_id;
--  channel_b->Close();
--  pcp_handler.DisconnectFromEndpointManager();
--}
--
--TEST_P(BasePcpHandlerTest, OnIncomingFrameChangesState) {
--  std::string endpoint_id{"1234"};
--  ClientProxy client;
--  EndpointChannelManager ecm;
--  EndpointManager em(&ecm);
--  MockPcpHandler pcp_handler(&em, &ecm);
--  StartDiscovery(&client, &pcp_handler);
--  auto channel_pair = SetupConnection(pipe_a_, pipe_b_);
--  auto& channel_a = channel_pair.first;
--  auto& channel_b = channel_pair.second;
--  EXPECT_CALL(*channel_a, CloseImpl).Times(1);
--  EXPECT_CALL(*channel_b, CloseImpl).Times(1);
--  RequestConnection(endpoint_id, std::move(channel_a), channel_b.get(), &client,
--                    &pcp_handler);
--  NEARBY_LOGS(INFO) << "Attempting to accept connection: id=" << endpoint_id;
--  EXPECT_CALL(mock_connection_listener_.accepted_cb, Call).Times(1);
--  EXPECT_CALL(mock_connection_listener_.disconnected_cb, Call)
--      .Times(AtLeast(0));
--  EXPECT_EQ(pcp_handler.AcceptConnection(&client, endpoint_id, {}),
--            Status{Status::kSuccess});
--  NEARBY_LOG(INFO, "Simulating remote accept: id=%s", endpoint_id.c_str());
--  auto frame =
--      parser::FromBytes(parser::ForConnectionResponse(Status::kSuccess));
--  pcp_handler.OnIncomingFrame(frame.result(), endpoint_id, &client,
--                              Medium::BLE);
--  NEARBY_LOGS(INFO) << "Closing connection: id=" << endpoint_id;
--  channel_b->Close();
--  pcp_handler.DisconnectFromEndpointManager();
--}
--
--TEST_P(BasePcpHandlerTest, DestructorIsCalledOnProtocolEndpoint) {
--  std::atomic_int destroyed_flag = 0;
--  int mediums_count = 0;
--  {
--    std::string endpoint_id{"1234"};
--    ClientProxy client;
--    EndpointChannelManager ecm;
--    EndpointManager em(&ecm);
--    MockPcpHandler pcp_handler(&em, &ecm);
--    StartDiscovery(&client, &pcp_handler);
--    auto channel_pair = SetupConnection(pipe_a_, pipe_b_);
--    auto& channel_a = channel_pair.first;
--    auto& channel_b = channel_pair.second;
--    EXPECT_CALL(*channel_a, CloseImpl).Times(1);
--    EXPECT_CALL(*channel_b, CloseImpl).Times(1);
--    RequestConnection(endpoint_id, std::move(channel_a), channel_b.get(),
--                      &client, &pcp_handler, &destroyed_flag);
--    mediums_count = pcp_handler.GetDiscoveryMediums().size();
--    NEARBY_LOG(INFO, "Attempting to accept connection: id=%s",
--               endpoint_id.c_str());
--    EXPECT_EQ(pcp_handler.AcceptConnection(&client, endpoint_id, {}),
--              Status{Status::kSuccess});
--    EXPECT_CALL(mock_connection_listener_.rejected_cb, Call).Times(AtLeast(0));
--    NEARBY_LOG(INFO, "Closing connection: id=%s", endpoint_id.c_str());
--    channel_b->Close();
--    pcp_handler.DisconnectFromEndpointManager();
--  }
--  EXPECT_EQ(destroyed_flag.load(), mediums_count);
--}
--
--INSTANTIATE_TEST_SUITE_P(ParameterizedBasePcpHandlerTest, BasePcpHandlerTest,
--                         ::testing::ValuesIn(kTestCases));
--
--}  // namespace
--}  // namespace connections
--}  // namespace nearby
--}  // namespace location
-diff --git a/chromium/third_party/nearby/src/cpp/core_v2/internal/offline_service_controller.h.orig b/chromium/third_party/nearby/src/cpp/core_v2/internal/offline_service_controller.h.orig
-deleted file mode 100644
-index 97517fa71..000000000
---- a/chromium/third_party/nearby/src/cpp/core_v2/internal/offline_service_controller.h.orig
-+++ /dev/null
-@@ -1,81 +0,0 @@
--#ifndef CORE_V2_INTERNAL_OFFLINE_SERVICE_CONTROLLER_H_
--#define CORE_V2_INTERNAL_OFFLINE_SERVICE_CONTROLLER_H_
--
--#include <cstdint>
--#include <string>
--#include <vector>
--
--#include "core_v2/internal/client_proxy.h"
--#include "core_v2/internal/endpoint_channel_manager.h"
--#include "core_v2/internal/endpoint_manager.h"
--#include "core_v2/internal/mediums/mediums.h"
--#include "core_v2/internal/payload_manager.h"
--#include "core_v2/internal/pcp_manager.h"
--#include "core_v2/internal/service_controller.h"
--#include "core_v2/listeners.h"
--#include "core_v2/options.h"
--#include "core_v2/payload.h"
--#include "core_v2/status.h"
--
--namespace location {
--namespace nearby {
--namespace connections {
--
--class OfflineServiceController : public ServiceController {
-- public:
--  OfflineServiceController() = default;
--  ~OfflineServiceController() override;
--
--  Status StartAdvertising(ClientProxy* client,
--                          const std::string& service_id,
--                          const ConnectionOptions& options,
--                          const ConnectionRequestInfo& info) override;
--  void StopAdvertising(ClientProxy* client) override;
--
--  Status StartDiscovery(ClientProxy* client,
--                        const std::string& service_id,
--                        const ConnectionOptions& options,
--                        const DiscoveryListener& listener) override;
--  void StopDiscovery(ClientProxy* client) override;
--
--  Status RequestConnection(ClientProxy* client,
--                           const std::string& endpoint_id,
--                           const ConnectionRequestInfo& info,
--                           const ConnectionOptions& options) override;
--  Status AcceptConnection(ClientProxy* client,
--                          const std::string& endpoint_id,
--                          const PayloadListener& listener) override;
--  Status RejectConnection(ClientProxy* client,
--                          const std::string& endpoint_id) override;
--
--  void InitiateBandwidthUpgrade(ClientProxy* client,
--                                const std::string& endpoint_id) override;
--
--  void SendPayload(ClientProxy* client,
--                   const std::vector<std::string>& endpoint_ids,
--                   Payload payload) override;
--  Status CancelPayload(ClientProxy* client,
--                       Payload::Id payload_id) override;
--
--  void DisconnectFromEndpoint(ClientProxy* client,
--                              const std::string& endpoint_id) override;
--
--  void Stop();
--
-- private:
--  // Note that the order of declaration of these is crucial, because we depend
--  // on the destructors running (strictly) in the reverse order; a deviation
--  // from that will lead to crashes at runtime.
--  AtomicBoolean stop_{false};
--  Mediums mediums_;
--  EndpointChannelManager channel_manager_;
--  EndpointManager endpoint_manager_{&channel_manager_};
--  PayloadManager payload_manager_{endpoint_manager_};
--  PcpManager pcp_manager_{mediums_, channel_manager_, endpoint_manager_};
--};
--
--}  // namespace connections
--}  // namespace nearby
--}  // namespace location
--
--#endif  // CORE_V2_INTERNAL_OFFLINE_SERVICE_CONTROLLER_H_
 diff --git a/chromium/tools/metrics/ukm/gen_builders.py b/chromium/tools/metrics/ukm/gen_builders.py
-index f9f61d90a..44e46fae8 100755
+index f9f61d90a56..44e46fae8cc 100755
 --- a/chromium/tools/metrics/ukm/gen_builders.py
 +++ b/chromium/tools/metrics/ukm/gen_builders.py
 @@ -48,9 +48,10 @@ def ReadFilteredData(path):
@@ -2379,7 +1744,7 @@ index f9f61d90a..44e46fae8 100755
  
  
 diff --git a/chromium/ui/ozone/generate_constructor_list.py b/chromium/ui/ozone/generate_constructor_list.py
-index 8d800636c..04fa18e93 100755
+index 8d800636c97..04fa18e93df 100755
 --- a/chromium/ui/ozone/generate_constructor_list.py
 +++ b/chromium/ui/ozone/generate_constructor_list.py
 @@ -45,12 +45,15 @@ Example Output: ./ui/ozone/generate_constructor_list.py \
@@ -2426,7 +1791,7 @@ index 8d800636c..04fa18e93 100755
    if options.output_cc:
      out_cc.close()
 diff --git a/chromium/ui/ozone/generate_ozone_platform_list.py b/chromium/ui/ozone/generate_ozone_platform_list.py
-index d47c39825..2702b68b9 100755
+index d47c398259b..2702b68b9bd 100755
 --- a/chromium/ui/ozone/generate_ozone_platform_list.py
 +++ b/chromium/ui/ozone/generate_ozone_platform_list.py
 @@ -49,12 +49,15 @@ Example Output: ./generate_ozone_platform_list.py --default wayland dri wayland
@@ -2489,5 +1854,5 @@ index d47c39825..2702b68b9 100755
    if options.output_cc:
      out_cc.close()
 -- 
-2.20.1
+2.25.1
 
