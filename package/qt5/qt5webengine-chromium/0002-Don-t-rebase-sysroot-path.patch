@@ -1,7 +1,7 @@
-From 9b23451499108a041f2a3f12993e866dd490afae Mon Sep 17 00:00:00 2001
+From bfc520671693587a0b81842018326da35aa97f80 Mon Sep 17 00:00:00 2001
 From: James Hilliard <james.hilliard1@gmail.com>
 Date: Thu, 3 Feb 2022 20:41:08 -0700
-Subject: [PATCH 02/14] Don't rebase sysroot path
+Subject: [PATCH] Don't rebase sysroot path
 
 Just use the actual sysroot as rebase_path will generate an invalid
 sysroot path.
@@ -15,7 +15,7 @@ Signed-off-by: James Hilliard <james.hilliard1@gmail.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/chromium/build/config/posix/BUILD.gn b/chromium/build/config/posix/BUILD.gn
-index e61554c56..dc9572258 100644
+index e61554c5656..dc957225869 100644
 --- a/chromium/build/config/posix/BUILD.gn
 +++ b/chromium/build/config/posix/BUILD.gn
 @@ -27,7 +27,7 @@ config("runtime_library") {
@@ -28,5 +28,5 @@ index e61554c56..dc9572258 100644
        # This is here so that all files get recompiled after a sysroot roll and
        # when turning the sysroot on or off. (defines are passed via the command
 -- 
-2.20.1
+2.25.1
 
