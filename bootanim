@@ -24,14 +24,30 @@ pid_sid()
 	ps x -o pid,sid | grep -w $@
 }
 
+bootanim_init()
+{
+	# Save bootanim's pid
+	echo $$ > $PID_FILE
+
+	# Freeze display service
+	touch /dev/null $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
+}
+
+bootanim_deinit()
+{
+	# Unfreeze display service
+	rm -rf $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
+
+	rm -rf "$PID_FILE"
+}
+
 bootanim_start()
 {
 	[ -d $HOOK_DIR ] || return
 
-	echo "Starting bootanim: $$..."
+	echo "Starting bootanim..."
 
-	# Freeze display server
-	touch /dev/null $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
+	bootanim_init
 
 	# Start bootanim hooks
 	for hook in $(find $HOOK_DIR -maxdepth 1 -name "*.sh"); do
@@ -40,42 +56,47 @@ bootanim_start()
 		echo "Started hook: $hook..."
 	done
 
-	# Save bootanim's pid
-	echo $$ > $PID_FILE
-
-	# Exit when no animation started
 	if [ ! -e "$TAG_FILE" ]; then
-		bootanim_stop 2>&1 | tee -a $LOG_FILE
+		echo "No animation started..."
+		bootanim_deinit
 		return
 	fi
 
 	# Timeout killer
-	start-stop-daemon -S -q -b -n bootanim-stop \
-		-x /bin/sh -- -c "sleep $TIMEOUT; $SCRIPT stop"
+	sleep $TIMEOUT
+	bootanim_stop
+}
+
+children_pid()
+{
+	[ -f $PID_FILE ] || return
+
+	SID=$(cat $PID_FILE)
+	[ "$SID" ] || return
+
+	pid_sid $SID | xargs -n 2 | cut -d' ' -f1 | xargs
 }
 
 bootanim_stop()
 {
-	[ -f $PID_FILE ] || return
-
-	# Parse our sid (same as bootanim's pid)
-	SID=$(cat $PID_FILE; rm -rf $PID_FILE)
-	[ -n "$SID" ] || return
+	echo "Stopping bootanim..."
 
 	# Parse children pid
-	CPID=$(pid_sid $SID | xargs -n 2 | cut -d' ' -f1 | xargs)
+	CPID=$(children_pid)
 
-	echo "Stopping bootanim: ${CPID:-none} for $SID..."
+	if [ -z "$CPID" ]; then
+		bootanim_deinit
+		return
+	fi
 
-	# Pause children
-	[ -z "$CPID" ] || kill -STOP $CPID &>/dev/null
-
-	# Unfreeze display server
-	rm -f $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
-	sleep .1
-
-	# Kill children
-	[ -z "$CPID" ] || kill -9 $CPID &>/dev/null
+	{
+		# Pause animation -> unfreeze display -> kill animation
+		kill -STOP $CPID &>/dev/null || true
+		bootanim_deinit
+		sleep .1
+		kill -9 $CPID &>/dev/null || true
+	}&
+	wait
 }
 
 case "$1" in
@@ -84,9 +105,10 @@ case "$1" in
 		if ! pid_sid -q "$$$" || [ $(realpath "$0") != $SCRIPT ] ; then
 			setsid $SCRIPT $@
 		else
-			# Run it
-			$SCRIPT stop
-			bootanim_start 2>&1 | tee -a $LOG_FILE&
+			{
+				bootanim_stop || true
+				bootanim_start
+			} 2>&1 | tee -a $LOG_FILE&
 		fi
 		;;
 	stop)
