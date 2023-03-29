@@ -1,4 +1,4 @@
-From 0f7014b9e27af61e80842aecc2abe4f382942e49 Mon Sep 17 00:00:00 2001
+From 1c0baf5e1507fbccab3bd3e523ae61df461d7bfc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 10:20:40 +0800
 Subject: [PATCH 27/93] Support holding display for the first app
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 37 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 805e05a..ea3c61f 100644
+index d65f8aa..987c8f9 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
-@@ -675,6 +675,7 @@ usage(int error_code)
+@@ -677,6 +677,7 @@ usage(int error_code)
  		"  -f, --flight-rec-scopes=SCOPE\n\t\t\tSpecify log scopes to "
  			"subscribe to.\n\t\t\tCan specify multiple scopes, "
  			"each followed by comma\n"
@@ -24,7 +24,7 @@ index 805e05a..ea3c61f 100644
  		"  -h, --help\t\tThis help message\n\n");
  
  #if defined(BUILD_DRM_COMPOSITOR)
-@@ -3573,6 +3574,8 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3581,6 +3582,8 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  	bool wait_for_debugger = false;
  	struct wl_protocol_logger *protologger = NULL;
  
@@ -33,7 +33,7 @@ index 805e05a..ea3c61f 100644
  	const struct weston_option core_options[] = {
  		{ WESTON_OPTION_STRING, "backend", 'B', &backend },
  		{ WESTON_OPTION_STRING, "shell", 0, &shell },
-@@ -3591,6 +3594,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3599,6 +3602,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  		{ WESTON_OPTION_BOOLEAN, "debug", 0, &debug_protocol },
  		{ WESTON_OPTION_STRING, "logger-scopes", 'l', &log_scopes },
  		{ WESTON_OPTION_STRING, "flight-rec-scopes", 'f', &flight_rec_scopes },
@@ -41,7 +41,7 @@ index 805e05a..ea3c61f 100644
  	};
  
  	wl_list_init(&wet.layoutput_list);
-@@ -3777,6 +3781,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3785,6 +3789,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  	wet.compositor->idle_time = idle_time;
  	wet.compositor->default_pointer_grab = NULL;
  	wet.compositor->exit = handle_exit;

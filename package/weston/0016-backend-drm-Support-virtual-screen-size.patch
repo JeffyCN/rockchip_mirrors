@@ -1,4 +1,4 @@
-From 14ed80528ac19e4d443ab27e66b12545a0394e80 Mon Sep 17 00:00:00 2001
+From 2a839667bac950c484e109560cd380af760e3781 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 24 Jun 2020 11:59:42 +0800
 Subject: [PATCH 16/93] backend-drm: Support virtual screen size
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 155 insertions(+), 26 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index e72a90e..ed4f721 100644
+index ec8bf0e..af82922 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -166,6 +166,7 @@ enum wdrm_plane_property {
@@ -61,7 +61,7 @@ index e72a90e..ed4f721 100644
  };
  
  struct drm_connector {
-@@ -612,6 +627,9 @@ struct drm_output {
+@@ -613,6 +628,9 @@ struct drm_output {
  	submit_frame_cb virtual_submit_frame;
  
  	bool state_invalid;
@@ -71,7 +71,7 @@ index e72a90e..ed4f721 100644
  };
  
  void
-@@ -725,6 +743,10 @@ uint64_t
+@@ -726,6 +744,10 @@ uint64_t
  drm_property_get_value(struct drm_property_info *info,
  		       const drmModeObjectProperties *props,
  		       uint64_t def);
@@ -83,7 +83,7 @@ index e72a90e..ed4f721 100644
  drm_property_get_range_values(struct drm_property_info *info,
  			      const drmModeObjectProperties *props);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c99e319..b984796 100644
+index f5ac1b6..a2f215f 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -331,6 +331,11 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
@@ -141,7 +141,7 @@ index c99e319..b984796 100644
  	zpos_range_values =
  		drm_property_get_range_values(&plane->props[WDRM_PLANE_ZPOS],
  					      props);
-@@ -3414,6 +3426,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3420,6 +3432,10 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	b->head_matches = drm_head_matches[head_mode];
  
@@ -153,7 +153,7 @@ index c99e319..b984796 100644
  	if (buf)
  		b->resize_freeze_ms = atoi(buf);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 4e9b4d7..fb51bcf 100644
+index c7dc2f8..0008e83 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -56,6 +56,15 @@ struct drm_property_enum_info plane_type_enums[] = {

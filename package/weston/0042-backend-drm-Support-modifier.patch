@@ -1,4 +1,4 @@
-From 07fab41ec9071ed48c8707a3da2a658a4649547b Mon Sep 17 00:00:00 2001
+From 1573d58b2a9612946e9b9fc1b8ebb94ad53dc620 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
 Subject: [PATCH 42/93] backend-drm: Support modifier
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 84 insertions(+), 21 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 37ee4cb..4bf5074 100644
+index e175f16..12ee031 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -534,6 +534,7 @@ struct drm_plane {
@@ -26,7 +26,7 @@ index 37ee4cb..4bf5074 100644
  
  struct drm_connector {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 4e91562..7c5ccca 100644
+index 8ebee93..0a8b878 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1258,6 +1258,42 @@ err:
@@ -106,7 +106,7 @@ index 4e91562..7c5ccca 100644
  	return NULL;
  }
  
-@@ -4262,9 +4313,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4268,9 +4319,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	compositor->backend = &b->base;
  
@@ -116,7 +116,7 @@ index 4e91562..7c5ccca 100644
  	/* Check if we run drm-backend using a compatible launcher */
  	compositor->launcher = weston_launcher_connect(compositor, seat_id, true);
  	if (compositor->launcher == NULL) {
-@@ -4297,15 +4345,42 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4303,15 +4351,42 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
@@ -161,7 +161,7 @@ index 4e91562..7c5ccca 100644
  		}
  	}
  
-@@ -4319,21 +4394,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4325,21 +4400,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	weston_setup_vt_switch_bindings(compositor);
  
@@ -184,7 +184,7 @@ index 4e91562..7c5ccca 100644
  			    compositor, b->udev, seat_id,
  			    config->configure_device) < 0) {
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 6737b67..30bb637 100644
+index 3d97df2..52f0c68 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -38,6 +38,7 @@
@@ -195,7 +195,7 @@ index 6737b67..30bb637 100644
  #include "shared/helpers.h"
  #include "shared/weston-drm-fourcc.h"
  #include "drm-internal.h"
-@@ -1609,7 +1610,7 @@ init_kms_caps(struct drm_device *device)
+@@ -1618,7 +1619,7 @@ init_kms_caps(struct drm_device *device)
  	weston_log("DRM: %s atomic modesetting\n",
  		   device->atomic_modeset ? "supports" : "does not support");
  
