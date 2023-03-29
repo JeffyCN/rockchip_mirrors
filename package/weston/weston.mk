@@ -4,9 +4,9 @@
 #
 ################################################################################
 
-WESTON_VERSION = 11.0.0
-WESTON_SITE = https://gitlab.freedesktop.org/wayland/weston/-/releases/$(WESTON_VERSION)/downloads
-WESTON_SOURCE = weston-$(WESTON_VERSION).tar.xz
+WESTON_VERSION = 11.0.1
+WESTON_SITE = https://gitlab.freedesktop.org/wayland/weston/-/archive/$(WESTON_VERSION)
+WESTON_SOURCE = weston-$(WESTON_VERSION).tar.gz
 WESTON_LICENSE = MIT
 WESTON_LICENSE_FILES = COPYING
 WESTON_CPE_ID_VENDOR = wayland

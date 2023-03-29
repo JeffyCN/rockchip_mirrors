@@ -1,4 +1,4 @@
-From e92682324c67799d432d817c17ea58e8e98bfd21 Mon Sep 17 00:00:00 2001
+From fa13dc634648979e9c3153fb356cb88bd3e998c8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 19/93] backend-drm: Support controlling output dynamically
@@ -43,10 +43,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  11 files changed, 437 insertions(+), 26 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 8e608a6..805e05a 100644
+index dcfe85b..d65f8aa 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
-@@ -2074,6 +2074,20 @@ drm_backend_output_configure(struct weston_output *output,
+@@ -2080,6 +2080,20 @@ drm_backend_output_configure(struct weston_output *output,
  	}
  	free(s);
  
@@ -198,7 +198,7 @@ index a8ec105..84b16fe 100644
  
  struct weston_solid_buffer_values {
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index abfc846..59154ed 100644
+index 037c937..532593e 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -115,6 +115,9 @@
@@ -221,7 +221,7 @@ index abfc846..59154ed 100644
  };
  
  struct drm_mode {
-@@ -640,6 +646,9 @@ struct drm_output {
+@@ -641,6 +647,9 @@ struct drm_output {
  	bool is_mirror;
  
  	pixman_box32_t plane_bounds;
@@ -231,7 +231,7 @@ index abfc846..59154ed 100644
  };
  
  void
-@@ -738,6 +747,13 @@ drm_mode_list_destroy(struct drm_device *device, struct wl_list *mode_list);
+@@ -739,6 +748,13 @@ drm_mode_list_destroy(struct drm_device *device, struct wl_list *mode_list);
  void
  drm_output_print_modes(struct drm_output *output);
  
@@ -246,7 +246,7 @@ index abfc846..59154ed 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index a7df017..53e4a85 100644
+index d366e2b..23dbe38 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -41,6 +41,7 @@
@@ -319,7 +319,7 @@ index a7df017..53e4a85 100644
  }
  
  /* Determine the type of vblank synchronization to use for the output.
-@@ -2288,6 +2299,8 @@ drm_output_enable(struct weston_output *base)
+@@ -2294,6 +2305,8 @@ drm_output_enable(struct weston_output *base)
  	output->base.switch_mode = drm_output_switch_mode;
  	output->base.set_gamma = drm_output_set_gamma;
  
@@ -328,7 +328,7 @@ index a7df017..53e4a85 100644
  	output->state_invalid = true;
  
  	weston_log("Output %s (crtc %d) video modes:\n",
-@@ -3180,6 +3193,7 @@ drm_destroy(struct weston_compositor *ec)
+@@ -3186,6 +3199,7 @@ drm_destroy(struct weston_compositor *ec)
  
  	udev_input_destroy(&b->input);
  
@@ -336,7 +336,7 @@ index a7df017..53e4a85 100644
  	wl_event_source_remove(b->hotplug_timer);
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
-@@ -3600,6 +3614,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -3606,6 +3620,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -347,7 +347,7 @@ index a7df017..53e4a85 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -3609,6 +3627,239 @@ static const struct weston_drm_output_api api = {
+@@ -3615,6 +3633,239 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_max_bpc,
  };
  
@@ -587,7 +587,7 @@ index a7df017..53e4a85 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3952,6 +4203,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3958,6 +4209,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b->drm);
  

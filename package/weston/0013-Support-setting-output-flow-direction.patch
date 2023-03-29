@@ -1,7 +1,7 @@
-From fac570e77c57f8b32b4425458fdff285406016be Mon Sep 17 00:00:00 2001
+From b342bc6139ea8a765084eacfc0ca365561fcdd30 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 18:05:28 +0800
-Subject: [PATCH 13/79] Support setting output flow direction
+Subject: [PATCH 13/93] Support setting output flow direction
 
 Set env "WESTON_OUTPUT_FLOW" to change output flow direction:
 horizontal:
@@ -21,7 +21,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 77 insertions(+), 30 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index b450a010..6eb97756 100644
+index b450a01..6eb9775 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -135,6 +135,8 @@ struct output {
@@ -70,10 +70,10 @@ index b450a010..6eb97756 100644
  		display_bind(desktop->display, id, &wl_output_interface, 2);
  	output->server_output_id = id;
 diff --git a/compositor/main.c b/compositor/main.c
-index 938726f7..d5daa8c0 100644
+index 631355e..57a52b6 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
-@@ -3538,6 +3538,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3546,6 +3546,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  	struct weston_log_subscriber *flight_rec = NULL;
  	sigset_t mask;
  	struct sigaction action;
@@ -81,7 +81,7 @@ index 938726f7..d5daa8c0 100644
  
  	bool wait_for_debugger = false;
  	struct wl_protocol_logger *protologger = NULL;
-@@ -3691,6 +3692,16 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -3699,6 +3700,16 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  		goto out;
  	}
  
@@ -99,7 +99,7 @@ index 938726f7..d5daa8c0 100644
  		weston_log_ctx_add_log_scope(log_ctx, "proto",
  					     "Wayland protocol dump for all clients.\n",
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 7363ee36..79e20ad1 100644
+index 7363ee3..79e20ad 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -1020,7 +1020,7 @@ constrain_position(struct weston_move_grab *move, int *cx, int *cy)
@@ -143,7 +143,7 @@ index 7363ee36..79e20ad1 100644
  		/* The output already has a panel, tell our helper
  		 * there is no need for another one. */
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index a3a23bc5..103c293b 100644
+index a3a23bc..103c293 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1184,6 +1184,12 @@ struct weston_color_manager;
@@ -179,7 +179,7 @@ index a3a23bc5..103c293b 100644
  }
  #endif
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 55751a7e..23316ef5 100644
+index 55751a7..23316ef 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -258,10 +258,6 @@ weston_mode_switch_finish(struct weston_output *output,

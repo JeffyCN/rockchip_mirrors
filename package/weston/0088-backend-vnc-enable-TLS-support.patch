@@ -1,7 +1,7 @@
-From b7922b0ade62f0efa0678f965d7750ed09e6a168 Mon Sep 17 00:00:00 2001
+From 2ff80ad1e037445a4a4c8831b7a9c6529d2e58af Mon Sep 17 00:00:00 2001
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Thu, 6 Oct 2022 12:18:04 +0200
-Subject: [PATCH 88/92] backend-vnc: enable TLS support
+Subject: [PATCH 88/93] backend-vnc: enable TLS support
 
 Add TLS key and certificate parameters to enable encryption support.
 
@@ -16,10 +16,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 62 insertions(+), 3 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index a3388860..09d26a06 100644
+index e30f27e..ed5c818 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
-@@ -728,6 +728,8 @@ usage(int error_code)
+@@ -730,6 +730,8 @@ usage(int error_code)
  		"  --width=WIDTH\t\tWidth of desktop\n"
  		"  --height=HEIGHT\tHeight of desktop\n"
  		"  --port=PORT\t\tThe port to listen on\n"
@@ -28,7 +28,7 @@ index a3388860..09d26a06 100644
  		"\n");
  #endif
  
-@@ -3245,6 +3247,8 @@ load_vnc_backend(struct weston_compositor *c,
+@@ -3253,6 +3255,8 @@ load_vnc_backend(struct weston_compositor *c,
  		{ WESTON_OPTION_INTEGER, "height", 0, &parsed_options->height },
  		{ WESTON_OPTION_STRING,  "address", 0, &config.bind_address },
  		{ WESTON_OPTION_INTEGER, "port", 0, &config.port },
@@ -37,7 +37,7 @@ index a3388860..09d26a06 100644
  	};
  
  	parse_options(vnc_options, ARRAY_LENGTH(vnc_options), argc, argv);
-@@ -3259,6 +3263,8 @@ load_vnc_backend(struct weston_compositor *c,
+@@ -3267,6 +3271,8 @@ load_vnc_backend(struct weston_compositor *c,
  					     &config.base);
  
  	free(config.bind_address);
@@ -47,7 +47,7 @@ index a3388860..09d26a06 100644
  	return ret;
  }
 diff --git a/include/libweston/backend-vnc.h b/include/libweston/backend-vnc.h
-index 0085df5f..3495c0e4 100644
+index 0085df5..3495c0e 100644
 --- a/include/libweston/backend-vnc.h
 +++ b/include/libweston/backend-vnc.h
 @@ -62,6 +62,8 @@ struct weston_vnc_backend_config {
@@ -60,7 +60,7 @@ index 0085df5f..3495c0e4 100644
  
  #ifdef  __cplusplus
 diff --git a/libweston/backend-vnc/vnc.c b/libweston/backend-vnc/vnc.c
-index 190fe92a..e57e3775 100644
+index 190fe92..e57e377 100644
 --- a/libweston/backend-vnc/vnc.c
 +++ b/libweston/backend-vnc/vnc.c
 @@ -997,6 +997,30 @@ vnc_backend_create(struct weston_compositor *compositor,
@@ -95,7 +95,7 @@ index 190fe92a..e57e3775 100644
  					 &api, sizeof(api));
  	if (ret < 0) {
 diff --git a/man/weston-vnc.man b/man/weston-vnc.man
-index 64910972..582fe28f 100644
+index 6491097..582fe28 100644
 --- a/man/weston-vnc.man
 +++ b/man/weston-vnc.man
 @@ -19,9 +19,8 @@ the graphical content, depending on what is supported by the VNC client.

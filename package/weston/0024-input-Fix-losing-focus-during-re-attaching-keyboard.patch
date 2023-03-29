@@ -1,4 +1,4 @@
-From 8bbb70fb1cd8207bb4ab6236e0ac14a82032b69a Mon Sep 17 00:00:00 2001
+From b991859d23c307cf82b5ab6655c4f399192e0c81 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 12 May 2020 15:35:40 +0800
 Subject: [PATCH 24/93] input: Fix losing focus during re-attaching keyboard
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+), 2 deletions(-)
 
 diff --git a/libweston/input.c b/libweston/input.c
-index 263225d..7be63e7 100644
+index 8c9cabc..352aab6 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
-@@ -3343,8 +3343,11 @@ weston_seat_release_keyboard(struct weston_seat *seat)
+@@ -3400,8 +3400,11 @@ weston_seat_release_keyboard(struct weston_seat *seat)
  	seat->keyboard_device_count--;
  	assert(seat->keyboard_device_count >= 0);
  	if (seat->keyboard_device_count == 0) {

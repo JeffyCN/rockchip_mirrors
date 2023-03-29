@@ -1,7 +1,7 @@
-From cea048d5009a58ee8b1a40a60d1b5ff05db4e180 Mon Sep 17 00:00:00 2001
+From 86907eede930bff3d75f84d44edec898b530f3bf Mon Sep 17 00:00:00 2001
 From: Stefan Agner <stefan@agner.ch>
 Date: Sun, 22 Sep 2019 19:40:04 +0200
-Subject: [PATCH 84/92] backend-vnc: add VNC support using Neat VNC library
+Subject: [PATCH 84/93] backend-vnc: add VNC support using Neat VNC library
 
 This adds basic VNC protocol support using the Neat VNC library
 (https://github.com/any1/neatvnc). Neat VNC depends on the AML main
@@ -47,7 +47,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  create mode 100644 libweston/backend-vnc/vnc.c
 
 diff --git a/compositor/main.c b/compositor/main.c
-index c8c07dcf..a3388860 100644
+index c3af8ee..e30f27e 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -61,6 +61,7 @@
@@ -58,7 +58,7 @@ index c8c07dcf..a3388860 100644
  #include <libweston/backend-x11.h>
  #include <libweston/backend-wayland.h>
  #include <libweston/windowed-output-api.h>
-@@ -651,6 +652,9 @@ usage(int error_code)
+@@ -653,6 +654,9 @@ usage(int error_code)
  #if defined(BUILD_RDP_COMPOSITOR)
  			"\t\t\t\trdp-backend.so\n"
  #endif
@@ -68,7 +68,7 @@ index c8c07dcf..a3388860 100644
  #if defined(BUILD_WAYLAND_COMPOSITOR)
  			"\t\t\t\twayland-backend.so\n"
  #endif
-@@ -718,6 +722,15 @@ usage(int error_code)
+@@ -720,6 +724,15 @@ usage(int error_code)
  		"\n");
  #endif
  
@@ -84,7 +84,7 @@ index c8c07dcf..a3388860 100644
  #if defined(BUILD_WAYLAND_COMPOSITOR)
  	fprintf(out,
  		"Options for wayland-backend.so:\n\n"
-@@ -3166,6 +3179,90 @@ load_rdp_backend(struct weston_compositor *c,
+@@ -3174,6 +3187,90 @@ load_rdp_backend(struct weston_compositor *c,
  	return ret;
  }
  
@@ -175,7 +175,7 @@ index c8c07dcf..a3388860 100644
  static int
  x11_backend_output_configure(struct weston_output *output)
  {
-@@ -3411,6 +3508,8 @@ load_backend(struct weston_compositor *compositor, const char *backend,
+@@ -3419,6 +3516,8 @@ load_backend(struct weston_compositor *compositor, const char *backend,
  		return load_headless_backend(compositor, argc, argv, config);
  	else if (strstr(backend, "rdp-backend.so"))
  		return load_rdp_backend(compositor, argc, argv, config);
@@ -186,7 +186,7 @@ index c8c07dcf..a3388860 100644
  	else if (strstr(backend, "x11-backend.so"))
 diff --git a/include/libweston/backend-vnc.h b/include/libweston/backend-vnc.h
 new file mode 100644
-index 00000000..0085df5f
+index 0000000..0085df5
 --- /dev/null
 +++ b/include/libweston/backend-vnc.h
 @@ -0,0 +1,71 @@
@@ -262,7 +262,7 @@ index 00000000..0085df5f
 +
 +#endif /* WESTON_COMPOSITOR_VNC_H */
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index f6f4ecc6..06a9ab90 100644
+index f6f4ecc..06a9ab9 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -2090,6 +2090,7 @@ enum weston_compositor_backend {
@@ -274,7 +274,7 @@ index f6f4ecc6..06a9ab90 100644
  	WESTON_BACKEND_X11,
  };
 diff --git a/include/libweston/meson.build b/include/libweston/meson.build
-index 8ae10011..f248dc59 100644
+index 8ae1001..f248dc5 100644
 --- a/include/libweston/meson.build
 +++ b/include/libweston/meson.build
 @@ -14,6 +14,7 @@ install_headers(
@@ -287,7 +287,7 @@ index 8ae10011..f248dc59 100644
  
 diff --git a/libweston/backend-vnc/meson.build b/libweston/backend-vnc/meson.build
 new file mode 100644
-index 00000000..4dfe0229
+index 0000000..4dfe022
 --- /dev/null
 +++ b/libweston/backend-vnc/meson.build
 @@ -0,0 +1,32 @@
@@ -325,7 +325,7 @@ index 00000000..4dfe0229
 +install_headers(backend_vnc_h, subdir: dir_include_libweston_install)
 diff --git a/libweston/backend-vnc/vnc.c b/libweston/backend-vnc/vnc.c
 new file mode 100644
-index 00000000..8cfad2ab
+index 0000000..8cfad2a
 --- /dev/null
 +++ b/libweston/backend-vnc/vnc.c
 @@ -0,0 +1,1032 @@
@@ -1362,7 +1362,7 @@ index 00000000..8cfad2ab
 +	return 0;
 +}
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 85db3fd8..9d43149c 100644
+index d40c9aa..6163825 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -9101,6 +9101,7 @@ static const char * const backend_map[] = {
@@ -1374,7 +1374,7 @@ index 85db3fd8..9d43149c 100644
  	[WESTON_BACKEND_X11] =		"x11-backend.so",
  };
 diff --git a/libweston/meson.build b/libweston/meson.build
-index 6a845cc8..6906244a 100644
+index 6a845cc..6906244 100644
 --- a/libweston/meson.build
 +++ b/libweston/meson.build
 @@ -241,5 +241,6 @@ subdir('renderer-gl')
@@ -1385,7 +1385,7 @@ index 6a845cc8..6906244a 100644
  subdir('backend-wayland')
  subdir('backend-x11')
 diff --git a/meson_options.txt b/meson_options.txt
-index 055457d5..df5ba603 100644
+index 055457d..df5ba60 100644
 --- a/meson_options.txt
 +++ b/meson_options.txt
 @@ -32,6 +32,12 @@ option(

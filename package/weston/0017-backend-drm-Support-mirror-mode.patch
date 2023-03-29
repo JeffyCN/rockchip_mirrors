@@ -1,4 +1,4 @@
-From d4612f3194074c49f2a61b63ae3821082f7dcb2d Mon Sep 17 00:00:00 2001
+From d96e7ef0bbaeeb0aee7f240c598591818acae27b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
 Subject: [PATCH 17/93] backend-drm: Support mirror mode
@@ -88,7 +88,7 @@ index 76fa79f..d10cc40 100644
  	}
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index ed4f721..abfc846 100644
+index af82922..037c937 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -362,6 +362,8 @@ struct drm_backend {
@@ -100,7 +100,7 @@ index ed4f721..abfc846 100644
  };
  
  struct drm_mode {
-@@ -616,6 +618,10 @@ struct drm_output {
+@@ -617,6 +619,10 @@ struct drm_output {
  	int current_image;
  	pixman_region32_t previous_damage;
  
@@ -111,7 +111,7 @@ index ed4f721..abfc846 100644
  	struct vaapi_recorder *recorder;
  	struct wl_listener recorder_frame_listener;
  
-@@ -630,6 +636,10 @@ struct drm_output {
+@@ -631,6 +637,10 @@ struct drm_output {
  
  	/* The dummy framebuffer for SET_CRTC. */
  	struct drm_fb *fb_dummy;
@@ -123,7 +123,7 @@ index ed4f721..abfc846 100644
  
  void
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index b984796..1e0f053 100644
+index a2f215f..159abee 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -68,6 +68,11 @@
@@ -525,7 +525,7 @@ index b984796..1e0f053 100644
  		drm_plane_reset_state(output->scanout_plane);
  	}
  
-@@ -2061,6 +2363,8 @@ drm_output_destroy(struct weston_output *base)
+@@ -2067,6 +2369,8 @@ drm_output_destroy(struct weston_output *base)
  
  	assert(output->hdr_output_metadata_blob_id == 0);
  
@@ -534,7 +534,7 @@ index b984796..1e0f053 100644
  	free(output);
  }
  
-@@ -3436,6 +3740,12 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3442,6 +3746,12 @@ drm_backend_create(struct weston_compositor *compositor,
  	else
  		b->resize_freeze_ms = DRM_RESIZE_FREEZE_MS;
  
@@ -683,10 +683,10 @@ index 707d1a0..07743ff 100644
  	 * Use view_list, as paint nodes have not been created for this
  	 * output yet. Any existing view might touch this new output.
 diff --git a/libweston/input.c b/libweston/input.c
-index 6cbb8db..263225d 100644
+index 235cf02..8c9cabc 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
-@@ -1688,6 +1688,10 @@ weston_pointer_clamp(struct weston_pointer *pointer, wl_fixed_t *fx, wl_fixed_t
+@@ -1733,6 +1733,10 @@ weston_pointer_clamp(struct weston_pointer *pointer, wl_fixed_t *fx, wl_fixed_t
  	wl_list_for_each(output, &ec->output_list, link) {
  		if (pointer->seat->output && pointer->seat->output != output)
  			continue;
@@ -697,7 +697,7 @@ index 6cbb8db..263225d 100644
  		if (pixman_region32_contains_point(&output->region,
  						   x, y, NULL))
  			valid = 1;
-@@ -1757,6 +1761,9 @@ weston_pointer_handle_output_destroy(struct wl_listener *listener, void *data)
+@@ -1802,6 +1806,9 @@ weston_pointer_handle_output_destroy(struct wl_listener *listener, void *data)
  	y = wl_fixed_to_int(pointer->y);
  
  	wl_list_for_each(output, &ec->output_list, link) {
@@ -708,7 +708,7 @@ index 6cbb8db..263225d 100644
  						   x, y, NULL))
  			return;
 diff --git a/meson.build b/meson.build
-index c6b73d5..396d158 100644
+index 82119ac..46e57e2 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -141,6 +141,11 @@ if dep_xkbcommon.version().version_compare('>= 0.5.0')
