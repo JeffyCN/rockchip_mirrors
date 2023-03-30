@@ -121,7 +121,7 @@ fi
 
 # Strip unneeded config resets
 TEMP_FILE=$(mktemp)
-for CFG in $(grep "=$" "$DEFCONFIG") ; do
+for CFG in $(grep " is reset to default$" "$DEFCONFIG") ; do
 	grep -wv "$CFG" "$DEFCONFIG" > $TEMP_FILE
 	savedefconfig "$NEW_DEFCONFIG" $TEMP_FILE
 	if ! diff "$ORIG_DEFCONFIG" "$NEW_DEFCONFIG" | grep -q ""; then
