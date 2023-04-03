@@ -1,4 +1,4 @@
-From 6e666b57884745454709af194ec54da834fc965b Mon Sep 17 00:00:00 2001
+From 14a416a3c5959e53d0de2e8cc7b8221a3544be5a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
 Subject: [PATCH 15/93] backend-drm: Support selecting monitors
@@ -933,7 +933,7 @@ index 735196b..c7dc2f8 100644
  
  	return 0;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 9f8282b..707d1a0 100644
+index 9f8282b..2125f1a 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -160,6 +160,25 @@ weston_paint_node_destroy(struct weston_paint_node *pnode)
@@ -974,7 +974,7 @@ index 9f8282b..707d1a0 100644
 +			view = view->geometry.parent;
 +
 +		if (output && !output->destroying)
-+			ev->output_mask |= 1u << output->id;
++			ev->output_mask = 1u << output->id;
 +		else
 +			weston_view_set_output(ev, NULL);
 +
