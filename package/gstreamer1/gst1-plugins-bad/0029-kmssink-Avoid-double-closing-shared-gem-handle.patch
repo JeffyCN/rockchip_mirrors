@@ -1,7 +1,7 @@
-From f602b645bbb212dfcabf34410af09b9cf6597d82 Mon Sep 17 00:00:00 2001
+From 6431eeddd0b6004d67f70900d4da449b1363c9a7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Jan 2022 12:20:10 +0800
-Subject: [PATCH 28/33] kmssink: Avoid double-closing shared gem handle
+Subject: [PATCH 29/41] kmssink: Avoid double-closing shared gem handle
 
 The gem handle could be shared between multiple planes.
 
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 6 insertions(+)
 
 diff --git a/sys/kms/gstkmsallocator.c b/sys/kms/gstkmsallocator.c
-index 6fe6a07..5d81643 100644
+index ad56a17..359646a 100644
 --- a/sys/kms/gstkmsallocator.c
 +++ b/sys/kms/gstkmsallocator.c
-@@ -566,6 +566,7 @@ gst_kms_allocator_dmabuf_import (GstAllocator * allocator, gint * prime_fds,
+@@ -538,6 +538,7 @@ gst_kms_allocator_dmabuf_import (GstAllocator * allocator, gint * prime_fds,
    GstKMSMemory *kmsmem;
    GstMemory *mem;
    gint i, ret;
@@ -22,7 +22,7 @@ index 6fe6a07..5d81643 100644
  
    g_return_val_if_fail (n_planes <= GST_VIDEO_MAX_PLANES, FALSE);
  
-@@ -592,6 +593,11 @@ gst_kms_allocator_dmabuf_import (GstAllocator * allocator, gint * prime_fds,
+@@ -564,6 +565,11 @@ gst_kms_allocator_dmabuf_import (GstAllocator * allocator, gint * prime_fds,
      struct drm_gem_close arg = { kmsmem->gem_handle[i], };
      gint err;
  

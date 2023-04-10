@@ -1,20 +1,20 @@
-From 7cd226beb3d0b95be6e7419af2a3ef439ccba985 Mon Sep 17 00:00:00 2001
+From c193043d8bc9731674d2a055d5b3ce97c3e33ff2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 20 Nov 2018 14:51:36 +0800
-Subject: [PATCH 05/11] playbin3: Fix qt videoplayer cannot change video state
+Subject: [PATCH 05/14] playbin3: Fix Qt videoplayer cannot change video state
 
 Change-Id: I765bbe0caebe333855bd16fdd0843e0257491246
 Signed-off-by: shine.liu <shine.liu@rock-chips.com>
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- gst/playback/gstplaybin3.c | 256 ++++++++++++++++++++++++++++++++++++-
- 1 file changed, 252 insertions(+), 4 deletions(-)
+ gst/playback/gstplaybin3.c | 252 +++++++++++++++++++++++++++++++++++++
+ 1 file changed, 252 insertions(+)
 
 diff --git a/gst/playback/gstplaybin3.c b/gst/playback/gstplaybin3.c
-index e86eb627b..dd8284ee0 100644
+index 46eb478..f059474 100644
 --- a/gst/playback/gstplaybin3.c
 +++ b/gst/playback/gstplaybin3.c
-@@ -530,6 +530,16 @@ struct _GstPlayBin3Class
+@@ -388,6 +388,16 @@ struct _GstPlayBin3Class
  
    /* get the last video sample and convert it to the given caps */
    GstSample *(*convert_sample) (GstPlayBin3 * playbin, GstCaps * caps);
@@ -31,7 +31,7 @@ index e86eb627b..dd8284ee0 100644
  };
  
  /* props */
-@@ -563,6 +573,12 @@ enum
+@@ -421,6 +431,12 @@ enum
    PROP_SUBURI,
    PROP_CURRENT_SUBURI,
    PROP_FLAGS,
@@ -44,7 +44,7 @@ index e86eb627b..dd8284ee0 100644
    PROP_SUBTITLE_ENCODING,
    PROP_AUDIO_SINK,
    PROP_VIDEO_SINK,
-@@ -595,6 +611,12 @@ enum
+@@ -454,6 +470,12 @@ enum
    SIGNAL_CONVERT_SAMPLE,
    SIGNAL_SOURCE_SETUP,
    SIGNAL_ELEMENT_SETUP,
@@ -57,7 +57,7 @@ index e86eb627b..dd8284ee0 100644
    LAST_SIGNAL
  };
  
-@@ -619,6 +641,13 @@ static void gst_play_bin3_deep_element_added (GstBin * playbin,
+@@ -473,6 +495,13 @@ static void gst_play_bin3_deep_element_added (GstBin * playbin,
  static gboolean gst_play_bin3_send_event (GstElement * element,
      GstEvent * event);
  
@@ -71,7 +71,7 @@ index e86eb627b..dd8284ee0 100644
  static GstSample *gst_play_bin3_convert_sample (GstPlayBin3 * playbin,
      GstCaps * caps);
  
-@@ -753,6 +782,36 @@ gst_play_bin3_class_init (GstPlayBin3Class * klass)
+@@ -610,6 +639,36 @@ gst_play_bin3_class_init (GstPlayBin3Class * klass)
            GST_TYPE_PLAY_FLAGS, DEFAULT_FLAGS,
            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
  
@@ -108,7 +108,7 @@ index e86eb627b..dd8284ee0 100644
    g_object_class_install_property (gobject_klass, PROP_SUBTITLE_ENCODING,
        g_param_spec_string ("subtitle-encoding", "subtitle encoding",
            "Encoding to assume if input subtitles are not in UTF-8 encoding. "
-@@ -1022,6 +1081,41 @@ gst_play_bin3_class_init (GstPlayBin3Class * klass)
+@@ -893,6 +952,41 @@ gst_play_bin3_class_init (GstPlayBin3Class * klass)
        g_signal_new ("element-setup", G_TYPE_FROM_CLASS (klass),
        G_SIGNAL_RUN_LAST, 0, NULL, NULL, NULL, G_TYPE_NONE, 1, GST_TYPE_ELEMENT);
  
@@ -150,7 +150,7 @@ index e86eb627b..dd8284ee0 100644
    /**
     * GstPlayBin3::convert-sample
     * @playbin: a #GstPlayBin3
-@@ -1043,6 +1137,10 @@ gst_play_bin3_class_init (GstPlayBin3Class * klass)
+@@ -914,6 +1008,10 @@ gst_play_bin3_class_init (GstPlayBin3Class * klass)
        G_STRUCT_OFFSET (GstPlayBin3Class, convert_sample), NULL, NULL,
        NULL, GST_TYPE_SAMPLE, 1, GST_TYPE_CAPS);
  
@@ -161,8 +161,8 @@ index e86eb627b..dd8284ee0 100644
    klass->convert_sample = gst_play_bin3_convert_sample;
  
    gst_element_class_set_static_metadata (gstelement_klass,
-@@ -1553,6 +1651,72 @@ get_group (GstPlayBin3 * playbin)
-   return result;
+@@ -1232,6 +1330,73 @@ gst_play_bin3_set_flags (GstPlayBin3 * playbin, GstPlayFlags flags)
+       "use-buffering", ((flags & GST_PLAY_FLAG_BUFFERING) != 0), NULL);
  }
  
 +static GstTagList *
@@ -231,12 +231,13 @@ index e86eb627b..dd8284ee0 100644
 +
 +  return result;
 +}
- 
++
  static GstSample *
  gst_play_bin3_convert_sample (GstPlayBin3 * playbin, GstCaps * caps)
-@@ -1766,6 +1930,15 @@ gst_play_bin3_set_property (GObject * object, guint prop_id,
-         GST_SOURCE_GROUP_UNLOCK (playbin->curr_group);
-       }
+ {
+@@ -1435,6 +1600,15 @@ gst_play_bin3_set_property (GObject * object, guint prop_id,
+     case PROP_FLAGS:
+       gst_play_bin3_set_flags (playbin, g_value_get_flags (value));
        break;
 +    case PROP_CURRENT_VIDEO:
 +      gst_play_bin3_set_current_video_stream (playbin, g_value_get_int (value));
@@ -250,9 +251,9 @@ index e86eb627b..dd8284ee0 100644
      case PROP_SUBTITLE_ENCODING:
        gst_play_bin3_set_encoding (playbin, g_value_get_string (value));
        break;
-@@ -1954,6 +2127,57 @@ gst_play_bin3_get_property (GObject * object, guint prop_id, GValue * value,
+@@ -1595,6 +1769,57 @@ gst_play_bin3_get_property (GObject * object, guint prop_id, GValue * value,
      case PROP_FLAGS:
-       g_value_set_flags (value, gst_play_bin3_get_flags (playbin));
+       g_value_set_flags (value, gst_play_sink_get_flags (playbin->playsink));
        break;
 +    case PROP_N_VIDEO:
 +    {
@@ -308,51 +309,36 @@ index e86eb627b..dd8284ee0 100644
      case PROP_SUBTITLE_ENCODING:
        GST_PLAY_BIN3_LOCK (playbin);
        g_value_take_string (value,
-@@ -2539,9 +2763,7 @@ gst_play_bin3_handle_message (GstBin * bin, GstMessage * msg)
-       if (target_group)
-         gst_object_replace ((GstObject **) & target_group->collection,
-             (GstObject *) collection);
--      /* FIXME: Only do the following if it's the current group? */
--      if (target_group == playbin->curr_group)
--        update_combiner_info (playbin, target_group->collection);
-+      update_combiner_info (playbin, target_group->collection);
-       if (pstate)
-         playbin->do_stream_selections = FALSE;
-       do_stream_selection (playbin, target_group);
-@@ -3038,6 +3260,8 @@ pad_added_cb (GstElement * uridecodebin, GstPad * pad, GstSourceGroup * group)
+@@ -2429,6 +2654,7 @@ pad_added_cb (GstElement * uridecodebin, GstPad * pad, GstPlayBin3 * playbin)
    gchar *pad_name;
-   GstPlayBin3 *playbin = group->playbin;
- 
+   GstPad *combine_pad;
+   GstStreamType selected, active, cur;
 +  gboolean changed = FALSE;
-+
-   GST_PLAY_BIN3_SHUTDOWN_LOCK (playbin, shutdown);
  
    pad_name = gst_object_get_name (GST_OBJECT (pad));
-@@ -3066,7 +3290,8 @@ pad_added_cb (GstElement * uridecodebin, GstPad * pad, GstSourceGroup * group)
  
-   combine = &playbin->combiner[pb_stream_type];
+@@ -2476,10 +2702,36 @@ pad_added_cb (GstElement * uridecodebin, GstPad * pad, GstPlayBin3 * playbin)
+   }
  
--  combiner_control_pad (playbin, combine, pad);
-+  if (combiner_control_pad (playbin, combine, pad))
+   combine_pad = combiner_control_pad (playbin, combine, pad);
++  if (combine_pad)
 +    changed = combine->combiner ? TRUE : FALSE;
++
+   control_source_pad (playbin, pad, combine_pad, combine->stream_type);
  
-   control_source_pad (group, pad, combine->stream_type);
- 
-@@ -3081,6 +3306,29 @@ pad_added_cb (GstElement * uridecodebin, GstPad * pad, GstSourceGroup * group)
- 
-   GST_PLAY_BIN3_SHUTDOWN_UNLOCK (playbin);
+   GST_PLAY_BIN3_UNLOCK (playbin);
  
 +  if (changed) {
 +    int signal;
 +
-+    switch (combine->type) {
-+      case GST_PLAY_SINK_TYPE_VIDEO:
++    switch (combine->stream_type) {
++      case GST_STREAM_TYPE_VIDEO:
 +        signal = SIGNAL_VIDEO_CHANGED;
 +        break;
-+      case GST_PLAY_SINK_TYPE_AUDIO:
++      case GST_STREAM_TYPE_AUDIO:
 +        signal = SIGNAL_AUDIO_CHANGED;
 +        break;
-+      case GST_PLAY_SINK_TYPE_TEXT:
++      case GST_STREAM_TYPE_TEXT:
 +        signal = SIGNAL_TEXT_CHANGED;
 +        break;
 +      default:

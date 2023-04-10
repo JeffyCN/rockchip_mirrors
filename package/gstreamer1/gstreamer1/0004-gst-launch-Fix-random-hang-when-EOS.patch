@@ -1,4 +1,4 @@
-From 8486605464354e70f30626c1e12649128197e983 Mon Sep 17 00:00:00 2001
+From 2faeb4dccb5828dfa1d98fb1a4bad188537bed3f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 3 Oct 2022 15:07:33 +0800
 Subject: [PATCH 4/4] gst-launch: Fix random hang when EOS
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 12 insertions(+)
 
 diff --git a/tools/gst-launch.c b/tools/gst-launch.c
-index 5733152..fdaf579 100644
+index 7d93993..fc3aa16 100644
 --- a/tools/gst-launch.c
 +++ b/tools/gst-launch.c
-@@ -78,6 +78,7 @@ static gboolean eos_on_shutdown = FALSE;
+@@ -82,6 +82,7 @@ static gboolean eos_on_shutdown = FALSE;
  static gchar **exclude_args = NULL;
  
  /* pipeline status */
@@ -25,7 +25,7 @@ index 5733152..fdaf579 100644
  static gboolean is_live = FALSE;
  static gboolean buffering = FALSE;
  static LaunchExitCode last_launch_code = LEC_NO_ERROR;
-@@ -737,12 +738,22 @@ bus_handler (GstBus * bus, GstMessage * message, gpointer data)
+@@ -741,12 +742,22 @@ bus_handler (GstBus * bus, GstMessage * message, gpointer data)
              PRINT (_("Prerolled, waiting for progress to finish...\n"));
              break;
            }
@@ -48,7 +48,7 @@ index 5733152..fdaf579 100644
        case GST_MESSAGE_BUFFERING:{
          gint percent;
  
-@@ -1274,6 +1285,7 @@ main (int argc, char *argv[])
+@@ -1279,6 +1290,7 @@ real_main (int argc, char *argv[])
          break;
        case GST_STATE_CHANGE_ASYNC:
          PRINT (_("Pipeline is PREROLLING ...\n"));

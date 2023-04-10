@@ -1,7 +1,7 @@
-From 00e3bbddc72efcc2d98c347e6a5bacb5363e5ea2 Mon Sep 17 00:00:00 2001
+From 7ee40a9101de8a3830e8da23b68d2c85afc98d14 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 28 Apr 2022 17:31:28 +0800
-Subject: [PATCH 01/11] Revert "decodebin: only emit 'drained' signal when top
+Subject: [PATCH 01/14] Revert "decodebin: only emit 'drained' signal when top
  chain is drained"
 
 This reverts commit e945b3706c86aa13d05d195a1170e6277a247548.
@@ -15,10 +15,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gst/playback/gstdecodebin2.c b/gst/playback/gstdecodebin2.c
-index f4be478e7..1a37434fe 100644
+index 7dcad54..1849714 100644
 --- a/gst/playback/gstdecodebin2.c
 +++ b/gst/playback/gstdecodebin2.c
-@@ -4239,7 +4239,7 @@ beach:
+@@ -4242,7 +4242,7 @@ beach:
  
    *drained = chain->drained;
  

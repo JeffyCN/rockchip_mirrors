@@ -1,7 +1,7 @@
-From 9b96fbaa4a6df9839624cf46bfeef4abed9954fb Mon Sep 17 00:00:00 2001
+From ef206e6b67526e9fc91f9515a1a1b65a5e755f14 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 26 Nov 2021 17:41:47 +0800
-Subject: [PATCH 04/11] playbin2: Fix deadlock when hooking about-to-finish
+Subject: [PATCH 04/14] playbin2: Fix deadlock when hooking about-to-finish
  signal
 
 The playbin2 will deactivate old group in drain_cb() for that, which
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 21 insertions(+)
 
 diff --git a/gst/playback/gstplaybin2.c b/gst/playback/gstplaybin2.c
-index a6679a2d2..f71b97752 100644
+index 4098fb9..cbd8e08 100644
 --- a/gst/playback/gstplaybin2.c
 +++ b/gst/playback/gstplaybin2.c
 @@ -389,6 +389,11 @@ G_STMT_START {                                          \
@@ -55,7 +55,7 @@ index a6679a2d2..f71b97752 100644
    g_mutex_clear (&playbin->dyn_lock);
    g_mutex_clear (&playbin->elements_lock);
  
-@@ -3132,7 +3142,14 @@ combiner_active_pad_changed (GObject * combiner, GParamSpec * pspec,
+@@ -3112,7 +3122,14 @@ combiner_active_pad_changed (GObject * combiner, GParamSpec * pspec,
    GstSourceCombine *combine = NULL;
    int i;
  
@@ -70,7 +70,7 @@ index a6679a2d2..f71b97752 100644
    group = get_group (playbin);
  
    for (i = 0; i < PLAYBIN_STREAM_LAST; i++) {
-@@ -3949,7 +3966,11 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
+@@ -3929,7 +3946,11 @@ drained_cb (GstElement * decodebin, GstSourceGroup * group)
  
    /* now activate the next group. If the app did not set a uri, this will
     * fail and we can do EOS */

@@ -1,7 +1,7 @@
-From bdae7d7d57718cabde193c6a20b059fb4c35ac46 Mon Sep 17 00:00:00 2001
+From 851f652c8600b53d17da699080d315d10be053ec Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:01:12 +0800
-Subject: [PATCH 38/39] kmssink: Support scaling in modesetting
+Subject: [PATCH 39/41] kmssink: Support scaling in modesetting
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,10 +9,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 34 insertions(+), 18 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 78f58e3..a27f569 100644
+index 3bb55e6..4538459 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -234,11 +234,12 @@ drm_plane_get_type (int fd, drmModePlane * plane)
+@@ -539,11 +539,12 @@ drm_plane_get_type (int fd, drmModePlane * plane)
  }
  
  static drmModePlane *
@@ -26,7 +26,7 @@ index 78f58e3..a27f569 100644
  
    num_primary = 0;
    fallback = 0;
-@@ -260,7 +261,8 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
+@@ -565,7 +566,8 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
      num_primary += plane_type == DRM_PLANE_TYPE_PRIMARY;
  
      /* Check unused possible planes */
@@ -36,7 +36,7 @@ index 78f58e3..a27f569 100644
        if (pipe == num_primary - 1 && plane_type == DRM_PLANE_TYPE_PRIMARY) {
          /* Prefer the Nth primary plane */
          return plane;
-@@ -525,12 +527,6 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+@@ -830,12 +832,6 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
  
    GST_INFO_OBJECT (self, "configuring mode setting");
  
@@ -49,7 +49,7 @@ index 78f58e3..a27f569 100644
    conn = drmModeGetConnector (self->fd, self->conn_id);
    if (!conn)
      goto connector_failed;
-@@ -542,9 +538,25 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+@@ -847,9 +843,25 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
        break;
      }
    }
@@ -75,7 +75,7 @@ index 78f58e3..a27f569 100644
    err = drmModeSetCrtc (self->fd, self->crtc_id, fb_id, 0, 0,
        (uint32_t *) & self->conn_id, 1, mode);
    if (err)
-@@ -720,7 +732,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -1025,7 +1037,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
  
        format = gst_video_format_to_string (fmt);
  
@@ -84,7 +84,7 @@ index 78f58e3..a27f569 100644
          caps = gst_caps_new_simple ("video/x-raw",
              "format", G_TYPE_STRING, format,
              "width", G_TYPE_INT, mode->hdisplay,
-@@ -1036,7 +1048,7 @@ retry_find_plane:
+@@ -1344,7 +1356,7 @@ retry_find_plane:
      goto plane_resources_failed;
  
    if (self->plane_id == -1)
@@ -93,7 +93,7 @@ index 78f58e3..a27f569 100644
    else
      plane = drmModeGetPlane (self->fd, self->plane_id);
    if (!plane)
-@@ -1586,7 +1598,7 @@ gst_kms_sink_sync (GstKMSSink * self)
+@@ -1900,7 +1912,7 @@ gst_kms_sink_sync (GstKMSSink * self)
    } else if (self->sync_mode == GST_KMS_SYNC_VBLANK) {
      pageflip = FALSE;
    } else if (self->sync_mode == GST_KMS_SYNC_AUTO) {
@@ -102,7 +102,7 @@ index 78f58e3..a27f569 100644
    } else {
      return TRUE;
    }
-@@ -1913,15 +1925,19 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2227,15 +2239,19 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
  
    GST_OBJECT_LOCK (self);
    if (self->modesetting_enabled) {

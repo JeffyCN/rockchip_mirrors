@@ -1,7 +1,7 @@
-From 091db43ee6691b9bf5a7d00d47d7ef291e09cfa1 Mon Sep 17 00:00:00 2001
+From 02517deddcd968b332eb6d996d00609b4784a980 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 8 Nov 2019 17:36:20 +0800
-Subject: [PATCH 5/5] video-flip: Support rockchip RGA 2D accel
+Subject: [PATCH 05/12] video-flip: Support rockchip RGA 2D accel
 
 Disabled by default, set env GST_VIDEO_FLIP_USE_RGA=1 to enable.
 
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 218 insertions(+), 3 deletions(-)
 
 diff --git a/gst/videofilter/gstvideoflip.c b/gst/videofilter/gstvideoflip.c
-index 371f291..2831689 100644
+index 07db899..9ea405b 100644
 --- a/gst/videofilter/gstvideoflip.c
 +++ b/gst/videofilter/gstvideoflip.c
 @@ -48,6 +48,11 @@
@@ -28,25 +28,25 @@ index 371f291..2831689 100644
  /* GstVideoFlip properties */
  enum
  {
-@@ -69,7 +74,7 @@ GST_STATIC_PAD_TEMPLATE ("src",
+@@ -68,7 +73,7 @@ GST_STATIC_PAD_TEMPLATE ("src",
+     GST_PAD_ALWAYS,
      GST_STATIC_CAPS (GST_VIDEO_CAPS_MAKE ("{ AYUV, "
              "ARGB, BGRA, ABGR, RGBA, Y444, xRGB, RGBx, xBGR, BGRx, "
-             "RGB, BGR, I420, YV12, IYUV, YUY2, UYVY, YVYU, NV12, NV21, "
--            "GRAY8, GRAY16_BE, GRAY16_LE }"))
-+            "NV12_10LE40, " "GRAY8, GRAY16_BE, GRAY16_LE }"))
+-            "RGB, BGR, I420, YV12, IYUV, YUY2, UYVY, YVYU, NV12, NV21,"
++            "RGB, BGR, I420, YV12, IYUV, YUY2, UYVY, YVYU, NV12, NV21, NV12_10LE40, "
+             "GRAY8, GRAY16_BE, GRAY16_LE, I420_10LE, I420_10BE, I420_12LE, I420_12BE, "
+             "I422_10LE, I422_10BE, I422_12LE, I422_12BE, Y444_10LE, Y444_10BE, Y444_12LE, Y444_12BE }"))
      );
- 
- static GstStaticPadTemplate gst_video_flip_sink_template =
 @@ -79,7 +84,7 @@ GST_STATIC_PAD_TEMPLATE ("sink",
+     GST_PAD_ALWAYS,
      GST_STATIC_CAPS (GST_VIDEO_CAPS_MAKE ("{ AYUV, "
              "ARGB, BGRA, ABGR, RGBA, Y444, xRGB, RGBx, xBGR, BGRx, "
-             "RGB, BGR, I420, YV12, IYUV, YUY2, UYVY, YVYU, NV12, NV21, "
--            "GRAY8, GRAY16_BE, GRAY16_LE }"))
-+            "NV12_10LE40, " "GRAY8, GRAY16_BE, GRAY16_LE }"))
+-            "RGB, BGR, I420, YV12, IYUV, YUY2, UYVY, YVYU, NV12, NV21,"
++            "RGB, BGR, I420, YV12, IYUV, YUY2, UYVY, YVYU, NV12, NV21, NV12_10LE40, "
+             "GRAY8, GRAY16_BE, GRAY16_LE, I420_10LE, I420_10BE, I420_12LE, I420_12BE, "
+             "I422_10LE, I422_10BE, I422_12LE, I422_12BE, Y444_10LE, Y444_10BE, Y444_12LE, Y444_12BE }"))
      );
- 
- #define GST_TYPE_VIDEO_FLIP_METHOD (gst_video_flip_method_get_type())
-@@ -982,6 +987,193 @@ gst_video_flip_y422 (GstVideoFlip * videoflip, GstVideoFrame * dest,
+@@ -1454,6 +1459,193 @@ gst_video_flip_y422 (GstVideoFlip * videoflip, GstVideoFrame * dest,
    }
  }
  
@@ -240,7 +240,7 @@ index 371f291..2831689 100644
  static void
  gst_video_flip_configure_process (GstVideoFlip * vf)
  {
-@@ -1016,6 +1208,12 @@ gst_video_flip_configure_process (GstVideoFlip * vf)
+@@ -1504,6 +1696,12 @@ gst_video_flip_configure_process (GstVideoFlip * vf)
      case GST_VIDEO_FORMAT_NV21:
        vf->process = gst_video_flip_semi_planar_yuv;
        break;
@@ -253,7 +253,7 @@ index 371f291..2831689 100644
      default:
        break;
    }
-@@ -1195,6 +1393,20 @@ gst_video_flip_transform_frame (GstVideoFilter * vfilter,
+@@ -1684,6 +1882,20 @@ gst_video_flip_transform_frame (GstVideoFilter * vfilter,
        GST_VIDEO_FRAME_WIDTH (out_frame), GST_VIDEO_FRAME_HEIGHT (out_frame));
    g_type_class_unref (enum_class);
  
@@ -275,7 +275,7 @@ index 371f291..2831689 100644
  
    proposed = videoflip->proposed_method;
 diff --git a/gst/videofilter/meson.build b/gst/videofilter/meson.build
-index acb5191..41e674f 100644
+index d7b6788..1a594c6 100644
 --- a/gst/videofilter/meson.build
 +++ b/gst/videofilter/meson.build
 @@ -10,7 +10,7 @@ gstvideofilter = library('gstvideofilter',
@@ -288,10 +288,10 @@ index acb5191..41e674f 100644
    install_dir : plugins_install_dir,
  )
 diff --git a/meson.build b/meson.build
-index c1a5ef1..a82a684 100644
+index c21a5ad..0f3f2f2 100644
 --- a/meson.build
 +++ b/meson.build
-@@ -362,6 +362,9 @@ gst_plugins_good_args = ['-DHAVE_CONFIG_H']
+@@ -382,6 +382,9 @@ gst_plugins_good_args = ['-DHAVE_CONFIG_H']
  configinc = include_directories('.')
  libsinc = include_directories('gst-libs')
  

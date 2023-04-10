@@ -1,7 +1,7 @@
-From 30176c223b5c45f44754551b58db4a105ff1231f Mon Sep 17 00:00:00 2001
+From 7c5f1171ff553accc588bd00500bf03b8a5de517 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Nov 2019 15:07:44 +0800
-Subject: [PATCH 4/8] v4l2: Support preferred formats
+Subject: [PATCH 04/12] v4l2: Support preferred formats
 
 Set env "GST_V4L2_PREFERRED_FOURCC" to specify preferred formats, for
 example:
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 54 insertions(+)
 
 diff --git a/sys/v4l2/gstv4l2object.c b/sys/v4l2/gstv4l2object.c
-index 9eb3b8e..a7b7ea7 100644
+index 032fd69..19ae751 100644
 --- a/sys/v4l2/gstv4l2object.c
 +++ b/sys/v4l2/gstv4l2object.c
 @@ -25,6 +25,7 @@
@@ -25,7 +25,7 @@ index 9eb3b8e..a7b7ea7 100644
  #include <string.h>
  #include <sys/mman.h>
  #include <sys/ioctl.h>
-@@ -1137,6 +1138,22 @@ gst_v4l2_object_format_get_rank (const struct v4l2_fmtdesc *fmt)
+@@ -1142,6 +1143,22 @@ gst_v4l2_object_format_get_rank (const struct v4l2_fmtdesc *fmt)
        break;
    }
  
@@ -49,10 +49,10 @@ index 9eb3b8e..a7b7ea7 100644
     * will a) make all non-emulated formats larger
     * than emulated and b) will not overflow
 diff --git a/sys/v4l2/gstv4l2src.c b/sys/v4l2/gstv4l2src.c
-index d00f7a8..1b2c1a6 100644
+index e33b71e..4cc4cdf 100644
 --- a/sys/v4l2/gstv4l2src.c
 +++ b/sys/v4l2/gstv4l2src.c
-@@ -308,6 +308,38 @@ gst_v4l2_src_parse_fixed_struct (GstStructure * s,
+@@ -438,6 +438,38 @@ gst_v4l2_src_parse_fixed_struct (GstStructure * s,
      gst_structure_get_fraction (s, "framerate", fps_n, fps_d);
  }
  
@@ -91,7 +91,7 @@ index d00f7a8..1b2c1a6 100644
  /* TODO Consider framerate */
  static gint
  gst_v4l2src_fixed_caps_compare (GstCaps * caps_a, GstCaps * caps_b,
-@@ -360,6 +392,11 @@ gst_v4l2src_fixed_caps_compare (GstCaps * caps_a, GstCaps * caps_b,
+@@ -490,6 +522,11 @@ gst_v4l2src_fixed_caps_compare (GstCaps * caps_a, GstCaps * caps_b,
    if (bh == pref->height)
      bd -= 1;
  
