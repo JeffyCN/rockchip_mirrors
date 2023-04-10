@@ -1,7 +1,7 @@
-From ead10f9607cc6d82e0df7fbb6b24d842f98f571d Mon Sep 17 00:00:00 2001
+From 26be5c13abb45c36e1e310699872e09050ebd244 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 25 Nov 2020 10:51:12 +0800
-Subject: [PATCH 13/31] waylandsink: Drop frame when window not ready
+Subject: [PATCH 13/41] waylandsink: Drop frame when window not ready
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,21 +9,21 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 6647123..25694cf 100644
+index 1870ba3..bc59506 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
-@@ -881,10 +881,15 @@ render:
+@@ -928,10 +928,15 @@ render:
  
  no_window_size:
    {
 +    /* HACK: Drop frame when window not ready */
 +#if 0
-     GST_ELEMENT_ERROR (sink, RESOURCE, WRITE,
+     GST_ELEMENT_ERROR (self, RESOURCE, WRITE,
          ("Window has no size set"),
          ("Make sure you set the size after calling set_window_handle"));
      ret = GST_FLOW_ERROR;
 +#else
-+    GST_WARNING_OBJECT (sink, "Window has no size set");
++    GST_WARNING_OBJECT (self, "Window has no size set");
 +#endif
      goto done;
    }

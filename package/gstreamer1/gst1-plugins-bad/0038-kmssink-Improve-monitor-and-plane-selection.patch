@@ -1,7 +1,7 @@
-From 2153ebe11725de26614aff3b5512a185ba87a19c Mon Sep 17 00:00:00 2001
+From f0fb72e564a241e07150cb17ac57bbe7e82b783d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 17:56:40 +0800
-Subject: [PATCH 37/39] kmssink: Improve monitor and plane selection
+Subject: [PATCH 38/41] kmssink: Improve monitor and plane selection
 
 Major changes:
 1/ Filter out disconnected monitors.
@@ -15,10 +15,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 71 insertions(+), 3 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index bfca332..78f58e3 100644
+index 0db743c..3bb55e6 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -210,13 +210,38 @@ kms_open (gchar ** driver)
+@@ -515,13 +515,38 @@ kms_open (gchar ** driver)
    return fd;
  }
  
@@ -58,7 +58,7 @@ index bfca332..78f58e3 100644
    plane = NULL;
    pipe = -1;
    for (i = 0; i < res->count_crtcs; i++) {
-@@ -231,11 +256,26 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
+@@ -536,11 +561,26 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
  
    for (i = 0; i < pres->count_planes; i++) {
      plane = drmModeGetPlane (fd, pres->planes[i]);
@@ -87,7 +87,7 @@ index bfca332..78f58e3 100644
    return NULL;
  }
  
-@@ -346,6 +386,25 @@ find_first_used_connector (int fd, drmModeRes * res)
+@@ -651,6 +691,25 @@ find_first_used_connector (int fd, drmModeRes * res)
    return NULL;
  }
  
@@ -113,7 +113,7 @@ index bfca332..78f58e3 100644
  static drmModeConnector *
  find_main_monitor (int fd, drmModeRes * res)
  {
-@@ -364,6 +423,10 @@ find_main_monitor (int fd, drmModeRes * res)
+@@ -669,6 +728,10 @@ find_main_monitor (int fd, drmModeRes * res)
    if (!conn)
      conn = find_first_used_connector (fd, res);
  
@@ -124,7 +124,7 @@ index bfca332..78f58e3 100644
    /* if no connector is used, grab the first one */
    if (!conn)
      conn = drmModeGetConnector (fd, res->connectors[0]);
-@@ -910,7 +973,12 @@ gst_kms_sink_start (GstBaseSink * bsink)
+@@ -1215,7 +1278,12 @@ gst_kms_sink_start (GstBaseSink * bsink)
    gboolean ret;
  
    self = GST_KMS_SINK (bsink);

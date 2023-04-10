@@ -1,7 +1,7 @@
-From aafad5206531efe5f2e810bb811933c423201a09 Mon Sep 17 00:00:00 2001
+From 27c5416b50ff2a62ca38c82bb45196e1e8ad1035 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 23 Jun 2022 16:04:18 +0800
-Subject: [PATCH 11/11] v4l2: Support setting v4l2 min buffers
+Subject: [PATCH 11/12] v4l2: Support setting v4l2 min buffers
 
 Tested with:
 gst-launch-1.0 v4l2src min-buffers=32 ! waylandsink ts-offset=1000000000
@@ -13,19 +13,19 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 26 insertions(+), 1 deletion(-)
 
 diff --git a/sys/v4l2/gstv4l2object.c b/sys/v4l2/gstv4l2object.c
-index fd1909d01..13e75eef2 100644
+index 09fabf0..4c8791a 100644
 --- a/sys/v4l2/gstv4l2object.c
 +++ b/sys/v4l2/gstv4l2object.c
-@@ -56,6 +56,8 @@ GST_DEBUG_CATEGORY_EXTERN (v4l2_debug);
- 
- #define ENCODED_BUFFER_SIZE             (2 * 1024 * 1024)
+@@ -58,6 +58,8 @@ GST_DEBUG_CATEGORY_EXTERN (v4l2_debug);
+ #define GST_V4L2_DEFAULT_WIDTH          320
+ #define GST_V4L2_DEFAULT_HEIGHT         240
  
 +static guint DEFAULT_PROP_MIN_BUFFERS = 0;
 +
  enum
  {
    PROP_0,
-@@ -307,6 +309,11 @@ void
+@@ -312,6 +314,11 @@ void
  gst_v4l2_object_install_properties_helper (GObjectClass * gobject_class,
      const char *default_device)
  {
@@ -37,7 +37,7 @@ index fd1909d01..13e75eef2 100644
    g_object_class_install_property (gobject_class, PROP_DEVICE,
        g_param_spec_string ("device", "Device", "Device location",
            default_device, G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
-@@ -426,6 +433,12 @@ gst_v4l2_object_install_properties_helper (GObjectClass * gobject_class,
+@@ -431,6 +438,12 @@ gst_v4l2_object_install_properties_helper (GObjectClass * gobject_class,
            "When enabled, the pixel aspect ratio will be enforced", TRUE,
            G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS));
  
@@ -50,7 +50,7 @@ index fd1909d01..13e75eef2 100644
    gst_type_mark_as_plugin_api (GST_TYPE_V4L2_DEVICE_FLAGS, 0);
    gst_type_mark_as_plugin_api (GST_TYPE_V4L2_TV_NORM, 0);
    gst_type_mark_as_plugin_api (GST_TYPE_V4L2_IO_MODE, 0);
-@@ -543,6 +556,8 @@ gst_v4l2_object_new (GstElement * element,
+@@ -548,6 +561,8 @@ gst_v4l2_object_new (GstElement * element,
      v4l2object->munmap = munmap;
    }
  
@@ -59,7 +59,7 @@ index fd1909d01..13e75eef2 100644
    return v4l2object;
  }
  
-@@ -713,6 +728,9 @@ gst_v4l2_object_set_property_helper (GstV4l2Object * v4l2object,
+@@ -715,6 +730,9 @@ gst_v4l2_object_set_property_helper (GstV4l2Object * v4l2object,
      case PROP_FORCE_ASPECT_RATIO:
        v4l2object->keep_aspect = g_value_get_boolean (value);
        break;
@@ -69,7 +69,7 @@ index fd1909d01..13e75eef2 100644
      default:
        return FALSE;
        break;
-@@ -810,6 +828,9 @@ gst_v4l2_object_get_property_helper (GstV4l2Object * v4l2object,
+@@ -812,6 +830,9 @@ gst_v4l2_object_get_property_helper (GstV4l2Object * v4l2object,
      case PROP_FORCE_ASPECT_RATIO:
        g_value_set_boolean (value, v4l2object->keep_aspect);
        break;
@@ -79,7 +79,7 @@ index fd1909d01..13e75eef2 100644
      default:
        return FALSE;
        break;
-@@ -822,6 +843,9 @@ gst_v4l2_get_driver_min_buffers (GstV4l2Object * v4l2object)
+@@ -824,6 +845,9 @@ gst_v4l2_get_driver_min_buffers (GstV4l2Object * v4l2object)
  {
    struct v4l2_control control = { 0, };
  
@@ -90,7 +90,7 @@ index fd1909d01..13e75eef2 100644
  
    if (V4L2_TYPE_IS_OUTPUT (v4l2object->type))
 diff --git a/sys/v4l2/gstv4l2object.h b/sys/v4l2/gstv4l2object.h
-index e5ed0acab..cac92f18c 100644
+index 3a5c961..276d58f 100644
 --- a/sys/v4l2/gstv4l2object.h
 +++ b/sys/v4l2/gstv4l2object.h
 @@ -246,7 +246,8 @@ GType gst_v4l2_object_get_type (void);

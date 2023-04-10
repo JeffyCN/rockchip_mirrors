@@ -1,7 +1,7 @@
-From 2b188223abebbc0020a3683d891b98d3f8528541 Mon Sep 17 00:00:00 2001
+From 7706971089dbae3a24b3073ecf2b7a225715d6a6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 24 May 2022 12:40:03 +0800
-Subject: [PATCH 9/9] matroska-{demux,parse}: Disable QoS lace skipping by
+Subject: [PATCH 09/12] matroska-{demux,parse}: Disable QoS lace skipping by
  default
 
 The QoS's timestamp would not reset in some cases, using it to skip late
@@ -19,10 +19,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 6 insertions(+)
 
 diff --git a/gst/matroska/matroska-demux.c b/gst/matroska/matroska-demux.c
-index 52a76b9d9..ceabeddcc 100644
+index 1e771b0..721db0d 100644
 --- a/gst/matroska/matroska-demux.c
 +++ b/gst/matroska/matroska-demux.c
-@@ -4744,6 +4744,7 @@ gst_matroska_demux_parse_blockgroup_or_simpleblock (GstMatroskaDemux * demux,
+@@ -4770,6 +4770,7 @@ gst_matroska_demux_parse_blockgroup_or_simpleblock (GstMatroskaDemux * demux,
           index entries point to keyframes, but if that is not true we
           will instead skip until the next keyframe. */
        if (GST_CLOCK_TIME_IS_VALID (lace_time) &&
@@ -31,7 +31,7 @@ index 52a76b9d9..ceabeddcc 100644
            stream->index_table && demux->common.segment.rate > 0.0) {
          GstMatroskaTrackVideoContext *videocontext =
 diff --git a/gst/matroska/matroska-parse.c b/gst/matroska/matroska-parse.c
-index 3fcb5c55e..ff22ec228 100644
+index 3fcb5c5..ff22ec2 100644
 --- a/gst/matroska/matroska-parse.c
 +++ b/gst/matroska/matroska-parse.c
 @@ -1878,6 +1878,7 @@ gst_matroska_parse_parse_blockgroup_or_simpleblock (GstMatroskaParse * parse,
@@ -43,10 +43,10 @@ index 3fcb5c55e..ff22ec228 100644
            stream->index_table && parse->common.segment.rate > 0.0) {
          GstMatroskaTrackVideoContext *videocontext =
 diff --git a/gst/matroska/matroska-read-common.c b/gst/matroska/matroska-read-common.c
-index eb317644c..334872a52 100644
+index 6fadbba..eff8812 100644
 --- a/gst/matroska/matroska-read-common.c
 +++ b/gst/matroska/matroska-read-common.c
-@@ -3371,6 +3371,8 @@ gst_matroska_read_common_reset (GstElement * element,
+@@ -3417,6 +3417,8 @@ gst_matroska_read_common_reset (GstElement * element,
      ctx->internal_toc = NULL;
    }
    ctx->toc_updated = FALSE;
@@ -56,7 +56,7 @@ index eb317644c..334872a52 100644
  
  /* call with object lock held */
 diff --git a/gst/matroska/matroska-read-common.h b/gst/matroska/matroska-read-common.h
-index 98cfc2451..40ea64199 100644
+index 98cfc24..40ea641 100644
 --- a/gst/matroska/matroska-read-common.h
 +++ b/gst/matroska/matroska-read-common.h
 @@ -115,6 +115,8 @@ typedef struct _GstMatroskaReadCommon {

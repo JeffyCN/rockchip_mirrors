@@ -1,7 +1,7 @@
-From ad3b8e5166eea06cc8cbab9269f1b951c9741a33 Mon Sep 17 00:00:00 2001
+From 6863269a4386d0428e7655945116d1ea72deb3c2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 17 Sep 2021 13:20:24 +0800
-Subject: [PATCH 11/11] videoconvert: Support preferred formats
+Subject: [PATCH 11/14] videoconvert: Support preferred formats
 
 Set env "GST_VIDEO_CONVERT_PREFERRED_FORMAT" to specify preferred
 formats, for example:
@@ -9,14 +9,14 @@ export GST_VIDEO_CONVERT_PREFERRED_FORMAT=NV12:NV16
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- gst/videoconvert/gstvideoconvert.c | 22 ++++++++++++++++++++++
+ gst/videoconvertscale/gstvideoconvertscale.c | 22 ++++++++++++++++++++
  1 file changed, 22 insertions(+)
 
-diff --git a/gst/videoconvert/gstvideoconvert.c b/gst/videoconvert/gstvideoconvert.c
-index 0f65ee2db..0aab69ecb 100644
---- a/gst/videoconvert/gstvideoconvert.c
-+++ b/gst/videoconvert/gstvideoconvert.c
-@@ -268,6 +268,28 @@ score_value (GstBaseTransform * base, const GstVideoFormatInfo * in_info,
+diff --git a/gst/videoconvertscale/gstvideoconvertscale.c b/gst/videoconvertscale/gstvideoconvertscale.c
+index d921b7f..ba905c5 100644
+--- a/gst/videoconvertscale/gstvideoconvertscale.c
++++ b/gst/videoconvertscale/gstvideoconvertscale.c
+@@ -1044,6 +1044,28 @@ score_value (GstBaseTransform * base, const GstVideoFormatInfo * in_info,
        loss += SCORE_DEPTH_LOSS;
    }
  

@@ -1,7 +1,7 @@
-From 1a0b32f5264b96e42cb6b05782c24451551bb80f Mon Sep 17 00:00:00 2001
+From e53fb661f705b96eefe16954df9e6437a2fd9555 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:18:07 +0800
-Subject: [PATCH 39/39] kmssink: Support fullscreen prop
+Subject: [PATCH 40/41] kmssink: Support fullscreen prop
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -10,18 +10,18 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 22 insertions(+)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index a27f569..f07ab6f 100644
+index 4538459..48d3f5b 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -100,6 +100,7 @@ enum
-   PROP_PLANE_PROPS,
+@@ -108,6 +108,7 @@ enum
+   PROP_SKIP_VSYNC,
    PROP_FORCE_ASPECT_RATIO,
    PROP_SYNC_MODE,
 +  PROP_FULLSCREEN,
    PROP_N,
  };
  
-@@ -1974,6 +1975,15 @@ retry_set_plane:
+@@ -2288,6 +2289,15 @@ retry_set_plane:
      src.h = video_height;
    }
  
@@ -37,7 +37,7 @@ index a27f569..f07ab6f 100644
    /* handle out of screen case */
    if ((result.x + result.w) > self->hdisplay)
      result.w = self->hdisplay - result.x;
-@@ -2176,6 +2186,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
+@@ -2546,6 +2556,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
      case PROP_SYNC_MODE:
        sink->sync_mode = g_value_get_enum (value);
        break;
@@ -47,7 +47,7 @@ index a27f569..f07ab6f 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_N, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -2235,6 +2248,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
+@@ -2611,6 +2624,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
      case PROP_SYNC_MODE:
        g_value_set_enum (value, sink->sync_mode);
        break;
@@ -57,7 +57,7 @@ index a27f569..f07ab6f 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -2469,6 +2485,11 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+@@ -2885,6 +2901,11 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
        GST_TYPE_KMS_SYNC_MODE, DEFAULT_SYNC_MODE,
        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  
@@ -70,10 +70,10 @@ index a27f569..f07ab6f 100644
  
    gst_video_overlay_install_properties (gobject_class, PROP_N);
 diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
-index 274351e..1981036 100644
+index 3e25665..d001ac8 100644
 --- a/sys/kms/gstkmssink.h
 +++ b/sys/kms/gstkmssink.h
-@@ -106,6 +106,7 @@ struct _GstKMSSink {
+@@ -122,6 +122,7 @@ struct _GstKMSSink {
    guintptr window_handle;
  
    gboolean keep_aspect;
