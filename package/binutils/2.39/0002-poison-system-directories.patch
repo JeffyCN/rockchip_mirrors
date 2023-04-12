@@ -1,4 +1,4 @@
-From a9652a60af6254d07066f08377415f05e3a9462e Mon Sep 17 00:00:00 2001
+From 4d8705ddb55897e8a74b617ab95736d520d9e1ea Mon Sep 17 00:00:00 2001
 From: Romain Naour <romain.naour@gmail.com>
 Date: Fri, 25 Dec 2015 11:45:38 +0100
 Subject: [PATCH] poison-system-directories
@@ -6,6 +6,8 @@ Subject: [PATCH] poison-system-directories
 Patch adapted to binutils 2.23.2 and extended to use
 BR_COMPILER_PARANOID_UNSAFE_PATH by Thomas Petazzoni.
 
+[Waldemar: rebase on top of 2.39]
+Signed-off-by: Waldemar Brodkorb <wbx@openadk.org>
 [Romain: rebase on top of 2.33.1]
 Signed-off-by: Romain Naour <romain.naour@gmail.com>
 [Gustavo: adapt to binutils 2.25]
@@ -77,11 +79,10 @@ Signed-off-by: Scott Garman <scott.a.garman@intel.com>
  ld/lexsup.c     | 21 +++++++++++++++++++++
  9 files changed, 89 insertions(+)
 
-diff --git a/ld/config.in b/ld/config.in
-index 7b60d778587..37b8e9b6f6c 100644
---- a/ld/config.in
-+++ b/ld/config.in
-@@ -40,6 +40,9 @@
+diff -Nur binutils-2.39.orig/ld/config.in binutils-2.39/ld/config.in
+--- binutils-2.39.orig/ld/config.in	2022-08-05 11:56:56.000000000 +0200
++++ binutils-2.39/ld/config.in	2022-08-11 13:00:55.310472243 +0200
+@@ -55,6 +55,9 @@
     language is requested. */
  #undef ENABLE_NLS
  
@@ -91,11 +92,10 @@ index 7b60d778587..37b8e9b6f6c 100644
  /* Additional extension a shared object might have. */
  #undef EXTRA_SHLIB_EXTENSION
  
-diff --git a/ld/configure b/ld/configure
-index a8d248eab58..f52e1f3c18f 100755
---- a/ld/configure
-+++ b/ld/configure
-@@ -828,6 +828,7 @@ with_lib_path
+diff -Nur binutils-2.39.orig/ld/configure binutils-2.39/ld/configure
+--- binutils-2.39.orig/ld/configure	2022-08-05 11:56:54.000000000 +0200
++++ binutils-2.39/ld/configure	2022-08-11 13:00:55.370470806 +0200
+@@ -836,6 +836,7 @@
  enable_targets
  enable_64_bit_bfd
  with_sysroot
@@ -103,8 +103,8 @@ index a8d248eab58..f52e1f3c18f 100755
  enable_gold
  enable_got
  enable_compressed_debug_sections
-@@ -1496,6 +1497,8 @@ Optional Features:
-   --disable-largefile     omit support for large files
+@@ -1514,6 +1515,8 @@
+   --enable-checking       enable run-time checks
    --enable-targets        alternative target configurations
    --enable-64-bit-bfd     64-bit support (on hosts with narrower word sizes)
 +  --enable-poison-system-directories
@@ -112,7 +112,7 @@ index a8d248eab58..f52e1f3c18f 100755
    --enable-gold[=ARG]     build gold [ARG={default,yes,no}]
    --enable-got=<type>     GOT handling scheme (target, single, negative,
                            multigot)
-@@ -15841,7 +15844,18 @@ else
+@@ -15370,7 +15373,18 @@
  fi
  
  
@@ -131,11 +131,10 @@ index a8d248eab58..f52e1f3c18f 100755
  
  # Check whether --enable-got was given.
  if test "${enable_got+set}" = set; then :
-diff --git a/ld/configure.ac b/ld/configure.ac
-index c9c69ab9245..59dab0a6ac4 100644
---- a/ld/configure.ac
-+++ b/ld/configure.ac
-@@ -94,6 +94,16 @@ AC_SUBST(use_sysroot)
+diff -Nur binutils-2.39.orig/ld/configure.ac binutils-2.39/ld/configure.ac
+--- binutils-2.39.orig/ld/configure.ac	2022-07-08 11:46:48.000000000 +0200
++++ binutils-2.39/ld/configure.ac	2022-08-11 13:00:55.370470806 +0200
+@@ -102,6 +102,16 @@
  AC_SUBST(TARGET_SYSTEM_ROOT)
  AC_SUBST(TARGET_SYSTEM_ROOT_DEFINE)
  
@@ -152,53 +151,10 @@ index c9c69ab9245..59dab0a6ac4 100644
  dnl Use --enable-gold to decide if this linker should be the default.
  dnl "install_as_default" is set to false if gold is the default linker.
  dnl "installed_linker" is the installed BFD linker name.
-diff --git a/ld/ld.h b/ld/ld.h
-index 93f5af92c7d..ff7f71a7b66 100644
---- a/ld/ld.h
-+++ b/ld/ld.h
-@@ -166,6 +166,14 @@ typedef struct
-      in the linker script.  */
-   bfd_boolean force_group_allocation;
- 
-+  /* If TRUE (the default) warn for uses of system directories when
-+     cross linking.  */
-+  bfd_boolean poison_system_directories;
-+
-+  /* If TRUE (default FALSE) give an error for uses of system
-+     directories when cross linking instead of a warning.  */
-+  bfd_boolean error_poison_system_directories;
-+
-   /* Big or little endian as set on command line.  */
-   enum endian_enum endian;
- 
-diff --git a/ld/ld.texi b/ld/ld.texi
-index 7a602b9c6ab..cccbfbab3bb 100644
---- a/ld/ld.texi
-+++ b/ld/ld.texi
-@@ -2810,6 +2810,18 @@ string identifying the original linked file does not change.
- 
- Passing @code{none} for @var{style} disables the setting from any
- @code{--build-id} options earlier on the command line.
-+
-+@kindex --no-poison-system-directories
-+@item --no-poison-system-directories
-+Do not warn for @option{-L} options using system directories such as
-+@file{/usr/lib} when cross linking.  This option is intended for use
-+in chroot environments when such directories contain the correct
-+libraries for the target system rather than the host.
-+
-+@kindex --error-poison-system-directories
-+@item --error-poison-system-directories
-+Give an error instead of a warning for @option{-L} options using
-+system directories when cross linking.
- @end table
- 
- @c man end
-diff --git a/ld/ldfile.c b/ld/ldfile.c
-index 81cb86d51e2..cd5c2752679 100644
---- a/ld/ldfile.c
-+++ b/ld/ldfile.c
-@@ -117,6 +117,23 @@ ldfile_add_library_path (const char *name, bfd_boolean cmdline)
+diff -Nur binutils-2.39.orig/ld/ldfile.c binutils-2.39/ld/ldfile.c
+--- binutils-2.39.orig/ld/ldfile.c	2022-07-08 11:46:48.000000000 +0200
++++ binutils-2.39/ld/ldfile.c	2022-08-11 13:00:55.394470231 +0200
+@@ -117,6 +117,23 @@
      new_dirs->name = concat (ld_sysroot, name + strlen ("$SYSROOT"), (const char *) NULL);
    else
      new_dirs->name = xstrdup (name);
@@ -222,37 +178,74 @@ index 81cb86d51e2..cd5c2752679 100644
  }
  
  /* Try to open a BFD for a lang_input_statement.  */
-diff --git a/ld/ldlex.h b/ld/ldlex.h
-index b0101028321..77f5accb5d9 100644
---- a/ld/ldlex.h
-+++ b/ld/ldlex.h
-@@ -161,6 +161,8 @@ enum option_values
+diff -Nur binutils-2.39.orig/ld/ld.h binutils-2.39/ld/ld.h
+--- binutils-2.39.orig/ld/ld.h	2022-07-08 11:46:48.000000000 +0200
++++ binutils-2.39/ld/ld.h	2022-08-11 13:00:55.382470519 +0200
+@@ -162,6 +162,14 @@
+      in the linker script.  */
+   bool force_group_allocation;
+ 
++  /* If TRUE (the default) warn for uses of system directories when
++     cross linking.  */
++  bool poison_system_directories;
++
++  /* If TRUE (default FALSE) give an error for uses of system
++     directories when cross linking instead of a warning.  */
++  bool error_poison_system_directories;
++
+   /* Big or little endian as set on command line.  */
+   enum endian_enum endian;
+ 
+diff -Nur binutils-2.39.orig/ld/ldlex.h binutils-2.39/ld/ldlex.h
+--- binutils-2.39.orig/ld/ldlex.h	2022-07-08 11:46:48.000000000 +0200
++++ binutils-2.39/ld/ldlex.h	2022-08-11 13:03:35.462636396 +0200
+@@ -164,6 +164,8 @@
    OPTION_CTF_VARIABLES,
    OPTION_NO_CTF_VARIABLES,
    OPTION_CTF_SHARE_TYPES,
 +  OPTION_NO_POISON_SYSTEM_DIRECTORIES,
 +  OPTION_ERROR_POISON_SYSTEM_DIRECTORIES,
- };
- 
- /* The initial parser states.  */
-diff --git a/ld/ldmain.c b/ld/ldmain.c
-index 863df0293ea..f06f2546ef5 100644
---- a/ld/ldmain.c
-+++ b/ld/ldmain.c
-@@ -323,6 +323,8 @@ main (int argc, char **argv)
-   command_line.warn_mismatch = TRUE;
-   command_line.warn_search_mismatch = TRUE;
+   OPTION_WARN_EXECSTACK,
+   OPTION_NO_WARN_EXECSTACK,
+   OPTION_WARN_RWX_SEGMENTS,
+diff -Nur binutils-2.39.orig/ld/ldmain.c binutils-2.39/ld/ldmain.c
+--- binutils-2.39.orig/ld/ldmain.c	2022-07-08 11:46:48.000000000 +0200
++++ binutils-2.39/ld/ldmain.c	2022-08-11 13:00:55.402470040 +0200
+@@ -321,6 +321,8 @@
+   command_line.warn_mismatch = true;
+   command_line.warn_search_mismatch = true;
    command_line.check_section_addresses = -1;
-+  command_line.poison_system_directories = TRUE;
-+  command_line.error_poison_system_directories = FALSE;
++  command_line.poison_system_directories = true;
++  command_line.error_poison_system_directories = false;
  
    /* We initialize DEMANGLING based on the environment variable
       COLLECT_NO_DEMANGLE.  The gcc collect2 program will demangle the
-diff --git a/ld/lexsup.c b/ld/lexsup.c
-index f005a58a045..eb383d3755b 100644
---- a/ld/lexsup.c
-+++ b/ld/lexsup.c
-@@ -591,6 +591,14 @@ static const struct ld_option ld_options[] =
+diff -Nur binutils-2.39.orig/ld/ld.texi binutils-2.39/ld/ld.texi
+--- binutils-2.39.orig/ld/ld.texi	2022-07-08 11:46:48.000000000 +0200
++++ binutils-2.39/ld/ld.texi	2022-08-11 13:02:44.627853889 +0200
+@@ -2936,6 +2936,18 @@
+ Passing @code{none} for @var{style} disables the setting from any
+ @code{--build-id} options earlier on the command line.
+ 
++@kindex --no-poison-system-directories
++@item --no-poison-system-directories
++Do not warn for @option{-L} options using system directories such as
++@file{/usr/lib} when cross linking.  This option is intended for use
++in chroot environments when such directories contain the correct
++libraries for the target system rather than the host.
++
++@kindex --error-poison-system-directories
++@item --error-poison-system-directories
++Give an error instead of a warning for @option{-L} options using
++system directories when cross linking.
++
+ @kindex --package-metadata=@var{JSON}
+ @item --package-metadata=@var{JSON}
+ Request the creation of a @code{.note.package} ELF note section.  The
+diff -Nur binutils-2.39.orig/ld/lexsup.c binutils-2.39/ld/lexsup.c
+--- binutils-2.39.orig/ld/lexsup.c	2022-07-08 11:46:48.000000000 +0200
++++ binutils-2.39/ld/lexsup.c	2022-08-11 13:00:55.434469274 +0200
+@@ -608,6 +608,14 @@
  		   "                                <method> is: share-unconflicted (default),\n"
  		   "                                             share-duplicated"),
      TWO_DASHES },
@@ -267,7 +260,7 @@ index f005a58a045..eb383d3755b 100644
  };
  
  #define OPTION_COUNT ARRAY_SIZE (ld_options)
-@@ -603,6 +611,7 @@ parse_args (unsigned argc, char **argv)
+@@ -620,6 +628,7 @@
    int ingroup = 0;
    char *default_dirlist = NULL;
    char *shortopts;
@@ -275,32 +268,31 @@ index f005a58a045..eb383d3755b 100644
    struct option *longopts;
    struct option *really_longopts;
    int last_optind;
-@@ -1633,6 +1642,14 @@ parse_args (unsigned argc, char **argv)
+@@ -1679,6 +1688,14 @@
  	  }
  	  break;
  
 +	case OPTION_NO_POISON_SYSTEM_DIRECTORIES:
-+	  command_line.poison_system_directories = FALSE;
++	  command_line.poison_system_directories = false;
 +	  break;
 +
 +	case OPTION_ERROR_POISON_SYSTEM_DIRECTORIES:
-+	  command_line.error_poison_system_directories = TRUE;
++	  command_line.error_poison_system_directories = true;
 +	  break;
 +
  	case OPTION_PUSH_STATE:
  	  input_flags.pushed = xmemdup (&input_flags,
  					sizeof (input_flags),
-@@ -1778,6 +1795,10 @@ parse_args (unsigned argc, char **argv)
+@@ -1824,6 +1841,10 @@
        command_line.soname = NULL;
      }
  
 +  BR_paranoid_env = getenv("BR_COMPILER_PARANOID_UNSAFE_PATH");
 +  if (BR_paranoid_env && strlen(BR_paranoid_env) > 0)
-+    command_line.error_poison_system_directories = TRUE;
++    command_line.error_poison_system_directories = true;
 +
    while (ingroup)
      {
        einfo (_("%P: missing --end-group; added as last command line option\n"));
 -- 
-2.29.2
-
+2.31.1
