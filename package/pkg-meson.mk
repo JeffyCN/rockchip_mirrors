@@ -68,12 +68,26 @@ else
 PKG_MESON_TARGET_CPU_FAMILY = $(ARCH)
 endif
 
+# To avoid populating the cross-file with non existing compilers,
+# we tie them to /bin/false
+ifeq ($(BR2_INSTALL_LIBSTDCPP),y)
+PKG_MESON_TARGET_CXX = $(TARGET_CXX)
+else
+PKG_MESON_TARGET_CXX = /bin/false
+endif
+
+ifeq ($(BR2_TOOLCHAIN_HAS_FORTRAN),y)
+PKG_MESON_TARGET_FC = $(TARGET_FC)
+else
+PKG_MESON_TARGET_FC = /bin/false
+endif
+
 # Generates sed patterns for patching the cross-compilation.conf template,
 # since Flags might contain commas the arguments are passed indirectly by
 # variable name (stripped to deal with whitespaces).
 # Arguments are variable containing cflags, cxxflags, ldflags, fcflags
 define PKG_MESON_CROSSCONFIG_SED_COMMON
-        -e "s%@TARGET_FC@%$(TARGET_FC)%g" \
+        -e "s%@TARGET_FC@%$(PKG_MESON_TARGET_FC)%g" \
         -e "s%@TARGET_ARCH@%$(PKG_MESON_TARGET_CPU_FAMILY)%g" \
         -e "s%@TARGET_CPU@%$(GCC_TARGET_CPU)%g" \
         -e "s%@TARGET_ENDIAN@%$(call qstrip,$(call LOWERCASE,$(BR2_ENDIAN)))%g" \
@@ -91,7 +105,7 @@ endef
 
 define PKG_MESON_CROSSCONFIG_SED
         -e "s%@TARGET_CC@%$(TARGET_CC)%g" \
-        -e "s%@TARGET_CXX@%$(TARGET_CXX)%g" \
+        -e "s%@TARGET_CXX@%$(PKG_MESON_TARGET_CXX)%g" \
         -e "s%@TARGET_AR@%$(TARGET_AR)%g" \
         -e "s%@TARGET_STRIP@%$(TARGET_STRIP)%g" \
 	$(call PKG_MESON_CROSSCONFIG_SED_COMMON,$(1),$(2),$(3),$(4))
@@ -172,7 +186,7 @@ define $(2)_CONFIGURE_CMDS
 	CC_FOR_BUILD="$$(HOSTCC)" \
 	CXX_FOR_BUILD="$$(HOSTCXX)" \
 	$$($$(PKG)_CONF_ENV) \
-	$$(MESON) \
+	$$(MESON) setup \
 		--prefix=/usr \
 		--libdir=lib \
 		--default-library=$(if $(BR2_STATIC_LIBS),static,$(if $(BR2_SHARED_STATIC_LIBS),both,shared)) \
@@ -192,7 +206,7 @@ define $(2)_CONFIGURE_CMDS
 	rm -rf $$($$(PKG)_SRCDIR)/build
 	mkdir -p $$($$(PKG)_SRCDIR)/build
 	$$(HOST_CONFIGURE_OPTS) \
-	$$($$(PKG)_CONF_ENV) $$(MESON) \
+	$$($$(PKG)_CONF_ENV) $$(MESON) setup \
 		--prefix=$$(HOST_DIR) \
 		--libdir=lib \
 		--sysconfdir=$$(HOST_DIR)/etc \
