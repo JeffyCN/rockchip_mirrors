@@ -8,28 +8,19 @@ fi
 choose_board()
 {
 	echo
-	echo "You're building on Linux"
-	echo "Lunch menu...pick a combo:"
+	echo "Pick a board:"
 	echo ""
 
-	echo "0. non-rockchip boards"
 	echo ${RK_DEFCONFIG_ARRAY[@]} | xargs -n 1 | sed "=" | sed "N;s/\n/. /"
 
 	local INDEX
 	while true; do
-		read -p "Which would you like? [0]: " INDEX
-		INDEX=$((${INDEX:-0} - 1))
-
-		if [ "$INDEX" -eq -1 ]; then
-			echo "Lunching for non-rockchip boards..."
-			unset RK_BUILD_CONFIG
-			rm -rf "$BUILDROOT_BOARD_DIR"
-			break;
-		fi
+		read -p "Which would you like? [1]: " INDEX
+		INDEX=$((${INDEX:-1} - 1))
 
 		if echo $INDEX | grep -vq [^0-9]; then
 			RK_BUILD_CONFIG="${RK_DEFCONFIG_ARRAY[$INDEX]}"
-			[ -n "$RK_BUILD_CONFIG" ] && break
+			[ -z "$RK_BUILD_CONFIG" ] || break
 		fi
 
 		echo
@@ -38,7 +29,7 @@ choose_board()
 	done
 }
 
-lunch_rockchip()
+setup_board()
 {
 	BUILDROOT_OUTPUT_DIR="$BUILDROOT_DIR/output/$RK_BUILD_CONFIG"
 
@@ -154,8 +145,6 @@ main()
 		$(cd "$BUILDROOT_DIR/configs/"; ls rockchip_* | \
 			grep "$(basename "$1")" | sed "s/_defconfig$//" | sort)
 	)
-
-	unset RK_BUILD_CONFIG
 	RK_DEFCONFIG_ARRAY_LEN=${#RK_DEFCONFIG_ARRAY[@]}
 
 	case $RK_DEFCONFIG_ARRAY_LEN in
@@ -183,9 +172,7 @@ main()
 			;;
 	esac
 
-	[ -n "$RK_BUILD_CONFIG" ] || return
-
-	lunch_rockchip
+	setup_board
 
 	# Set alias
 	alias croot='cd "$TOP_DIR"'
@@ -204,23 +191,6 @@ main()
 	alias breconfig-update='bpkg_run reconfig-update'
 	alias brebuild-update='bpkg_run rebuild-update'
 	alias breinstall-update='bpkg_run reinstall-update'
-
-	# The new buildroot Makefile needs make (>= 4.0)
-	if "$BUILDROOT_DIR/support/dependencies/check-host-make.sh" 4.0 make >/dev/null; then
-		return 0
-	fi
-
-	echo -e "\e[35mYour make is too old: $(make -v | head -n 1)\e[0m"
-	echo "Please update it:"
-	echo "git clone https://github.com/mirror/make.git"
-	echo "cd make"
-	echo "git checkout 4.2"
-	echo "git am $BUILDROOT_DIR/package/make/*.patch"
-	echo "autoreconf -f -i"
-	echo "./configure"
-	echo "make make -j8"
-	echo "install -m 0755 make /usr/local/bin/make"
-	return 1
 }
 
 main "$@"
