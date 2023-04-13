@@ -12,6 +12,12 @@ MESON_SETUP_TYPE = setuptools
 
 HOST_MESON_DEPENDENCIES = host-ninja
 
+# Cleanup old files before installing
+define HOST_MESON_CLEANUP
+	$(RM) -r $(HOST_DIR)/lib/python$(PYTHON3_VERSION_MAJOR)/site-packages/mesonbuild
+endef
+HOST_MESON_PRE_INSTALL_HOOKS += HOST_MESON_CLEANUP
+
 # Avoid interpreter shebang longer than 128 chars
 define HOST_MESON_SET_INTERPRETER
 	$(SED) '1s:.*:#!/usr/bin/env python3:' $(HOST_DIR)/bin/meson
