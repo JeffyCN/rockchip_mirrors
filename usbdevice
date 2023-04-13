@@ -194,7 +194,7 @@ usb_stop_daemon()
 
 usb_load_config()
 {
-	USB_CONFIG_FILE=$(find /etc/ -name .usb_config | head -n 1)
+	USB_CONFIG_FILE=$(find /tmp/ /etc/ -name .usb_config | head -n 1)
 	[ -n "$USB_CONFIG_FILE" -a -r "$USB_CONFIG_FILE" ] || return 0
 
 	ums_parse()
