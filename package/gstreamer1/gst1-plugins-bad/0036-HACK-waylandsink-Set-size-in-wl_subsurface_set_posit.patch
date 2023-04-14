@@ -1,4 +1,4 @@
-From 22ac345a68c25a9e1008d45cb324481bb4aacc63 Mon Sep 17 00:00:00 2001
+From fb2c268edceeac0abfffd5f3441b5f3fd899f2f0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 21 Jul 2022 12:29:27 +0800
 Subject: [PATCH 36/41] HACK: waylandsink: Set size in
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 11 insertions(+), 1 deletion(-)
 
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index 293038c..30ceb2f 100644
+index f94976f..21cd476 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
-@@ -602,7 +602,17 @@ gst_wl_window_resize_video_surface (GstWlWindow * self, gboolean commit)
+@@ -604,7 +604,17 @@ gst_wl_window_resize_video_surface (GstWlWindow * self, gboolean commit)
          wl_fixed_from_int (src.x), wl_fixed_from_int (src.y),
          wl_fixed_from_int (src.w), wl_fixed_from_int (src.h));
    } else {
