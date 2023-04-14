@@ -1,4 +1,4 @@
-From 83e06911d44d9cbc87f03b01e981aa3557323761 Mon Sep 17 00:00:00 2001
+From 4dc621faa702285e385c8dc3fb42463a0774c4d8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Mar 2021 10:15:51 +0800
 Subject: [PATCH 19/41] waylandsink: Support window layer property
@@ -12,9 +12,9 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  ext/wayland/gstwaylandsink.c       | 52 ++++++++++++++++++++++++++++--
  ext/wayland/gstwaylandsink.h       |  1 +
- gst-libs/gst/wayland/gstwlwindow.c | 41 ++++++++++++++++++++++-
+ gst-libs/gst/wayland/gstwlwindow.c | 40 ++++++++++++++++++++++-
  gst-libs/gst/wayland/gstwlwindow.h | 15 +++++++--
- 4 files changed, 104 insertions(+), 5 deletions(-)
+ 4 files changed, 103 insertions(+), 5 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
 index 7917c69..56a6849 100644
@@ -141,33 +141,32 @@ index d4c3764..a417788 100644
    gchar *display_name;
  
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index dd6e1c2..358a948 100644
+index dd6e1c2..fed1c97 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
-@@ -252,6 +252,44 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
+@@ -252,6 +252,43 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
    return self;
  }
  
 +static void
-+gst_wl_window_set_flags (GstWlWindow * self, const char *flags)
++gst_wl_window_set_config (GstWlWindow * self, const char *config)
 +{
 +  GstWlWindowPrivate *priv;
 +
-+  /* HACK: set self flags through title */
-+  char s[128] = "flags=";
-+  strcat (s, flags);
-+
-+  if (!self)
++  /* TODO: support non-toplevel */
++  if (!gst_wl_window_is_toplevel (self))
 +    return;
 +
 +  priv = gst_wl_window_get_instance_private (self);
-+  xdg_toplevel_set_title (priv->xdg_toplevel, s);
++
++  /* HACK: set window config through title */
++  xdg_toplevel_set_title (priv->xdg_toplevel, config);
 +}
 +
 +void
 +gst_wl_window_ensure_layer (GstWlWindow * self, GstWlWindowLayer layer)
 +{
-+  char s[128] = "\0";
++  char s[128] = "flags=";
 +
 +  switch (layer) {
 +    case GST_WL_WINDOW_LAYER_TOP:
@@ -183,13 +182,13 @@ index dd6e1c2..358a948 100644
 +      return;
 +  }
 +
-+  gst_wl_window_set_flags (self, s);
++  gst_wl_window_set_config (self, s);
 +}
 +
  void
  gst_wl_window_ensure_fullscreen (GstWlWindow * self, gboolean fullscreen)
  {
-@@ -269,7 +307,7 @@ gst_wl_window_ensure_fullscreen (GstWlWindow * self, gboolean fullscreen)
+@@ -269,7 +306,7 @@ gst_wl_window_ensure_fullscreen (GstWlWindow * self, gboolean fullscreen)
  
  GstWlWindow *
  gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
@@ -198,7 +197,7 @@ index dd6e1c2..358a948 100644
      GstVideoRectangle * render_rectangle)
  {
    GstWlWindow *self;
-@@ -306,6 +344,7 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+@@ -306,6 +343,7 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
          &xdg_toplevel_listener, self);
  
      gst_wl_window_ensure_fullscreen (self, fullscreen);

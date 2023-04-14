@@ -1,4 +1,4 @@
-From 143e004606b32684c5134b74f79845ca0d0ed49a Mon Sep 17 00:00:00 2001
+From 4e301bfe0bafe8fd9b6ca88bae11a8b6f055e41a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 07:08:06 +0800
 Subject: [PATCH 21/41] waylandsink: Support window fill-mode property
@@ -153,7 +153,7 @@ index 0339ef7..7abfea1 100644
    gchar *display_name;
  
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index 236ab9a..e4df155 100644
+index f470338..7dc0da5 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
 @@ -71,6 +71,8 @@ typedef struct _GstWlWindowPrivate
@@ -182,10 +182,10 @@ index 236ab9a..e4df155 100644
 +  priv->fill_mode = fill_mode;
 +}
 +
- /* HACK: set window config through title */
  static void
  gst_wl_window_set_config (GstWlWindow * self, const char *config)
-@@ -508,7 +523,33 @@ gst_wl_window_resize_video_surface (GstWlWindow * self, gboolean commit)
+ {
+@@ -510,7 +525,33 @@ gst_wl_window_resize_video_surface (GstWlWindow * self, gboolean commit)
  
    /* center the video_subsurface inside area_subsurface */
    if (priv->video_viewport) {

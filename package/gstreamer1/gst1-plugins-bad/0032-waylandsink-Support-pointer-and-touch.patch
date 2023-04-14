@@ -1,4 +1,4 @@
-From 6834da6a5da4a3de0e6d00a19a7068e79ad3b738 Mon Sep 17 00:00:00 2001
+From 75c7ee95b6d561ee0030cfe5d7680b1fb48041b1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 5 May 2022 17:56:46 +0800
 Subject: [PATCH 32/41] waylandsink: Support pointer and touch
@@ -397,7 +397,7 @@ index c130b79..c6b4c8d 100644
  gboolean gst_wl_display_support_afbc (GstWlDisplay * self);
  
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index 6a9086f..8ff8bd2 100644
+index df60a67..f55778d 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
 @@ -96,6 +96,19 @@ static void gst_wl_window_finalize (GObject * gobject);
@@ -429,7 +429,7 @@ index 6a9086f..8ff8bd2 100644
    priv->area_surface_wrapper = wl_proxy_create_wrapper (priv->area_surface);
    priv->video_surface_wrapper = wl_proxy_create_wrapper (priv->video_surface);
  
-@@ -366,6 +381,8 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
+@@ -368,6 +383,8 @@ gst_wl_window_new_toplevel (GstWlDisplay * display, const GstVideoInfo * info,
    self = gst_wl_window_new_internal (display, render_lock);
    priv = gst_wl_window_get_instance_private (self);
  

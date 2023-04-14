@@ -1,4 +1,4 @@
-From c91b1c527448eba4fd1942efdb676381e28e26a6 Mon Sep 17 00:00:00 2001
+From 11b559342c5bed99b46652b68e35bfea171d1a86 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
 Subject: [PATCH 26/41] waylandsink: Support NV12_10LE40 and
@@ -407,7 +407,7 @@ index bc36a08..abf579c 100644
  void gst_wl_videoformat_init_once (void);
  
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index e4df155..6a9086f 100644
+index 7dc0da5..df60a67 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
 @@ -66,6 +66,9 @@ typedef struct _GstWlWindowPrivate
@@ -450,7 +450,7 @@ index e4df155..6a9086f 100644
  void
  gst_wl_window_ensure_fill_mode (GstWlWindow * self,
      GstWlWindowFillMode fill_mode)
-@@ -521,6 +547,14 @@ gst_wl_window_resize_video_surface (GstWlWindow * self, gboolean commit)
+@@ -523,6 +549,14 @@ gst_wl_window_resize_video_surface (GstWlWindow * self, gboolean commit)
    dst.w = priv->render_rectangle.w;
    dst.h = priv->render_rectangle.h;
  
@@ -465,7 +465,7 @@ index e4df155..6a9086f 100644
    /* center the video_subsurface inside area_subsurface */
    if (priv->video_viewport) {
      if (priv->fill_mode == GST_WL_WINDOW_STRETCH) {
-@@ -535,22 +569,21 @@ gst_wl_window_resize_video_surface (GstWlWindow * self, gboolean commit)
+@@ -537,22 +571,21 @@ gst_wl_window_resize_video_surface (GstWlWindow * self, gboolean commit)
  
        if (src_ratio < dst_ratio) {
          int h = src.w / dst_ratio;
@@ -493,7 +493,7 @@ index e4df155..6a9086f 100644
    } else {
      gst_video_center_rect (&src, &dst, &res, FALSE);
    }
-@@ -595,13 +628,14 @@ gst_wl_window_render (GstWlWindow * self, GstWlBuffer * buffer,
+@@ -597,13 +630,14 @@ gst_wl_window_render (GstWlWindow * self, GstWlBuffer * buffer,
    GstWlWindowPrivate *priv = gst_wl_window_get_instance_private (self);
  
    if (G_UNLIKELY (info)) {
