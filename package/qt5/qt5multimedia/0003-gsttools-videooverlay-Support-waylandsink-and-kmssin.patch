@@ -1,17 +1,17 @@
-From a9655e044dd00901013ae9b0131f4cde206546a9 Mon Sep 17 00:00:00 2001
+From c4e12604a6a59a81ea8ba49e89eb52060987b8a0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Nov 2018 21:31:49 +0800
 Subject: [PATCH 03/17] gsttools: videooverlay: Support waylandsink and kmssink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- src/gsttools/qgstreamervideooverlay.cpp | 179 ++++++++++++++++++++----
+ src/gsttools/qgstreamervideooverlay.cpp | 181 ++++++++++++++++++++----
  src/gsttools/qgstreamervideooverlay_p.h |   2 +
  src/gsttools/qgstreamervideowidget.cpp  |  16 ++-
- 3 files changed, 168 insertions(+), 29 deletions(-)
+ 3 files changed, 170 insertions(+), 29 deletions(-)
 
 diff --git a/src/gsttools/qgstreamervideooverlay.cpp b/src/gsttools/qgstreamervideooverlay.cpp
-index d410be7..454c149 100644
+index d410be7..8d2df0a 100644
 --- a/src/gsttools/qgstreamervideooverlay.cpp
 +++ b/src/gsttools/qgstreamervideooverlay.cpp
 @@ -39,8 +39,13 @@
@@ -181,7 +181,7 @@ index d410be7..454c149 100644
  }
  
  void QGstreamerVideoOverlay::expose()
-@@ -499,24 +606,43 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
+@@ -499,24 +606,45 @@ void QGstreamerVideoOverlay::setRenderRectangle(const QRect &rect)
          h = rect.height();
      }
  
@@ -210,13 +210,15 @@ index d410be7..454c149 100644
 +
 +#ifdef ENABLE_WAYLAND_PLATFORM
 +#define GST_WAYLAND_DISPLAY_HANDLE_CONTEXT_TYPE "GstWaylandDisplayHandleContextType"
++#define GST_WL_DISPLAY_HANDLE_CONTEXT_TYPE "GstWlDisplayHandleContextType"
 +    if (gm && (GST_MESSAGE_TYPE(gm) == GST_MESSAGE_NEED_CONTEXT)) {
 +        const gchar *type = NULL;
 +
 +        if (gst_message_parse_context_type(gm, &type) &&
-+                !g_strcmp0(type, GST_WAYLAND_DISPLAY_HANDLE_CONTEXT_TYPE)) {
++                (!g_strcmp0(type, GST_WL_DISPLAY_HANDLE_CONTEXT_TYPE) ||
++                 !g_strcmp0(type, GST_WAYLAND_DISPLAY_HANDLE_CONTEXT_TYPE))) {
 +            GstContext *context =
-+                gst_context_new(GST_WAYLAND_DISPLAY_HANDLE_CONTEXT_TYPE, TRUE);
++                gst_context_new(type, TRUE);
 +            QPlatformNativeInterface *native =
 +                QGuiApplication::platformNativeInterface();
 +            void *handle = NULL;
@@ -237,7 +239,7 @@ index d410be7..454c149 100644
  #if !GST_CHECK_VERSION(1,0,0)
      if (gm && (GST_MESSAGE_TYPE(gm) == GST_MESSAGE_ELEMENT) &&
              gst_structure_has_name(gm->structure, "prepare-xwindow-id")) {
-@@ -574,6 +700,7 @@ void QGstreamerVideoOverlay::updateIsActive()
+@@ -574,6 +702,7 @@ void QGstreamerVideoOverlay::updateIsActive()
      if (newIsActive != m_isActive) {
          m_isActive = newIsActive;
          emit activeChanged();
