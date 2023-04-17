@@ -8,7 +8,7 @@ RECOVERY_VERSION = develop
 RECOVERY_SITE = $(TOPDIR)/../external/recovery
 RECOVERY_SITE_METHOD = local
 
-RECOVERY_LICENSE = Apache V2.0
+RECOVERY_LICENSE = ROCKCHIP
 RECOVERY_LICENSE_FILES = NOTICE
 CC="$(TARGET_CC)"
 PROJECT_DIR="$(@D)"
@@ -18,7 +18,8 @@ RECOVERY_BUILD_OPTS+=-I$(PROJECT_DIR) -I$(STAGING_DIR)/usr/include/libdrm \
 	-lpthread \
 	-lcurl \
 	-lssl \
-	-lcrypto
+	-lcrypto \
+	-lbz2
 
 RECOVERY_DEPENDENCIES += libcurl openssl
 
@@ -46,12 +47,12 @@ ifeq ($(BR2_PACKAGE_RECOVERY_RETRY),y)
 endif
 
 RECOVERY_MAKE_OPTS = \
-        CFLAGS="$(TARGET_CFLAGS) $(RECOVERY_BUILD_OPTS)" \
-        PROJECT_DIR="$(@D)"
+	CFLAGS="$(TARGET_CFLAGS) $(RECOVERY_BUILD_OPTS)" \
+	PROJECT_DIR="$(@D)"
 
 define RECOVERY_IMAGE_COPY
-        mkdir -p $(TARGET_DIR)/res/images
-        cp $(BUILD_DIR)/recovery-$(RECOVERY_VERSION)/res/images/* $(TARGET_DIR)/res/images/
+	mkdir -p $(TARGET_DIR)/res/images
+	cp $(BUILD_DIR)/recovery-$(RECOVERY_VERSION)/res/images/* $(TARGET_DIR)/res/images/
 endef
 
 define RECOVERY_BUILD_CMDS
