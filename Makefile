@@ -36,8 +36,8 @@ SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 # or avoid confusing packages that can use the O=<dir> syntax for out-of-tree
 # build by preventing it from being forwarded to sub-make calls.
 ifneq ("$(origin O)", "command line")
-BOARD_DIR := $(CURDIR)/output/.board
-O := $(if $(wildcard $(BOARD_DIR)),$(BOARD_DIR),$(CURDIR)/output)
+LATEST_BOARD_DIR := $(CURDIR)/output/latest
+O := $(if $(wildcard $(LATEST_BOARD_DIR)),$(LATEST_BOARD_DIR),$(CURDIR)/output)
 endif
 
 # Check if the current Buildroot execution meets all the pre-requisites.
