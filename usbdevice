@@ -204,8 +204,8 @@ usb_load_config()
 	UMS_FILE="$(ums_parse ums_block)"
 	UMS_SIZE=$(ums_parse ums_block_size || echo 0)M
 	UMS_FSTYPE=$(ums_parse ums_block_type)
-	UMS_MOUNT=$([ "$(ums_parse ums_block_auto_mount)" != on ]; echo $?)
-	UMS_RO=$([ "$(ums_parse ums_block_ro)" != on ]; echo $?)
+	UMS_MOUNT=$([ "$(ums_parse ums_block_auto_mount)" != on ] || echo 1)
+	UMS_RO=$([ "$(ums_parse ums_block_ro)" != on ] || echo 1)
 
 	USB_FUNCS="$(sed -n "s/usb_\(.*\)_en/\1/p" "$USB_CONFIG_FILE" | xargs)"
 }
@@ -491,7 +491,11 @@ usb_prepare()
 	usb_load_config
 
 	# Allow function/variable overriding
-	[ -d /etc/usbdevice.d ] && . /etc/usbdevice.d/*
+	if [ -d /etc/usbdevice.d ]; then
+		for hook in $(ls /etc/usbdevice.d/); do
+			source "$hook"
+		done
+	fi
 
 	UMS_FILE=${UMS_FILE:-/userdata/ums_shared.img}
 	UMS_SIZE=${UMS_SIZE:-256M}
