@@ -7,7 +7,7 @@
 start() {
 	printf "Starting pulseaudio: "
 	umask 077
-	/usr/bin/pulseaudio &
+	PULSE_HOME=/userdata/.pulse /usr/bin/pulseaudio &
 #		--system \
 #		--daemonize \
 #		--disallow-module-loading \
