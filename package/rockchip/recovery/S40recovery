@@ -1,17 +1,17 @@
 #!/bin/sh
 #
-# Start Rockchip recovery for Linux...
+# Start Rockchip recovery...
 #
 
 case "$1" in
   start)
+		echo "starting recovery... "
 	  	touch /dev/.coldboot_done
 		/usr/bin/recovery &
 
 	;;
   stop)
 		killall recovery
-		printf "stop finished"
         ;;
   *)
         echo "Usage: $0 {start|stop}"
