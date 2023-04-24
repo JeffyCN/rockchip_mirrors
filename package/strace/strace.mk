@@ -4,14 +4,12 @@
 #
 ################################################################################
 
-STRACE_VERSION = 5.14
+STRACE_VERSION = 5.18
 STRACE_SOURCE = strace-$(STRACE_VERSION).tar.xz
-STRACE_SITE = https://strace.io/files/$(STRACE_VERSION)
+STRACE_SITE = https://github.com/strace/strace/releases/download/v$(STRACE_VERSION)
 STRACE_LICENSE = LGPL-2.1+
 STRACE_LICENSE_FILES = COPYING LGPL-2.1-or-later
 STRACE_CPE_ID_VENDOR = strace_project
-# We're patching configure.ac
-STRACE_AUTORECONF = YES
 STRACE_CONF_OPTS = --enable-mpers=no
 
 ifeq ($(BR2_PACKAGE_LIBUNWIND),y)
@@ -27,6 +25,11 @@ STRACE_DEPENDENCIES += binutils
 STRACE_CONF_OPTS += --with-libiberty=check
 else
 STRACE_CONF_OPTS += --without-libiberty
+endif
+
+ifeq ($(BR2_PACKAGE_STRACE_STATIC),y)
+STRACE_CONF_OPTS += --enable-static
+STRACE_CONF_ENV += CFLAGS="$(TARGET_CFLAGS) -static"
 endif
 
 ifeq ($(BR2_PACKAGE_PERL),)
