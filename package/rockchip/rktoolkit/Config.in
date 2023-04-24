@@ -3,6 +3,10 @@ config BR2_PACKAGE_RKTOOLKIT
 	help
 	  rockchip toolkit for linux
 
+config BR2_PACKAGE_RKTOOLKIT_STATIC
+	bool "static tools"
+	depends on BR2_PACKAGE_RKTOOLKIT
+
 config BR2_PACKAGE_IO
 	bool "io tool for linux"
 	select BR2_PACKAGE_RKTOOLKIT

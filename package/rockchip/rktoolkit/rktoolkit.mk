@@ -10,6 +10,52 @@ RKTOOLKIT_SITE_METHOD = local
 RKTOOLKIT_LICENSE_FILES = LICENSE
 RKTOOLKIT_LICENSE = Apache-2.0
 
+RKTOOLKIT_CFLAGS = $(TARGET_CFLAGS)
+ifeq ($(BR2_PACKAGE_RKTOOLKIT_STATIC),y)
+RKTOOLKIT_CFLAGS += -static
+endif
+
+ifeq ($(BR2_PACKAGE_IO),y)
+define RKTOOLKIT_BUILD_IO
+	$(TARGET_CC) $(RKTOOLKIT_CFLAGS) $(TARGET_LDFLAGS) $(@D)/io.c \
+		-o $(@D)/io
+endef
+RKTOOLKIT_POST_BUILD_HOOKS += RKTOOLKIT_BUILD_IO
+
+define RKTOOLKIT_INSTALL_IO
+	$(INSTALL) -D -m 755 $(@D)/io $(TARGET_DIR)/usr/bin/io
+endef
+RKTOOLKIT_POST_INSTALL_TARGET_HOOKS += RKTOOLKIT_INSTALL_IO
+endif
+
+ifeq ($(BR2_PACKAGE_UPDATE),y)
+define RKTOOLKIT_BUILD_UPDATE
+	$(TARGET_CC) $(RKTOOLKIT_CFLAGS) $(TARGET_LDFLAGS) $(@D)/update.c \
+		$(@D)/update_recv/update_recv.c -I$(@D)/update_recv/ \
+		-o $(@D)/update
+endef
+RKTOOLKIT_POST_BUILD_HOOKS += RKTOOLKIT_BUILD_UPDATE
+
+define RKTOOLKIT_INSTALL_UPDATE
+	$(INSTALL) -D -m 755 $(@D)/update $(TARGET_DIR)/usr/bin/update
+endef
+RKTOOLKIT_POST_INSTALL_TARGET_HOOKS += RKTOOLKIT_INSTALL_UPDATE
+endif
+
+ifeq ($(BR2_PACKAGE_VENDOR_STORAGE),y)
+define RKTOOLKIT_BUILD_VENDOR_STORAGE
+	$(TARGET_CC) $(RKTOOLKIT_CFLAGS) $(TARGET_LDFLAGS) \
+		$(@D)/vendor_storage.c -o $(@D)/vendor_storage
+endef
+RKTOOLKIT_POST_BUILD_HOOKS += RKTOOLKIT_BUILD_VENDOR_STORAGE
+
+define RKTOOLKIT_INSTALL_VENDOR_STORAGE
+	$(INSTALL) -D -m 755 $(@D)/vendor_storage \
+		$(TARGET_DIR)/usr/bin/vendor_storage
+endef
+RKTOOLKIT_POST_INSTALL_TARGET_HOOKS += RKTOOLKIT_INSTALL_VENDOR_STORAGE
+endif
+
 ifeq ($(BR2_PACKAGE_VENDOR_STORAGE_LIBRARY), y)
 RKTOOLKIT_VENDOR_STORAGE_LIB_NAME = libvendor_storage.so
 RKTOOLKIT_VENDOR_STORAGE_INCLUDE_NAME = vendor_storage.h
@@ -25,17 +71,5 @@ define RKTOOLKIT_INSTALL_LIB_TARGET_CMDS
 endef
 RKTOOLKIT_POST_INSTALL_TARGET_HOOKS += RKTOOLKIT_INSTALL_LIB_TARGET_CMDS
 endif
-
-define RKTOOLKIT_BUILD_CMDS
-	$(TARGET_CC) $(TARGET_CFLAGS) $(TARGET_LDFLAGS) $(@D)/io.c -o $(@D)/io
-	$(TARGET_CC) $(TARGET_CFLAGS) $(TARGET_LDFLAGS) $(@D)/update.c $(@D)/update_recv/update_recv.c -I$(@D)/update_recv/ -o $(@D)/update
-	$(TARGET_CC) $(TARGET_CFLAGS) $(TARGET_LDFLAGS) $(@D)/vendor_storage.c -o $(@D)/vendor_storage
-endef
-
-define RKTOOLKIT_INSTALL_TARGET_CMDS
-	[ -n "$(BR2_PACKAGE_IO)" ] && $(INSTALL) -D -m 755 $(@D)/io $(TARGET_DIR)/usr/bin/io || true
-	[ -n "$(BR2_PACKAGE_UPDATE)" ] && $(INSTALL) -D -m 755 $(@D)/update $(TARGET_DIR)/usr/bin/update || true
-	[ -n "$(BR2_PACKAGE_VENDOR_STORAGE)" ] && $(INSTALL) -D -m 755 $(@D)/vendor_storage $(TARGET_DIR)/usr/bin/vendor_storage || true
-endef
 
 $(eval $(generic-package))
