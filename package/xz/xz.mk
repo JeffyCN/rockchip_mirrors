@@ -24,5 +24,9 @@ HOST_XZ_CONF_ENV = \
 	CC="$(HOSTCC_NOCCACHE)" \
 	CXX="$(HOSTCXX_NOCCACHE)"
 
+ifeq ($(BR2_PACKAGE_XZ_STATIC),y)
+XZ_CONF_OPTS += --enable-static
+endif
+
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))
