@@ -72,7 +72,7 @@ BUSYBOX_DEPENDENCIES = \
 # Link against libtirpc if available so that we can leverage its RPC
 # support for NFS mounting with BusyBox
 ifeq ($(BR2_PACKAGE_LIBTIRPC),y)
-ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_BUSYBOX_STATIC),y)
+ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_BUSYBOX_STATIC),)
 BUSYBOX_DEPENDENCIES += libtirpc host-pkgconf
 BUSYBOX_CFLAGS += "`$(PKG_CONFIG_HOST_BINARY) --cflags libtirpc`"
 # Don't use LDFLAGS for -ltirpc, because LDFLAGS is used for
@@ -192,7 +192,7 @@ define BUSYBOX_SET_MMU
 endef
 endif
 
-ifeq ($(BR2_PACKAGE_BUSYBOX_STATIC),y)
+ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_BUSYBOX_STATIC),)
 define BUSYBOX_SET_STATIC
 	$(call KCONFIG_ENABLE_OPT,CONFIG_STATIC)
 endef
