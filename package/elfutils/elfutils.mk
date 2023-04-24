@@ -86,5 +86,10 @@ else
 ELFUTILS_CONF_OPTS += --disable-progs
 endif
 
+define ELFUTILS_INSTALL_LIBEBL
+	$(INSTALL) -D -m 0755 $(@D)/libebl/libebl.a $(STAGING_DIR)/usr/lib/
+endef
+ELFUTILS_POST_INSTALL_STAGING_HOOKS += ELFUTILS_INSTALL_LIBEBL
+
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))
