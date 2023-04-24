@@ -27,6 +27,11 @@ else
 STRACE_CONF_OPTS += --without-libiberty
 endif
 
+ifeq ($(BR2_PACKAGE_STRACE_STATIC),y)
+STRACE_CONF_OPTS += --enable-static
+STRACE_CONF_ENV += CFLAGS="$(TARGET_CFLAGS) -static"
+endif
+
 ifeq ($(BR2_PACKAGE_PERL),)
 define STRACE_REMOVE_STRACE_GRAPH
 	rm -f $(TARGET_DIR)/usr/bin/strace-graph

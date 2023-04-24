@@ -22,3 +22,11 @@ comment "strace needs a toolchain w/ headers >= 4.0 on nios2"
 comment "strace needs a toolchain w/ headers >= 5.0 on xtensa"
 	depends on BR2_xtensa
 	depends on !BR2_TOOLCHAIN_HEADERS_AT_LEAST_5_0
+
+if BR2_PACKAGE_STRACE
+
+config BR2_PACKAGE_STRACE_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
+endif
