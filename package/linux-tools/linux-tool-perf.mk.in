@@ -29,6 +29,10 @@ PERF_MAKE_FLAGS = \
 	NO_LIBPYTHON=1 \
 	NO_LIBBIONIC=1
 
+ifeq ($(BR2_PACKAGE_LINUX_TOOLS_PERF_STATIC),y)
+PERF_MAKE_FLAGS += LDFLAGS="$(TARGET_LDFLAGS) -static"
+endif
+
 # We need to pass an argument to ld for setting the emulation when
 # building for MIPS architecture, otherwise the default one will always
 # be used and the compilation for most variants will fail.
