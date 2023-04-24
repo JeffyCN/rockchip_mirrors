@@ -24,4 +24,8 @@ ifeq ($(BR2_PACKAGE_LIBUCONTEXT),y)
 LIBUNWIND_DEPENDENCIES += libucontext
 endif
 
+ifeq ($(BR2_PACKAGE_LIBUNWIND_STATIC),y)
+LIBUNWIND_CONF_OPTS += --enable-static --disable-zlibdebuginfo
+endif
+
 $(eval $(autotools-package))
