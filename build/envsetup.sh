@@ -34,8 +34,7 @@ setup_board()
 	BUILDROOT_OUTPUT_DIR="$BUILDROOT_DIR/output/$RK_BUILD_CONFIG"
 
 	mkdir -p "$BUILDROOT_OUTPUT_DIR"
-	rm -rf "$BUILDROOT_BOARD_DIR" "$BUILDROOT_LATEST_DIR"
-	ln -rsf "$BUILDROOT_OUTPUT_DIR" "$BUILDROOT_BOARD_DIR"
+	rm -rf "$BUILDROOT_LATEST_DIR"
 	ln -rsf "$BUILDROOT_OUTPUT_DIR" "$BUILDROOT_LATEST_DIR"
 
 	echo "Output dir: $BUILDROOT_OUTPUT_DIR"
@@ -62,7 +61,6 @@ setup_board()
 
 bpkg()
 {
-	BUILDROOT_OUTPUT_DIR="$(realpath "$BUILDROOT_LATEST_DIR")"
 	case "${1:-dir}" in
 		dir)
 			if [ -n "$2" ]; then
@@ -138,7 +136,6 @@ main()
 {
 	SCRIPTS_DIR="$(dirname "$(realpath "$BASH_SOURCE")")"
 	BUILDROOT_DIR="$(dirname "$SCRIPTS_DIR")"
-	BUILDROOT_BOARD_DIR="$BUILDROOT_DIR/output/.board"
 	BUILDROOT_LATEST_DIR="$BUILDROOT_DIR/output/latest"
 	TOP_DIR="$(dirname "$BUILDROOT_DIR")"
 	echo "Top of tree: $TOP_DIR"
@@ -176,10 +173,12 @@ main()
 
 	setup_board
 
+	export BUILDROOT_OUTPUT_DIR
+
 	# Set alias
 	alias croot='cd "$TOP_DIR"'
 	alias broot='cd "$BUILDROOT_DIR"'
-	alias bmake='make -f "$BUILDROOT_LATEST_DIR/Makefile"'
+	alias bmake='make -f "$BUILDROOT_OUTPUT_DIR/Makefile"'
 
 	alias bconfig='bpkg_run configure'
 	alias bbuild='bpkg_run build'
