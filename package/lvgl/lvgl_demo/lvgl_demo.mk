@@ -8,7 +8,7 @@ LVGL_DEMO_SITE = $(TOPDIR)/../app/lvgl_demo
 LVGL_DEMO_SITE_METHOD = local
 
 # add dependencies
-LVGL_DEMO_DEPENDENCIES = rockchip-rga lvgl
+LVGL_DEMO_DEPENDENCIES = lvgl
 
 LVGL_DEMO_INSTALL_STAGING = YES
 
