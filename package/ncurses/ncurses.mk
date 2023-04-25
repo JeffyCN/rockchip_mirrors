@@ -44,6 +44,10 @@ else ifeq ($(BR2_SHARED_STATIC_LIBS),y)
 NCURSES_CONF_OPTS += --with-shared --with-normal
 endif
 
+ifeq ($(BR2_PACKAGE_NCURSES_STATIC),y)
+NCURSES_CONF_OPTS += --with-normal
+endif
+
 # configure can't find the soname for libgpm when cross compiling
 ifeq ($(BR2_PACKAGE_GPM),y)
 NCURSES_CONF_OPTS += --with-gpm=libgpm.so.2
@@ -109,7 +113,7 @@ define NCURSES_LINK_PC
 endef
 
 NCURSES_LINK_STAGING_LIBS = \
-	$(if $(BR2_STATIC_LIBS)$(BR2_SHARED_STATIC_LIBS),$(call NCURSES_LINK_LIBS_STATIC);) \
+	$(if $(BR2_STATIC_LIBS)$(BR2_SHARED_STATIC_LIBS)$(BR2_PACKAGE_NCURSES_STATIC),$(call NCURSES_LINK_LIBS_STATIC);) \
 	$(if $(BR2_SHARED_LIBS)$(BR2_SHARED_STATIC_LIBS),$(call NCURSES_LINK_LIBS_SHARED))
 
 NCURSES_LINK_STAGING_PC = $(call NCURSES_LINK_PC)

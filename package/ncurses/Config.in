@@ -10,6 +10,10 @@ config BR2_PACKAGE_NCURSES
 
 if BR2_PACKAGE_NCURSES
 
+config BR2_PACKAGE_NCURSES_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
 config BR2_PACKAGE_NCURSES_WCHAR
 	bool "enable wide char support"
 	depends on BR2_USE_WCHAR
