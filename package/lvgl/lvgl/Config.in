@@ -3,3 +3,12 @@ config BR2_PACKAGE_LVGL
 	default n
 	help
 	  Little VGL
+
+config BR2_PACKAGE_LVGL_USE_SDL
+	bool "Little VGL use SDL"
+	default n
+	depends on BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
+	depends on BR2_PACKAGE_SDL2
+	depends on BR2_PACKAGE_LVGL
+	help
+	  Little VGL use SDL for graphic acceleration
