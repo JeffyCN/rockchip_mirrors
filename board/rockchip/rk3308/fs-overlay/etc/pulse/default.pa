@@ -139,5 +139,7 @@ load-module module-filter-apply
 ### Make some devices default
 #set-default-sink output
 set-default-sink alsa_output.platform-vad-sound.stereo-fallback
+set-default-sink alsa_output.platform-vad-acodec-sound.stereo-fallback
 #set-default-source input
-set-default-sink alsa_input.platform-vad-sound.multichannel-input
+set-default-source alsa_input.platform-vad-sound.multichannel-input
+set-default-source alsa_input.platform-vad-acodec-sound.multichannel-input
