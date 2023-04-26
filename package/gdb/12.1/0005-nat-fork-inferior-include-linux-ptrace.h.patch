@@ -1,4 +1,4 @@
-From d84ecfa3a8c8fbade89229ac66c09f2a97ab00fb Mon Sep 17 00:00:00 2001
+From cbcb73a86dea0c0b9917b49b37095463155c5377 Mon Sep 17 00:00:00 2001
 From: Thomas Petazzoni <thomas.petazzoni@bootlin.com>
 Date: Sun, 24 Jun 2018 23:33:55 +0200
 Subject: [PATCH] nat/fork-inferior: include linux-ptrace.h
@@ -37,7 +37,7 @@ Signed-off-by: Romain Naour <romain.naour@gmail.com>
  1 file changed, 1 insertion(+)
 
 diff --git a/gdb/nat/fork-inferior.c b/gdb/nat/fork-inferior.c
-index fe9360a5039..626fe7c1fbf 100644
+index 4df9a98047e..9bf0f6059f5 100644
 --- a/gdb/nat/fork-inferior.c
 +++ b/gdb/nat/fork-inferior.c
 @@ -27,6 +27,7 @@
@@ -49,5 +49,5 @@ index fe9360a5039..626fe7c1fbf 100644
  
  extern char **environ;
 -- 
-2.21.0
+2.37.1
 
