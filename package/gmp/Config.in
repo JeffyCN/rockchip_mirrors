@@ -4,3 +4,11 @@ config BR2_PACKAGE_GMP
 	  GNU Multiple Precision Arithmetic Library.
 
 	  http://gmplib.org/
+
+if BR2_PACKAGE_GMP
+
+config BR2_PACKAGE_GMP_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
+endif
