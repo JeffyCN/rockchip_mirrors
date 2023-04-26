@@ -1,0 +1,26 @@
+From 97578511d9f8e55d76212cfcbd82ecfbf62efa80 Mon Sep 17 00:00:00 2001
+From: Jiajian Wu <jair.wu@rock-chips.com>
+Date: Wed, 26 Apr 2023 16:42:00 +0800
+Subject: [PATCH 2/4] lv_conf.h: lv_demo_music use large items
+
+Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
+---
+ lv_conf.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lv_conf.h b/lv_conf.h
+index 65c32bba2..77dcf4010 100644
+--- a/lv_conf.h
++++ b/lv_conf.h
+@@ -760,7 +760,7 @@
+     #define LV_DEMO_MUSIC_SQUARE    0
+     #define LV_DEMO_MUSIC_LANDSCAPE 0
+     #define LV_DEMO_MUSIC_ROUND     0
+-    #define LV_DEMO_MUSIC_LARGE     0
++    #define LV_DEMO_MUSIC_LARGE     1
+     #define LV_DEMO_MUSIC_AUTO_PLAY 0
+ #endif
+ 
+-- 
+2.25.1
+
