@@ -31,5 +31,9 @@ else
 GMP_CONF_OPTS += --disable-cxx
 endif
 
+ifeq ($(BR2_PACKAGE_GMP_STATIC),y)
+GMP_CONF_OPTS += --enable-static
+endif
+
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))
