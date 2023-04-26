@@ -1,7 +1,7 @@
-From 5ec3ff51a4e5cdaa694f4f97bd507fa6250be140 Mon Sep 17 00:00:00 2001
+From f0a4ffb3f6b9128e4c77ec1ff509077feb330298 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 9 Dec 2022 11:15:45 +0800
-Subject: [PATCH 5/5] Support bypassing Unicode when printing
+Subject: [PATCH 7/8] Support bypassing Unicode when printing
 
 Enabled by default.
 
@@ -20,10 +20,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 20 insertions(+), 2 deletions(-)
 
 diff --git a/libbb/Config.src b/libbb/Config.src
-index 24b31fa..3396773 100644
+index b980f19..8b833c9 100644
 --- a/libbb/Config.src
 +++ b/libbb/Config.src
-@@ -238,6 +238,12 @@ config UNICODE_SUPPORT
+@@ -264,6 +264,12 @@ config UNICODE_SUPPORT
  	Probably by the time when busybox will be fully Unicode-clean,
  	other encodings will be mainly of historic interest.
  
