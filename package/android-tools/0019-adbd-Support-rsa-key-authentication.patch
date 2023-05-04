@@ -34,7 +34,7 @@ index 32173f2..37d230c 100644
  #else
      //property_get("ro.adb.secure", value, "0");
 -    auth_enabled = 0;//!strcmp(value, "1");
-+    auth_enabled = getenv("ADBD_RSA_AUTH_ENABLE")? 1: 0;
++    auth_enabled = !!getenv("ADBD_RSA_KEY_FILE");
      if (auth_enabled)
          adb_auth_init();
  
@@ -68,7 +68,7 @@ index 068d837..34a19dc 100644
 -    if (framework_fd < 0) {
 -        D("Client not connected\n");
 -        return;
-+    char *auth_key_file = getenv("ADBD_RSA_KEY_FILE") ? getenv("ADBD_RSA_KEY_FILE"): "/etc/adbkey.pub";
++    char *auth_key_file = getenv("ADBD_RSA_KEY_FILE") ?: "/etc/adbkey.pub";
 +    char msg[MAX_PAYLOAD] = {0};
 +    if(-1 == snprintf(msg,sizeof(msg),"%s",key)){
 +        D("Could not read pc pub msg");

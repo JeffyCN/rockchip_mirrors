@@ -92,50 +92,50 @@ define HOST_ANDROID_TOOLS_INSTALL_CMDS
 		$(INSTALL) -D -m 0755 $(@D)/$(t) $(HOST_DIR)/bin/$(notdir $(t))$(sep))
 endef
 
-ifeq ($(BR2_PACKAGE_ANDROID_TOOLS_AUTH_RSA),y)
-ADBD_RSA_KEY_FILEPATH = $(call qstrip,$(BR2_PACKAGE_ANDROID_TOOLS_AUTH_RSA_KEY_PATH))
-define ANDROID_TOOLS_INSTALL_RSAAUTH_ENV
-	echo "export ADBD_RSA_AUTH_ENABLE=1" > $(TARGET_DIR)/etc/profile.d/adbd.sh
-	echo "export ADBD_RSA_KEY_FILE=${ADBD_RSA_KEY_FILEPATH}" >> $(TARGET_DIR)/etc/profile.d/adbd.sh
-	$(INSTALL) -D -m 0644 $(HOME)/.android/adbkey.pub $(TARGET_DIR)/${ADBD_RSA_KEY_FILEPATH}
+define ANDROID_TOOLS_INSTALL_TARGET_CMDS
+	$(foreach t,$(ANDROID_TOOLS_TARGETS),\
+		$(INSTALL) -D -m 0755 $(@D)/build-$(t)/$(t) $(TARGET_DIR)/usr/bin/$(t)$(sep))
 endef
+
+ifeq ($(BR2_PACKAGE_ANDROID_TOOLS_ADBD),y)
+define ANDROID_TOOLS_INSTALL_TARGET_SHELL
+	mkdir -p $(TARGET_DIR)/etc/profile.d
+	echo "[ -x /bin/bash ] && export ADBD_SHELL=/bin/bash" > \
+		$(TARGET_DIR)/etc/profile.d/adbd.sh
+endef
+ANDROID_TOOLS_PRE_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_SHELL
+
+ifneq ($(BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT),0)
+define ANDROID_TOOLS_INSTALL_TARGET_TCP_PORT
+	echo "export ADB_TCP_PORT=$(BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT)" >> \
+		$(TARGET_DIR)/etc/profile.d/adbd.sh
+endef
+ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_TCP_PORT
 endif
 
 ADBD_AUTH_PASSWORD = $(call qstrip,$(BR2_PACKAGE_ANDROID_TOOLS_AUTH_PASSWORD))
 ifneq ($(ADBD_AUTH_PASSWORD),)
 ADBD_AUTH_PASSWORD_MD5=$(shell echo $(ADBD_AUTH_PASSWORD) | md5sum)
 
-define ANDROID_TOOLS_INSTALL_AUTH
-	$(INSTALL) -D -m 0755 $(ANDROID_TOOLS_PKGDIR)/adbd_auth.sh \
-		$(TARGET_DIR)/usr/bin/adbd_auth.sh
+define ANDROID_TOOLS_INSTALL_TARGET_PASSWORD
+	$(INSTALL) -D -m 0755 $(ANDROID_TOOLS_PKGDIR)/adbd-auth \
+		$(TARGET_DIR)/usr/bin/adbd-auth
 	sed -i "s/AUTH_PASSWORD/${ADBD_AUTH_PASSWORD_MD5}/g" \
-		$(TARGET_DIR)/usr/bin/adbd_auth.sh
+		$(TARGET_DIR)/usr/bin/adbd-auth
 endef
+ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_PASSWORD
 endif
 
-define ANDROID_TOOLS_INSTALL_TARGET_CMDS
-	$(foreach t,$(ANDROID_TOOLS_TARGETS),\
-		$(INSTALL) -D -m 0755 $(@D)/build-$(t)/$(t) $(TARGET_DIR)/usr/bin/$(t)$(sep))
-	$(ANDROID_TOOLS_INSTALL_AUTH)
-	$(ANDROID_TOOLS_INSTALL_RSAAUTH_ENV)
+ADBD_RSA_KEY = $(call qstrip,$(BR2_PACKAGE_ANDROID_TOOLS_AUTH_RSA_KEY))
+ifneq ($(ADBD_RSA_KEY),)
+define ANDROID_TOOLS_INSTALL_TARGET_RSA_KEY
+	echo "export ADBD_RSA_KEY_FILE=/etc/adbkey.pub" >> \
+		$(TARGET_DIR)/etc/profile.d/adbd.sh
+	$(INSTALL) -D -m 0644 $(ADBD_RSA_KEY) $(TARGET_DIR)/etc/adbkey.pub
 endef
-
-ifeq ($(BR2_PACKAGE_BASH),y)
-define ANDROID_TOOLS_INSTALL_TARGET_SHELL_ENV
-        $(INSTALL) -D -m 0644 $(ANDROID_TOOLS_PKGDIR)/adbd_shell.sh \
-                $(TARGET_DIR)/etc/profile.d/adbd_shell.sh
-endef
-ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_SHELL_ENV
+ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_RSA_KEY
 endif
 
-ifneq ($(BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT),0)
-define ANDROID_TOOLS_INSTALL_TARGET_TCP_PORT
-	echo "export ADB_TCP_PORT=$(BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT)" > \
-		$(@D)/adbd_tcp_port.sh
-	$(INSTALL) -D -m 0644 $(@D)/adbd_tcp_port.sh \
-		$(TARGET_DIR)/etc/profile.d/adbd_tcp_port.sh
-endef
-ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_TCP_PORT
 endif
 
 $(eval $(generic-package))
