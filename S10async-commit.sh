@@ -1,6 +1,8 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:       async-commit
+# Required-Start:
+# Required-Stop:
 # Default-Start:  S
 # Default-Stop:
 # Description:    Enable ASYNC_COMMIT for Rockchip BSP kernel > 4.4

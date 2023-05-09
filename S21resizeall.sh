@@ -1,6 +1,8 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:       resize-all
+# Required-Start: $local_fs
+# Required-Stop:  $local_fs
 # Default-Start:  S
 # Default-Stop:
 # Description:    Resize all internal mounted partitions

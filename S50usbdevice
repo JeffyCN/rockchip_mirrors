@@ -1,6 +1,8 @@
 #!/bin/sh
 ### BEGIN INIT INFO
 # Provides:       usbdevice
+# Required-Start: $local_fs $syslog
+# Required-Stop:  $local_fs
 # Default-Start:  S
 # Default-Stop:   K
 # Description:    Manage USB device functions
