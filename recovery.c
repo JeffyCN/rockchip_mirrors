@@ -188,6 +188,19 @@ check_and_fclose(FILE *fp, const char *name) {
     fclose(fp);
 }
 
+// rockchip partition check (e.g: oem/userdata....)
+static void
+rockchip_partition_check() {
+    if (ensure_path_unmounted("/oem") != 0)
+	LOGE("\n === umount oem fail === \n");
+
+    if (ensure_path_unmounted("/userdata") != 0)
+	LOGE("\n === umount userdata fail === \n");
+
+    ui_print("check userdata/oem partition success ...\n");
+    printf("check userdata/oem partition success ...\n");
+}
+
 // command line args come from, in decreasing precedence:
 //   - the actual command line
 //   - the bootloader control block (one per line, after "recovery")
@@ -984,11 +997,7 @@ main(int argc, char **argv) {
             LOGE("open /userdata/update_rst.txt fail, errno = %d\n", errno);
         }
 
-        if (ensure_path_unmounted("/oem") != 0)
-            LOGE("\n === umount oem fail === \n");
-
-        if (ensure_path_unmounted("/userdata") != 0)
-            LOGE("\n === umount userdata fail === \n");
+        rockchip_partition_check();
 
         const char* binary = "/usr/bin/rkupdate";
         int i, ret = 0;
@@ -1037,6 +1046,8 @@ main(int argc, char **argv) {
         ui_print("update.img Installation done.\n");
         //ui_show_text(0);
     } else if (sdupdate_package != NULL) {
+        rockchip_partition_check();
+
         // update image from sdcard
 #ifdef USE_RKUPDATE
         const char* binary = "/usr/bin/rkupdate";
@@ -1094,6 +1105,7 @@ main(int argc, char **argv) {
         }
 
     } else if (usbupdate_package != NULL) {
+        rockchip_partition_check();
         // update image from udisk
 #ifdef USE_RKUPDATE
         const char* binary = "/usr/bin/rkupdate";
