@@ -156,6 +156,7 @@ main()
 			if [ ! -f "$CONFIG" ]; then
 				unset RK_BUILD_CONFIG
 				echo "No available configs${1:+" for: $1"}"
+				return
 			fi
 			;;
 		1)
