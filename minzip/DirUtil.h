@@ -34,7 +34,7 @@
  * (usually if some element of path is not a directory).
  */
 int dirCreateHierarchy(const char *path, int mode,
-        const struct utimbuf *timestamp, bool stripFileName);
+                       const struct utimbuf *timestamp, bool stripFileName);
 
 /* rm -rf <path>
  */
@@ -46,6 +46,6 @@ int dirUnlinkHierarchy(const char *path);
  * Sets directories to <dirMode> and files to <fileMode>.  Skips symlinks.
  */
 int dirSetHierarchyPermissions(const char *path,
-         int uid, int gid, int dirMode, int fileMode);
+                               int uid, int gid, int dirMode, int fileMode);
 
 #endif  // MINZIP_DIRUTIL_H_

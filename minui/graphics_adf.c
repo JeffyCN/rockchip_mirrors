@@ -50,12 +50,12 @@ static gr_surface adf_flip(struct minui_backend *backend);
 static void adf_blank(struct minui_backend *backend, bool blank);
 
 static int adf_surface_init(struct adf_pdata *pdata,
-        struct drm_mode_modeinfo *mode, struct adf_surface_pdata *surf)
+                            struct drm_mode_modeinfo *mode, struct adf_surface_pdata *surf)
 {
     memset(surf, 0, sizeof(*surf));
 
     surf->fd = adf_interface_simple_buffer_alloc(pdata->intf_fd, mode->hdisplay,
-            mode->vdisplay, pdata->format, &surf->offset, &surf->pitch);
+                                                 mode->vdisplay, pdata->format, &surf->offset, &surf->pitch);
     if (surf->fd < 0)
         return surf->fd;
 
@@ -65,7 +65,7 @@ static int adf_surface_init(struct adf_pdata *pdata,
     surf->base.pixel_bytes = (pdata->format == DRM_FORMAT_RGB565) ? 2 : 4;
 
     surf->base.data = mmap(NULL, surf->pitch * surf->base.height, PROT_WRITE,
-            MAP_SHARED, surf->fd, surf->offset);
+                           MAP_SHARED, surf->fd, surf->offset);
     if (surf->base.data == MAP_FAILED) {
         close(surf->fd);
         return -errno;
@@ -92,7 +92,7 @@ static int adf_interface_init(struct adf_pdata *pdata)
     }
 
     err = adf_surface_init(pdata, &intf_data.current_mode,
-            &pdata->surfaces[1]);
+                           &pdata->surfaces[1]);
     if (err < 0) {
         fprintf(stderr, "allocating surface 1 failed: %s\n", strerror(-err));
         memset(&pdata->surfaces[1], 0, sizeof(pdata->surfaces[1]));
@@ -113,7 +113,7 @@ static int adf_device_init(struct adf_pdata *pdata, struct adf_device *dev)
     int err;
 
     err = adf_find_simple_post_configuration(dev, &pdata->format, 1, &intf_id,
-            &pdata->eng_id);
+                                             &pdata->eng_id);
     if (err < 0)
         return err;
 
@@ -197,8 +197,8 @@ static gr_surface adf_flip(struct minui_backend *backend)
     struct adf_surface_pdata *surf = &pdata->surfaces[pdata->current_surface];
 
     int fence_fd = adf_interface_simple_post(pdata->intf_fd, pdata->eng_id,
-            surf->base.width, surf->base.height, pdata->format, surf->fd,
-            surf->offset, surf->pitch, -1);
+                                             surf->base.width, surf->base.height, pdata->format, surf->fd,
+                                             surf->offset, surf->pitch, -1);
     if (fence_fd >= 0)
         close(fence_fd);
 
@@ -210,7 +210,7 @@ static void adf_blank(struct minui_backend *backend, bool blank)
 {
     struct adf_pdata *pdata = (struct adf_pdata *)backend;
     adf_interface_blank(pdata->intf_fd,
-            blank ? DRM_MODE_DPMS_OFF : DRM_MODE_DPMS_ON);
+                        blank ? DRM_MODE_DPMS_OFF : DRM_MODE_DPMS_ON);
 }
 
 static void adf_surface_destroy(struct adf_surface_pdata *surf)

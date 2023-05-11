@@ -23,8 +23,9 @@
 /*
  * Compute the capacity needed for a table to hold "size" elements.
  */
-size_t mzHashSize(size_t size) {
-    return (size * LOAD_DENOM) / LOAD_NUMER +1;
+size_t mzHashSize(size_t size)
+{
+    return (size * LOAD_DENOM) / LOAD_NUMER + 1;
 }
 
 /*
@@ -153,9 +154,9 @@ static bool resizeHash(HashTable* pHashTable, int newSize)
             int newIdx;
 
             /* probe for new spot, wrapping around */
-            newIdx = hashValue & (newSize-1);
+            newIdx = hashValue & (newSize - 1);
             while (pNewEntries[newIdx].data != NULL)
-                newIdx = (newIdx + 1) & (newSize-1);
+                newIdx = (newIdx + 1) & (newSize - 1);
 
             pNewEntries[newIdx].hashValue = hashValue;
             pNewEntries[newIdx].data = data;
@@ -177,7 +178,7 @@ static bool resizeHash(HashTable* pHashTable, int newSize)
  * We probe on collisions, wrapping around the table.
  */
 void* mzHashTableLookup(HashTable* pHashTable, unsigned int itemHash, void* item,
-    HashCompareFunc cmpFunc, bool doAdd)
+                        HashCompareFunc cmpFunc, bool doAdd)
 {
     HashEntry* pEntry;
     HashEntry* pEnd;
@@ -188,13 +189,12 @@ void* mzHashTableLookup(HashTable* pHashTable, unsigned int itemHash, void* item
     assert(item != NULL);
 
     /* jump to the first entry and probe for a match */
-    pEntry = &pHashTable->pEntries[itemHash & (pHashTable->tableSize-1)];
+    pEntry = &pHashTable->pEntries[itemHash & (pHashTable->tableSize - 1)];
     pEnd = &pHashTable->pEntries[pHashTable->tableSize];
     while (pEntry->data != NULL) {
         if (pEntry->data != HASH_TOMBSTONE &&
             pEntry->hashValue == itemHash &&
-            (*cmpFunc)(pEntry->data, item) == 0)
-        {
+            (*cmpFunc)(pEntry->data, item) == 0) {
             /* match */
             //LOGD("+++ match on entry %d\n", pEntry - pHashTable->pEntries);
             break;
@@ -219,9 +219,8 @@ void* mzHashTableLookup(HashTable* pHashTable, unsigned int itemHash, void* item
             /*
              * We've added an entry.  See if this brings us too close to full.
              */
-            if ((pHashTable->numEntries+pHashTable->numDeadEntries) * LOAD_DENOM
-                > pHashTable->tableSize * LOAD_NUMER)
-            {
+            if ((pHashTable->numEntries + pHashTable->numDeadEntries) * LOAD_DENOM
+                > pHashTable->tableSize * LOAD_NUMER) {
                 if (!resizeHash(pHashTable, pHashTable->tableSize * 2)) {
                     /* don't really have a way to indicate failure */
                     LOGE("Dalvik hash resize failure\n");
@@ -260,7 +259,7 @@ bool mzHashTableRemove(HashTable* pHashTable, unsigned int itemHash, void* item)
     assert(pHashTable->tableSize > 0);
 
     /* jump to the first entry and probe for a match */
-    pEntry = &pHashTable->pEntries[itemHash & (pHashTable->tableSize-1)];
+    pEntry = &pHashTable->pEntries[itemHash & (pHashTable->tableSize - 1)];
     pEnd = &pHashTable->pEntries[pHashTable->tableSize];
     while (pEntry->data != NULL) {
         if (pEntry->data == item) {
@@ -313,7 +312,7 @@ int mzHashForeach(HashTable* pHashTable, HashForeachFunc func, void* arg)
  * Returns -1 if the entry wasn't found.
  */
 int countProbes(HashTable* pHashTable, unsigned int itemHash, const void* item,
-    HashCompareFunc cmpFunc)
+                HashCompareFunc cmpFunc)
 {
     HashEntry* pEntry;
     HashEntry* pEnd;
@@ -324,13 +323,12 @@ int countProbes(HashTable* pHashTable, unsigned int itemHash, const void* item,
     assert(item != NULL);
 
     /* jump to the first entry and probe for a match */
-    pEntry = &pHashTable->pEntries[itemHash & (pHashTable->tableSize-1)];
+    pEntry = &pHashTable->pEntries[itemHash & (pHashTable->tableSize - 1)];
     pEnd = &pHashTable->pEntries[pHashTable->tableSize];
     while (pEntry->data != NULL) {
         if (pEntry->data != HASH_TOMBSTONE &&
             pEntry->hashValue == itemHash &&
-            (*cmpFunc)(pEntry->data, item) == 0)
-        {
+            (*cmpFunc)(pEntry->data, item) == 0) {
             /* match */
             break;
         }
@@ -359,20 +357,19 @@ int countProbes(HashTable* pHashTable, unsigned int itemHash, const void* item,
  * The caller should lock the table before calling here.
  */
 void mzHashTableProbeCount(HashTable* pHashTable, HashCalcFunc calcFunc,
-    HashCompareFunc cmpFunc)
+                           HashCompareFunc cmpFunc)
 {
     int numEntries, minProbe, maxProbe, totalProbe;
     HashIter iter;
 
     numEntries = maxProbe = totalProbe = 0;
-    minProbe = 65536*32767;
+    minProbe = 65536 * 32767;
 
     for (mzHashIterBegin(pHashTable, &iter); !mzHashIterDone(&iter);
-        mzHashIterNext(&iter))
-    {
+         mzHashIterNext(&iter)) {
         const void* data = (const void*)mzHashIterData(&iter);
         int count;
-            
+
         count = countProbes(pHashTable, (*calcFunc)(data), data, cmpFunc);
 
         numEntries++;
@@ -385,6 +382,6 @@ void mzHashTableProbeCount(HashTable* pHashTable, HashCalcFunc calcFunc,
     }
 
     LOGI("Probe: min=%d max=%d, total=%d in %d (%d), avg=%.3f\n",
-        minProbe, maxProbe, totalProbe, numEntries, pHashTable->tableSize,
-        (float) totalProbe / (float) numEntries);
+         minProbe, maxProbe, totalProbe, numEntries, pHashTable->tableSize,
+         (float) totalProbe / (float) numEntries);
 }

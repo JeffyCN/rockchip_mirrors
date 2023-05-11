@@ -10,18 +10,16 @@
 #include "defineHeader.h"
 
 #pragma pack(1)
-typedef struct
-{
+typedef struct {
     char name[20];
     unsigned int offset;
     unsigned int size;
-}STRUCT_PARAM_ITEM,*PSTRUCT_PARAM_ITEM;
+} STRUCT_PARAM_ITEM, *PSTRUCT_PARAM_ITEM;
 
-typedef struct
-{
+typedef struct {
     char name[20];
     char value[256];
-}STRUCT_CONFIG_ITEM,*PSTRUCT_CONFIG_ITEM;
+} STRUCT_CONFIG_ITEM, *PSTRUCT_CONFIG_ITEM;
 #pragma pack()
 
 int flash_bootloader(char *dest_path, void *pupdate_cmd);

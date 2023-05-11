@@ -25,31 +25,29 @@ typedef unsigned char UCHAR;
 typedef unsigned short WCHAR;
 typedef signed char CHAR;
 
-typedef enum
-{
-    RKNONE_DEVICE=0,
-    RK27_DEVICE=0x10,
+typedef enum {
+    RKNONE_DEVICE = 0,
+    RK27_DEVICE = 0x10,
     RKCAYMAN_DEVICE,
-    RK28_DEVICE=0x20,
+    RK28_DEVICE = 0x20,
     RK281X_DEVICE,
     RKPANDA_DEVICE,
-    RKNANO_DEVICE=0x30,
+    RKNANO_DEVICE = 0x30,
     RKSMART_DEVICE,
-    RKCROWN_DEVICE=0x40,
-    RK29_DEVICE=0x50,
+    RKCROWN_DEVICE = 0x40,
+    RK29_DEVICE = 0x50,
     RK292X_DEVICE,
-    RK30_DEVICE=0x60,
+    RK30_DEVICE = 0x60,
     RK30B_DEVICE,
-    RK31_DEVICE=0x70,
-    RK32_DEVICE=0x80
-}ENUM_RKDEVICE_TYPE;
+    RK31_DEVICE = 0x70,
+    RK32_DEVICE = 0x80
+} ENUM_RKDEVICE_TYPE;
 
-typedef enum
-{
-        ENTRY471=1,
-        ENTRY472=2,
-        ENTRYLOADER=4
-}ENUM_RKBOOTENTRY;
+typedef enum {
+    ENTRY471 = 1,
+    ENTRY472 = 2,
+    ENTRYLOADER = 4
+} ENUM_RKBOOTENTRY;
 
 #define SHA_DIGEST_SIZE 20
 #define PART_NAME 32

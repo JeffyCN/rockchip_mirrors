@@ -56,44 +56,46 @@ int run(const char *filename, char *const argv[])
     return 0;
 }
 
-int rk_check_and_resizefs(const char *filename) {
+int rk_check_and_resizefs(const char *filename)
+{
     int result;
 
     const char *const e2fsck_argv[] = { "/sbin/e2fsck", "-fy", filename, NULL };
     const char *const resizefs_argv[] = { "/sbin/resize2fs", filename, NULL  };
 
     result = run(e2fsck_argv[0], (char **) e2fsck_argv);
-    if(result) {
+    if (result) {
         printf("e2fsck check '%s' failed!\n", filename);
         return result;
     }
 
     result = run(resizefs_argv[0], (char **) resizefs_argv);
-    if(result) {
+    if (result) {
         printf("resizefs '%s' failed!\n", filename);
     }
 
     return result;
 }
 
-int rk_check_and_resizefs_f2fs(const char *filename) {
-	int result;
+int rk_check_and_resizefs_f2fs(const char *filename)
+{
+    int result;
 
-	const char *const e2fsck_argv[] = { "fsck_f2fs", filename, NULL };
-	const char *const resizefs_argv[] = { "resize.f2fs", filename, NULL  };
+    const char *const e2fsck_argv[] = { "fsck_f2fs", filename, NULL };
+    const char *const resizefs_argv[] = { "resize.f2fs", filename, NULL  };
 
-	result = run(e2fsck_argv[0], (char **) e2fsck_argv);
-	if(result) {
-		printf("fsck_f2fs check '%s' failed!\n", filename);
-		return result;
-	}
+    result = run(e2fsck_argv[0], (char **) e2fsck_argv);
+    if (result) {
+        printf("fsck_f2fs check '%s' failed!\n", filename);
+        return result;
+    }
 
-	result = run(resizefs_argv[0], (char **) resizefs_argv);
-	if(result) {
-		printf("resize.f2fs '%s' failed!\n", filename);
-	}
+    result = run(resizefs_argv[0], (char **) resizefs_argv);
+    if (result) {
+        printf("resize.f2fs '%s' failed!\n", filename);
+    }
 
-	return result;
+    return result;
 }
 
 static int make_extfs(const char *path, const char *label, const char *type)
@@ -110,13 +112,13 @@ static int make_extfs(const char *path, const char *label, const char *type)
 
     printf("format '%s' to %s filesystem\n", path, type);
     result = run(mke2fs[0], (char **) mke2fs);
-    if(result) {
+    if (result) {
         printf("failed!\n");
         return result;
     }
 
     result = run(tune2fs[0], (char **) tune2fs);
-    if(result) {
+    if (result) {
         printf("failed!\n");
         return result;
     }

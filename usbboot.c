@@ -27,22 +27,23 @@
 extern size_t strlcpy(char *dst, const char *src, size_t dsize);
 extern size_t strlcat(char *dst, const char *src, size_t dsize);
 
-bool is_boot_from_udisk(void){
+bool is_boot_from_udisk(void)
+{
     bool bUDisk = false;
     char param[1024];
     int fd, ret;
     char *s = NULL;
     printf("read cmdline\n");
-    memset(param,0,1024);
+    memset(param, 0, 1024);
 
     fd = open("/proc/cmdline", O_RDONLY);
     ret = read(fd, (char*)param, 1024);
 
-    s = strstr(param,"usbfwupdate");
-    if(s != NULL){
+    s = strstr(param, "usbfwupdate");
+    if (s != NULL) {
         bUDisk = true;
         printf(">>> Boot from U-Disk\n");
-    }else{
+    } else {
         bUDisk = false;
         printf(">>> Boot from non-U-Disk\n");
     }
@@ -51,11 +52,12 @@ bool is_boot_from_udisk(void){
     return bUDisk;
 }
 
-void ensure_udisk_mounted(bool *bMounted) {
+void ensure_udisk_mounted(bool *bMounted)
+{
     int i;
     bool bSucc = false;
-    for(i = 0; i < 3; i++) {
-        if(0 == ensure_path_mounted(EX_UDISK_ROOT)){
+    for (i = 0; i < 3; i++) {
+        if (0 == ensure_path_mounted(EX_UDISK_ROOT)) {
             *bMounted = true;
             bSucc = true;
             break;
@@ -66,8 +68,8 @@ void ensure_udisk_mounted(bool *bMounted) {
     }
 
     if (!bSucc) {   // try another mount point
-        for(i = 0; i < 3; i++) {
-            if(0 == ensure_path_mounted(EX_UDISK_ROOT2)){
+        for (i = 0; i < 3; i++) {
+            if (0 == ensure_path_mounted(EX_UDISK_ROOT2)) {
                 *bMounted = true;
                 bSucc = true;
                 break;
@@ -84,7 +86,7 @@ void ensure_udisk_mounted(bool *bMounted) {
 
 #define MaxLine 1024
 static int get_cfg_Item(char *pFileName /*in*/, char *pKey /*in*/,
-                       char * pValue/*in out*/, int * pValueLen /*out*/)
+                        char * pValue/*in out*/, int * pValueLen /*out*/)
 {
     int     ret = 0;
     FILE    *fp = NULL;
@@ -138,8 +140,8 @@ static int get_cfg_Item(char *pFileName /*in*/, char *pKey /*in*/,
         }
         pEnd = pTmp;
 
-        *pValueLen = pEnd-pBegin;
-        memcpy(pValue, pBegin, pEnd-pBegin);
+        *pValueLen = pEnd - pBegin;
+        memcpy(pValue, pBegin, pEnd - pBegin);
     }
 
 End:
@@ -149,7 +151,8 @@ End:
     return 0;
 }
 
-bool is_udisk_update(void) {
+bool is_udisk_update(void)
+{
     int  ret = 0;
     bool bUdiskMounted = false;
     char configFile[64] = {0};
@@ -157,7 +160,7 @@ bool is_udisk_update(void) {
     char str_val[10] = {0};
     char *str_key = "fw_update";
 
-    printf("%s in\n",__func__);
+    printf("%s in\n", __func__);
     ensure_udisk_mounted(&bUdiskMounted);
     if (!bUdiskMounted) {
         printf("Error! U-Disk not mounted\n");
@@ -169,18 +172,18 @@ bool is_udisk_update(void) {
     printf("configFile = %s \n", configFile);
     ret = get_cfg_Item(configFile, str_key, str_val, &vlen);
 
-    if(ret != 0) {
+    if (ret != 0) {
         printf("func get_cfg_Item err:%d \n", ret);
         return false;
     }
 
     printf("\n %s:%s \n", str_key, str_val);
 
-    if(strcmp(str_val, "1") != 0) {
+    if (strcmp(str_val, "1") != 0) {
         return false;
     }
 
     printf("firmware update will from UDisk.\n");
-    printf("%s out\n",__func__);
+    printf("%s out\n", __func__);
     return true;
 }

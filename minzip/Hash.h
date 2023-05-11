@@ -97,14 +97,16 @@ void mzHashTableFree(HashTable* pHashTable);
 /*
  * Get #of entries in hash table.
  */
-INLINE int mzHashTableNumEntries(HashTable* pHashTable) {
+INLINE int mzHashTableNumEntries(HashTable* pHashTable)
+{
     return pHashTable->numEntries;
 }
 
 /*
  * Get total size of hash table (for memory usage calculations).
  */
-INLINE int mzHashTableMemUsage(HashTable* pHashTable) {
+INLINE int mzHashTableMemUsage(HashTable* pHashTable)
+{
     return sizeof(HashTable) + pHashTable->tableSize * sizeof(HashEntry);
 }
 
@@ -118,7 +120,7 @@ INLINE int mzHashTableMemUsage(HashTable* pHashTable) {
  * An "add" operation may cause the entire table to be reallocated.
  */
 void* mzHashTableLookup(HashTable* pHashTable, unsigned int itemHash, void* item,
-    HashCompareFunc cmpFunc, bool doAdd);
+                        HashCompareFunc cmpFunc, bool doAdd);
 
 /*
  * Remove an item from the hash table, given its "data" pointer.  Does not
@@ -149,8 +151,9 @@ typedef struct HashIter {
     HashTable*  pHashTable;
     int         idx;
 } HashIter;
-INLINE void mzHashIterNext(HashIter* pIter) {
-    int i = pIter->idx +1;
+INLINE void mzHashIterNext(HashIter* pIter)
+{
+    int i = pIter->idx + 1;
     int lim = pIter->pHashTable->tableSize;
     for ( ; i < lim; i++) {
         void* data = pIter->pHashTable->pEntries[i].data;
@@ -159,15 +162,18 @@ INLINE void mzHashIterNext(HashIter* pIter) {
     }
     pIter->idx = i;
 }
-INLINE void mzHashIterBegin(HashTable* pHashTable, HashIter* pIter) {
+INLINE void mzHashIterBegin(HashTable* pHashTable, HashIter* pIter)
+{
     pIter->pHashTable = pHashTable;
     pIter->idx = -1;
     mzHashIterNext(pIter);
 }
-INLINE bool mzHashIterDone(HashIter* pIter) {
+INLINE bool mzHashIterDone(HashIter* pIter)
+{
     return (pIter->idx >= pIter->pHashTable->tableSize);
 }
-INLINE void* mzHashIterData(HashIter* pIter) {
+INLINE void* mzHashIterData(HashIter* pIter)
+{
     assert(pIter->idx >= 0 && pIter->idx < pIter->pHashTable->tableSize);
     return pIter->pHashTable->pEntries[pIter->idx].data;
 }
@@ -181,6 +187,6 @@ INLINE void* mzHashIterData(HashIter* pIter) {
  */
 typedef unsigned int (*HashCalcFunc)(const void* item);
 void mzHashTableProbeCount(HashTable* pHashTable, HashCalcFunc calcFunc,
-    HashCompareFunc cmpFunc);
+                           HashCompareFunc cmpFunc);
 
 #endif /*_MINZIP_HASH*/

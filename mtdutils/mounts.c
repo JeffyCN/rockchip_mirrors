@@ -116,16 +116,16 @@ scan_mounted_volumes()
         /* %as is a gnu extension that malloc()s a string for each field.
          */
         matches = sscanf(bufp, "%63s %63s %63s %127s",
-                device, mount_point, filesystem, flags);
+                         device, mount_point, filesystem, flags);
 
         if (matches == 4) {
-            device[sizeof(device)-1] = '\0';
-            mount_point[sizeof(mount_point)-1] = '\0';
-            filesystem[sizeof(filesystem)-1] = '\0';
-            flags[sizeof(flags)-1] = '\0';
+            device[sizeof(device) - 1] = '\0';
+            mount_point[sizeof(mount_point) - 1] = '\0';
+            filesystem[sizeof(filesystem) - 1] = '\0';
+            flags[sizeof(flags) - 1] = '\0';
 
             MountedVolume *v =
-                    &g_mounts_state.volumes[g_mounts_state.volume_count++];
+                &g_mounts_state.volumes[g_mounts_state.volume_count++];
             v->device = strdup(device);
             v->mount_point = strdup(mount_point);
             v->filesystem = strdup(filesystem);

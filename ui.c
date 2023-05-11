@@ -118,8 +118,8 @@ static void draw_progress_locked()
     int width = gr_get_width(gProgressBarEmpty);
     int height = gr_get_height(gProgressBarEmpty);
 
-    int dx = (gr_fb_width() - width)/2;
-    int dy = (3*gr_fb_height() + iconHeight - 2*height)/4;
+    int dx = (gr_fb_width() - width) / 2;
+    int dy = (3 * gr_fb_height() + iconHeight - 2 * height) / 4;
 
     // Erase behind the progress bar (in case this was a progress-only update)
     gr_color(0, 0, 0, 255);
@@ -130,10 +130,10 @@ static void draw_progress_locked()
         int pos = (int) (progress * width);
 
         if (pos > 0) {
-          gr_blit(gProgressBarFill, 0, 0, pos, height, dx, dy);
+            gr_blit(gProgressBarFill, 0, 0, pos, height, dx, dy);
         }
-        if (pos < width-1) {
-          gr_blit(gProgressBarEmpty, pos, 0, width-pos, height, dx+pos, dy);
+        if (pos < width - 1) {
+            gr_blit(gProgressBarEmpty, pos, 0, width - pos, height, dx + pos, dy);
         }
     }
 
@@ -144,10 +144,11 @@ static void draw_progress_locked()
     }
 }
 
-static void draw_text_line(int row, const char* t) {
-  if (t[0] != '\0') {
-    gr_text(0, (row+1)*CHAR_HEIGHT-1, t);
-  }
+static void draw_text_line(int row, const char* t)
+{
+    if (t[0] != '\0') {
+        gr_text(0, (row + 1)*CHAR_HEIGHT - 1, t);
+    }
 }
 
 // Redraw everything on the screen.  Does not flip pages.
@@ -164,8 +165,8 @@ static void draw_screen_locked(void)
         int i = 0;
         if (show_menu) {
             gr_color(64, 96, 255, 255);
-            gr_fill(0, (menu_top+1+menu_sel) * CHAR_HEIGHT,
-                    gr_fb_width(), (menu_top+menu_sel+2)*CHAR_HEIGHT+1);
+            gr_fill(0, (menu_top + 1 + menu_sel) * CHAR_HEIGHT,
+                    gr_fb_width(), (menu_top + menu_sel + 2)*CHAR_HEIGHT + 1);
 
             for (; i < menu_top + menu_items; ++i) {
                 if (i == menu_top + menu_sel) {
@@ -177,14 +178,14 @@ static void draw_screen_locked(void)
                 }
             }
             ++i;
-            gr_fill(0, i*CHAR_HEIGHT+CHAR_HEIGHT/2-1,
-                    gr_fb_width(), i*CHAR_HEIGHT+CHAR_HEIGHT/2+1);
+            gr_fill(0, i * CHAR_HEIGHT + CHAR_HEIGHT / 2 - 1,
+                    gr_fb_width(), i * CHAR_HEIGHT + CHAR_HEIGHT / 2 + 1);
         }
 
         gr_color(255, 255, 0, 255);
 
         for (; i < text_rows; ++i) {
-            draw_text_line(i, text[(i+text_top) % text_rows]);
+            draw_text_line(i, text[(i + text_top) % text_rows]);
         }
     }
 }
@@ -471,14 +472,14 @@ void ui_start_menu(char** headers, char** items, int initial_selection)
     if (text_rows > 0 && text_cols > 0) {
         for (i = 0; i < text_rows; ++i) {
             if (headers[i] == NULL) break;
-            strncpy(menu[i], headers[i], text_cols-1);
-            menu[i][text_cols-1] = '\0';
+            strncpy(menu[i], headers[i], text_cols - 1);
+            menu[i][text_cols - 1] = '\0';
         }
         menu_top = i;
         for (; i < text_rows; ++i) {
-            if (items[i-menu_top] == NULL) break;
-            strncpy(menu[i], items[i-menu_top], text_cols-1);
-            menu[i][text_cols-1] = '\0';
+            if (items[i - menu_top] == NULL) break;
+            strncpy(menu[i], items[i - menu_top], text_cols - 1);
+            menu[i][text_cols - 1] = '\0';
         }
         menu_items = i - menu_top;
         show_menu = 1;
@@ -500,7 +501,7 @@ int ui_menu_select(int sel)
         old_sel = menu_sel;
         menu_sel = sel;
         if (menu_sel < 0) menu_sel = 0;
-        if (menu_sel >= menu_items) menu_sel = menu_items-1;
+        if (menu_sel >= menu_items) menu_sel = menu_items - 1;
         sel = menu_sel;
         if (menu_sel != old_sel) update_screen_locked();
     }
@@ -566,7 +567,8 @@ int ui_key_pressed(int key)
     return key_pressed[key];
 }
 
-void ui_clear_key_queue() {
+void ui_clear_key_queue()
+{
     pthread_mutex_lock(&key_queue_mutex);
     key_queue_len = 0;
     pthread_mutex_unlock(&key_queue_mutex);

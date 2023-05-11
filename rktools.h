@@ -20,7 +20,7 @@ static const char *point_items[] = {
     "/dev/mmcblk3",
 };
 
-enum type{
+enum type {
     MMC,
     SD,
     SDIO,

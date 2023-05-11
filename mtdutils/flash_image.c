@@ -28,7 +28,8 @@
 
 #define HEADER_SIZE 2048  // size of header to compare for equality
 
-void die(const char *msg, ...) {
+void die(const char *msg, ...)
+{
     int err = errno;
     va_list args;
     va_start(args, msg);
@@ -48,7 +49,8 @@ void die(const char *msg, ...) {
 
 /* Read an image file and write it to a flash partition. */
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv)
+{
     const MtdPartition *ptn;
     MtdWriteContext *write;
     void *data;

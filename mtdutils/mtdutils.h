@@ -36,12 +36,12 @@ const MtdPartition *mtd_find_partition_by_name(const char *name);
  * filesystem is like "yaffs2"
  */
 int mtd_mount_partition(const MtdPartition *partition, const char *mount_point,
-        const char *filesystem, int read_only);
+                        const char *filesystem, int read_only);
 
 /* get the partition and the minimum erase/write block size.  NULL is ok.
  */
 int mtd_partition_info(const MtdPartition *partition,
-        size_t *total_size, size_t *erase_size, size_t *write_size);
+                       size_t *total_size, size_t *erase_size, size_t *write_size);
 
 /* read or write raw data from a partition, starting at the beginning.
  * skips bad blocks as best we can.

@@ -57,14 +57,17 @@ void ui_print(const char *fmt, ...)
 {
 }
 
-void ui_start_menu(char** headers, char** items, int initial_selection) {
+void ui_start_menu(char** headers, char** items, int initial_selection)
+{
 }
 
-int ui_menu_select(int sel) {
+int ui_menu_select(int sel)
+{
     return 0;
 }
 
-void ui_end_menu() {
+void ui_end_menu()
+{
 }
 
 int ui_text_visible()
@@ -86,5 +89,6 @@ int ui_key_pressed(int key)
     return 0;
 }
 
-void ui_clear_key_queue() {
+void ui_clear_key_queue()
+{
 }

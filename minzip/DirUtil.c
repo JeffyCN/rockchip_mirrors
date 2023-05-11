@@ -54,7 +54,7 @@ getPathDirStatus(const char *path)
 
 int
 dirCreateHierarchy(const char *path, int mode,
-        const struct utimbuf *timestamp, bool stripFileName)
+                   const struct utimbuf *timestamp, bool stripFileName)
 {
     DirStatus ds;
 
@@ -155,7 +155,7 @@ dirCreateHierarchy(const char *path, int mode,
             }
         }
         // else, this directory already exists.
-        
+
         /* Repair the path and continue.
          */
         *p = '/';
@@ -223,7 +223,7 @@ dirUnlinkHierarchy(const char *path)
 
 int
 dirSetHierarchyPermissions(const char *path,
-        int uid, int gid, int dirMode, int fileMode)
+                           int uid, int gid, int dirMode, int fileMode)
 {
     struct stat st;
     if (lstat(path, &st)) {

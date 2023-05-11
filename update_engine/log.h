@@ -8,11 +8,11 @@
 // Simple logging class. The implementation is platform dependent.
 
 typedef enum {
-  LOG_ERROR,
-  LOG_WARN,
-  LOG_INFO,
-  LOG_DEBUG,
-  LOG_VERBOSE
+    LOG_ERROR,
+    LOG_WARN,
+    LOG_INFO,
+    LOG_DEBUG,
+    LOG_VERBOSE
 } LogPriority;
 
 // Enable/disable verbose logging (LOGV).

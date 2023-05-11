@@ -9,18 +9,16 @@
 #define _RKIMAGE_H
 #include "defineHeader.h"
 #pragma pack(1)
-typedef struct
-{
+typedef struct {
     USHORT  usYear;
     BYTE    ucMonth;
     BYTE    ucDay;
     BYTE    ucHour;
     BYTE    ucMinute;
     BYTE    ucSecond;
-}STRUCT_RKTIME, *PSTRUCT_RKTIME;
+} STRUCT_RKTIME, *PSTRUCT_RKTIME;
 
-typedef struct
-{
+typedef struct {
     UINT uiTag;     //标志，固定为0x57 0x46 0x4B 0x52
     USHORT usSize;  //结构体大小
     DWORD  dwVersion;   //Image 文件版本
@@ -32,20 +30,18 @@ typedef struct
     DWORD  dwFWOffset;  //固件偏移
     DWORD  dwFWSize;    //固件大小
     BYTE   reserved[61];    //预留空间，用于存放不同固件特征
-}STRUCT_RKIMAGE_HEAD,*PSTRUCT_RKIMAGE_HEAD;
+} STRUCT_RKIMAGE_HEAD, *PSTRUCT_RKIMAGE_HEAD;
 
-typedef struct tagRKIMAGE_ITEM
-{
+typedef struct tagRKIMAGE_ITEM {
     char name[PART_NAME];
     char file[RELATIVE_PATH];
     unsigned int offset;
     unsigned int flash_offset;
     unsigned int usespace;
     unsigned int size;
-}RKIMAGE_ITEM, *PRKIMAGE_ITEM;
+} RKIMAGE_ITEM, *PRKIMAGE_ITEM;
 
-typedef struct tagRKIMAGE_HDR
-{
+typedef struct tagRKIMAGE_HDR {
     unsigned int tag;
     unsigned int size;
     char machine_model[MAX_MACHINE_MODEL];
@@ -53,10 +49,9 @@ typedef struct tagRKIMAGE_HDR
     unsigned int version;
     int item_count;
     RKIMAGE_ITEM item[MAX_PACKAGE_FILES];
-}RKIMAGE_HDR, *PRKIMAGE_HDR;
+} RKIMAGE_HDR, *PRKIMAGE_HDR;
 
-typedef struct
-{
+typedef struct {
     UINT uiTag;
     USHORT usSize;
     DWORD  dwVersion;
@@ -75,19 +70,17 @@ typedef struct
     UCHAR ucSignFlag;
     UCHAR ucRc4Flag;
     UCHAR reserved[BOOT_RESERVED_SIZE];
-}STRUCT_RKBOOT_HEAD,*PSTRUCT_RKBOOT_HEAD;
+} STRUCT_RKBOOT_HEAD, *PSTRUCT_RKBOOT_HEAD;
 
-typedef struct
-{
+typedef struct {
     UCHAR ucSize;
     ENUM_RKBOOTENTRY emType;
     WCHAR szName[20];
     DWORD dwDataOffset;
     DWORD dwDataSize;
     DWORD dwDataDelay;//以秒为单位
-}STRUCT_RKBOOT_ENTRY,*PSTRUCT_RKBOOT_ENTRY;
-typedef    struct
-{
+} STRUCT_RKBOOT_ENTRY, *PSTRUCT_RKBOOT_ENTRY;
+typedef    struct {
     DWORD    dwTag;
     BYTE    reserved[4];
     UINT    uiRc4Flag;
@@ -97,10 +90,9 @@ typedef    struct
     USHORT  usBootDataSize;
     USHORT    usBootCodeSize;
     USHORT    usCrc;
-}RKANDROID_IDB_SEC0,*PRKANDROID_IDB_SEC0;
+} RKANDROID_IDB_SEC0, *PRKANDROID_IDB_SEC0;
 
-typedef struct
-{
+typedef struct {
     USHORT  usSysReservedBlock;
     USHORT  usDisk0Size;
     USHORT  usDisk1Size;
@@ -133,10 +125,9 @@ typedef struct
     USHORT  usIdBlock2;
     USHORT  usIdBlock3;
     USHORT  usIdBlock4;
-}RKANDROID_IDB_SEC1,*PRKANDROID_IDB_SEC1;
+} RKANDROID_IDB_SEC1, *PRKANDROID_IDB_SEC1;
 
-typedef struct
-{
+typedef struct {
     USHORT  usInfoSize;
     BYTE    bChipInfo[CHIPINFO_LEN];
     BYTE    reserved[RKANDROID_SEC2_RESERVED_LEN];
@@ -148,10 +139,9 @@ typedef struct
     USHORT  usSec3CustomDataSize;
     char    szCrcTag[4];
     USHORT  usSec3Crc;
-}RKANDROID_IDB_SEC2,*PRKANDROID_IDB_SEC2;
+} RKANDROID_IDB_SEC2, *PRKANDROID_IDB_SEC2;
 
-typedef struct
-{
+typedef struct {
     USHORT  usSNSize;
     BYTE    sn[RKDEVICE_SN_LEN];
     BYTE    reserved[RKANDROID_SEC3_RESERVED_LEN];
@@ -163,7 +153,7 @@ typedef struct
     BYTE    blueToothAddr[RKDEVICE_BT_LEN];
     BYTE    macSize;
     BYTE    macAddr[RKDEVICE_MAC_LEN];
-}RKANDROID_IDB_SEC3,*PRKANDROID_IDB_SEC3;
+} RKANDROID_IDB_SEC3, *PRKANDROID_IDB_SEC3;
 
 #pragma pack()
 

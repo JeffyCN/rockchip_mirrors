@@ -22,7 +22,8 @@ typedef struct MemMapping {
 } MemMapping;
 
 /* copy a map */
-INLINE void sysCopyMap(MemMapping* dst, const MemMapping* src) {
+INLINE void sysCopyMap(MemMapping* dst, const MemMapping* src)
+{
     *dst = *src;
 }
 
@@ -49,7 +50,7 @@ int sysMapFileInShmem(int fd, MemMapping* pMap);
  * Like sysMapFileInShmem, but on only part of a file.
  */
 int sysMapFileSegmentInShmem(int fd, off_t start, long length,
-    MemMapping* pMap);
+                             MemMapping* pMap);
 
 /*
  * Release the pages associated with a shared memory segment.

@@ -54,14 +54,14 @@ INLINE unsigned long long get8BE(unsigned char const* pSrc)
 {
     unsigned long long result;
 
-    result = (unsigned long long) *pSrc++ << 56;
-    result |= (unsigned long long) *pSrc++ << 48;
-    result |= (unsigned long long) *pSrc++ << 40;
-    result |= (unsigned long long) *pSrc++ << 32;
-    result |= (unsigned long long) *pSrc++ << 24;
-    result |= (unsigned long long) *pSrc++ << 16;
-    result |= (unsigned long long) *pSrc++ << 8;
-    result |= (unsigned long long) *pSrc++;
+    result = (unsigned long long) * pSrc++ << 56;
+    result |= (unsigned long long) * pSrc++ << 48;
+    result |= (unsigned long long) * pSrc++ << 40;
+    result |= (unsigned long long) * pSrc++ << 32;
+    result |= (unsigned long long) * pSrc++ << 24;
+    result |= (unsigned long long) * pSrc++ << 16;
+    result |= (unsigned long long) * pSrc++ << 8;
+    result |= (unsigned long long) * pSrc++;
 
     return result;
 }
@@ -101,14 +101,14 @@ INLINE unsigned long long get8LE(unsigned char const* pSrc)
 {
     unsigned long long result;
 
-    result = (unsigned long long) *pSrc++;
-    result |= (unsigned long long) *pSrc++ << 8;
-    result |= (unsigned long long) *pSrc++ << 16;
-    result |= (unsigned long long) *pSrc++ << 24;
-    result |= (unsigned long long) *pSrc++ << 32;
-    result |= (unsigned long long) *pSrc++ << 40;
-    result |= (unsigned long long) *pSrc++ << 48;
-    result |= (unsigned long long) *pSrc++ << 56;
+    result = (unsigned long long) * pSrc++;
+    result |= (unsigned long long) * pSrc++ << 8;
+    result |= (unsigned long long) * pSrc++ << 16;
+    result |= (unsigned long long) * pSrc++ << 24;
+    result |= (unsigned long long) * pSrc++ << 32;
+    result |= (unsigned long long) * pSrc++ << 40;
+    result |= (unsigned long long) * pSrc++ << 48;
+    result |= (unsigned long long) * pSrc++ << 56;
 
     return result;
 }
@@ -156,14 +156,14 @@ INLINE unsigned long long read8BE(unsigned char const** ppSrc)
 {
     unsigned long long result;
 
-    result = (unsigned long long) *(*ppSrc)++ << 56;
-    result |= (unsigned long long) *(*ppSrc)++ << 48;
-    result |= (unsigned long long) *(*ppSrc)++ << 40;
-    result |= (unsigned long long) *(*ppSrc)++ << 32;
-    result |= (unsigned long long) *(*ppSrc)++ << 24;
-    result |= (unsigned long long) *(*ppSrc)++ << 16;
-    result |= (unsigned long long) *(*ppSrc)++ << 8;
-    result |= (unsigned long long) *(*ppSrc)++;
+    result = (unsigned long long) * (*ppSrc)++ << 56;
+    result |= (unsigned long long) * (*ppSrc)++ << 48;
+    result |= (unsigned long long) * (*ppSrc)++ << 40;
+    result |= (unsigned long long) * (*ppSrc)++ << 32;
+    result |= (unsigned long long) * (*ppSrc)++ << 24;
+    result |= (unsigned long long) * (*ppSrc)++ << 16;
+    result |= (unsigned long long) * (*ppSrc)++ << 8;
+    result |= (unsigned long long) * (*ppSrc)++;
 
     return result;
 }
@@ -203,14 +203,14 @@ INLINE unsigned long long read8LE(unsigned char const** ppSrc)
 {
     unsigned long long result;
 
-    result = (unsigned long long) *(*ppSrc)++;
-    result |= (unsigned long long) *(*ppSrc)++ << 8;
-    result |= (unsigned long long) *(*ppSrc)++ << 16;
-    result |= (unsigned long long) *(*ppSrc)++ << 24;
-    result |= (unsigned long long) *(*ppSrc)++ << 32;
-    result |= (unsigned long long) *(*ppSrc)++ << 40;
-    result |= (unsigned long long) *(*ppSrc)++ << 48;
-    result |= (unsigned long long) *(*ppSrc)++ << 56;
+    result = (unsigned long long) * (*ppSrc)++;
+    result |= (unsigned long long) * (*ppSrc)++ << 8;
+    result |= (unsigned long long) * (*ppSrc)++ << 16;
+    result |= (unsigned long long) * (*ppSrc)++ << 24;
+    result |= (unsigned long long) * (*ppSrc)++ << 32;
+    result |= (unsigned long long) * (*ppSrc)++ << 40;
+    result |= (unsigned long long) * (*ppSrc)++ << 48;
+    result |= (unsigned long long) * (*ppSrc)++ << 56;
 
     return result;
 }
@@ -233,7 +233,7 @@ INLINE void skipUtf8String(unsigned char const** ppSrc)
 INLINE int readUtf8String(unsigned char const** ppSrc, char* buf, size_t bufLen)
 {
     unsigned int length = read4BE(ppSrc);
-    size_t copyLen = (length < bufLen) ? length : bufLen-1;
+    size_t copyLen = (length < bufLen) ? length : bufLen - 1;
 
     memcpy(buf, *ppSrc, copyLen);
     buf[copyLen] = '\0';
@@ -253,7 +253,7 @@ INLINE char* readNewUtf8String(unsigned char const** ppSrc, size_t* pLength)
     unsigned int length = read4BE(ppSrc);
     char* buf;
 
-    buf = (char*) malloc(length+1);
+    buf = (char*) malloc(length + 1);
 
     memcpy(buf, *ppSrc, length);
     buf[length] = '\0';

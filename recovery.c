@@ -45,14 +45,14 @@
 #include "mtdutils/mtdutils.h"
 
 static const struct option OPTIONS[] = {
-  { "send_intent", required_argument, NULL, 's' },
-  { "update_package", required_argument, NULL, 'u' },
-  { "wipe_data", no_argument, NULL, 'w' },
-  { "wipe_all", no_argument, NULL, 'a' },
-  { "set_encrypted_filesystems", required_argument, NULL, 'e' },
-  { "show_text", no_argument, NULL, 't' },
-  { "factory_pcba_test", no_argument, NULL, 'f' },
-  { NULL, 0, NULL, 0 },
+    { "send_intent", required_argument, NULL, 's' },
+    { "update_package", required_argument, NULL, 'u' },
+    { "wipe_data", no_argument, NULL, 'w' },
+    { "wipe_all", no_argument, NULL, 'a' },
+    { "set_encrypted_filesystems", required_argument, NULL, 'e' },
+    { "show_text", no_argument, NULL, 't' },
+    { "factory_pcba_test", no_argument, NULL, 'f' },
+    { NULL, 0, NULL, 0 },
 };
 
 static const char *COMMAND_FILE = "/userdata/recovery/command";
@@ -157,16 +157,19 @@ extern size_t strlcat(char *dst, const char *src, size_t dsize);
 extern int do_rk_updateEngine(const char *binary, const char *path);
 
 
-int read_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {
+int read_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data)
+{
     return ENCRYPTED_FS_ERROR;
 }
 
-int restore_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data) {
+int restore_encrypted_fs_info(encrypted_fs_info *encrypted_fs_data)
+{
     return ENCRYPTED_FS_ERROR;
 }
 // open a given path, mounting partitions as necessary
 static FILE*
-fopen_path(const char *path, const char *mode) {
+fopen_path(const char *path, const char *mode)
+{
     if (ensure_path_mounted(path) != 0) {
         LOGE("Can't mount %s\n", path);
         return NULL;
@@ -182,7 +185,8 @@ fopen_path(const char *path, const char *mode) {
 
 // close a file, log an error if the error indicator is set
 static void
-check_and_fclose(FILE *fp, const char *name) {
+check_and_fclose(FILE *fp, const char *name)
+{
     fflush(fp);
     if (ferror(fp)) LOGE("Error in %s\n(%s)\n", name, strerror(errno));
     fclose(fp);
@@ -190,12 +194,13 @@ check_and_fclose(FILE *fp, const char *name) {
 
 // rockchip partition check (e.g: oem/userdata....)
 static void
-rockchip_partition_check() {
+rockchip_partition_check()
+{
     if (ensure_path_unmounted("/oem") != 0)
-	LOGE("\n === umount oem fail === \n");
+        LOGE("\n === umount oem fail === \n");
 
     if (ensure_path_unmounted("/userdata") != 0)
-	LOGE("\n === umount userdata fail === \n");
+        LOGE("\n === umount userdata fail === \n");
 
     ui_print("check userdata/oem partition success ...\n");
     printf("check userdata/oem partition success ...\n");
@@ -206,7 +211,8 @@ rockchip_partition_check() {
 //   - the bootloader control block (one per line, after "recovery")
 //   - the contents of COMMAND_FILE (one per line)
 static void
-get_args(int *argc, char ***argv) {
+get_args(int *argc, char ***argv)
+{
     struct bootloader_message boot;
     memset(&boot, 0, sizeof(boot));
     get_bootloader_message(&boot);  // this may fail, leaving a zeroed structure
@@ -268,7 +274,8 @@ get_args(int *argc, char ***argv) {
 }
 
 static void
-set_sdcard_update_bootloader_message() {
+set_sdcard_update_bootloader_message()
+{
     struct bootloader_message boot;
     memset(&boot, 0, sizeof(boot));
     strlcpy(boot.command, "boot-recovery", sizeof(boot.command));
@@ -280,7 +287,8 @@ set_sdcard_update_bootloader_message() {
 static long tmplog_offset = 0;
 
 static void
-copy_log_file(const char* destination, int append) {
+copy_log_file(const char* destination, int append)
+{
     FILE *log = fopen_path(destination, append ? "a" : "w");
     if (log == NULL) {
         LOGE("Can't open %s\n", destination);
@@ -309,7 +317,8 @@ copy_log_file(const char* destination, int append) {
 // record any intent we were asked to communicate back to the system.
 // this function is idempotent: call it as many times as you like.
 static void
-finish_recovery(const char *send_intent) {
+finish_recovery(const char *send_intent)
+{
     // By this point, we're ready to return to the main system...
     if (send_intent != NULL) {
         FILE *fp = fopen_path(INTENT_FILE, "w");
@@ -344,7 +353,8 @@ finish_recovery(const char *send_intent) {
 }
 
 static int
-erase_volume(const char *volume) {
+erase_volume(const char *volume)
+{
     ui_set_background(BACKGROUND_ICON_INSTALLING);
     ui_show_indeterminate_progress();
     ui_print("Formatting %s...\n", volume);
@@ -360,101 +370,104 @@ erase_volume(const char *volume) {
 }
 
 static char*
-copy_sideloaded_package(const char* original_path) {
-  if (ensure_path_mounted(original_path) != 0) {
-    LOGE("Can't mount %s\n", original_path);
-    return NULL;
-  }
-
-  if (ensure_path_mounted(SIDELOAD_TEMP_DIR) != 0) {
-    LOGE("Can't mount %s\n", SIDELOAD_TEMP_DIR);
-    return NULL;
-  }
-
-  if (mkdir(SIDELOAD_TEMP_DIR, 0700) != 0) {
-    if (errno != EEXIST) {
-      LOGE("Can't mkdir %s (%s)\n", SIDELOAD_TEMP_DIR, strerror(errno));
-      return NULL;
+copy_sideloaded_package(const char* original_path)
+{
+    if (ensure_path_mounted(original_path) != 0) {
+        LOGE("Can't mount %s\n", original_path);
+        return NULL;
     }
-  }
 
-  // verify that SIDELOAD_TEMP_DIR is exactly what we expect: a
-  // directory, owned by root, readable and writable only by root.
-  struct stat st;
-  if (stat(SIDELOAD_TEMP_DIR, &st) != 0) {
-    LOGE("failed to stat %s (%s)\n", SIDELOAD_TEMP_DIR, strerror(errno));
-    return NULL;
-  }
-  if (!S_ISDIR(st.st_mode)) {
-    LOGE("%s isn't a directory\n", SIDELOAD_TEMP_DIR);
-    return NULL;
-  }
-  if ((st.st_mode & 0777) != 0700) {
-    LOGE("%s has perms %o\n", SIDELOAD_TEMP_DIR, st.st_mode);
-    return NULL;
-  }
-  if (st.st_uid != 0) {
-    LOGE("%s owned by %lu; not root\n", SIDELOAD_TEMP_DIR, st.st_uid);
-    return NULL;
-  }
-
-  char copy_path[PATH_MAX];
-  strcpy(copy_path, SIDELOAD_TEMP_DIR);
-  strcat(copy_path, "/package.zip");
-
-  char* buffer = malloc(BUFSIZ);
-  if (buffer == NULL) {
-    LOGE("Failed to allocate buffer\n");
-    return NULL;
-  }
-
-  size_t read;
-  FILE* fin = fopen(original_path, "rb");
-  if (fin == NULL) {
-    LOGE("Failed to open %s (%s)\n", original_path, strerror(errno));
-    return NULL;
-  }
-  FILE* fout = fopen(copy_path, "wb");
-  if (fout == NULL) {
-    LOGE("Failed to open %s (%s)\n", copy_path, strerror(errno));
-    return NULL;
-  }
-
-  while ((read = fread(buffer, 1, BUFSIZ, fin)) > 0) {
-    if (fwrite(buffer, 1, read, fout) != read) {
-      LOGE("Short write of %s (%s)\n", copy_path, strerror(errno));
-      return NULL;
+    if (ensure_path_mounted(SIDELOAD_TEMP_DIR) != 0) {
+        LOGE("Can't mount %s\n", SIDELOAD_TEMP_DIR);
+        return NULL;
     }
-  }
 
-  free(buffer);
+    if (mkdir(SIDELOAD_TEMP_DIR, 0700) != 0) {
+        if (errno != EEXIST) {
+            LOGE("Can't mkdir %s (%s)\n", SIDELOAD_TEMP_DIR, strerror(errno));
+            return NULL;
+        }
+    }
 
-  if (fclose(fout) != 0) {
-    LOGE("Failed to close %s (%s)\n", copy_path, strerror(errno));
-    return NULL;
-  }
+    // verify that SIDELOAD_TEMP_DIR is exactly what we expect: a
+    // directory, owned by root, readable and writable only by root.
+    struct stat st;
+    if (stat(SIDELOAD_TEMP_DIR, &st) != 0) {
+        LOGE("failed to stat %s (%s)\n", SIDELOAD_TEMP_DIR, strerror(errno));
+        return NULL;
+    }
+    if (!S_ISDIR(st.st_mode)) {
+        LOGE("%s isn't a directory\n", SIDELOAD_TEMP_DIR);
+        return NULL;
+    }
+    if ((st.st_mode & 0777) != 0700) {
+        LOGE("%s has perms %o\n", SIDELOAD_TEMP_DIR, st.st_mode);
+        return NULL;
+    }
+    if (st.st_uid != 0) {
+        LOGE("%s owned by %lu; not root\n", SIDELOAD_TEMP_DIR, st.st_uid);
+        return NULL;
+    }
 
-  if (fclose(fin) != 0) {
-    LOGE("Failed to close %s (%s)\n", original_path, strerror(errno));
-    return NULL;
-  }
+    char copy_path[PATH_MAX];
+    strcpy(copy_path, SIDELOAD_TEMP_DIR);
+    strcat(copy_path, "/package.zip");
 
-  // "adb push" is happy to overwrite read-only files when it's
-  // running as root, but we'll try anyway.
-  if (chmod(copy_path, 0400) != 0) {
-    LOGE("Failed to chmod %s (%s)\n", copy_path, strerror(errno));
-    return NULL;
-  }
+    char* buffer = malloc(BUFSIZ);
+    if (buffer == NULL) {
+        LOGE("Failed to allocate buffer\n");
+        return NULL;
+    }
 
-  return strdup(copy_path);
+    size_t read;
+    FILE* fin = fopen(original_path, "rb");
+    if (fin == NULL) {
+        LOGE("Failed to open %s (%s)\n", original_path, strerror(errno));
+        return NULL;
+    }
+    FILE* fout = fopen(copy_path, "wb");
+    if (fout == NULL) {
+        LOGE("Failed to open %s (%s)\n", copy_path, strerror(errno));
+        return NULL;
+    }
+
+    while ((read = fread(buffer, 1, BUFSIZ, fin)) > 0) {
+        if (fwrite(buffer, 1, read, fout) != read) {
+            LOGE("Short write of %s (%s)\n", copy_path, strerror(errno));
+            return NULL;
+        }
+    }
+
+    free(buffer);
+
+    if (fclose(fout) != 0) {
+        LOGE("Failed to close %s (%s)\n", copy_path, strerror(errno));
+        return NULL;
+    }
+
+    if (fclose(fin) != 0) {
+        LOGE("Failed to close %s (%s)\n", original_path, strerror(errno));
+        return NULL;
+    }
+
+    // "adb push" is happy to overwrite read-only files when it's
+    // running as root, but we'll try anyway.
+    if (chmod(copy_path, 0400) != 0) {
+        LOGE("Failed to chmod %s (%s)\n", copy_path, strerror(errno));
+        return NULL;
+    }
+
+    return strdup(copy_path);
 }
 
 static char**
-prepend_title(const char** headers) {
+prepend_title(const char** headers)
+{
     char* title[] = { "Linux system recovery <"
-                          EXPAND(RECOVERY_API_VERSION) "e>",
+                      EXPAND(RECOVERY_API_VERSION) "e>",
                       "",
-                      NULL };
+                      NULL
+                    };
 
     // count the number of lines in our title, plus the
     // caller-provided headers.
@@ -463,7 +476,7 @@ prepend_title(const char** headers) {
     for (p = title; *p; ++p, ++count);
     for (p = (char** )headers; *p; ++p, ++count);
 
-    char** new_headers = malloc((count+1) * sizeof(char*));
+    char** new_headers = malloc((count + 1) * sizeof(char*));
     char** h = new_headers;
     for (p = title; *p; ++p, ++h) *h = *p;
     for (p = (char** )headers; *p; ++p, ++h) *h = *p;
@@ -474,7 +487,8 @@ prepend_title(const char** headers) {
 
 static int
 get_menu_selection(char** headers, char** items, int menu_only,
-                   int initial_selection) {
+                   int initial_selection)
+{
     // throw away keys pressed previously, so user doesn't
     // accidentally trigger menu items.
     ui_clear_key_queue();
@@ -491,19 +505,19 @@ get_menu_selection(char** headers, char** items, int menu_only,
 
         if (action < 0) {
             switch (action) {
-                case HIGHLIGHT_UP:
-                    --selected;
-                    selected = ui_menu_select(selected);
-                    break;
-                case HIGHLIGHT_DOWN:
-                    ++selected;
-                    selected = ui_menu_select(selected);
-                    break;
-                case SELECT_ITEM:
-                    chosen_item = selected;
-                    break;
-                case NO_ACTION:
-                    break;
+            case HIGHLIGHT_UP:
+                --selected;
+                selected = ui_menu_select(selected);
+                break;
+            case HIGHLIGHT_DOWN:
+                ++selected;
+                selected = ui_menu_select(selected);
+                break;
+            case SELECT_ITEM:
+                chosen_item = selected;
+                break;
+            case NO_ACTION:
+                break;
             }
         } else if (!menu_only) {
             chosen_item = action;
@@ -514,18 +528,21 @@ get_menu_selection(char** headers, char** items, int menu_only,
     return chosen_item;
 }
 
-static int compare_string(const void* a, const void* b) {
+static int compare_string(const void* a, const void* b)
+{
     return strcmp(*(const char**)a, *(const char**)b);
 }
 
 static int
-sdcard_directory(const char* path) {
+sdcard_directory(const char* path)
+{
     ensure_path_mounted(SDCARD_ROOT);
 
     const char* MENU_HEADERS[] = { "Choose a package to install:",
                                    path,
                                    "",
-                                   NULL };
+                                   NULL
+                                 };
     DIR* d;
     struct dirent* de;
     d = opendir(path);
@@ -561,11 +578,11 @@ sdcard_directory(const char* path) {
             dirs[d_size] = malloc(name_len + 2);
             strcpy(dirs[d_size], de->d_name);
             dirs[d_size][name_len] = '/';
-            dirs[d_size][name_len+1] = '\0';
+            dirs[d_size][name_len + 1] = '\0';
             ++d_size;
         } else if (de->d_type == DT_REG &&
                    name_len >= 4 &&
-                   strncasecmp(de->d_name + (name_len-4), ".zip", 4) == 0) {
+                   strncasecmp(de->d_name + (name_len - 4), ".zip", 4) == 0) {
             if (z_size >= z_alloc) {
                 z_alloc *= 2;
                 zips = realloc(zips, z_alloc * sizeof(char*));
@@ -599,13 +616,13 @@ sdcard_directory(const char* path) {
             // go up but continue browsing (if the caller is sdcard_directory)
             result = -1;
             break;
-        } else if (item[item_len-1] == '/') {
+        } else if (item[item_len - 1] == '/') {
             // recurse down into a subdirectory
             char new_path[PATH_MAX];
             strlcpy(new_path, path, PATH_MAX);
             strlcat(new_path, "/", PATH_MAX);
             strlcat(new_path, item, PATH_MAX);
-            new_path[strlen(new_path)-1] = '\0';  // truncate the trailing '/'
+            new_path[strlen(new_path) - 1] = '\0'; // truncate the trailing '/'
             result = sdcard_directory(new_path);
             if (result >= 0) break;
         } else {
@@ -640,7 +657,8 @@ sdcard_directory(const char* path) {
 }
 
 static void
-wipe_data(int confirm) {
+wipe_data(int confirm)
+{
     if (confirm) {
         static char** title_headers = NULL;
 
@@ -648,7 +666,8 @@ wipe_data(int confirm) {
             char* headers[] = { "Confirm wipe of all user data?",
                                 "  THIS CAN NOT BE UNDONE.",
                                 "",
-                                NULL };
+                                NULL
+                              };
             title_headers = prepend_title((const char**)headers);
         }
 
@@ -663,7 +682,8 @@ wipe_data(int confirm) {
                           " No",
                           " No",
                           " No",
-                          NULL };
+                          NULL
+                        };
 
         int chosen_item = get_menu_selection(title_headers, items, 1, 0);
         if (chosen_item != 7) {
@@ -678,20 +698,21 @@ wipe_data(int confirm) {
     ui_print("Data wipe complete.\n");
 }
 
-static int ui_update(const char * fw_package) {
+static int ui_update(const char * fw_package)
+{
     const char* binary = "/usr/bin/rkupdate";
     int i, ret = 0;
     int status = INSTALL_SUCCESS;
 
-    for(i = 0; i < 5; i++) {
-    ret = ensure_path_mounted(fw_package);
-    if(ret == 0)
-        break;
+    for (i = 0; i < 5; i++) {
+        ret = ensure_path_mounted(fw_package);
+        if (ret == 0)
+            break;
         sleep(1);
         LOGD("mounted %s failed.\n", fw_package);
     }
 
-    if(ret == 0 && access(fw_package, F_OK) == 0) {
+    if (ret == 0 && access(fw_package, F_OK) == 0) {
         LOGD(">>>rkflash will update from %s\n", fw_package);
 #ifdef USE_RKUPDATE
         status = do_rk_update(binary, fw_package);
@@ -701,15 +722,15 @@ static int ui_update(const char * fw_package) {
         const char* updateEnginebin = "/usr/bin/updateEngine";
         status = do_rk_updateEngine(updateEnginebin, fw_package);
 #endif
-        if(status == INSTALL_SUCCESS){
+        if (status == INSTALL_SUCCESS) {
             strcpy(systemFlag, fw_package);
 
-            if(strncmp(fw_package,"/userdata", 9) != 0) {
+            if (strncmp(fw_package, "/userdata", 9) != 0) {
                 if (resize_volume("/userdata"))
                     LOGE("\n ---resize_volume userdata error ---\n");
             } else {
                 //update success, delete userdata/update.img and write result to file.
-                if(access(fw_package, F_OK) == 0)
+                if (access(fw_package, F_OK) == 0)
                     remove(fw_package);
             }
         }
@@ -719,8 +740,7 @@ static int ui_update(const char * fw_package) {
 
     if (status != INSTALL_SUCCESS) {
         ui_print("Installation aborted.\n");
-        while (1)
-        {
+        while (1) {
             /* code */
         }
 
@@ -733,7 +753,8 @@ static int ui_update(const char * fw_package) {
 }
 
 static void
-prompt_and_wait() {
+prompt_and_wait()
+{
     char** headers = prepend_title((const char**)MENU_HEADERS);
 
     for (;;) {
@@ -748,93 +769,92 @@ prompt_and_wait() {
         chosen_item = device_perform_action(chosen_item);
 
         switch (chosen_item) {
-            case ITEM_REBOOT:
-                return;
+        case ITEM_REBOOT:
+            return;
 
-            case ITEM_WIPE_DATA:
-                wipe_data(ui_text_visible());
-                if (!ui_text_visible()) return;
-                break;
+        case ITEM_WIPE_DATA:
+            wipe_data(ui_text_visible());
+            if (!ui_text_visible()) return;
+            break;
 #if 0
-            case ITEM_WIPE_CACHE:
-                ui_print("\n-- Wiping cache...\n");
-                erase_volume("/cache");
-                ui_print("Cache wipe complete.\n");
-                if (!ui_text_visible()) return;
-                break;
+        case ITEM_WIPE_CACHE:
+            ui_print("\n-- Wiping cache...\n");
+            erase_volume("/cache");
+            ui_print("Cache wipe complete.\n");
+            if (!ui_text_visible()) return;
+            break;
 #endif
-            case ITEM_APPLY_SDCARD:
-            {
-                int status = sdcard_directory(SDCARD_ROOT);
-                if (status >= 0) {
-                    if (status != INSTALL_SUCCESS) {
-                        ui_set_background(BACKGROUND_ICON_ERROR);
-                        ui_print("Installation aborted.\n");
-                    } else if (!ui_text_visible()) {
-                        return;  // reboot if logs aren't visible
-                    } else {
-                        ui_print("\nInstall from sdcard complete.\n");
-                    }
-                }
-            }
-                break;
-
-            case ITEM_APPLY_USERDATA:
-            {
-                //update firmware from local userdata;
-                const char* fw_package = "/userdata/update.img";
-                // LOGD("%s:%d:-------->>>>> USERDATA update\n",__func__, __LINE__);
-                int status = ui_update(fw_package);
-                if (status < 0) {
+        case ITEM_APPLY_SDCARD: {
+            int status = sdcard_directory(SDCARD_ROOT);
+            if (status >= 0) {
+                if (status != INSTALL_SUCCESS) {
                     ui_set_background(BACKGROUND_ICON_ERROR);
+                    ui_print("Installation aborted.\n");
                 } else if (!ui_text_visible()) {
                     return;  // reboot if logs aren't visible
                 } else {
                     ui_print("\nInstall from sdcard complete.\n");
                 }
             }
-                break;
+        }
+        break;
 
-            case ITEM_APPLY_UDISK:
-            {
-                //update firmware from udisk;
-                const char* fw_package = "/udisk/update.img";
-                // LOGD("%s:%d:-------->>>> UDISK update\n",__func__, __LINE__);
-                int status = ui_update(fw_package);
-                if (status < 0) {
-                    ui_set_background(BACKGROUND_ICON_ERROR);
-                } else if (!ui_text_visible()) {
-                    ui_print("\nInstall from sdcard complete.\n");
-                    return;  // reboot if logs aren't visible
-                } else {
-                    ui_print("\nInstall from sdcard complete.\n");
-                }
+        case ITEM_APPLY_USERDATA: {
+            //update firmware from local userdata;
+            const char* fw_package = "/userdata/update.img";
+            // LOGD("%s:%d:-------->>>>> USERDATA update\n",__func__, __LINE__);
+            int status = ui_update(fw_package);
+            if (status < 0) {
+                ui_set_background(BACKGROUND_ICON_ERROR);
+            } else if (!ui_text_visible()) {
+                return;  // reboot if logs aren't visible
+            } else {
+                ui_print("\nInstall from sdcard complete.\n");
             }
-               break;
+        }
+        break;
+
+        case ITEM_APPLY_UDISK: {
+            //update firmware from udisk;
+            const char* fw_package = "/udisk/update.img";
+            // LOGD("%s:%d:-------->>>> UDISK update\n",__func__, __LINE__);
+            int status = ui_update(fw_package);
+            if (status < 0) {
+                ui_set_background(BACKGROUND_ICON_ERROR);
+            } else if (!ui_text_visible()) {
+                ui_print("\nInstall from sdcard complete.\n");
+                return;  // reboot if logs aren't visible
+            } else {
+                ui_print("\nInstall from sdcard complete.\n");
+            }
+        }
+        break;
         }
     }
 }
 
 static void
-print_property(const char *key, const char *name, void *cookie) {
+print_property(const char *key, const char *name, void *cookie)
+{
     printf("%s=%s\n", key, name);
 }
 
 
 int
-main(int argc, char **argv) {
+main(int argc, char **argv)
+{
     bool bSDBoot    = false;
     bool bUDiskBoot = false;
     const char *sdupdate_package = NULL;
     const char *usbupdate_package = NULL;
 
-    while(access(coldboot_done, F_OK) != 0){
+    while (access(coldboot_done, F_OK) != 0) {
         printf("coldboot not done, wait...\n");
         sleep(1);
     }
 
     time_t start = time(NULL);
-    if(access("/.rkdebug", F_OK) != 0){
+    if (access("/.rkdebug", F_OK) != 0) {
         // If these fail, there's not really anywhere to complain...
         freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
         freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
@@ -859,7 +879,7 @@ main(int argc, char **argv) {
     bSDBoot = is_boot_from_SD();
     bUDiskBoot = is_boot_from_udisk();
 
-    if(!bSDBoot && !bUDiskBoot) {
+    if (!bSDBoot && !bUDiskBoot) {
         get_args(&argc, &argv);
     } else {
         char imageFile[64] = {0};
@@ -871,7 +891,7 @@ main(int argc, char **argv) {
                     sdupdate_package = strdup(imageFile);
                     bSDBootUpdate = true;
                     ui_show_text(1);
-                    printf("sdupdate_package = %s\n",sdupdate_package);
+                    printf("sdupdate_package = %s\n", sdupdate_package);
                 }
             } else {
                 get_args(&argc, &argv);
@@ -886,7 +906,7 @@ main(int argc, char **argv) {
                     usbupdate_package = strdup(imageFile);
                     bUdiskUpdate = true;
                     ui_show_text(1);
-                    printf("usbupdate_package = %s\n",usbupdate_package);
+                    printf("usbupdate_package = %s\n", usbupdate_package);
                 }
             } else {
                 get_args(&argc, &argv);
@@ -938,7 +958,7 @@ main(int argc, char **argv) {
             int len = strlen(update_package) + 10;
             char* modified_path = malloc(len);
             strlcpy(modified_path, "/cache/", len);
-            strlcat(modified_path, update_package+6, len);
+            strlcat(modified_path, update_package + 6, len);
             printf("(replacing path \"%s\" with \"%s\")\n",
                    update_package, modified_path);
             update_package = modified_path;
@@ -949,10 +969,10 @@ main(int argc, char **argv) {
     int status = INSTALL_SUCCESS;
 
     if (toggle_secure_fs) {
-        if (strcmp(encrypted_fs_mode,"on") == 0) {
+        if (strcmp(encrypted_fs_mode, "on") == 0) {
             encrypted_fs_data.mode = MODE_ENCRYPTED_FS_ENABLED;
             ui_print("Enabling Encrypted FS.\n");
-        } else if (strcmp(encrypted_fs_mode,"off") == 0) {
+        } else if (strcmp(encrypted_fs_mode, "off") == 0) {
             encrypted_fs_data.mode = MODE_ENCRYPTED_FS_DISABLED;
             ui_print("Disabling Encrypted FS.\n");
         } else {
@@ -963,7 +983,7 @@ main(int argc, char **argv) {
         // Recovery strategy: if the data partition is damaged, disable encrypted file systems.
         // This preventsthe device recycling endlessly in recovery mode.
         if ((encrypted_fs_data.mode == MODE_ENCRYPTED_FS_ENABLED) &&
-                (read_encrypted_fs_info(&encrypted_fs_data))) {
+            (read_encrypted_fs_info(&encrypted_fs_data))) {
             ui_print("Encrypted FS change aborted, resetting to disabled state.\n");
             encrypted_fs_data.mode = MODE_ENCRYPTED_FS_DISABLED;
         }
@@ -978,7 +998,7 @@ main(int argc, char **argv) {
                 status = INSTALL_ERROR;
 #endif
             } else if ((encrypted_fs_data.mode == MODE_ENCRYPTED_FS_ENABLED) &&
-                      (restore_encrypted_fs_info(&encrypted_fs_data))) {
+                       (restore_encrypted_fs_info(&encrypted_fs_data))) {
                 ui_print("Encrypted FS change aborted.\n");
                 status = INSTALL_ERROR;
             } else {
@@ -1003,29 +1023,29 @@ main(int argc, char **argv) {
         int i, ret = 0;
         for (i = 0; i < 5; i++) {
             ret = ensure_path_mounted(update_package);
-            if(ret == 0)
+            if (ret == 0)
                 break;
             sleep(1);
             printf("mounted %s failed.\n", update_package);
         }
         if (ret == 0) {
             printf(">>>rkflash will update from %s\n", update_package);
-            #ifdef USE_RKUPDATE
+#ifdef USE_RKUPDATE
             status = do_rk_update(binary, update_package);
-            #endif
-            #ifdef USE_UPDATEENGINE
+#endif
+#ifdef USE_UPDATEENGINE
             const char* updateEnginebin = "/usr/bin/updateEngine";
             status = do_rk_updateEngine(updateEnginebin, update_package);
-            #endif
+#endif
             if (status == INSTALL_SUCCESS) {
                 strcpy(systemFlag, update_package);
 
-                if (strncmp(update_package,"/userdata", 9) != 0) {
+                if (strncmp(update_package, "/userdata", 9) != 0) {
                     if (resize_volume("/userdata"))
                         LOGE("\n ---resize_volume userdata error ---\n");
                 } else {
                     //update success, delete userdata/update.img and write result to file.
-                    if(access(update_package, F_OK) == 0)
+                    if (access(update_package, F_OK) == 0)
                         remove(update_package);
                 }
                 strlcpy(text, "update images success!\n", 127);
@@ -1057,44 +1077,44 @@ main(int argc, char **argv) {
 
 #ifdef USE_UPDATEENGINE
 
-#define	FACTORY_FIRMWARE_IMAGE "/mnt/sdcard/out_image.img"
-#define	CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
-    if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
-        int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
-        if (tmp_fd < 0) {
-            printf("creat % error.\n", CMD4RECOVERY_FILENAME);
-            status = INSTALL_ERROR;
-        } else {
-            close(tmp_fd);
-            const char* updateEnginebin = "/usr/bin/updateEngine";
-            status = do_rk_updateEngine(updateEnginebin, sdupdate_package);
+#define FACTORY_FIRMWARE_IMAGE "/mnt/sdcard/out_image.img"
+#define CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
+        if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
+            int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
+            if (tmp_fd < 0) {
+                printf("creat % error.\n", CMD4RECOVERY_FILENAME);
+                status = INSTALL_ERROR;
+            } else {
+                close(tmp_fd);
+                const char* updateEnginebin = "/usr/bin/updateEngine";
+                status = do_rk_updateEngine(updateEnginebin, sdupdate_package);
+            }
         }
-    }
 
-    if (isMtdDevice()) {
-        printf("start flash write to /dev/mtd0.\n");
-        size_t total_size;
-        size_t erase_size;
-        mtd_scan_partitions();
-        const MtdPartition *part = mtd_find_partition_by_name("rk-nand");
-        if ( part == NULL ) {
-            part = mtd_find_partition_by_name("spi-nand0");
-        }
-        if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
-            if ((!access(FACTORY_FIRMWARE_IMAGE, F_OK)) && mtd_find_partition_by_name("sfc_nor") != NULL) {
-                printf("Info: start flash out_image.img to spi nor.\n");
-                system("flashcp -v " FACTORY_FIRMWARE_IMAGE " /dev/mtd0");
-            } else
-            printf("Error: Can't find rk-nand or spi-nand0.\n");
+        if (isMtdDevice()) {
+            printf("start flash write to /dev/mtd0.\n");
+            size_t total_size;
+            size_t erase_size;
+            mtd_scan_partitions();
+            const MtdPartition *part = mtd_find_partition_by_name("rk-nand");
+            if ( part == NULL ) {
+                part = mtd_find_partition_by_name("spi-nand0");
+            }
+            if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
+                if ((!access(FACTORY_FIRMWARE_IMAGE, F_OK)) && mtd_find_partition_by_name("sfc_nor") != NULL) {
+                    printf("Info: start flash out_image.img to spi nor.\n");
+                    system("flashcp -v " FACTORY_FIRMWARE_IMAGE " /dev/mtd0");
+                } else
+                    printf("Error: Can't find rk-nand or spi-nand0.\n");
+            } else {
+                system("flash_erase /dev/mtd0 0x0 0");
+                system("sh "CMD4RECOVERY_FILENAME);
+            }
         } else {
-            system("flash_erase /dev/mtd0 0x0 0");
+            printf("Start to dd data to emmc partition.\n");
             system("sh "CMD4RECOVERY_FILENAME);
+            printf("sdcard upgrade done\n");
         }
-    } else {
-        printf("Start to dd data to emmc partition.\n");
-        system("sh "CMD4RECOVERY_FILENAME);
-        printf("sdcard upgrade done\n");
-    }
 
 #endif
 
@@ -1114,8 +1134,8 @@ main(int argc, char **argv) {
 #endif
 
 #ifdef USE_UPDATEENGINE
-        #define	FACTORY_FIRMWARE_IMAGE "/mnt/usb_storage/out_image.img"
-        #define	CMD4RECOVERY_FILENAME "/mnt/usb_storage/cmd4recovery"
+#define FACTORY_FIRMWARE_IMAGE "/mnt/usb_storage/out_image.img"
+#define CMD4RECOVERY_FILENAME "/mnt/usb_storage/cmd4recovery"
         if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
             int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
             if (tmp_fd < 0) {
@@ -1142,7 +1162,7 @@ main(int argc, char **argv) {
                     printf("Info: start flash out_image.img to spi nor.\n");
                     system("flashcp -v " FACTORY_FIRMWARE_IMAGE " /dev/mtd0");
                 } else
-                printf("Error: Can't find rk-nand or spi-nand0.\n");
+                    printf("Error: Can't find rk-nand or spi-nand0.\n");
             } else {
                 system("flash_erase /dev/mtd0 0x0 0");
                 system("sh "CMD4RECOVERY_FILENAME);
@@ -1182,10 +1202,10 @@ main(int argc, char **argv) {
         ui_print("resize oem done.\n");
         //ui_show_text(0);
     } else if (pcba_test) {
-         //pcba test todo...
-         printf("------------------ pcba test start -------------\n");
-         exit(EXIT_SUCCESS); //exit recovery bin directly, not start pcba here, in rkLanuch.sh
-         return 0;
+        //pcba test todo...
+        printf("------------------ pcba test start -------------\n");
+        exit(EXIT_SUCCESS); //exit recovery bin directly, not start pcba here, in rkLanuch.sh
+        return 0;
     } else {
         if (argc == 1) { // No command specified
             if (!bSDBootUpdate && !bUdiskUpdate && ui_text_visible())
@@ -1205,9 +1225,9 @@ main(int argc, char **argv) {
     }
 
     if (sdupdate_package != NULL && bSDBootUpdate) {
-        if (status == INSTALL_SUCCESS){
+        if (status == INSTALL_SUCCESS) {
             char *SDDdevice =
-                     strdup(get_mounted_device_from_path(EX_SDCARD_ROOT));
+                strdup(get_mounted_device_from_path(EX_SDCARD_ROOT));
 
             ensure_ex_path_unmounted(EX_SDCARD_ROOT);
             /* Updating is finished here, we must print this message

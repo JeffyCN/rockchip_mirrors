@@ -128,7 +128,7 @@ mtd_scan_partitions()
         mtdnum = -1;
 
         matches = sscanf(bufp, "mtd%d: %x %x \"%63[^\"]",
-                &mtdnum, &mtdsize, &mtderasesize, mtdname);
+                         &mtdnum, &mtdsize, &mtderasesize, mtdname);
         /* This will fail on the first line, which just contains
          * column headers.
          */
@@ -184,7 +184,7 @@ mtd_find_partition_by_name(const char *name)
 
 int
 mtd_mount_partition(const MtdPartition *partition, const char *mount_point,
-        const char *filesystem, int read_only)
+                    const char *filesystem, int read_only)
 {
     const unsigned long flags = MS_NOATIME | MS_NODEV | MS_NODIRATIME;
     char devname[64];
@@ -198,7 +198,7 @@ mtd_mount_partition(const MtdPartition *partition, const char *mount_point,
         rv = mount(devname, mount_point, filesystem, flags | MS_RDONLY, 0);
         if (rv < 0) {
             printf("Failed to mount %s on %s: %s\n",
-                    devname, mount_point, strerror(errno));
+                   devname, mount_point, strerror(errno));
         } else {
             printf("Mount %s on %s read-only\n", devname, mount_point);
         }
@@ -215,11 +215,11 @@ mtd_mount_partition(const MtdPartition *partition, const char *mount_point,
         }
         mode_t new_mode = st.st_mode | S_IXUSR | S_IXGRP | S_IXOTH;
         if (new_mode != st.st_mode) {
-printf("Fixing execute permissions for %s\n", mount_point);
+            printf("Fixing execute permissions for %s\n", mount_point);
             rv = chmod(mount_point, new_mode);
             if (rv < 0) {
                 printf("Couldn't fix permissions for %s: %s\n",
-                        mount_point, strerror(errno));
+                       mount_point, strerror(errno));
             }
         }
     }
@@ -254,10 +254,10 @@ int mtd_get_flash_info(size_t *total_size, size_t *block_size, size_t *page_size
 
 int
 mtd_partition_info(const MtdPartition *partition,
-        size_t *total_size, size_t *erase_size, size_t *write_size)
+                   size_t *total_size, size_t *erase_size, size_t *write_size)
 {
     char mtddevname[32];
-	//sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
+    //sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
     sprintf(mtddevname, "/dev/mtd%d", partition->device_index);
     int fd = open(mtddevname, O_RDONLY);
     if (fd < 0) return -1;
@@ -285,7 +285,7 @@ MtdReadContext *mtd_read_partition(const MtdPartition *partition)
     }
 
     char mtddevname[32];
-	sprintf(mtddevname, "/dev/mtd%d", partition->device_index);
+    sprintf(mtddevname, "/dev/mtd%d", partition->device_index);
     //sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
     ctx->fd = open(mtddevname, O_RDONLY);
     if (ctx->fd < 0) {
@@ -301,7 +301,8 @@ MtdReadContext *mtd_read_partition(const MtdPartition *partition)
 
 // Seeks to a location in the partition.  Don't mix with reads of
 // anything other than whole blocks; unpredictable things will result.
-void mtd_read_skip_to(const MtdReadContext* ctx, size_t offset) {
+void mtd_read_skip_to(const MtdReadContext* ctx, size_t offset)
+{
     lseek64(ctx->fd, offset, SEEK_SET);
 }
 
@@ -402,7 +403,7 @@ MtdWriteContext *mtd_write_partition(const MtdPartition *partition)
     }
 
     char mtddevname[32];
-	sprintf(mtddevname, "/dev/mtd%d", partition->device_index);
+    sprintf(mtddevname, "/dev/mtd%d", partition->device_index);
     //sprintf(mtddevname, "/dev/mtd/mtd%d", partition->device_index);
     ctx->fd = open(mtddevname, O_RDWR);
     if (ctx->fd < 0) {
@@ -416,9 +417,10 @@ MtdWriteContext *mtd_write_partition(const MtdPartition *partition)
     return ctx;
 }
 
-static void add_bad_block_offset(MtdWriteContext *ctx, off_t pos) {
+static void add_bad_block_offset(MtdWriteContext *ctx, off_t pos)
+{
     if (ctx->bad_block_count + 1 > ctx->bad_block_alloc) {
-        ctx->bad_block_alloc = (ctx->bad_block_alloc*2) + 1;
+        ctx->bad_block_alloc = (ctx->bad_block_alloc * 2) + 1;
         ctx->bad_block_offsets = realloc(ctx->bad_block_offsets,
                                          ctx->bad_block_alloc * sizeof(off_t));
     }
@@ -579,7 +581,8 @@ int mtd_write_close(MtdWriteContext *ctx)
 /* Return the offset of the first good block at or after pos (which
  * might be pos itself).
  */
-off_t mtd_find_write_start(MtdWriteContext *ctx, off_t pos) {
+off_t mtd_find_write_start(MtdWriteContext *ctx, off_t pos)
+{
     int i;
     for (i = 0; i < ctx->bad_block_count; ++i) {
         if (ctx->bad_block_offsets[i] == pos) {

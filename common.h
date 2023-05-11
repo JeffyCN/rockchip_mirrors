@@ -51,10 +51,10 @@ void ui_end_menu();
 
 // Set the icon (normally the only thing visible besides the progress bar).
 enum {
-  BACKGROUND_ICON_NONE,
-  BACKGROUND_ICON_INSTALLING,
-  BACKGROUND_ICON_ERROR,
-  NUM_BACKGROUND_ICONS
+    BACKGROUND_ICON_NONE,
+    BACKGROUND_ICON_INSTALLING,
+    BACKGROUND_ICON_ERROR,
+    NUM_BACKGROUND_ICONS
 };
 void ui_set_background(int icon);
 
@@ -99,11 +99,11 @@ typedef struct {
     const char* fs_type;      // "yaffs2" or "ext4" or "vfat"
 
     const char* device;       // MTD partition name if fs_type == "yaffs"
-                              // block device if fs_type == "ext4" or "vfat"
+    // block device if fs_type == "ext4" or "vfat"
 
     const char* device2;      // alternative device to try if fs_type
-                              // == "ext4" or "vfat" and mounting
-                              // 'device' fails
+    // == "ext4" or "vfat" and mounting
+    // 'device' fails
 
     const char* option;       // mount parameter
 

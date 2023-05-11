@@ -19,13 +19,13 @@ typedef struct {
     char dest_path[100];
     bool skip_verify;
     update_func cmd;
-}UPDATE_CMD, *PUPDATE_CMD;
+} UPDATE_CMD, *PUPDATE_CMD;
 
-typedef enum{
+typedef enum {
     RK_UPGRADE_FINISHED,
     RK_UPGRADE_START,
     RK_UPGRADE_ERR,
-}RK_Upgrade_Status_t;
+} RK_Upgrade_Status_t;
 
 typedef void(*RK_upgrade_callback)(void *user_data, RK_Upgrade_Status_t status);
 typedef void (*RK_print_callback)(char *pszPrompt);

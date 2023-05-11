@@ -52,7 +52,8 @@ static minui_backend my_backend = {
     .exit = fbdev_exit,
 };
 
-minui_backend* open_fbdev() {
+minui_backend* open_fbdev()
+{
     return &my_backend;
 }
 
@@ -78,7 +79,8 @@ static void set_displayed_framebuffer(unsigned n)
     displayed_buffer = n;
 }
 
-static gr_surface fbdev_init(minui_backend* backend) {
+static gr_surface fbdev_init(minui_backend* backend)
+{
     int fd;
     void *bits;
 
@@ -143,11 +145,11 @@ static gr_surface fbdev_init(minui_backend* backend) {
     if (vi.yres * fi.line_length * 2 <= fi.smem_len) {
         double_buffered = true;
 
-        memcpy(gr_framebuffer+1, gr_framebuffer, sizeof(GRSurface));
+        memcpy(gr_framebuffer + 1, gr_framebuffer, sizeof(GRSurface));
         gr_framebuffer[1].data = gr_framebuffer[0].data +
-            gr_framebuffer[0].height * gr_framebuffer[0].row_bytes;
+                                 gr_framebuffer[0].height * gr_framebuffer[0].row_bytes;
 
-        gr_draw = gr_framebuffer+1;
+        gr_draw = gr_framebuffer + 1;
 
     } else {
         double_buffered = false;
@@ -177,13 +179,14 @@ static gr_surface fbdev_init(minui_backend* backend) {
     return gr_draw;
 }
 
-static gr_surface fbdev_flip(minui_backend* backend __unused) {
+static gr_surface fbdev_flip(minui_backend* backend __unused)
+{
     if (double_buffered) {
         // Change gr_draw to point to the buffer currently displayed,
         // then flip the driver so we're displaying the other buffer
         // instead.
         gr_draw = gr_framebuffer + displayed_buffer;
-        set_displayed_framebuffer(1-displayed_buffer);
+        set_displayed_framebuffer(1 - displayed_buffer);
     } else {
         // Copy from the in-memory surface to the framebuffer.
 
@@ -205,7 +208,8 @@ static gr_surface fbdev_flip(minui_backend* backend __unused) {
     return gr_draw;
 }
 
-static void fbdev_exit(minui_backend* backend __unused) {
+static void fbdev_exit(minui_backend* backend __unused)
+{
     close(fb_fd);
     fb_fd = -1;
 

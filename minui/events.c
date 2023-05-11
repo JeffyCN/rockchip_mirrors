@@ -64,14 +64,14 @@ int ev_init(ev_callback input_cb, void *data)
         return -1;
 
     dir = opendir("/dev/input");
-    if(dir != 0) {
-        while((de = readdir(dir))) {
+    if (dir != 0) {
+        while ((de = readdir(dir))) {
             unsigned long ev_bits[BITS_TO_LONGS(EV_MAX)];
 
 //            fprintf(stderr,"/dev/input/%s\n", de->d_name);
-            if(strncmp(de->d_name,"event",5)) continue;
+            if (strncmp(de->d_name, "event", 5)) continue;
             fd = openat(dirfd(dir), de->d_name, O_RDONLY);
-            if(fd < 0) continue;
+            if (fd < 0) continue;
 
             /* read the evbits of the input device */
             if (ioctl(fd, EVIOCGBIT(0, sizeof(ev_bits)), ev_bits) < 0) {
@@ -99,7 +99,7 @@ int ev_init(ev_callback input_cb, void *data)
             ev_fdinfo[ev_count].data = data;
             ev_count++;
             ev_dev_count++;
-            if(ev_dev_count == MAX_DEVICES) break;
+            if (ev_dev_count == MAX_DEVICES) break;
         }
     }
 

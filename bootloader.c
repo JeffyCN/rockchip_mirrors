@@ -32,14 +32,16 @@ static int set_bootloader_message_mtd(const struct bootloader_message *in);
 static int get_bootloader_message_block(struct bootloader_message *out);
 static int set_bootloader_message_block(const struct bootloader_message *in);
 
-int get_bootloader_message(struct bootloader_message *out) {
+int get_bootloader_message(struct bootloader_message *out)
+{
     if (isMtdDevice())
         return get_bootloader_message_mtd(out);
 
     return get_bootloader_message_block(out);
 }
 
-int set_bootloader_message(const struct bootloader_message *in) {
+int set_bootloader_message(const struct bootloader_message *in)
+{
     if (isMtdDevice())
         return set_bootloader_message_mtd(in);
 
@@ -56,7 +58,8 @@ int set_bootloader_message(const struct bootloader_message *in) {
 #define CMD_OFFSET (16 << 10)
 
 #define MISC_NAME "misc"
-static int get_bootloader_message_mtd(struct bootloader_message *out) {
+static int get_bootloader_message_mtd(struct bootloader_message *out)
+{
     size_t write_size;
     mtd_scan_partitions();
     const MtdPartition *part = mtd_find_partition_by_name(MISC_NAME);
@@ -80,14 +83,15 @@ static int get_bootloader_message_mtd(struct bootloader_message *out) {
     if (r != size) return -1;
 
     memcpy(out, &data[CMD_OFFSET], sizeof(*out));
-	printf("out->command = %s.\n", out->command);
-	printf("out->status = %s.\n", out->status);
-	printf("out->recovery = %s.\n", out->recovery);
-	printf("out->systemFlag = %s.\n", out->systemFlag);
+    printf("out->command = %s.\n", out->command);
+    printf("out->status = %s.\n", out->status);
+    printf("out->recovery = %s.\n", out->recovery);
+    printf("out->systemFlag = %s.\n", out->systemFlag);
 
     return 0;
 }
-static int set_bootloader_message_mtd(const struct bootloader_message *in) {
+static int set_bootloader_message_mtd(const struct bootloader_message *in)
+{
     size_t write_size;
     mtd_scan_partitions();
     const MtdPartition *part = mtd_find_partition_by_name(MISC_NAME);
@@ -135,7 +139,8 @@ static int set_bootloader_message_mtd(const struct bootloader_message *in) {
 // ------------------------------------
 // for misc partitions on block devices
 // ------------------------------------
-static void wait_for_device(const char* fn) {
+static void wait_for_device(const char* fn)
+{
     int tries = 0;
     int ret;
     struct stat buf;
@@ -152,7 +157,8 @@ static void wait_for_device(const char* fn) {
     }
 }
 
-static int get_bootloader_message_block(struct bootloader_message *out) {
+static int get_bootloader_message_block(struct bootloader_message *out)
+{
     wait_for_device(MISC_PARTITION_NAME_BLOCK);
     FILE* f = fopen(MISC_PARTITION_NAME_BLOCK, "rb");
     if (f == NULL) {
@@ -175,7 +181,8 @@ static int get_bootloader_message_block(struct bootloader_message *out) {
     return 0;
 }
 
-static int set_bootloader_message_block(const struct bootloader_message *in) {
+static int set_bootloader_message_block(const struct bootloader_message *in)
+{
     FILE* f = fopen(MISC_PARTITION_NAME_BLOCK, "wb");
     if (f == NULL) {
         LOGE("Can't open %s\n(%s)\n", MISC_PARTITION_NAME_BLOCK, strerror(errno));

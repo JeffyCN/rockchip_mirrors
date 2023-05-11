@@ -18,9 +18,10 @@
 #define URL_MAX_LENGTH 512
 #define CMDLINE_LENGTH 2048
 extern bool bSDBootUpdate;
-static int start_main (const char *binary, char *args[], int* pipefd) {
+static int start_main (const char *binary, char *args[], int* pipefd)
+{
     pid_t pid = fork();
-    if(pid == 0){
+    if (pid == 0) {
         close(pipefd[0]);
         execv(binary, args);
         printf("E:Can't run %s (%s)\n", binary, strerror(errno));
@@ -42,7 +43,7 @@ static int start_main (const char *binary, char *args[], int* pipefd) {
             float fraction = strtof(fraction_s, NULL);
             int seconds = strtol(seconds_s, NULL, 10);
 
-            ui_show_progress(fraction * (1-VERIFICATION_PROGRESS_FRACTION), seconds);
+            ui_show_progress(fraction * (1 - VERIFICATION_PROGRESS_FRACTION), seconds);
         } else if (strcmp(command, "set_progress") == 0) {
             char* fraction_s = strtok(NULL, " \n");
             float fraction = strtof(fraction_s, NULL);
@@ -73,10 +74,11 @@ static int start_main (const char *binary, char *args[], int* pipefd) {
 
 }
 
-int do_rk_updateEngine(const char *binary, const char *path) {
+int do_rk_updateEngine(const char *binary, const char *path)
+{
     LOGI("[%s] start with main.\n", __func__);
-    char *update="--update";
-    char *update_sdboot="--update=sdboot";
+    char *update = "--update";
+    char *update_sdboot = "--update=sdboot";
     int pipefd[2];
     pipe(pipefd);
 
@@ -131,7 +133,8 @@ int do_rk_updateEngine(const char *binary, const char *path) {
     return start_main(binary, args, pipefd);
 
 }
-int do_rk_update(const char *binary, const char *path) {
+int do_rk_update(const char *binary, const char *path)
+{
     LOGI("[%s] start with main.\n", __func__);
     int pipefd[2];
     pipe(pipefd);
@@ -151,7 +154,7 @@ int do_rk_update(const char *binary, const char *path) {
 
 #if 0
     pid_t pid = fork();
-    if(pid == 0){
+    if (pid == 0) {
         close(pipefd[0]);
         execv(binary, args);
         printf("E:Can't run %s (%s)\n", binary, strerror(errno));
@@ -173,7 +176,7 @@ int do_rk_update(const char *binary, const char *path) {
             float fraction = strtof(fraction_s, NULL);
             int seconds = strtol(seconds_s, NULL, 10);
 
-            ui_show_progress(fraction * (1-VERIFICATION_PROGRESS_FRACTION), seconds);
+            ui_show_progress(fraction * (1 - VERIFICATION_PROGRESS_FRACTION), seconds);
         } else if (strcmp(command, "set_progress") == 0) {
             char* fraction_s = strtok(NULL, " \n");
             float fraction = strtof(fraction_s, NULL);

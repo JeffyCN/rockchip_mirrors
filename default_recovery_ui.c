@@ -21,52 +21,60 @@
 
 char* MENU_HEADERS[] = { "Linux system recovery utility",
                          "",
-                         NULL };
+                         NULL
+                       };
 
 char* MENU_ITEMS[] = { "reboot system now",
                        "apply update from sdcard",
                        "apply update from local userdata",
                        "apply update from udisk",
                        "wipe data/factory reset",
-                       NULL };
+                       NULL
+                     };
 
-int device_recovery_start() {
+int device_recovery_start()
+{
     return 0;
 }
 
-int device_toggle_display(volatile char* key_pressed, int key_code) {
+int device_toggle_display(volatile char* key_pressed, int key_code)
+{
     // return key_code == KEY_MENU;
     return 0;
 }
 
-int device_reboot_now(volatile char* key_pressed, int key_code) {
+int device_reboot_now(volatile char* key_pressed, int key_code)
+{
     return 0;
 }
 
-int device_handle_key(int key_code, int visible) {
+int device_handle_key(int key_code, int visible)
+{
     if (visible) {
         switch (key_code) {
-            case KEY_DOWN:
-            case KEY_VOLUMEDOWN:
-                return HIGHLIGHT_DOWN;
+        case KEY_DOWN:
+        case KEY_VOLUMEDOWN:
+            return HIGHLIGHT_DOWN;
 
-            case KEY_UP:
-            case KEY_VOLUMEUP:
-                return HIGHLIGHT_UP;
+        case KEY_UP:
+        case KEY_VOLUMEUP:
+            return HIGHLIGHT_UP;
 
-            case KEY_ENTER:
-            case KEY_MENU:
-                return SELECT_ITEM;
+        case KEY_ENTER:
+        case KEY_MENU:
+            return SELECT_ITEM;
         }
     }
 
     return NO_ACTION;
 }
 
-int device_perform_action(int which) {
+int device_perform_action(int which)
+{
     return which;
 }
 
-int device_wipe_data() {
+int device_wipe_data()
+{
     return 0;
 }

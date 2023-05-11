@@ -27,22 +27,23 @@
 extern size_t strlcpy(char *dst, const char *src, size_t dsize);
 extern size_t strlcat(char *dst, const char *src, size_t dsize);
 
-bool is_boot_from_SD(void){
+bool is_boot_from_SD(void)
+{
     bool bSDBoot = false;
     char param[1024];
     int fd, ret;
-    char *s=NULL;
+    char *s = NULL;
     printf("read cmdline\n");
-    memset(param,0,1024);
+    memset(param, 0, 1024);
 
     fd = open("/proc/cmdline", O_RDONLY);
     ret = read(fd, (char*)param, 1024);
 
-    s = strstr(param,"sdfwupdate");
-    if(s != NULL){
+    s = strstr(param, "sdfwupdate");
+    if (s != NULL) {
         bSDBoot = true;
         printf(">>> Boot from SDcard\n");
-    }else{
+    } else {
         bSDBoot = false;
         printf(">>> Boot from non-SDcard\n");
     }
@@ -51,13 +52,14 @@ bool is_boot_from_SD(void){
     return bSDBoot;
 }
 
-void ensure_sd_mounted(bool *bSDMounted) {
+void ensure_sd_mounted(bool *bSDMounted)
+{
     int i;
-    for(i = 0; i < 3; i++) {
-        if(0 == ensure_path_mounted(EX_SDCARD_ROOT)){
+    for (i = 0; i < 3; i++) {
+        if (0 == ensure_path_mounted(EX_SDCARD_ROOT)) {
             *bSDMounted = true;
             break;
-        }else {
+        } else {
             printf("delay 1sec\n");
             sleep(1);
         }
@@ -69,7 +71,7 @@ void ensure_sd_mounted(bool *bSDMounted) {
 
 #define MaxLine 1024
 static int get_cfg_Item(char *pFileName /*in*/, char *pKey /*in*/,
-                       char * pValue/*in out*/, int * pValueLen /*out*/)
+                        char * pValue/*in out*/, int * pValueLen /*out*/)
 {
     int     ret = 0;
     FILE    *fp = NULL;
@@ -123,8 +125,8 @@ static int get_cfg_Item(char *pFileName /*in*/, char *pKey /*in*/,
         }
         pEnd = pTmp;
 
-        *pValueLen = pEnd-pBegin;
-        memcpy(pValue, pBegin, pEnd-pBegin);
+        *pValueLen = pEnd - pBegin;
+        memcpy(pValue, pBegin, pEnd - pBegin);
     }
 
 End:
@@ -134,7 +136,8 @@ End:
     return 0;
 }
 
-bool is_sdcard_update(void) {
+bool is_sdcard_update(void)
+{
     int  ret = 0;
     bool bSdMounted = false;
     char configFile[64] = {0};
@@ -142,7 +145,7 @@ bool is_sdcard_update(void) {
     char str_val[10] = {0};
     char *str_key = "fw_update";
 
-    printf("%s in\n",__func__);
+    printf("%s in\n", __func__);
     ensure_sd_mounted(&bSdMounted);
     if (!bSdMounted) {
         printf("Error! SDcard not mounted\n");
@@ -154,18 +157,18 @@ bool is_sdcard_update(void) {
     printf("configFile = %s \n", configFile);
     ret = get_cfg_Item(configFile, str_key, str_val, &vlen);
 
-    if(ret != 0) {
+    if (ret != 0) {
         printf("func get_cfg_Item err:%d \n", ret);
         return false;
     }
 
     printf("\n %s:%s \n", str_key, str_val);
 
-    if(strcmp(str_val, "1") != 0) {
+    if (strcmp(str_val, "1") != 0) {
         return false;
     }
 
     printf("firmware update will from SDCARD. \n");
-    printf("%s out\n",__func__);
+    printf("%s out\n", __func__);
     return true;
 }

@@ -98,7 +98,7 @@ typedef struct AvbABSlotData {
 
     /* Reserved for future use. */
     unsigned char reserved[1];
-}AvbABSlotData;
+} AvbABSlotData;
 
 /* Struct used for recording A/B metadata.
  *
@@ -124,7 +124,7 @@ typedef struct AvbABData {
 
     /* CRC32 of all 28 bytes preceding this field. */
     unsigned int crc32;
-}AvbABData;
+} AvbABData;
 
 int setSlotActivity();
 int setSlotSucceed();

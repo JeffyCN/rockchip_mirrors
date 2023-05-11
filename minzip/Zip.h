@@ -76,12 +76,13 @@ void mzCloseZipArchive(ZipArchive* pArchive);
  * Find an entry in the Zip archive, by name.
  */
 const ZipEntry* mzFindZipEntry(const ZipArchive* pArchive,
-        const char* entryName);
+                               const char* entryName);
 
 /*
  * Get the number of entries in the Zip archive.
  */
-INLINE unsigned int mzZipEntryCount(const ZipArchive* pArchive) {
+INLINE unsigned int mzZipEntryCount(const ZipArchive* pArchive)
+{
     return pArchive->numEntries;
 }
 
@@ -101,29 +102,35 @@ mzGetZipEntryAt(const ZipArchive* pArchive, unsigned int index)
  * Get the index number of an entry in the archive.
  */
 INLINE unsigned int
-mzGetZipEntryIndex(const ZipArchive *pArchive, const ZipEntry *pEntry) {
+mzGetZipEntryIndex(const ZipArchive *pArchive, const ZipEntry *pEntry)
+{
     return pEntry - pArchive->pEntries;
 }
 
 /*
  * Simple accessors.
  */
-INLINE UnterminatedString mzGetZipEntryFileName(const ZipEntry* pEntry) {
+INLINE UnterminatedString mzGetZipEntryFileName(const ZipEntry* pEntry)
+{
     UnterminatedString ret;
     ret.str = pEntry->fileName;
     ret.len = pEntry->fileNameLen;
     return ret;
 }
-INLINE long mzGetZipEntryOffset(const ZipEntry* pEntry) {
+INLINE long mzGetZipEntryOffset(const ZipEntry* pEntry)
+{
     return pEntry->offset;
 }
-INLINE long mzGetZipEntryUncompLen(const ZipEntry* pEntry) {
+INLINE long mzGetZipEntryUncompLen(const ZipEntry* pEntry)
+{
     return pEntry->uncompLen;
 }
-INLINE long mzGetZipEntryModTime(const ZipEntry* pEntry) {
+INLINE long mzGetZipEntryModTime(const ZipEntry* pEntry)
+{
     return pEntry->modTime;
 }
-INLINE long mzGetZipEntryCrc32(const ZipEntry* pEntry) {
+INLINE long mzGetZipEntryCrc32(const ZipEntry* pEntry)
+{
     return pEntry->crc32;
 }
 bool mzIsZipEntrySymlink(const ZipEntry* pEntry);
@@ -134,7 +141,7 @@ bool mzIsZipEntrySymlink(const ZipEntry* pEntry);
  * mzProcessZipEntryContents().
  */
 typedef bool (*ProcessZipEntryContentsFunction)(const unsigned char *data,
-    int dataLen, void *cookie);
+                                                int dataLen, void *cookie);
 
 /*
  * Stream the uncompressed data through the supplied function,
@@ -147,14 +154,14 @@ typedef bool (*ProcessZipEntryContentsFunction)(const unsigned char *data,
  * This is useful for calculating the hash of an entry's uncompressed contents.
  */
 bool mzProcessZipEntryContents(const ZipArchive *pArchive,
-    const ZipEntry *pEntry, ProcessZipEntryContentsFunction processFunction,
-    void *cookie);
+                               const ZipEntry *pEntry, ProcessZipEntryContentsFunction processFunction,
+                               void *cookie);
 
 /*
  * Read an entry into a buffer allocated by the caller.
  */
 bool mzReadZipEntry(const ZipArchive* pArchive, const ZipEntry* pEntry,
-        char* buf, int bufLen);
+                    char* buf, int bufLen);
 
 /*
  * Check the CRC on this entry; return true if it is correct.
@@ -166,14 +173,14 @@ bool mzIsZipEntryIntact(const ZipArchive *pArchive, const ZipEntry *pEntry);
  * Inflate and write an entry to a file.
  */
 bool mzExtractZipEntryToFile(const ZipArchive *pArchive,
-    const ZipEntry *pEntry, int fd);
+                             const ZipEntry *pEntry, int fd);
 
 /*
  * Inflate and write an entry to a memory buffer, which must be long
  * enough to hold mzGetZipEntryUncomplen(pEntry) bytes.
  */
 bool mzExtractZipEntryToBuffer(const ZipArchive *pArchive,
-    const ZipEntry *pEntry, unsigned char* buffer);
+                               const ZipEntry *pEntry, unsigned char* buffer);
 
 /*
  * Inflate all entries under zipDir to the directory specified by
@@ -206,8 +213,8 @@ bool mzExtractZipEntryToBuffer(const ZipArchive *pArchive,
  */
 enum { MZ_EXTRACT_FILES_ONLY = 1, MZ_EXTRACT_DRY_RUN = 2 };
 bool mzExtractRecursive(const ZipArchive *pArchive,
-        const char *zipDir, const char *targetDir,
-        int flags, const struct utimbuf *timestamp,
-        void (*callback)(const char *fn, void*), void *cookie);
+                        const char *zipDir, const char *targetDir,
+                        int flags, const struct utimbuf *timestamp,
+                        void (*callback)(const char *fn, void*), void *cookie);
 
 #endif /*_MINZIP_ZIP*/

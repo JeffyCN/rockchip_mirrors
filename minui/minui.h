@@ -36,11 +36,11 @@ typedef struct {
 typedef GRSurface* gr_surface;
 
 typedef enum GRRotation_e {
-  ROTATION_NONE = 0,
-  ROTATION_RIGHT = 1,
-  ROTATION_DOWN = 2,
-  ROTATION_LEFT = 3,
-}GRRotation;
+    ROTATION_NONE = 0,
+    ROTATION_RIGHT = 1,
+    ROTATION_DOWN = 2,
+    ROTATION_LEFT = 3,
+} GRRotation;
 
 int gr_init(void);
 void gr_exit(void);

@@ -47,7 +47,8 @@ static drmModeConnector *main_monitor_connector;
 
 static int drm_fd = -1;
 
-static void drm_disable_crtc(int drm_fd, drmModeCrtc *crtc) {
+static void drm_disable_crtc(int drm_fd, drmModeCrtc *crtc)
+{
     if (crtc) {
         drmModeSetCrtc(drm_fd, crtc->crtc_id,
                        0, // fb_id
@@ -59,7 +60,8 @@ static void drm_disable_crtc(int drm_fd, drmModeCrtc *crtc) {
 }
 
 static void drm_enable_crtc(int drm_fd, drmModeCrtc *crtc,
-                            struct drm_surface *surface) {
+                            struct drm_surface *surface)
+{
     int32_t ret;
 
     ret = drmModeSetCrtc(drm_fd, crtc->crtc_id,
@@ -73,7 +75,8 @@ static void drm_enable_crtc(int drm_fd, drmModeCrtc *crtc,
         printf("drmModeSetCrtc failed ret=%d\n", ret);
 }
 
-static void drm_blank(minui_backend* backend, bool blank) {
+static void drm_blank(minui_backend* backend, bool blank)
+{
     if (blank)
         drm_disable_crtc(drm_fd, main_monitor_crtc);
     else
@@ -81,11 +84,12 @@ static void drm_blank(minui_backend* backend, bool blank) {
                         drm_surfaces[current_buffer]);
 }
 
-static void drm_destroy_surface(struct drm_surface *surface) {
+static void drm_destroy_surface(struct drm_surface *surface)
+{
     struct drm_gem_close gem_close;
     int ret;
 
-    if(!surface)
+    if (!surface)
         return;
 
     if (surface->base.data)
@@ -110,24 +114,26 @@ static void drm_destroy_surface(struct drm_surface *surface) {
     free(surface);
 }
 
-static int drm_format_to_bpp(uint32_t format) {
-    switch(format) {
-        case DRM_FORMAT_ABGR8888:
-        case DRM_FORMAT_BGRA8888:
-        case DRM_FORMAT_RGBX8888:
-        case DRM_FORMAT_BGRX8888:
-        case DRM_FORMAT_XBGR8888:
-        case DRM_FORMAT_XRGB8888:
-            return 32;
-        case DRM_FORMAT_RGB565:
-            return 16;
-        default:
-            printf("Unknown format %d\n", format);
-            return 32;
+static int drm_format_to_bpp(uint32_t format)
+{
+    switch (format) {
+    case DRM_FORMAT_ABGR8888:
+    case DRM_FORMAT_BGRA8888:
+    case DRM_FORMAT_RGBX8888:
+    case DRM_FORMAT_BGRX8888:
+    case DRM_FORMAT_XBGR8888:
+    case DRM_FORMAT_XRGB8888:
+        return 32;
+    case DRM_FORMAT_RGB565:
+        return 16;
+    default:
+        printf("Unknown format %d\n", format);
+        return 32;
     }
 }
 
-static struct drm_surface *drm_create_surface(int width, int height) {
+static struct drm_surface *drm_create_surface(int width, int height)
+{
     struct drm_surface *surface;
     struct drm_mode_create_dumb create_dumb;
     uint32_t format;
@@ -157,7 +163,7 @@ static struct drm_surface *drm_create_surface(int width, int height) {
 
     ret = drmIoctl(drm_fd, DRM_IOCTL_MODE_CREATE_DUMB, &create_dumb);
     if (ret) {
-        printf("DRM_IOCTL_MODE_CREATE_DUMB failed ret=%d\n",ret);
+        printf("DRM_IOCTL_MODE_CREATE_DUMB failed ret=%d\n", ret);
         drm_destroy_surface(surface);
         return NULL;
     }
@@ -170,8 +176,8 @@ static struct drm_surface *drm_create_surface(int width, int height) {
     offsets[0] = 0;
 
     ret = drmModeAddFB2(drm_fd, width, height,
-            format, handles, pitches, offsets,
-            &(surface->fb_id), 0);
+                        format, handles, pitches, offsets,
+                        &(surface->fb_id), 0);
     if (ret) {
         printf("drmModeAddFB2 failed ret=%d\n", ret);
         drm_destroy_surface(surface);
@@ -183,7 +189,7 @@ static struct drm_surface *drm_create_surface(int width, int height) {
     map_dumb.handle = create_dumb.handle;
     ret = drmIoctl(drm_fd, DRM_IOCTL_MODE_MAP_DUMB, &map_dumb);
     if (ret) {
-        printf("DRM_IOCTL_MODE_MAP_DUMB failed ret=%d\n",ret);
+        printf("DRM_IOCTL_MODE_MAP_DUMB failed ret=%d\n", ret);
         drm_destroy_surface(surface);
         return NULL;;
     }
@@ -207,8 +213,9 @@ static struct drm_surface *drm_create_surface(int width, int height) {
 }
 
 static drmModeCrtc *find_crtc_for_connector(int fd,
-                            drmModeRes *resources,
-                            drmModeConnector *connector) {
+                                            drmModeRes *resources,
+                                            drmModeConnector *connector)
+{
     int i, j;
     drmModeEncoder *encoder;
     int32_t crtc;
@@ -252,8 +259,9 @@ static drmModeCrtc *find_crtc_for_connector(int fd,
 }
 
 static drmModeConnector *find_used_connector_by_type(int fd,
-                                 drmModeRes *resources,
-                                 unsigned type) {
+                                                     drmModeRes *resources,
+                                                     unsigned type)
+{
     int i;
     for (i = 0; i < resources->count_connectors; i++) {
         drmModeConnector *connector;
@@ -261,8 +269,8 @@ static drmModeConnector *find_used_connector_by_type(int fd,
         connector = drmModeGetConnector(fd, resources->connectors[i]);
         if (connector) {
             if ((connector->connector_type == type) &&
-                    (connector->connection == DRM_MODE_CONNECTED) &&
-                    (connector->count_modes > 0))
+                (connector->connection == DRM_MODE_CONNECTED) &&
+                (connector->count_modes > 0))
                 return connector;
 
             drmModeFreeConnector(connector);
@@ -272,7 +280,8 @@ static drmModeConnector *find_used_connector_by_type(int fd,
 }
 
 static drmModeConnector *find_first_connected_connector(int fd,
-                             drmModeRes *resources) {
+                                                        drmModeRes *resources)
+{
     int i;
     for (i = 0; i < resources->count_connectors; i++) {
         drmModeConnector *connector;
@@ -280,7 +289,7 @@ static drmModeConnector *find_first_connected_connector(int fd,
         connector = drmModeGetConnector(fd, resources->connectors[i]);
         if (connector) {
             if ((connector->count_modes > 0) &&
-                    (connector->connection == DRM_MODE_CONNECTED))
+                (connector->connection == DRM_MODE_CONNECTED))
                 return connector;
 
             drmModeFreeConnector(connector);
@@ -290,7 +299,8 @@ static drmModeConnector *find_first_connected_connector(int fd,
 }
 
 static drmModeConnector *find_main_monitor(int fd, drmModeRes *resources,
-        uint32_t *mode_index) {
+                                           uint32_t *mode_index)
+{
     unsigned i = 0;
     int modes;
     /* Look for LVDS/eDP/DSI connectors. Those are the main screens. */
@@ -303,15 +313,15 @@ static drmModeConnector *find_main_monitor(int fd, drmModeRes *resources,
     drmModeConnector *main_monitor_connector = NULL;
     do {
         main_monitor_connector = find_used_connector_by_type(fd,
-                                         resources,
-                                         kConnectorPriority[i]);
+                                                             resources,
+                                                             kConnectorPriority[i]);
         i++;
     } while (!main_monitor_connector && i < ARRAY_SIZE(kConnectorPriority));
 
     /* If we didn't find a connector, grab the first one that is connected. */
     if (!main_monitor_connector)
         main_monitor_connector =
-                find_first_connected_connector(fd, resources);
+            find_first_connected_connector(fd, resources);
 
     /* If we still didn't find a connector, give up and return. */
     if (!main_monitor_connector)
@@ -320,7 +330,7 @@ static drmModeConnector *find_main_monitor(int fd, drmModeRes *resources,
     *mode_index = 0;
     for (modes = 0; modes < main_monitor_connector->count_modes; modes++) {
         if (main_monitor_connector->modes[modes].type &
-                DRM_MODE_TYPE_PREFERRED) {
+            DRM_MODE_TYPE_PREFERRED) {
             *mode_index = modes;
             break;
         }
@@ -330,8 +340,9 @@ static drmModeConnector *find_main_monitor(int fd, drmModeRes *resources,
 }
 
 static void disable_non_main_crtcs(int fd,
-                    drmModeRes *resources,
-                    drmModeCrtc* main_crtc) {
+                                   drmModeRes *resources,
+                                   drmModeCrtc* main_crtc)
+{
     int i;
     drmModeCrtc* crtc;
 
@@ -346,7 +357,8 @@ static void disable_non_main_crtcs(int fd,
     }
 }
 
-static GRSurface* drm_init(minui_backend* backend) {
+static GRSurface* drm_init(minui_backend* backend)
+{
     drmModeRes *res = NULL;
     uint32_t selected_mode;
     char *dev_name;
@@ -395,7 +407,7 @@ static GRSurface* drm_init(minui_backend* backend) {
     }
 
     main_monitor_connector = find_main_monitor(drm_fd,
-            res, &selected_mode);
+                                               res, &selected_mode);
 
     if (!main_monitor_connector) {
         printf("main_monitor_connector not found\n");
@@ -441,7 +453,8 @@ static GRSurface* drm_init(minui_backend* backend) {
     return &(drm_surfaces[0]->base);
 }
 
-static GRSurface* drm_flip(minui_backend* backend) {
+static GRSurface* drm_flip(minui_backend* backend)
+{
     int ret;
 
     ret = drmModePageFlip(drm_fd, main_monitor_crtc->crtc_id,
@@ -454,7 +467,8 @@ static GRSurface* drm_flip(minui_backend* backend) {
     return &(drm_surfaces[current_buffer]->base);
 }
 
-static void drm_exit(minui_backend* backend) {
+static void drm_exit(minui_backend* backend)
+{
     drm_disable_crtc(drm_fd, main_monitor_crtc);
     drm_destroy_surface(drm_surfaces[0]);
     drm_destroy_surface(drm_surfaces[1]);
@@ -471,6 +485,7 @@ static minui_backend drm_backend = {
     .exit = drm_exit,
 };
 
-minui_backend* open_drm() {
+minui_backend* open_drm()
+{
     return &drm_backend;
 }

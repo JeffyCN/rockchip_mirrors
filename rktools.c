@@ -21,23 +21,24 @@
  * 从/proc/cmdline 获取串口的节点
  *
 */
-char *getSerial(){
+char *getSerial()
+{
     char *ans = (char*)malloc(20);
     char param[1024];
     int fd, ret;
     char *s = NULL;
     fd = open("/proc/cmdline", O_RDONLY);
     ret = read(fd, (char*)param, 1024);
-    printf("cmdline=%s\n",param);
-    s = strstr(param,"console");
-    if(s == NULL){
+    printf("cmdline=%s\n", param);
+    s = strstr(param, "console");
+    if (s == NULL) {
         printf("no found console in cmdline\n");
         free(ans);
         ans = NULL;
         return ans;
-    }else{
+    } else {
         s = strstr(s, "=");
-        if(s == NULL){
+        if (s == NULL) {
             free(ans);
             ans = NULL;
             return ans;
@@ -46,7 +47,7 @@ char *getSerial(){
         strcpy(ans, "/dev/");
         char *str = ans + 5;
         s++;
-        while(*s != ' '){
+        while (*s != ' ') {
             *str = *s;
             str++;
             s++;
@@ -61,28 +62,29 @@ char *getSerial(){
 /**
  *  设置flash 节点
  */
-static char result_point[4][20]={'\0'}; //0-->emmc, 1-->sdcard, 2-->SDIO, 3-->SDcombo
-int readFile(DIR* dir, char* filename){
+static char result_point[4][20] = {'\0'}; //0-->emmc, 1-->sdcard, 2-->SDIO, 3-->SDcombo
+int readFile(DIR* dir, char* filename)
+{
     char name[30] = {'\0'};
     int i;
 
     strcpy(name, filename);
     strcat(name, "/type");
     int fd = openat(dirfd(dir), name, O_RDONLY);
-    if(fd == -1){
+    if (fd == -1) {
         printf("Error: openat %s error %s.\n", name, strerror(errno));
         return -1;
     }
     char resultBuf[10] = {'\0'};
     read(fd, resultBuf, sizeof(resultBuf));
-    for(i = 0; i < strlen(resultBuf); i++){
-        if(resultBuf[i] == '\n'){
+    for (i = 0; i < strlen(resultBuf); i++) {
+        if (resultBuf[i] == '\n') {
             resultBuf[i] = '\0';
             break;
         }
     }
-    for(i = 0; i < 4; i++){
-        if(strcmp(typeName[i], resultBuf) == 0){
+    for (i = 0; i < 4; i++) {
+        if (strcmp(typeName[i], resultBuf) == 0) {
             //printf("type is %s.\n", typeName[i]);
             return i;
         }
@@ -92,24 +94,25 @@ int readFile(DIR* dir, char* filename){
     return -1;
 }
 
-void init_sd_emmc_point(){
+void init_sd_emmc_point()
+{
     DIR* dir = opendir("/sys/bus/mmc/devices/");
-    if(dir != NULL){
+    if (dir != NULL) {
         struct dirent* de;
-        while((de = readdir(dir))){
+        while ((de = readdir(dir))) {
             if (strcmp(de->d_name, ".") == 0 || strcmp(de->d_name, "..") == 0 )
                 continue;
             //if (de->d_type == 4)    //dir
             //    printf("dir name : %s \n", de->d_name);
 
-            if (strncmp(de->d_name, "mmc", 3) == 0){
+            if (strncmp(de->d_name, "mmc", 3) == 0) {
                 //printf("find mmc is %s.\n", de->d_name);
                 char flag = de->d_name[3];
                 int ret = -1;
                 ret = readFile(dir, de->d_name);
-                if(ret != -1){
+                if (ret != -1) {
                     strcpy(result_point[ret], point_items[flag - '0']);
-                }else{
+                } else {
                     strcpy(result_point[ret], "");
                 }
             }
@@ -118,7 +121,8 @@ void init_sd_emmc_point(){
     closedir(dir);
 }
 
-static void wait_for_device(const char* fn) {
+static void wait_for_device(const char* fn)
+{
     int tries = 0;
     int ret;
     struct stat buf;
@@ -135,7 +139,8 @@ static void wait_for_device(const char* fn) {
     }
 }
 
-void setFlashPoint(){
+void setFlashPoint()
+{
     if (!isMtdDevice())
         wait_for_device(MISC_PARTITION_NAME_BLOCK);
 
@@ -143,14 +148,14 @@ void setFlashPoint(){
     setenv(EMMC_POINT_NAME, result_point[MMC], 1);
     //SDcard 有两个挂载点
 
-    if(access(result_point[SD], F_OK) == 0)
+    if (access(result_point[SD], F_OK) == 0)
         setenv(SD_POINT_NAME_2, result_point[SD], 1);
     char name_t[22];
-    if(strlen(result_point[SD]) > 0){
+    if (strlen(result_point[SD]) > 0) {
         strcpy(name_t, result_point[SD]);
         strcat(name_t, "p1");
     }
-    if(access(name_t, F_OK) == 0)
+    if (access(name_t, F_OK) == 0)
         setenv(SD_POINT_NAME, name_t, 1);
 
     printf("emmc_point is %s\n", getenv(EMMC_POINT_NAME));
@@ -160,18 +165,19 @@ void setFlashPoint(){
 
 #define MTD_PATH "/proc/mtd"
 //判断是MTD还是block 设备
-bool isMtdDevice() {
+bool isMtdDevice()
+{
     char param[2048];
     int fd, ret;
     char *s = NULL;
     fd = open("/proc/cmdline", O_RDONLY);
     ret = read(fd, (char*)param, 2048);
     close(fd);
-    s = strstr(param,"storagemedia");
-    if(s == NULL){
+    s = strstr(param, "storagemedia");
+    if (s == NULL) {
         printf("no found storagemedia in cmdline, default is not MTD.\n");
         return false;
-    }else{
+    } else {
         s = strstr(s, "=");
         if (s == NULL) {
             printf("no found storagemedia in cmdline, default is not MTD.\n");
@@ -193,8 +199,8 @@ bool isMtdDevice() {
                 ret = read(fd, (char*)param, 2048);
                 close(fd);
 
-                s = strstr(param,"mtd");
-                if(s == NULL){
+                s = strstr(param, "mtd");
+                if (s == NULL) {
                     LOGI("no found mtd.\n");
                     return false;
                 }
