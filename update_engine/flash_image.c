@@ -15,6 +15,7 @@
 #include <errno.h>
 #include <libgen.h>
 #include <limits.h>
+#include <stdbool.h>
 #include "flash_image.h"
 #include "update.h"
 #include "log.h"
@@ -23,10 +24,9 @@
 #include "rkimage.h"
 #include "defineHeader.h"
 #include "rkboot.h"
+#include "../mtdutils/mtdutils.h"
 
-extern "C" {
-    #include "../mtdutils/mtdutils.h"
-}
+
 #define UBI_HEAD_MAGIC "UBI#"
 
 static PSTRUCT_PARAM_ITEM gp_param_item = NULL;
@@ -35,11 +35,10 @@ static long long *gp_backup_gpt_offset = NULL;
 // get greastest common divisor (gcd)
 static int get_gcd ( long long x, long long y )
 {
-    while (x != y)//用大数减去小数并将结果保存起来
-    {
+    while (x != y) { //用大数减去小数并将结果保存起来
         if (x > y) {
             x -= y;
-        } else if(x < y) {
+        } else if (x < y) {
             y -= x;
         }
     }
@@ -63,7 +62,7 @@ static bool is_ubi(char *src_path, long long offset)
     }
     read(fd_src, magic, 4);
     LOGI("image magic is %s\n", magic);
-    if(strcmp(magic, UBI_HEAD_MAGIC) == 0)
+    if (strcmp(magic, UBI_HEAD_MAGIC) == 0)
         ret = 1;
     else
         ret = 0;
@@ -72,11 +71,13 @@ static bool is_ubi(char *src_path, long long offset)
     return ret;
 }
 
-static void mtd_read() {
+static void mtd_read()
+{
 
 }
 
-static int mtd_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path) {
+static int mtd_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path)
+{
     LOGI("mtd_write %s, offset = %#llx size = %#llx flash_offset = %lld.\n", dest_path, offset, size, flash_offset);
 
     struct stat sb;
@@ -87,7 +88,7 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
     long long dd_count = size;
 
     if ((sb.st_mode & S_IFMT) == S_IFCHR) {
-        memset(mtd_write_erase_cmd, 0, sizeof(mtd_write_erase_cmd)/sizeof(mtd_write_erase_cmd[0]));
+        memset(mtd_write_erase_cmd, 0, sizeof(mtd_write_erase_cmd) / sizeof(mtd_write_erase_cmd[0]));
         sprintf(mtd_write_erase_cmd, "flash_erase %s 0 0", dest_path);
         system(mtd_write_erase_cmd);
 
@@ -95,7 +96,7 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
         dd_skip = offset / dd_bs;
         dd_count = size / dd_bs;
         // dd if=/mnt/sdcard/sdupdate.img bs=4 skip=2727533 count=3646464 | nandwrite -p /dev/block/by-name/recovery
-        memset(mtd_write_erase_cmd, 0, sizeof(mtd_write_erase_cmd)/sizeof(mtd_write_erase_cmd[0]));
+        memset(mtd_write_erase_cmd, 0, sizeof(mtd_write_erase_cmd) / sizeof(mtd_write_erase_cmd[0]));
         sprintf(mtd_write_erase_cmd, "dd if=%s bs=%lld skip=%lld count=%lld | nandwrite -p %s",
                 src_path, dd_bs, dd_skip, dd_count, dest_path );
         system(mtd_write_erase_cmd);
@@ -107,11 +108,13 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
     return 0;
 }
 
-static void block_read() {
+static void block_read()
+{
 
 }
 
-static int block_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path) {
+static int block_write(char *src_path, long long offset, long long size, long long flash_offset, char *dest_path)
+{
     LOGI("block_write src %s dest %s.\n", src_path, dest_path);
     int fd_dest = 0, fd_src = 0;
     long long src_offset = 0, dest_offset = 0;
@@ -155,7 +158,7 @@ static int block_write(char *src_path, long long offset, long long size, long lo
     }
     while (src_remain > 0 && dest_remain > 0) {
         memset(data_buf, 0, BLOCK_WRITE_LEN);
-        read_count = src_remain>src_step?src_step:src_remain;
+        read_count = src_remain > src_step ? src_step : src_remain;
 
         if (read(fd_src, data_buf, read_count) != read_count) {
             close(fd_dest);
@@ -166,7 +169,7 @@ static int block_write(char *src_path, long long offset, long long size, long lo
 
         src_remain -= read_count;
         src_file_offset += read_count;
-        write_count = dest_remain>dest_step?dest_step:dest_remain;
+        write_count = dest_remain > dest_step ? dest_step : dest_remain;
 
         if (write(fd_dest, data_buf, write_count) != write_count) {
             close(fd_dest);
@@ -187,7 +190,8 @@ extern int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
                           const char *blk_dev, const char *dst_file);
 
 extern bool is_sdboot;
-int flash_normal(char *src_path, void *pupdate_cmd) {
+int flash_normal(char *src_path, void *pupdate_cmd)
+{
     LOGI("%s:%d start.\n", __func__, __LINE__);
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
     int ret = 0;
@@ -289,16 +293,16 @@ static void string_to_uuid(char* strUUid, char *uuid)
     unsigned int i;
     char value;
     memset(uuid, 0, 16);
-    for (i =0; i < 256; i++) {
+    for (i = 0; i < 256; i++) {
         if (strUUid[i] == '\0') {
             break;
         }
         value = 0;
-        if ((strUUid[i] >= '0')&&(strUUid[i] <= '9'))
+        if ((strUUid[i] >= '0') && (strUUid[i] <= '9'))
             value = strUUid[i] - '0';
-        if ((strUUid[i] >= 'a')&&(strUUid[i] <= 'f'))
+        if ((strUUid[i] >= 'a') && (strUUid[i] <= 'f'))
             value = strUUid[i] - 'a' + 10;
-        if ((strUUid[i] >= 'A')&&(strUUid[i] <= 'F'))
+        if ((strUUid[i] >= 'A') && (strUUid[i] <= 'F'))
             value = strUUid[i] - 'A' + 10;
         if ((i % 2) == 0)
             uuid[i / 2] += (value << 4);
@@ -315,7 +319,8 @@ static void string_to_uuid(char* strUUid, char *uuid)
     *p16 = cpu_to_be16(*p16);
 }
 
-static void getUuidFromString(char *str, PSTRUCT_CONFIG_ITEM  p_config) {
+static void getUuidFromString(char *str, PSTRUCT_CONFIG_ITEM  p_config)
+{
     char data_buf[strlen(str)];
     memcpy(data_buf, str, strlen(str));
     char *line = strtok(data_buf, "\n");
@@ -325,10 +330,10 @@ static void getUuidFromString(char *str, PSTRUCT_CONFIG_ITEM  p_config) {
         }
 
         char *pline = strstr(line, "uuid");
-        if(pline != NULL && (pline = strstr(pline, ":")) != NULL) {
+        if (pline != NULL && (pline = strstr(pline, ":")) != NULL) {
             pline++; //过滤掉冒号
             //过滤掉空格
-            while(*pline == ' ') {
+            while (*pline == ' ') {
                 pline++;
             }
             char tmp;
@@ -342,7 +347,8 @@ static void getUuidFromString(char *str, PSTRUCT_CONFIG_ITEM  p_config) {
     }
 }
 
-static void getParamFromString(char *str, PSTRUCT_PARAM_ITEM p_param) {
+static void getParamFromString(char *str, PSTRUCT_PARAM_ITEM p_param)
+{
     char data_buf[strlen(str)];
     memcpy(data_buf, str, strlen(str));
     char *line = strtok(data_buf, "\n");
@@ -367,7 +373,7 @@ static void getParamFromString(char *str, PSTRUCT_PARAM_ITEM p_param) {
             while (token != NULL) {
                 char size[20], offset[20];
                 char tmp;
-                if (*token == '-'){
+                if (*token == '-') {
                     sscanf(token, "-@0x%x(%[^)]", &p_param->offset, p_param->name);
                     p_param->size = 0xFFFFFFFF;
                     p_param++;
@@ -469,17 +475,17 @@ unsigned int crc32table_le[] = {
 #define DO_CRC(x) crc = tab[ (crc ^ (x)) & 255 ] ^ (crc>>8)
 static unsigned int crc32_le(unsigned int crc, unsigned char *p, unsigned int len)
 {
-    unsigned int      *b =(unsigned int *)p;
+    unsigned int      *b = (unsigned int *)p;
     unsigned int      *tab = crc32table_le;
     crc = crc ^ 0xFFFFFFFF;
-    if((((long)b)&3 && len)){
+    if ((((long)b) & 3 && len)) {
         do {
             unsigned char *p = (unsigned char *)b;
             DO_CRC(*p++);
             b = (unsigned int *)p;
-        } while ((--len) && ((long)b)&3 );
+        } while ((--len) && ((long)b) & 3 );
     }
-    if((len >= 4)){
+    if ((len >= 4)) {
         unsigned int save_len = len & 3;
         len = len >> 2;
         --b;
@@ -493,7 +499,7 @@ static unsigned int crc32_le(unsigned int crc, unsigned char *p, unsigned int le
         b++;
         len = save_len;
     }
-    if(len){
+    if (len) {
         do {
             unsigned char *p = (unsigned char *)b;
             DO_CRC(*p++);
@@ -516,9 +522,9 @@ static void create_gpt_buffer(u8 *gpt, PSTRUCT_PARAM_ITEM p_param, int param_len
     mbr->signature = MSDOS_MBR_SIGNATURE;
     mbr->partition_record[0].sys_ind = EFI_PMBR_OSTYPE_EFI_GPT;
     mbr->partition_record[0].start_sect = 1;
-    mbr->partition_record[0].nr_sects = (u32)-1;
+    mbr->partition_record[0].nr_sects = (u32) - 1;
 
-      /*2.gpt header*/
+    /*2.gpt header*/
     memset(gpt + SECTOR_SIZE, 0, SECTOR_SIZE);
     gptHead->signature = cpu_to_le64(GPT_HEADER_SIGNATURE);
     gptHead->revision = cpu_to_le32(GPT_HEADER_REVISION_V1);
@@ -607,14 +613,15 @@ int flash_register_partition_data(PSTRUCT_PARAM_ITEM p_param_item, long long *p_
     return 0;
 }
 
-int flash_parameter(char *src_path, void *pupdate_cmd) {
+int flash_parameter(char *src_path, void *pupdate_cmd)
+{
     LOGI("flash_parameter start src_path [%s].\n", src_path);
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
 
     unsigned int m_uiParamFileSize = pcmd->size;
 
     if (m_uiParamFileSize % SECTOR_SIZE != 0) {
-        m_uiParamFileSize = (m_uiParamFileSize/SECTOR_SIZE + 1) * SECTOR_SIZE;
+        m_uiParamFileSize = (m_uiParamFileSize / SECTOR_SIZE + 1) * SECTOR_SIZE;
     }
 
     // 1. 读取parameter 数据
@@ -647,7 +654,7 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
     }
 
     LOGI("%s-%d: List partitions:\n", __func__, __LINE__);
-    for (int j = 0; j < sizeof(param_item)/sizeof(param_item[0]); j++) {
+    for (int j = 0; j < sizeof(param_item) / sizeof(param_item[0]); j++) {
         LOGI("    param_item[%d].name [%s]\n", j, param_item[j].name);
     }
 
@@ -663,50 +670,50 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
     // 4. 创建gpt 表
     unsigned char write_buf[SECTOR_SIZE * 67];
     unsigned char *backup_gpt;
-    backup_gpt = write_buf+34*SECTOR_SIZE;
+    backup_gpt = write_buf + 34 * SECTOR_SIZE;
     memset(write_buf, 0, SECTOR_SIZE * 67);
     create_gpt_buffer(write_buf, param_item, 20, config_item, 10, block_num);
-    memcpy(backup_gpt, write_buf + 2* SECTOR_SIZE, 32 * SECTOR_SIZE);
+    memcpy(backup_gpt, write_buf + 2 * SECTOR_SIZE, 32 * SECTOR_SIZE);
     memcpy(backup_gpt + 32 * SECTOR_SIZE, write_buf + SECTOR_SIZE, SECTOR_SIZE);
     prepare_gpt_backup(write_buf, backup_gpt);
 
     if (gp_backup_gpt_offset) {
-		*gp_backup_gpt_offset = (block_num - 33) * SECTOR_SIZE;
+        *gp_backup_gpt_offset = (block_num - 33) * SECTOR_SIZE;
     }
 
     //5. 写入主GPT表
-    int fd_dest = open(pcmd->dest_path, O_CREAT|O_RDWR| O_TRUNC, 0644);
+    int fd_dest = open(pcmd->dest_path, O_CREAT | O_RDWR | O_TRUNC, 0644);
     if (fd_dest < 0) {
         LOGE("Can't open %s, %s\n", pcmd->dest_path, strerror(errno));
         return -2;
     }
     lseek64(fd_dest, 0, SEEK_SET);
-    if (write(fd_dest, write_buf, 34*SECTOR_SIZE) != 34*SECTOR_SIZE) {
+    if (write(fd_dest, write_buf, 34 * SECTOR_SIZE) != 34 * SECTOR_SIZE) {
         LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
         close(fd_dest);
         return -2;
     }
     //6. 尾部写入GPT表到文件
-	/*
+    /*
      * char gpt_backup_dest_path[100] = {0};
-	 * memset(gpt_backup_dest_path, 0, sizeof(gpt_backup_dest_path)/sizeof(gpt_backup_dest_path[0]));
-	 * memcpy(gpt_backup_dest_path, pcmd->dest_path, strlen(pcmd->dest_path));
-	 * dirname(gpt_backup_dest_path);
-	 * sprintf(gpt_backup_dest_path, "%s/%s", gpt_backup_dest_path, GPT_BACKUP_FILE_NAME);
-	 */
-	
+     * memset(gpt_backup_dest_path, 0, sizeof(gpt_backup_dest_path)/sizeof(gpt_backup_dest_path[0]));
+     * memcpy(gpt_backup_dest_path, pcmd->dest_path, strlen(pcmd->dest_path));
+     * dirname(gpt_backup_dest_path);
+     * sprintf(gpt_backup_dest_path, "%s/%s", gpt_backup_dest_path, GPT_BACKUP_FILE_NAME);
+     */
+
 #if 0
-    int fd_backup = open(gpt_backup_dest_path, O_CREAT|O_RDWR| O_TRUNC, 0644);
+    int fd_backup = open(gpt_backup_dest_path, O_CREAT | O_RDWR | O_TRUNC, 0644);
     if (fd_backup < 0) {
         LOGE("Can't open %s, %s\n", gpt_backup_dest_path, strerror(errno));
         return -2;
     }
 
-	if (write(fd_backup, backup_gpt, 33*SECTOR_SIZE) != 33*SECTOR_SIZE) {
-		LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
-		close(fd_backup);
-		return -2;
-	}
+    if (write(fd_backup, backup_gpt, 33 * SECTOR_SIZE) != 33 * SECTOR_SIZE) {
+        LOGE("write error %s: (%s:%d).\n", strerror(errno), __func__, __LINE__);
+        close(fd_backup);
+        return -2;
+    }
     close(fd_backup);
 #endif
     close(fd_dest);
@@ -715,7 +722,8 @@ int flash_parameter(char *src_path, void *pupdate_cmd) {
 }
 
 
-int flash_bootloader(char *src_path, void *pupdate_cmd) {
+int flash_bootloader(char *src_path, void *pupdate_cmd)
+{
     PUPDATE_CMD pcmd = (PUPDATE_CMD)pupdate_cmd;
 
     if (isMtdDevice()) {
@@ -728,7 +736,7 @@ int flash_bootloader(char *src_path, void *pupdate_cmd) {
         pcmd->flash_offset = block_size;
     } else {
         // bootrom read IDBlock from the offset (32KB + 512KB * n <n=0,1,2,3...>) for eMMC
-        pcmd->flash_offset = 32*1024;
+        pcmd->flash_offset = 32 * 1024;
     }
 
     // 1. 读取bootloader

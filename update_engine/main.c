@@ -23,7 +23,8 @@ extern bool is_usbboot;
 RK_Upgrade_Status_t m_status = RK_UPGRADE_ERR;
 FILE* cmd_pipe = NULL;
 
-void handle_upgrade_callback(void *user_data, RK_Upgrade_Status_t status){
+void handle_upgrade_callback(void *user_data, RK_Upgrade_Status_t status)
+{
     if (status == RK_UPGRADE_FINISHED) {
         LOGI("rk ota success.\n");
         setSlotActivity();
@@ -34,12 +35,13 @@ void handle_upgrade_callback(void *user_data, RK_Upgrade_Status_t status){
 
 void handle_print_callback(char *szPrompt)
 {
-    if(cmd_pipe != NULL){
+    if (cmd_pipe != NULL) {
         fprintf(cmd_pipe, "ui_print %s\n", szPrompt);
     }
 }
 
-static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
+static int MiscUpdate(char *url,  char *update_partition, char *save_path)
+{
     int partition;
     char *savepath = NULL;
     int slot = -1;
@@ -51,7 +53,7 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
     slot = getCurrentSlot();
     if (update_partition == NULL) {
         //没有传入要升级的分区，默认升级
-        if (slot == -1){
+        if (slot == -1) {
             // recovery mdoe
             // u-boot/trust/boot/recovery/boot/rootfs/oem
             partition = 0X3F0000;
@@ -61,7 +63,7 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
             partition = 0XFC00;
         }
     } else {
-        partition = strtol(update_partition+2, NULL, 16);
+        partition = strtol(update_partition + 2, NULL, 16);
     }
 
     if (save_path == NULL) {
@@ -74,7 +76,7 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
     LOGI("url = %s.\n", url);
     LOGI("[%s:%d] save path: %s\n", __func__, __LINE__, savepath);
     // If it's recovery mode, upgrade recovery in normal system.
-    if (slot == -1 && !is_sdboot && !is_usbboot){
+    if (slot == -1 && !is_sdboot && !is_usbboot) {
         if (partition & 0x040000) {
             LOGI("update recovery in normal system.\n");
             partition = partition & 0xFBFFFF;
@@ -120,7 +122,8 @@ static int MiscUpdate(char *url,  char *update_partition, char *save_path) {
     return 0;
 }
 
-void display() {
+void display(void)
+{
     LOGI("--misc=now             Linux A/B mode: Setting the current partition to bootable.\n");
     LOGI("--misc=other           Linux A/B mode: Setting another partition to bootable.\n");
     LOGI("--misc=update          Recovery mode: Setting the partition to be upgraded.\n");
@@ -159,21 +162,22 @@ void display() {
 }
 
 static const struct option engine_options[] = {
-  { "update", optional_argument, NULL, 'u' },
-  { "version_url", required_argument, NULL, 'v' + 'u' },
-  { "image_url", required_argument, NULL, 'i' + 'u'},
-  { "check", required_argument, NULL, 'c' },
-  { "misc", required_argument, NULL, 'm' },
-  { "misc_custom", required_argument, NULL, 'd' },
-  { "partition", required_argument, NULL, 'p' },
-  { "reboot", no_argument, NULL, 'r' },
-  { "help", no_argument, NULL, 'h' },
-  { "pipefd", required_argument, NULL, 'p' + 'f' },
-  { "savepath", required_argument, NULL, 's'},
-  { NULL, 0, NULL, 0 },
+    { "update", optional_argument, NULL, 'u' },
+    { "version_url", required_argument, NULL, 'v' + 'u' },
+    { "image_url", required_argument, NULL, 'i' + 'u'},
+    { "check", required_argument, NULL, 'c' },
+    { "misc", required_argument, NULL, 'm' },
+    { "misc_custom", required_argument, NULL, 'd' },
+    { "partition", required_argument, NULL, 'p' },
+    { "reboot", no_argument, NULL, 'r' },
+    { "help", no_argument, NULL, 'h' },
+    { "pipefd", required_argument, NULL, 'p' + 'f' },
+    { "savepath", required_argument, NULL, 's'},
+    { NULL, 0, NULL, 0 },
 };
 
-int main(int argc, char *argv[]) {
+int main(int argc, char *argv[])
+{
     LOGI("*** update_engine: Version V1.1.5 ***.\n");
     int arg;
     char *image_url = NULL;
@@ -188,7 +192,7 @@ int main(int argc, char *argv[]) {
 
     while ((arg = getopt_long(argc, argv, "", engine_options, NULL)) != -1) {
         switch (arg) {
-        case 'u': is_update = true; if(optarg != NULL) is_sdboot = true; continue;
+        case 'u': is_update = true; if (optarg != NULL) is_sdboot = true; continue;
         case 'c': version_url = optarg; continue;
         case 'm': misc_func = optarg; continue;
         case 'p': partition = optarg; continue;
@@ -211,7 +215,7 @@ int main(int argc, char *argv[]) {
     }
 
     if (is_update) {
-        if (optarg && (strstr(optarg , "usb") != NULL || strstr(optarg, "udisk")!=NULL)) {
+        if (optarg && (strstr(optarg, "usb") != NULL || strstr(optarg, "udisk") != NULL)) {
             is_usbboot = true;
             is_sdboot = false;
             LOGI("*** will upgrade firmware from udisk ***");
@@ -221,16 +225,16 @@ int main(int argc, char *argv[]) {
             int res = 0x3FFC00; //默认升级的分区
             LOGI("%s-%d: is %s update.\n", __func__, __LINE__, is_usbboot ? "usbboot" : "sdboot");
             if (partition != NULL) {
-                res = strtol(partition+2, NULL, 16);
+                res = strtol(partition + 2, NULL, 16);
             }
             RK_ota_set_url(image_url, save_path);
-            if ( !RK_ota_set_partition(res) ){
+            if ( !RK_ota_set_partition(res) ) {
                 LOGE("ota file is error.\n");
                 return -1;
             }
 
             if (version_url != NULL) {
-                if (!RK_ota_check_version(version_url) ){
+                if (!RK_ota_check_version(version_url) ) {
                     LOGE("you shouldn't update the device.\n");
                     return -1;
                 }
@@ -243,9 +247,9 @@ int main(int argc, char *argv[]) {
                 m_status = RK_UPGRADE_FINISHED;
             }
         }
-    }else if (misc_func != NULL) {
+    } else if (misc_func != NULL) {
         if (strcmp(misc_func, "now") == 0) {
-            if (setSlotSucceed() ==0) {
+            if (setSlotSucceed() == 0) {
                 m_status = RK_UPGRADE_FINISHED;
             }
         } else if (strcmp(misc_func, "other") == 0) {
@@ -277,8 +281,8 @@ int main(int argc, char *argv[]) {
             if (cleanCustomMiscCmdline())
                 return -1;
         } else {
-                LOGI("Not supported\n");
-                return m_status;
+            LOGI("Not supported\n");
+            return m_status;
         }
         m_status = RK_UPGRADE_FINISHED;
     }

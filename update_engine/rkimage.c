@@ -12,13 +12,15 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
+#include <stdbool.h>
 #include "rkimage.h"
 #include "log.h"
 #include "md5sum.h"
 #include "rktools.h"
 #include "update.h"
 
-static void display_head(PSTRUCT_RKIMAGE_HEAD pHead){
+static void display_head(PSTRUCT_RKIMAGE_HEAD pHead)
+{
     LOGD("uiTag = %x.\n", pHead->uiTag);
     LOGD("usSize = %x.\n", pHead->usSize);
     LOGD("dwVersion = %x.\n", pHead->dwVersion);
@@ -32,7 +34,8 @@ static void display_head(PSTRUCT_RKIMAGE_HEAD pHead){
     LOGD("dwFWSize = %x.\n", pHead->dwFWSize);
 }
 
-static void display_item(PRKIMAGE_ITEM pitem) {
+static void display_item(PRKIMAGE_ITEM pitem)
+{
     //char name[PART_NAME];
     //char file[RELATIVE_PATH];
     //unsigned int offset;
@@ -48,7 +51,8 @@ static void display_item(PRKIMAGE_ITEM pitem) {
     LOGD("size = %d", pitem->size);
 }
 
-static void display_hdr(PRKIMAGE_HDR phdr) {
+static void display_hdr(PRKIMAGE_HDR phdr)
+{
 
     //unsigned int tag;
     //unsigned int size;
@@ -64,7 +68,7 @@ static void display_hdr(PRKIMAGE_HDR phdr) {
     LOGD("manufacturer = %s", phdr->manufacturer);
     LOGD("version = %d", phdr->version);
     LOGD("item = %d.\n", phdr->item_count);
-    for(int i = 0; i < phdr->item_count; i++){
+    for (int i = 0; i < phdr->item_count; i++) {
         LOGI("================================================");
         display_item(&(phdr->item[i]));
     }
@@ -72,8 +76,8 @@ static void display_hdr(PRKIMAGE_HDR phdr) {
 
 void adjustFileOffset(PRKIMAGE_HDR phdr, int offset, int loader_offset, int loader_size)
 {
-    for(int i = 0; i< phdr->item_count; i++){
-        if( strcmp(phdr->item[i].name, "bootloader") == 0){
+    for (int i = 0; i < phdr->item_count; i++) {
+        if ( strcmp(phdr->item[i].name, "bootloader") == 0) {
             phdr->item[i].offset = loader_offset;
             phdr->item[i].size = loader_size;
             continue ;
@@ -83,7 +87,8 @@ void adjustFileOffset(PRKIMAGE_HDR phdr, int offset, int loader_offset, int load
 }
 
 //解析固件，获得固件头部信息
-int analyticImage(const char *filepath, PRKIMAGE_HDR phdr) {
+int analyticImage(const char *filepath, PRKIMAGE_HDR phdr)
+{
     long long ulFwSize;
     STRUCT_RKIMAGE_HEAD rkimage_head;
     unsigned char m_md5[32];
@@ -102,7 +107,7 @@ int analyticImage(const char *filepath, PRKIMAGE_HDR phdr) {
         return -2;
     }
 
-    if ((rkimage_head.reserved[14]=='H')&&(rkimage_head.reserved[15]=='I')) {
+    if ((rkimage_head.reserved[14] == 'H') && (rkimage_head.reserved[15] == 'I')) {
         ulFwSize = *((DWORD *)(&rkimage_head.reserved[16]));
         ulFwSize <<= 32;
         ulFwSize += rkimage_head.dwFWOffset;
@@ -156,8 +161,7 @@ int analyticImage(const char *filepath, PRKIMAGE_HDR phdr) {
         return -3;
     }
 
-    if ((phdr->manufacturer[56]==0x55)&&(phdr->manufacturer[57]==0x66))
-    {
+    if ((phdr->manufacturer[56] == 0x55) && (phdr->manufacturer[57] == 0x66)) {
         USHORT *pItemRemain;
         pItemRemain = (USHORT *)(&phdr->manufacturer[58]);
         phdr->item_count += *pItemRemain;
@@ -170,18 +174,19 @@ int analyticImage(const char *filepath, PRKIMAGE_HDR phdr) {
     display_hdr(phdr);
 
     close(fd);
-    #if 1
-    if (!compareMd5sum((char*)filepath, m_md5, 0, fileSize-32)) {
-        LOGE("Md5Check update.img fwSize:%ld", fileSize-32);
+#if 1
+    if (!compareMd5sum((char*)filepath, m_md5, 0, fileSize - 32)) {
+        LOGE("Md5Check update.img fwSize:%ld", fileSize - 32);
         return -1;
     }
-    #endif
+#endif
     LOGI("analyticImage ok.\n");
     return 0;
 }
 
 // 获得Image 打包版本号
-bool getImageVersion(const char *filepath, char *version, int maxLength) {
+bool getImageVersion(const char *filepath, char *version, int maxLength)
+{
     STRUCT_RKIMAGE_HEAD rkimage_head;
 
     int fd = open(filepath, O_RDONLY);
@@ -208,7 +213,8 @@ bool getImageVersion(const char *filepath, char *version, int maxLength) {
 }
 
 #if 0
-int main(int argc, char *argv[]){
+int main(int argc, char *argv[])
+{
     analyticImage(argv[1]);
     compareVersion();
 }

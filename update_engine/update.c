@@ -7,6 +7,12 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <errno.h>
+#include <libgen.h>
+#include <stdbool.h>
 #include "update.h"
 #include "log.h"
 #include "download.h"
@@ -15,25 +21,18 @@
 #include "rktools.h"
 #include "md5sum.h"
 #include "defineHeader.h"
+#include "../mtdutils/mtdutils.h"
 
-#include <unistd.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <libgen.h>
 
-extern "C" {
-    #include "../mtdutils/mtdutils.h"
-}
-
-#define	CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
+#define CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
 #define CMD4RECOVERY_UDISK_FILENAME "/mnt/usb_storage/cmd4recovery"
 static char * _url = NULL;
 static char const * _save_path = NULL;
 static char _url_dir[128];
 double processvalue = 0;
 
-void RK_ota_set_url(char *url, char *savepath) {
+void RK_ota_set_url(char *url, char *savepath)
+{
     LOGI("start RK_ota_url url [%s] save path [%s].\n", url, savepath);
     if ( url == NULL ) {
         LOGE("RK_ota_set_url : url is NULL.\n");
@@ -55,25 +54,26 @@ bool is_sdboot = false;
 bool is_usbboot = false;
 
 UPDATE_CMD update_cmd[] = {
-           {"bootloader" , false , false , 0 , 0 , 0 , "" , false, flash_bootloader} ,
-           {"parameter"  , false , false , 0 , 0 , 0 , "" , false, flash_parameter}  ,
-           {"uboot"      , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"trust"      , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"boot"       , false , true  , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"recovery"   , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"rootfs"     , false , true  , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"oem"        , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"uboot_a"    , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"uboot_b"    , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"boot_a"     , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"boot_b"     , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"system_a"   , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"system_b"   , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"misc"       , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
-           {"userdata"   , false , false , 0 , 0 , 0 , "" , false, flash_normal}     ,
+    {"bootloader", false, false, 0, 0, 0, "", false, flash_bootloader},
+    {"parameter", false, false, 0, 0, 0, "", false, flash_parameter},
+    {"uboot", false, false, 0, 0, 0, "", false, flash_normal},
+    {"trust", false, false, 0, 0, 0, "", false, flash_normal},
+    {"boot", false, true, 0, 0, 0, "", false, flash_normal},
+    {"recovery", false, false, 0, 0, 0, "", false, flash_normal},
+    {"rootfs", false, true, 0, 0, 0, "", false, flash_normal},
+    {"oem", false, false, 0, 0, 0, "", false, flash_normal},
+    {"uboot_a", false, false, 0, 0, 0, "", false, flash_normal},
+    {"uboot_b", false, false, 0, 0, 0, "", false, flash_normal},
+    {"boot_a", false, false, 0, 0, 0, "", false, flash_normal},
+    {"boot_b", false, false, 0, 0, 0, "", false, flash_normal},
+    {"system_a", false, false, 0, 0, 0, "", false, flash_normal},
+    {"system_b", false, false, 0, 0, 0, "", false, flash_normal},
+    {"misc", false, false, 0, 0, 0, "", false, flash_normal},
+    {"userdata", false, false, 0, 0, 0, "", false, flash_normal},
 };
 
-bool RK_ota_set_partition(int partition) {
+bool RK_ota_set_partition(int partition)
+{
     //000000000000000000000000: 没有升级分区
     //100000000000000000000000: 升级loader分区
     //010000000000000000000000: 升级parameter分区
@@ -92,13 +92,13 @@ bool RK_ota_set_partition(int partition) {
     //000000000000001000000000: 升级misc分区，sdboot使用
     //000000000000000100000000: 升级userdata分区
 
-    int num = sizeof(update_cmd)/sizeof(UPDATE_CMD);
+    int num = sizeof(update_cmd) / sizeof(UPDATE_CMD);
     LOGI("[%s:%d] num [%d]\n", __func__, __LINE__, num);
 
     if (partition == -1) {
         //设置目标分区大小
         RKIMAGE_HDR rkimage_hdr;
-        if( analyticImage(_url, &rkimage_hdr) != 0){
+        if ( analyticImage(_url, &rkimage_hdr) != 0) {
             LOGE("analyticImage error.\n");
             return false;
         }
@@ -109,7 +109,7 @@ bool RK_ota_set_partition(int partition) {
                 for (int j = 0; j < rkimage_hdr.item_count; j++) {
                     if (strcmp(rkimage_hdr.item[j].name, update_cmd[i].name) == 0) {
                         LOGI("found rkimage_hdr.item[%d].name = %s.\n", j, update_cmd[i].name);
-                        if (rkimage_hdr.item[j].file[50]=='H') {
+                        if (rkimage_hdr.item[j].file[50] == 'H') {
                             update_cmd[i].offset = *((DWORD *)(&rkimage_hdr.item[j].file[51]));
                             update_cmd[i].offset <<= 32;
                             update_cmd[i].offset += rkimage_hdr.item[j].offset;
@@ -118,7 +118,7 @@ bool RK_ota_set_partition(int partition) {
                             update_cmd[i].offset = rkimage_hdr.item[j].offset;
                         }
 
-                        if (rkimage_hdr.item[j].file[55]=='H') {
+                        if (rkimage_hdr.item[j].file[55] == 'H') {
                             update_cmd[i].size = *((DWORD *)(&rkimage_hdr.item[j].file[56]));
                             update_cmd[i].size <<= 32;
                             update_cmd[i].size += rkimage_hdr.item[j].size;
@@ -138,20 +138,19 @@ bool RK_ota_set_partition(int partition) {
         }
 
         if (!is_sdboot && !is_usbboot) {
-            for ( int i=0; i<num; i++ ) {
+            for ( int i = 0; i < num; i++ ) {
                 if (*update_cmd[i].dest_path && (update_cmd[i].need_update == false)) {
 
                     unsigned char len = strlen(update_cmd[i].name);
-                    if (update_cmd[i].name[len-2] == '_' && (update_cmd[i].name[len-1] == 'a' || update_cmd[i].name[len-1] == 'b'))
-                    {
+                    if (update_cmd[i].name[len - 2] == '_' && (update_cmd[i].name[len - 1] == 'a' || update_cmd[i].name[len - 1] == 'b')) {
 
-                        char slot_find = (update_cmd[i].name[len-1] == 'a')? 'b':'a';
+                        char slot_find = (update_cmd[i].name[len - 1] == 'a') ? 'b' : 'a';
 
-                        update_cmd[i].name[len-1] = slot_find;
+                        update_cmd[i].name[len - 1] = slot_find;
                         for (int j = 0; j < rkimage_hdr.item_count; j++) {
                             if (strcmp(rkimage_hdr.item[j].name, update_cmd[i].name) == 0) {
                                 LOGI("again found rkimage_hdr.item[%d].name = %s.\n", j, update_cmd[i].name);
-                                if (rkimage_hdr.item[j].file[50]=='H') {
+                                if (rkimage_hdr.item[j].file[50] == 'H') {
                                     update_cmd[i].offset = *((DWORD *)(&rkimage_hdr.item[j].file[51]));
                                     update_cmd[i].offset <<= 32;
                                     update_cmd[i].offset += rkimage_hdr.item[j].offset;
@@ -160,7 +159,7 @@ bool RK_ota_set_partition(int partition) {
                                     update_cmd[i].offset = rkimage_hdr.item[j].offset;
                                 }
 
-                                if (rkimage_hdr.item[j].file[55]=='H') {
+                                if (rkimage_hdr.item[j].file[55] == 'H') {
                                     update_cmd[i].size = *((DWORD *)(&rkimage_hdr.item[j].file[56]));
                                     update_cmd[i].size <<= 32;
                                     update_cmd[i].size += rkimage_hdr.item[j].size;
@@ -177,10 +176,10 @@ bool RK_ota_set_partition(int partition) {
                 }
             }
         }
-    // for ( int i=0; i<num; i++ ) {
-    // printf ( "[%s:%d] update_cmd[%d].name [%s] dest path [%s] flash offset [%#llx] offset [%#llx] size [%#llx] \n",
-    // __func__, __LINE__, i, update_cmd[i].name, update_cmd[i].dest_path, update_cmd[i].flash_offset, update_cmd[i].offset, update_cmd[i].size);
-    // }
+        // for ( int i=0; i<num; i++ ) {
+        // printf ( "[%s:%d] update_cmd[%d].name [%s] dest path [%s] flash offset [%#llx] offset [%#llx] size [%#llx] \n",
+        // __func__, __LINE__, i, update_cmd[i].name, update_cmd[i].dest_path, update_cmd[i].flash_offset, update_cmd[i].offset, update_cmd[i].size);
+        // }
 
         return true;
     }
@@ -192,7 +191,7 @@ bool RK_ota_set_partition(int partition) {
             update_cmd[i].need_update = true;
 
             if (is_sdboot || is_usbboot) {
-                memset(update_cmd[i].dest_path, 0, sizeof(update_cmd[i].dest_path)/sizeof(update_cmd[i].dest_path[0]));
+                memset(update_cmd[i].dest_path, 0, sizeof(update_cmd[i].dest_path) / sizeof(update_cmd[i].dest_path[0]));
                 if (strcmp(update_cmd[i].name, "parameter") == 0) {
                     sprintf(update_cmd[i].dest_path, "%s/gpt", _url_dir);
                 } else {
@@ -203,17 +202,17 @@ bool RK_ota_set_partition(int partition) {
                     sprintf(update_cmd[i].dest_path, "/dev/block/by-name/gpt");
                 } else {
                     if (!isMtdDevice()) {
-                       sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
+                        sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
                     } else {
-                       if ( update_cmd[i].need_update && (mtd_scan_partitions() > 0) ) {
-                          const MtdPartition *mtdp = mtd_find_partition_by_name(update_cmd[i].name);
-                          if (mtdp) {
-                             sprintf(update_cmd[i].dest_path, "/dev/mtd%d", mtdp->device_index);
-                             LOGI("need update %s ,.dest_path: %s.\n", update_cmd[i].name,update_cmd[i].dest_path);
-                          }
-                       } else {
-                          sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
-                       }
+                        if ( update_cmd[i].need_update && (mtd_scan_partitions() > 0) ) {
+                            const MtdPartition *mtdp = mtd_find_partition_by_name(update_cmd[i].name);
+                            if (mtdp) {
+                                sprintf(update_cmd[i].dest_path, "/dev/mtd%d", mtdp->device_index);
+                                LOGI("need update %s ,.dest_path: %s.\n", update_cmd[i].name, update_cmd[i].dest_path);
+                            }
+                        } else {
+                            sprintf(update_cmd[i].dest_path, "/dev/block/by-name/%s", update_cmd[i].name);
+                        }
                     }
                 }
             }
@@ -236,16 +235,16 @@ static int ota_recovery_cmds (long long flash_offset, const char *dest_path)
     }
 
     LOGI("[%s:%d] parameter flash offset %#llx dest path %s\n", __func__, __LINE__, flash_offset, dest_path);
-    memset(data_buf, 0, sizeof(data_buf)/sizeof(data_buf[0]));
+    memset(data_buf, 0, sizeof(data_buf) / sizeof(data_buf[0]));
 
     if (is_sdboot) {
-        fd = open(CMD4RECOVERY_FILENAME, O_CREAT|O_RDWR|O_SYNC|O_APPEND, 0644);
+        fd = open(CMD4RECOVERY_FILENAME, O_CREAT | O_RDWR | O_SYNC | O_APPEND, 0644);
         if (fd < 0) {
             LOGE("[%s-%d] error opening %s.\n", __func__, __LINE__,  CMD4RECOVERY_FILENAME);
             return -1;
         }
     } else if (is_usbboot) {
-        fd = open(CMD4RECOVERY_UDISK_FILENAME, O_CREAT|O_RDWR|O_SYNC|O_APPEND, 0644);
+        fd = open(CMD4RECOVERY_UDISK_FILENAME, O_CREAT | O_RDWR | O_SYNC | O_APPEND, 0644);
         if (fd < 0) {
             LOGE("[%s-%d] error opening %s.\n", __func__, __LINE__,  CMD4RECOVERY_UDISK_FILENAME);
             return -1;
@@ -263,12 +262,12 @@ static int ota_recovery_cmds (long long flash_offset, const char *dest_path)
         unsigned int dd_bs = 0;
         long long dd_seek  = 1;
 
-        for ( int j=DD_MALLOC_MAX_SIZE/SECTOR_SIZE; j>0 ; j-- ) {
-            dd_bs = j*SECTOR_SIZE;
+        for ( int j = DD_MALLOC_MAX_SIZE / SECTOR_SIZE; j > 0 ; j-- ) {
+            dd_bs = j * SECTOR_SIZE;
             if ( !(flash_offset % dd_bs) ) {
                 dd_seek  = flash_offset / dd_bs;
                 printf ( "flash offset = [%#llx] j=%d bs=%#x  seek = %#llx  result = [%s]\n",
-                        flash_offset , j, dd_bs, dd_seek , (dd_bs*dd_seek == flash_offset)? "YES":"NO" );
+                         flash_offset, j, dd_bs, dd_seek, (dd_bs * dd_seek == flash_offset) ? "YES" : "NO" );
                 break;
             } else {
                 dd_bs = 1;
@@ -290,7 +289,8 @@ static int ota_recovery_cmds (long long flash_offset, const char *dest_path)
     return 0;
 }
 
-void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
+void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb)
+{
     LOGI("start RK_ota_start.\n");
     processvalue = 95;
     cb(NULL, RK_UPGRADE_START);
@@ -327,17 +327,17 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
     int is_mtd_flag = isMtdDevice();
 
     // 3. 下载文件到分区并校验
-    int num = sizeof(update_cmd)/sizeof(UPDATE_CMD);
+    int num = sizeof(update_cmd) / sizeof(UPDATE_CMD);
     char prompt[128] = {0};
     for (int i = 0; i < num; i++ ) {
         if (update_cmd[i].need_update) {
             if (update_cmd[i].cmd != NULL) {
                 LOGI("now write %s to %s.\n", update_cmd[i].name, update_cmd[i].dest_path);
-                sprintf(prompt,"[%s] upgrade start...\n", update_cmd[i].name);
+                sprintf(prompt, "[%s] upgrade start...\n", update_cmd[i].name);
                 print_cb(prompt);
                 if (!is_sdboot && !is_usbboot &&
-                        ( (strcmp(update_cmd[i].name, "misc") == 0) ||
-                          (strcmp(update_cmd[i].name, "parameter") == 0) )) {
+                    ( (strcmp(update_cmd[i].name, "misc") == 0) ||
+                      (strcmp(update_cmd[i].name, "parameter") == 0) )) {
                     LOGI("ingore misc.\n");
                     continue;
                 }
@@ -345,7 +345,7 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
                 printf("update_cmd.flash_offset = %lld.\n", update_cmd[i].flash_offset);
                 if (update_cmd[i].cmd(_url, (void*)(&update_cmd[i])) != 0) {
                     LOGE("update %s error.\n", update_cmd[i].dest_path);
-                    sprintf(prompt,"[%s] upgrade fail\n", update_cmd[i].name);
+                    sprintf(prompt, "[%s] upgrade fail\n", update_cmd[i].name);
                     print_cb(prompt);
                     cb(NULL, RK_UPGRADE_ERR);
                     return ;
@@ -399,13 +399,13 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
                 continue;
             }
             unsigned char len = strlen(update_cmd[i].name);
-            if (update_cmd[i].name[len-2] == '_' && (update_cmd[i].name[len-1] == 'a' || update_cmd[i].name[len-1] == 'b') ) {
-                char slot_find = (update_cmd[i].name[len-1] == 'a')? 'b':'a';
+            if (update_cmd[i].name[len - 2] == '_' && (update_cmd[i].name[len - 1] == 'a' || update_cmd[i].name[len - 1] == 'b') ) {
+                char slot_find = (update_cmd[i].name[len - 1] == 'a') ? 'b' : 'a';
                 int part_need_fix = 1;
                 char part_name[32];
-                memset(part_name, 0, sizeof(part_name)/sizeof(part_name[0]));
+                memset(part_name, 0, sizeof(part_name) / sizeof(part_name[0]));
                 memcpy(part_name, update_cmd[i].name, len);
-                part_name[len-1] = slot_find;
+                part_name[len - 1] = slot_find;
 
                 for (int k = 0; k < num; k++) {
                     if ( (!update_cmd[k].need_update) || (update_cmd[k].cmd == NULL)) {
@@ -417,7 +417,7 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
                 }
 
                 if (part_need_fix) {
-                    for (int j = 0; j < sizeof(param_item)/sizeof(param_item[0]); j++) {
+                    for (int j = 0; j < sizeof(param_item) / sizeof(param_item[0]); j++) {
                         if (strcmp(param_item[j].name, part_name) == 0) {
                             if (ota_recovery_cmds(param_item[j].offset * SECTOR_SIZE, update_cmd[i].dest_path)) {
                                 LOGE("sdboot fix write recovery cmds to %s failed.\n", CMD4RECOVERY_FILENAME);
@@ -458,15 +458,18 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb) {
     }
 }
 
-int RK_ota_get_progress() {
+int RK_ota_get_progress()
+{
     return processvalue;
 }
 
-void RK_ota_get_sw_version(char *buffer, int  maxLength) {
+void RK_ota_get_sw_version(char *buffer, int  maxLength)
+{
     getLocalVersion(buffer, maxLength);
 }
 
-bool RK_ota_check_version(char *url) {
+bool RK_ota_check_version(char *url)
+{
     char source_version[20] = {0};
     char target_version[20] = {0};
     if (!getLocalVersion(source_version, sizeof(source_version))) {

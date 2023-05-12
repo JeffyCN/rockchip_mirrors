@@ -7,6 +7,7 @@
 
 #ifndef _RKIMAGE_H
 #define _RKIMAGE_H
+#include <stdbool.h>
 #include "defineHeader.h"
 #pragma pack(1)
 typedef struct {

@@ -8,6 +8,7 @@
 #include <stdio.h>
 #include <curl/curl.h>
 #include <string.h>
+#include <stdbool.h>
 #include "log.h"
 
 size_t my_write_func(void *ptr, size_t size, size_t nmemb, FILE *stream)
@@ -47,8 +48,7 @@ int download_file(char *url, char const *output_filename)
     down_processvalue = -1;
 
     curl = curl_easy_init();
-    if(curl)
-    {
+    if (curl) {
         outfile = fopen(output_filename, "wb");
 
         curl_easy_setopt(curl, CURLOPT_URL, url);
@@ -60,13 +60,13 @@ int download_file(char *url, char const *output_filename)
 
         res = curl_easy_perform(curl);
 
-        if(res != CURLE_OK)
+        if (res != CURLE_OK)
             LOGE("curl_easy_perform() failed: %s\n", curl_easy_strerror(res));
         fclose(outfile);
         /* always cleanup */
         curl_easy_cleanup(curl);
     }
-    if(res != CURLE_OK){
+    if (res != CURLE_OK) {
         LOGE("download Error.\n");
         return -1;
     }

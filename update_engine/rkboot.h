@@ -7,5 +7,7 @@
 
 #ifndef _RKBOOT_H
 #define _RKBOOT_H
+#include <stdbool.h>
+
 bool download_loader(PBYTE data_buf, int size, char *dest_path);
 #endif

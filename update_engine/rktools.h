@@ -8,6 +8,8 @@
 #ifndef _RKTOOLS_H
 #define _RKTOOLS_H
 
+#include <stdbool.h>
+
 #define MTD_PATH "/proc/mtd"
 #define CMDLINE_LENGTH 2048
 #define EMMC_POINT_NAME "emmc_point_name"

@@ -128,8 +128,6 @@ typedef struct AvbABData {
 
 int setSlotActivity();
 int setSlotSucceed();
-int readMisc(struct AvbABData *info);
-void display(struct AvbABData info);
 void miscDisplay() ;
 int wipe_userdata(int auto_reboot);
 int writeCustomMiscCmdline(void);

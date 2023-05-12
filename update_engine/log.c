@@ -25,23 +25,24 @@
 
 void InitLogging(int argc, const char* const* argv) {}
 
-void Log(const char* file, int line, LogPriority level, const char* fmt, ...) {
-  va_list ap;
-  char buf[LOG_BUF_SIZE];
-  va_start(ap, fmt);
-  vsnprintf(buf, LOG_BUF_SIZE, fmt, ap);
-  va_end(ap);
+void Log(const char* file, int line, LogPriority level, const char* fmt, ...)
+{
+    va_list ap;
+    char buf[LOG_BUF_SIZE];
+    va_start(ap, fmt);
+    vsnprintf(buf, LOG_BUF_SIZE, fmt, ap);
+    va_end(ap);
 
-  switch(level) {
+    switch (level) {
     case LOG_ERROR: printf("LOG_ERROR : %s", buf); break;
     case LOG_WARN: printf("LOG_WARN : %s", buf); break;
     case LOG_INFO: printf("LOG_INFO :%s", buf); break;
     case LOG_DEBUG:
-      //#if LOG_NDEBUG
-      printf("LOG_DEBUG :%s", buf);
-      //#endif
-      break;
+        //#if LOG_NDEBUG
+        printf("LOG_DEBUG :%s", buf);
+        //#endif
+        break;
     default :
-      break;
-  }
+        break;
+    }
 }

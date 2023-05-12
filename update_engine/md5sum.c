@@ -10,19 +10,20 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
- #include <fcntl.h>
+#include <fcntl.h>
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <stdbool.h>
 #include "log.h"
 #include "rktools.h"
-extern "C" {
-    #include "../mtdutils/mtdutils.h"
-}
+#include "../mtdutils/mtdutils.h"
 
-#define	TMP_MD5SUM_NAME "/tmp/.tmp_md5sum"
 
-bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long offset, long long checkSize) {
+#define TMP_MD5SUM_NAME "/tmp/.tmp_md5sum"
+
+bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long offset, long long checkSize)
+{
 
     char nanddump_cmd[256] = {0};
     unsigned char buf[33] = {0};
@@ -30,13 +31,13 @@ bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long o
 
     LOGI( "[%s:%d] offset [%lld] checksize [%lld] \n", __func__, __LINE__, offset, checkSize );
 
-    memset(nanddump_cmd, 0, sizeof(nanddump_cmd)/sizeof(nanddump_cmd[0]));
+    memset(nanddump_cmd, 0, sizeof(nanddump_cmd) / sizeof(nanddump_cmd[0]));
     sprintf(nanddump_cmd, "nanddump --bb=skipbad -l %lld -s %lld %s | md5sum > %s",
             checkSize, offset, dest_path, TMP_MD5SUM_NAME);
     system(nanddump_cmd);
 
     int dest_fd = open(TMP_MD5SUM_NAME, O_RDONLY );
-    if(dest_fd == 0){
+    if (dest_fd == 0) {
         LOGE("open file failed %s", TMP_MD5SUM_NAME);
         return -1;
     }
@@ -52,23 +53,23 @@ bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long o
     printf("read new md5: [%s]\n", buf);
 
     unsigned char md5sum_tmp[32];
-    for ( int ii=0; ii<32; ii+=2) {
+    for ( int ii = 0; ii < 32; ii += 2) {
         sscanf((char *)(buf + ii), "%02hhx", &md5sum_tmp[ii]);
     }
 
-    for ( int ii=0, j=0; ii<32; ii+=2 ) {
+    for ( int ii = 0, j = 0; ii < 32; ii += 2 ) {
         // printf ( "%d = %02x\n", ii, md5sum_tmp[ii] );
         md5sum[j] = md5sum_tmp[ii];
         j++;
     }
 
     printf("new md5:");
-    for(int i = 0; i < 16; i++){
+    for (int i = 0; i < 16; i++) {
         printf("%02x", md5sum[i]);
     }
     printf("\n");
     //change
-    if(out_md5sum != NULL){
+    if (out_md5sum != NULL) {
         memset(out_md5sum, 0, 16);
         memcpy(out_md5sum, md5sum, 16);
     }
@@ -78,7 +79,8 @@ bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long o
     return 0;
 }
 
-bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offset, long long checkSize){
+bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offset, long long checkSize)
+{
     MD5_CTX ctx;
     unsigned char md5sum[16];
     char buffer[512];
@@ -86,14 +88,13 @@ bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offse
     int ret;
 
     FILE *fp = fopen(dest_path, "rb");
-    if(fp == NULL){
+    if (fp == NULL) {
         LOGE("open file failed %s", dest_path);
         return -1;
     }
 
     ret = fseeko64(fp, offset, SEEK_SET);
-    if (ret < 0)
-    {
+    if (ret < 0) {
         LOGE("%s:%d fseeko64 fail", __func__, __LINE__);
         return false;
     }
@@ -102,9 +103,9 @@ bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offse
 
     long long readSize = 0;
     int step = 512;
-    while(checkSize > 0){
-        readSize = checkSize > step ? step: checkSize;
-        if(fread(buffer, 1, readSize, fp) != readSize){
+    while (checkSize > 0) {
+        readSize = checkSize > step ? step : checkSize;
+        if (fread(buffer, 1, readSize, fp) != readSize) {
             LOGE("fread error.\n");
             return false;
         }
@@ -117,12 +118,12 @@ bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offse
 
     printf("\n");
     printf("new md5:");
-    for(int i = 0; i < 16; i++){
+    for (int i = 0; i < 16; i++) {
         printf("%02x", md5sum[i]);
     }
     printf("\n");
     //change
-    if(out_md5sum != NULL){
+    if (out_md5sum != NULL) {
         memset(out_md5sum, 0, 16);
         memcpy(out_md5sum, md5sum, 16);
     }
@@ -130,7 +131,8 @@ bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offse
     return 0;
 }
 
-bool comparefile(const char *dest_path, const char *source_path, long long dest_offset, long long source_offset, long long checkSize){
+bool comparefile(const char *dest_path, const char *source_path, long long dest_offset, long long source_offset, long long checkSize)
+{
     unsigned char md5sum_source[16];
     unsigned char md5sum_dest[16];
     if (isMtdDevice()) {
@@ -139,8 +141,8 @@ bool comparefile(const char *dest_path, const char *source_path, long long dest_
         checkdata(dest_path, md5sum_dest, dest_offset, checkSize);
     }
     checkdata(source_path, md5sum_source, source_offset, checkSize);
-    for(int i = 0; i < 16; i++){
-        if(md5sum_dest[i] != md5sum_source[i]){
+    for (int i = 0; i < 16; i++) {
+        if (md5sum_dest[i] != md5sum_source[i]) {
             LOGE("MD5Check is error of %s", dest_path);
             return false;
         }
@@ -148,7 +150,8 @@ bool comparefile(const char *dest_path, const char *source_path, long long dest_
     return true;
 }
 
-bool compareMd5sum(const char *dest_path, unsigned char *source_md5sum, long long offset, long long checkSize){
+bool compareMd5sum(const char *dest_path, unsigned char *source_md5sum, long long offset, long long checkSize)
+{
     unsigned char md5sum[16];
 
     checkdata(dest_path, md5sum, offset, checkSize);
@@ -171,16 +174,16 @@ bool compareMd5sum(const char *dest_path, unsigned char *source_md5sum, long lon
         0x65, 0x0e,
         0x66, 0x0f,
     };
-    for(int i = 0; i < 32; i = i+2){
-        for(int j = 0; j < 16; j++){
-            if(tmp[j][1] == (md5sum[i/2] >> 4)){
-                if(source_md5sum[i] != tmp[j][0]){
+    for (int i = 0; i < 32; i = i + 2) {
+        for (int j = 0; j < 16; j++) {
+            if (tmp[j][1] == (md5sum[i / 2] >> 4)) {
+                if (source_md5sum[i] != tmp[j][0]) {
                     LOGE("MD5Check is error of %s", dest_path);
                     return false;
                 }
             }
-            if(tmp[j][1] == (md5sum[i/2] & 0x0f)){
-                if(source_md5sum[i+1] != tmp[j][0]){
+            if (tmp[j][1] == (md5sum[i / 2] & 0x0f)) {
+                if (source_md5sum[i + 1] != tmp[j][0]) {
                     LOGE("MD5Check is error of %s", dest_path);
                     return false;
                 }

@@ -9,7 +9,7 @@
 #define _CRC_H
 #include "defineHeader.h"
 extern USHORT CRC_16(BYTE * aData, UINT aSize);
-extern UINT CRC_32(PBYTE pData, UINT ulSize, UINT uiPreviousValue = 0);
+extern UINT CRC_32(PBYTE pData, UINT ulSize, UINT uiPreviousValue);
 extern void P_RC4(BYTE * buf, USHORT len);
 extern void bch_encode(BYTE *encode_in, BYTE *encode_out);
 extern USHORT CRC_CCITT(UCHAR *p, UINT CalculateNumber);

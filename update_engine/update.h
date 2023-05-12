@@ -7,6 +7,7 @@
 
 #ifndef _UPDATE_H
 #define _UPDATE_H
+#include <stdbool.h>
 
 typedef int (*update_func)(char *src_path, void* pupdate_cmd);
 typedef struct {

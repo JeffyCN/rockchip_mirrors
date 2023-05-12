@@ -18,11 +18,7 @@
 #include "stdlib.h"
 #include <stdint.h>
 #include <fcntl.h>
-
-extern "C" {
-    #include "../mtdutils/mtdutils.h"
-}
-
+#include "../mtdutils/mtdutils.h"
 #include "rktools.h"
 #include "log.h"
 #include <errno.h>
@@ -40,7 +36,8 @@ static char custom_cmdline_path[] = "/tmp/custom_cmdline";
 // ------------------------------------
 // for misc partitions on block devices
 // ------------------------------------
-static void wait_for_device(const char* fn) {
+static void wait_for_device(const char* fn)
+{
     int tries = 0;
     int ret;
     struct stat buf;
@@ -104,7 +101,8 @@ static unsigned int iavb_crc32_tab[] = {
 };
 
 /* Converts a 32-bit unsigned integer from host to big-endian byte order. */
-static unsigned int avb_htobe32(unsigned int in) {
+static unsigned int avb_htobe32(unsigned int in)
+{
     union {
         unsigned int word;
         unsigned char bytes[4];
@@ -122,18 +120,20 @@ static unsigned int avb_htobe32(unsigned int in) {
  *  of this function that's actually used in the kernel can be found
  *  in sys/libkern.h, where it can be inlined.
  */
-static unsigned int iavb_crc32(unsigned int crc_in, const unsigned char* buf, int size) {
+static unsigned int iavb_crc32(unsigned int crc_in, const unsigned char* buf, int size)
+{
     const unsigned char* p = buf;
     unsigned int crc;
 
     crc = crc_in ^ ~0U;
     while (size--)
-    crc = iavb_crc32_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
+        crc = iavb_crc32_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
     return crc ^ ~0U;
 }
 
-static unsigned int avb_crc32(const unsigned char* buf, size_t size) {
-      return iavb_crc32(0, buf, size);
+static unsigned int avb_crc32(const unsigned char* buf, size_t size)
+{
+    return iavb_crc32(0, buf, size);
 }
 
 static void AvbABData_update_crc(struct AvbABData *data)
@@ -141,7 +141,8 @@ static void AvbABData_update_crc(struct AvbABData *data)
     data->crc32 = avb_htobe32(avb_crc32((const unsigned char*)data, sizeof(struct AvbABData) - sizeof(unsigned int)));
 }
 
-static int writeMisc_mtd(char *buf, int offset, int size) {
+static int writeMisc_mtd(char *buf, int offset, int size)
+{
     size_t page_size = 0;
     mtd_scan_partitions();
     const MtdPartition *part = mtd_find_partition_by_name(MISC_PARTITION_NAME_MTD);
@@ -184,7 +185,8 @@ static int writeMisc_mtd(char *buf, int offset, int size) {
     return 0;
 }
 
-static int readMisc_mtd(char *buf, int offset, int size) {
+static int readMisc_mtd(char *buf, int offset, int size)
+{
     size_t page_size;
     memset(buf, 0, size);
     mtd_scan_partitions();
@@ -210,7 +212,8 @@ static int readMisc_mtd(char *buf, int offset, int size) {
     return 0;
 }
 
-static int writeMisc_block(char *buf, int offset, int size) {
+static int writeMisc_block(char *buf, int offset, int size)
+{
     FILE* f = fopen(MISC_PARTITION_NAME_BLOCK, "wb");
     if (f == NULL) {
         LOGE("Can't open %s\n(%s)\n", MISC_PARTITION_NAME_BLOCK, strerror(errno));
@@ -229,7 +232,8 @@ static int writeMisc_block(char *buf, int offset, int size) {
     return 0;
 }
 
-static int readMisc_block(char *buf, int offset, int size) {
+static int readMisc_block(char *buf, int offset, int size)
+{
     wait_for_device(MISC_PARTITION_NAME_BLOCK);
     FILE* f = fopen(MISC_PARTITION_NAME_BLOCK, "rb");
     if (f == NULL) {
@@ -252,7 +256,8 @@ static int readMisc_block(char *buf, int offset, int size) {
 
 }
 
-static int writeMisc(char *buf, int offset, int size) {
+static int writeMisc(char *buf, int offset, int size)
+{
     if (isMtdDevice()) {
         return writeMisc_mtd(buf, offset, size);
     } else {
@@ -260,7 +265,8 @@ static int writeMisc(char *buf, int offset, int size) {
     }
 }
 
-static int readMisc(char *buf, int offset, int size) {
+static int readMisc(char *buf, int offset, int size)
+{
     if (isMtdDevice()) {
         return readMisc_mtd(buf, offset, size);
     } else {
@@ -271,35 +277,40 @@ static int readMisc(char *buf, int offset, int size) {
 /**
 * 往misc 偏移4k处写入格式化命令
 */
-static int writeCmdMisc(char *cmdline, int size) {
+static int writeCmdMisc(char *cmdline, int size)
+{
     return writeMisc(cmdline, MISC_OFFSET_CMDLINE, strlen(cmdline));
 }
 
 /**
 * 读misc 偏移4K处格式化命令
 */
-static int readCmdMisc(char *cmdline, int size) {
+static int readCmdMisc(char *cmdline, int size)
+{
     return readMisc(cmdline, MISC_OFFSET_CMDLINE, size);
 }
 
 /**
  * 从misc 偏移2k处读取引导信息
  */
-static int readABMisc(struct AvbABData* info) {
-   return readMisc((char *)info, MISC_OFFSET, sizeof(struct AvbABData));
+static int readABMisc(struct AvbABData* info)
+{
+    return readMisc((char *)info, MISC_OFFSET, sizeof(struct AvbABData));
 }
 
 /**
  * 往misc 偏移2k处写入引导信息
  */
-static int writeABMisc(struct AvbABData *info) {
+static int writeABMisc(struct AvbABData *info)
+{
     return writeMisc((char *)info, MISC_OFFSET, sizeof(struct AvbABData));
 }
 
 /**
 * 往misc 偏移16k位置处读取recovery信息
 */
-int get_bootloader_message(struct bootloader_message *out) {
+int get_bootloader_message(struct bootloader_message *out)
+{
     return readMisc((char *)out, BOOTLOADER_MESSAGE_OFFSET_IN_MISC, sizeof(struct bootloader_message));
 }
 
@@ -307,33 +318,36 @@ int get_bootloader_message(struct bootloader_message *out) {
 * 往misc 偏移16k位置写入recovery信息
 */
 
-int set_bootloader_message(const struct bootloader_message *in){
+int set_bootloader_message(const struct bootloader_message *in)
+{
     return writeMisc((char*)in, BOOTLOADER_MESSAGE_OFFSET_IN_MISC, sizeof(struct bootloader_message));
 }
 
-int avb_safe_memcmp(const void* s1, const void* s2, size_t n) {
-  const unsigned char* us1 = (const unsigned char *)s1;
-  const unsigned char* us2 = (const unsigned char *)s2;
-  int result = 0;
+int avb_safe_memcmp(const void* s1, const void* s2, size_t n)
+{
+    const unsigned char* us1 = (const unsigned char *)s1;
+    const unsigned char* us2 = (const unsigned char *)s2;
+    int result = 0;
 
-  if (0 == n) {
-    return 0;
-  }
+    if (0 == n) {
+        return 0;
+    }
 
-  /*
-   * Code snippet without data-dependent branch due to Nate Lawson
-   * (nate@root.org) of Root Labs.
-   */
-  while (n--) {
-    result |= *us1++ ^ *us2++;
-  }
+    /*
+     * Code snippet without data-dependent branch due to Nate Lawson
+     * (nate@root.org) of Root Labs.
+     */
+    while (n--) {
+        result |= *us1++ ^ *us2++;
+    }
 
-  return result != 0;
+    return result != 0;
 }
 /**
 * 设置当前分区为可启动分区
 */
-int setSlotSucceed() {
+int setSlotSucceed()
+{
     int now_slot = getCurrentSlot();
     if (now_slot == -1) {
         return -1;
@@ -343,9 +357,8 @@ int setSlotSucceed() {
         return -1;
     }
 
-    for (size_t i = 0; i < 4; i++)
-    {
-        printf("info.mafic is %x\n",info.magic[i]);
+    for (size_t i = 0; i < 4; i++) {
+        printf("info.mafic is %x\n", info.magic[i]);
     }
     if (avb_safe_memcmp(info.magic, AVB_AB_MAGIC, AVB_AB_MAGIC_LEN) != 0) {
         printf("Magic is incorrect.\n");
@@ -357,11 +370,11 @@ int setSlotSucceed() {
                info.slots[now_slot].priority, AVB_AB_MAX_PRIORITY);
         info.slots[now_slot].priority = AVB_AB_MAX_PRIORITY;
     }
-    #ifdef SUCCESSFUL_BOOT
+#ifdef SUCCESSFUL_BOOT
     info.slots[now_slot].tries_remaining = 0;
     info.slots[now_slot].successful_boot = 1;
-    #endif
-    #ifdef RETRY_BOOT
+#endif
+#ifdef RETRY_BOOT
     info.slots[now_slot].tries_remaining = AVB_AB_MAX_TRIES_REMAINING;
     /* Clear suc boot flag anyway. Because it's chance that an older slot
      * used succ mode without this patch applied, while the other one
@@ -369,7 +382,7 @@ int setSlotSucceed() {
      * u-boot, otherwise this slot will be unbootable.
      */
     info.slots[now_slot].successful_boot = 0;
-    #endif
+#endif
     info.last_boot = now_slot;
 
     AvbABData_update_crc(&info);
@@ -383,7 +396,8 @@ int setSlotSucceed() {
 /**
 * 设置升级分区, 即另外一个分区优先级最高
 */
-int setSlotActivity() {
+int setSlotActivity()
+{
     int now_slot = getCurrentSlot();
     if (now_slot == -1) {
         return -1;
@@ -413,7 +427,8 @@ int setSlotActivity() {
 /**
 *格式化userdata_data
 */
-int wipe_userdata(int auto_reboot) {
+int wipe_userdata(int auto_reboot)
+{
     if (writeCmdMisc((char *)CMD_WIPE_USERDATA, sizeof(CMD_WIPE_USERDATA)) != 0) {
         return -1;
     }
@@ -427,122 +442,125 @@ int wipe_userdata(int auto_reboot) {
 }
 
 /* CustomCmdline struct = len + data */
-static int writeCustomMisc(char *cmdline, int size) {
-	return writeMisc(cmdline, MISC_OFFSET_CUSTOM, size);
+static int writeCustomMisc(char *cmdline, int size)
+{
+    return writeMisc(cmdline, MISC_OFFSET_CUSTOM, size);
 }
 
-static int readCustomMisc(char *cmdline, int size) {
-	return readMisc(cmdline, MISC_OFFSET_CUSTOM, size);
+static int readCustomMisc(char *cmdline, int size)
+{
+    return readMisc(cmdline, MISC_OFFSET_CUSTOM, size);
 }
 
 int readCustomMiscCmdline(void)
 {
-	uint16_t len;
-	uint8_t *buf;
-	int fd, ret = 0;
+    uint16_t len;
+    uint8_t *buf;
+    int fd, ret = 0;
 
-	fd = open(custom_cmdline_path, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
-	if (fd == -1) {
-		LOGE("ERROR: Can't open %s\n", custom_cmdline_path);
-		return -1;
-	}
+    fd = open(custom_cmdline_path, O_CREAT | O_WRONLY, S_IRUSR | S_IWUSR);
+    if (fd == -1) {
+        LOGE("ERROR: Can't open %s\n", custom_cmdline_path);
+        return -1;
+    }
 
-	readCustomMisc((char *)&len, 2);
-	if (len > 1022) {
-		LOGE("ERROR: cmdline is too bigger than 1K (%d)\n", len);
-		ret = -1;
-		goto out;
-	}
+    readCustomMisc((char *)&len, 2);
+    if (len > 1022) {
+        LOGE("ERROR: cmdline is too bigger than 1K (%d)\n", len);
+        ret = -1;
+        goto out;
+    }
 
-	if (!len) {
-		LOGE("ERROR: len is 0\n");
-		ret = -1;
-		goto out;
-	}
+    if (!len) {
+        LOGE("ERROR: len is 0\n");
+        ret = -1;
+        goto out;
+    }
 
-	buf = (uint8_t *)malloc(len + 2);
-	if (!buf) {
-		LOGE("ERROR: failed to malloc buf for cmdline\n");
-		ret = -1;
-		goto out;
-	}
+    buf = (uint8_t *)malloc(len + 2);
+    if (!buf) {
+        LOGE("ERROR: failed to malloc buf for cmdline\n");
+        ret = -1;
+        goto out;
+    }
 
-	readCustomMisc((char *)buf, len + 2);
+    readCustomMisc((char *)buf, len + 2);
 
-	ftruncate(fd, 0);
-	lseek(fd, 0, SEEK_SET);
-	ret = write(fd, &buf[2], len);
-	if (ret == len) {
-		ret = 0;
-	} else {
-		LOGE("ERROR: failed to write %s (%d)\n", custom_cmdline_path, ret);
-		ret = -1;
-	}
+    ftruncate(fd, 0);
+    lseek(fd, 0, SEEK_SET);
+    ret = write(fd, &buf[2], len);
+    if (ret == len) {
+        ret = 0;
+    } else {
+        LOGE("ERROR: failed to write %s (%d)\n", custom_cmdline_path, ret);
+        ret = -1;
+    }
 
-	free(buf);
+    free(buf);
 out:
-	close(fd);
-	return ret;
+    close(fd);
+    return ret;
 }
 
 int writeCustomMiscCmdline(void)
 {
-	uint16_t len;
-	uint8_t *buf;
-	int fd, ret = 0;
+    uint16_t len;
+    uint8_t *buf;
+    int fd, ret = 0;
 
-	fd = open(custom_cmdline_path, O_RDONLY);
-	if (fd == -1) {
-		LOGE("ERROR: Can't open %s\n", custom_cmdline_path);
-		return -1;
-	}
+    fd = open(custom_cmdline_path, O_RDONLY);
+    if (fd == -1) {
+        LOGE("ERROR: Can't open %s\n", custom_cmdline_path);
+        return -1;
+    }
 
-	lseek(fd, 0, SEEK_SET);
-	ret = read(fd, (uint8_t *)&len, 2);
-	if (ret != 2) {
-		printf("ERROR: failed to read %s\n", custom_cmdline_path);
-		ret = -1;
-		goto out;
-	}
+    lseek(fd, 0, SEEK_SET);
+    ret = read(fd, (uint8_t *)&len, 2);
+    if (ret != 2) {
+        printf("ERROR: failed to read %s\n", custom_cmdline_path);
+        ret = -1;
+        goto out;
+    }
 
-	printf("len = %d\n", len);
-	buf = (uint8_t *)malloc(len + 2);
-	if (!buf) {
-		LOGE("ERROR: failed to malloc buf for cmdline\n");
-		ret = -1;
-		goto out;
-	}
+    printf("len = %d\n", len);
+    buf = (uint8_t *)malloc(len + 2);
+    if (!buf) {
+        LOGE("ERROR: failed to malloc buf for cmdline\n");
+        ret = -1;
+        goto out;
+    }
 
-	memcpy(buf, &len, 2);
-	ret = read(fd, &buf[2], len);
-	if (ret == len) {
-		ret = 0;
-	} else {
-		LOGE("ERROR: failed to read %s\n", custom_cmdline_path);
-		ret = -1;
-		goto out1;
-	}
+    memcpy(buf, &len, 2);
+    ret = read(fd, &buf[2], len);
+    if (ret == len) {
+        ret = 0;
+    } else {
+        LOGE("ERROR: failed to read %s\n", custom_cmdline_path);
+        ret = -1;
+        goto out1;
+    }
 
-	writeCustomMisc((char *)buf, len + 2);
+    writeCustomMisc((char *)buf, len + 2);
 out1:
-	free(buf);
+    free(buf);
 out:
-	close(fd);
-	return ret;
+    close(fd);
+    return ret;
 }
 
 int cleanCustomMiscCmdline(void)
 {
-	uint8_t buf[1024];
+    uint8_t buf[1024];
 
-	memset(buf, 0, 1024);
-	return writeCustomMisc((char *)buf, 1024);
+    memset(buf, 0, 1024);
+    return writeCustomMisc((char *)buf, 1024);
 }
 
 /*
 * 显示MISC 分区的所有内容，方便调试
 */
-void miscDisplay() {
+void miscDisplay()
+{
     // 显示A/B 分区的misc 信息
     LOGI("===============Linux A/B=============\n");
     struct AvbABData info_ab;
@@ -569,7 +587,7 @@ void miscDisplay() {
     LOGI("cmdline = %s.\n", cmdline);
     LOGI("==============recovery============\n");
 
-    bootloader_message boot;
+    struct bootloader_message boot;
     get_bootloader_message(&boot);
     LOGI("bootloader.command = %s.\n", boot.command);
     LOGI("bootloader.recovery = %s.\n", boot.recovery);
