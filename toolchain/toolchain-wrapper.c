@@ -309,6 +309,14 @@ int main(int argc, char **argv)
 		}
 	}
 
+	/**
+	 * Toolchains don't like linker input for '-v' without sources.
+	 * It's to hard to handle all those cases, let's focus on a single
+	 * '-v' here, since people might use "$CC -v" to dump spec.
+	 */
+	if (argc == 2 && !strcmp(argv[1], "-v"))
+		linker_args = 0;
+
 	/* Fill in the relative paths */
 #ifdef BR_CROSS_PATH_REL
 	ret = snprintf(path, sizeof(path), "%s/" BR_CROSS_PATH_REL "/%s" BR_CROSS_PATH_SUFFIX, absbasedir, basename);
