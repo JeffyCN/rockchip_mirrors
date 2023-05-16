@@ -11,7 +11,7 @@ choose_board()
 	echo "Pick a board:"
 	echo ""
 
-	echo ${RK_DEFCONFIG_ARRAY[@]} | xargs -n 1 | sed "=" | sed "N;s/\n/. /"
+	echo ${RK_BOARD_ARRAY[@]} | xargs -n 1 | sed "=" | sed "N;s/\n/. /"
 
 	local INDEX
 	while true; do
@@ -19,8 +19,8 @@ choose_board()
 		INDEX=$((${INDEX:-1} - 1))
 
 		if echo $INDEX | grep -vq [^0-9]; then
-			RK_BUILD_CONFIG="${RK_DEFCONFIG_ARRAY[$INDEX]}"
-			[ -z "$RK_BUILD_CONFIG" ] || break
+			RK_BOARD="${RK_BOARD_ARRAY[$INDEX]}"
+			[ -z "$RK_BOARD" ] || break
 		fi
 
 		echo
@@ -31,27 +31,22 @@ choose_board()
 
 setup_board()
 {
-	BUILDROOT_OUTPUT_DIR="$BUILDROOT_DIR/output/$RK_BUILD_CONFIG"
+	export BUILDROOT_OUTPUT_DIR="$BUILDROOT_DIR/output/$RK_BOARD"
+	BMAKE="make -C $BUILDROOT_DIR O=$BUILDROOT_OUTPUT_DIR"
 
-	mkdir -p "$BUILDROOT_OUTPUT_DIR"
-	rm -rf "$BUILDROOT_LATEST_DIR"
-	ln -rsf "$BUILDROOT_OUTPUT_DIR" "$BUILDROOT_LATEST_DIR"
-
-	echo "Output dir: $BUILDROOT_OUTPUT_DIR"
-
-	if [ $RK_DEFCONFIG_ARRAY_LEN -eq 0 ]; then
+	if [ $RK_BOARD_ARRAY_LEN -eq 0 ]; then
 		echo "Continue without defconfig..."
-		make -C "$BUILDROOT_DIR" olddefconfig &>/dev/null
+		${BMAKE} olddefconfig &>/dev/null
 		return 0
 	fi
 
-	make -C "$BUILDROOT_DIR" "${RK_BUILD_CONFIG}_defconfig"
+	${BMAKE} "${RK_BOARD}_defconfig"
 
 	CONFIG="$BUILDROOT_OUTPUT_DIR/.config"
 	cp "$CONFIG" "$CONFIG.new"
 	mv "$CONFIG.old" "$CONFIG" &>/dev/null || return 0
 
-	make -C "$BUILDROOT_DIR" olddefconfig &>/dev/null
+	${BMAKE} olddefconfig &>/dev/null
 
 	if ! diff "$CONFIG" "$CONFIG.new"; then
 		read -t 10 -p "Found old config, override it? (y/n):" YES
@@ -136,36 +131,35 @@ main()
 {
 	SCRIPTS_DIR="$(dirname "$(realpath "$BASH_SOURCE")")"
 	BUILDROOT_DIR="$(dirname "$SCRIPTS_DIR")"
-	BUILDROOT_LATEST_DIR="$BUILDROOT_DIR/output/latest"
 	TOP_DIR="$(dirname "$BUILDROOT_DIR")"
 	echo "Top of tree: $TOP_DIR"
 
-	RK_DEFCONFIG_ARRAY=(
+	RK_BOARD_ARRAY=(
 		$(cd "$BUILDROOT_DIR/configs/"; ls rockchip_* | \
 			grep "$(basename "$1")" | sed "s/_defconfig$//" | sort)
 	)
-	RK_DEFCONFIG_ARRAY_LEN=${#RK_DEFCONFIG_ARRAY[@]}
+	RK_BOARD_ARRAY_LEN=${#RK_BOARD_ARRAY[@]}
 
-	case $RK_DEFCONFIG_ARRAY_LEN in
+	case $RK_BOARD_ARRAY_LEN in
 		0)
 			# Try existing output without defconfig
 			BOARD="$(echo "$1" | \
 				sed "s#^\(output/\|\)rockchip_\([^/]*\).*#\2#")"
-			RK_BUILD_CONFIG="${BOARD:+rockchip_$BOARD}"
-			CONFIG="$BUILDROOT_DIR/output/$RK_BUILD_CONFIG/.config"
+			RK_BOARD="${BOARD:+rockchip_$BOARD}"
+			CONFIG="$BUILDROOT_DIR/output/$RK_BOARD/.config"
 			if [ ! -f "$CONFIG" ]; then
-				unset RK_BUILD_CONFIG
+				unset RK_BOARD
 				echo "No available configs${1:+" for: $1"}"
 				return
 			fi
 			;;
 		1)
-			RK_BUILD_CONFIG=${RK_DEFCONFIG_ARRAY[0]}
+			RK_BOARD=${RK_BOARD_ARRAY[0]}
 			;;
 		*)
-			if [ "$1" = ${RK_DEFCONFIG_ARRAY[0]} ]; then
+			if [ "$1" = ${RK_BOARD_ARRAY[0]} ]; then
 				# Prefer exact-match
-				RK_BUILD_CONFIG="$1"
+				RK_BOARD="$1"
 			else
 				choose_board
 			fi
@@ -174,12 +168,10 @@ main()
 
 	setup_board
 
-	export BUILDROOT_OUTPUT_DIR
-
 	# Set alias
 	alias croot='cd "$TOP_DIR"'
 	alias broot='cd "$BUILDROOT_DIR"'
-	alias bmake='make -f "$BUILDROOT_OUTPUT_DIR/Makefile"'
+	alias bmake='make -C "$BUILDROOT_OUTPUT_DIR"'
 
 	alias bconfig='bpkg_run configure'
 	alias bbuild='bpkg_run build'
