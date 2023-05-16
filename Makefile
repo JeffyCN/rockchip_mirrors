@@ -32,16 +32,33 @@ SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	 else if [ -x /bin/bash ]; then echo /bin/bash; \
 	 else echo sh; fi; fi)
 
+O_LATEST := $(CURDIR)/output/latest
+
 # Set O variable if not already done on the command line;
 # or avoid confusing packages that can use the O=<dir> syntax for out-of-tree
 # build by preventing it from being forwarded to sub-make calls.
 ifneq ("$(origin O)", "command line")
+DEFCONFIG=$(firstword $(filter %_defconfig,$(MAKECMDGOALS)))
+ifneq ($(DEFCONFIG),)
+# Set O=output/<board> for defconfig
+O := $(patsubst %_defconfig,$(CURDIR)/output/%,$(DEFCONFIG))
+$(shell rm -rf $(O_LATEST); mkdir -p $(CURDIR)/output)
+$(shell ln -rsf $(O) $(O_LATEST))
+else
+# Prefer BUILDROOT_OUTPUT_DIR env and $(CURDIR)/output/latest symlink
 O := $(BUILDROOT_OUTPUT_DIR)
-ifeq ($(O),)
-O := $(realpath $(CURDIR)/output/latest)
-ifeq ($(O),)
-O := $(CURDIR)/output
+O := $(if $(O),$(O),$(realpath $(CURDIR)/output/latest))
 endif
+# Fallback to $(CURDIR)/output
+O := $(if $(O),$(O),$(CURDIR)/output)
+endif
+
+ifneq ($(BUILDROOT_OUTPUT_DIR),)
+ifneq ($(BUILDROOT_OUTPUT_DIR),$(O))
+$(warning "BUILDROOT_OUTPUT_DIR environment unmatched with output dir!")
+$(warning "BUILDROOT_OUTPUT_DIR: $(BUILDROOT_OUTPUT_DIR)")
+$(warning "Output dir: $(O)")
+$(error "Please unset it: unset BUILDROOT_OUTPUT_DIR")
 endif
 endif
 
@@ -1039,11 +1056,15 @@ defconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
 
 define percent_defconfig
 # Override the BR2_DEFCONFIG from COMMON_CONFIG_ENV with the new defconfig
-%_defconfig: $(BUILD_DIR)/buildroot-config/conf $(1)/configs/%_defconfig outputmakefile
+rockchip_%_defconfig: $(BUILD_DIR)/buildroot-config/conf $(1)/configs/rockchip_%_defconfig outputmakefile
 	$(TOPDIR)/build/parse_defconfig.sh $(1)/configs/$$@ \
 		$(BASE_DIR)/.config.in
 	$$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$(1)/configs/$$@ \
 		$$< --defconfig=$(BASE_DIR)/.config.in $$(CONFIG_CONFIG_IN)
+
+%_defconfig: $(BUILD_DIR)/buildroot-config/conf $(1)/configs/%_defconfig outputmakefile
+	$$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$(1)/configs/$$@ \
+		$$< --defconfig=$(1)/configs/$$@ $$(CONFIG_CONFIG_IN)
 endef
 $(eval $(foreach d,$(call reverse,$(TOPDIR) $(BR2_EXTERNAL_DIRS)),$(call percent_defconfig,$(d))$(sep)))
 
