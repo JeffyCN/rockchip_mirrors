@@ -218,11 +218,11 @@ get_args(int *argc, char ***argv)
     get_bootloader_message(&boot);  // this may fail, leaving a zeroed structure
 
     if (boot.command[0] != 0 && boot.command[0] != 255) {
-        LOGI("Boot command: %.*s\n", sizeof(boot.command), boot.command);
+        LOGI("Boot command: %.*s\n", (int)sizeof(boot.command), boot.command);
     }
 
     if (boot.status[0] != 0 && boot.status[0] != 255) {
-        LOGI("Boot status: %.*s\n", sizeof(boot.status), boot.status);
+        LOGI("Boot status: %.*s\n", (int)sizeof(boot.status), boot.status);
     }
 
     // --- if arguments weren't supplied, look in the bootloader control block
@@ -405,7 +405,7 @@ copy_sideloaded_package(const char* original_path)
         return NULL;
     }
     if (st.st_uid != 0) {
-        LOGE("%s owned by %lu; not root\n", SIDELOAD_TEMP_DIR, st.st_uid);
+        LOGE("%s owned by %u; not root\n", SIDELOAD_TEMP_DIR, st.st_uid);
         return NULL;
     }
 
@@ -694,7 +694,6 @@ wipe_data(int confirm)
     ui_print("\n-- Wiping data...\n");
     device_wipe_data();
     erase_volume("/userdata");
-    //erase_volume("/cache");
     ui_print("Data wipe complete.\n");
 }
 
@@ -776,14 +775,7 @@ prompt_and_wait()
             wipe_data(ui_text_visible());
             if (!ui_text_visible()) return;
             break;
-#if 0
-        case ITEM_WIPE_CACHE:
-            ui_print("\n-- Wiping cache...\n");
-            erase_volume("/cache");
-            ui_print("Cache wipe complete.\n");
-            if (!ui_text_visible()) return;
-            break;
-#endif
+
         case ITEM_APPLY_SDCARD: {
             int status = sdcard_directory(SDCARD_ROOT);
             if (status >= 0) {
@@ -1076,13 +1068,14 @@ main(int argc, char **argv)
 #endif
 
 #ifdef USE_UPDATEENGINE
-
+#undef FACTORY_FIRMWARE_IMAGE
+#undef CMD4RECOVERY_FILENAME
 #define FACTORY_FIRMWARE_IMAGE "/mnt/sdcard/out_image.img"
 #define CMD4RECOVERY_FILENAME "/mnt/sdcard/cmd4recovery"
         if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
             int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
             if (tmp_fd < 0) {
-                printf("creat % error.\n", CMD4RECOVERY_FILENAME);
+                printf("creat %s error.\n", CMD4RECOVERY_FILENAME);
                 status = INSTALL_ERROR;
             } else {
                 close(tmp_fd);
@@ -1134,12 +1127,14 @@ main(int argc, char **argv)
 #endif
 
 #ifdef USE_UPDATEENGINE
+#undef FACTORY_FIRMWARE_IMAGE
+#undef CMD4RECOVERY_FILENAME
 #define FACTORY_FIRMWARE_IMAGE "/mnt/usb_storage/out_image.img"
 #define CMD4RECOVERY_FILENAME "/mnt/usb_storage/cmd4recovery"
         if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
             int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
             if (tmp_fd < 0) {
-                printf("creat % error.\n", CMD4RECOVERY_FILENAME);
+                printf("creat %s error.\n", CMD4RECOVERY_FILENAME);
                 status = INSTALL_ERROR;
             } else {
                 close(tmp_fd);
