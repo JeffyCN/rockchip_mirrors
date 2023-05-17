@@ -12,10 +12,12 @@
 
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
+FRECON_ARGS=
+
 case "$1" in
 	start)
 		echo -n "starting frecon... "
-		frecon --daemon --enable-vts
+		frecon --daemon $FRECON_ARGS
 		echo "done."
 		;;
 	stop)

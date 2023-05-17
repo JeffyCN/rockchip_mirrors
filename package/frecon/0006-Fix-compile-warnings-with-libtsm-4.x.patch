@@ -1,7 +1,7 @@
-From 097f9fb966456a185e518ff3776daae9f59f78c8 Mon Sep 17 00:00:00 2001
+From 57acefb1d5f2793ba80addb5f837ab624e836c17 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 10 Jun 2022 16:39:32 +0800
-Subject: [PATCH 6/8] Fix compile warnings with libtsm 4.x
+Subject: [PATCH 6/9] Fix compile warnings with libtsm 4.x
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/term.c b/term.c
-index 95ffc9a..0aaf0ab 100644
+index 8f391ef..4b24ff6 100644
 --- a/term.c
 +++ b/term.c
 @@ -85,7 +85,7 @@ static void __attribute__ ((noreturn)) term_run_child(terminal_t* terminal)
@@ -21,7 +21,7 @@ index 95ffc9a..0aaf0ab 100644
  			  const uint32_t* ch, size_t len,
  			  unsigned int cwidth, unsigned int posx,
  			  unsigned int posy,
-@@ -343,7 +343,7 @@ static bool is_xterm_osc(char *osc)
+@@ -353,7 +353,7 @@ static bool is_xterm_osc(char *osc)
  	return false;
  }
  
