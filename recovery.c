@@ -999,20 +999,11 @@ main(int argc, char **argv)
             }
         }
     } else if (update_package != NULL) {
-        int fd = -1;
-        char* resutl_file = "/userdata/update_rst.txt";
-        char text[128] ;
-        memset(text, 0, sizeof(text));
-
-        fd = open(resutl_file, O_CREAT | O_WRONLY | O_TRUNC, 0777);
-        if (fd < 0) {
-            LOGE("open /userdata/update_rst.txt fail, errno = %d\n", errno);
-        }
+        int i, ret = 0;
+        const char* binary = "/usr/bin/rkupdate";
 
         rockchip_partition_check();
 
-        const char* binary = "/usr/bin/rkupdate";
-        int i, ret = 0;
         for (i = 0; i < 5; i++) {
             ret = ensure_path_mounted(update_package);
             if (ret == 0)
@@ -1040,19 +1031,13 @@ main(int argc, char **argv)
                     if (access(update_package, F_OK) == 0)
                         remove(update_package);
                 }
-                strlcpy(text, "update images success!\n", 127);
+                ui_print("update.img images success!\n");
             } else {
-                strlcpy(text, "update images failed!\n", 127);
+                ui_print("update.img images failed!\n");
             }
         } else {
-            strlcpy(text, "update images failed!", 127);
+            ui_print("update.img images failed!\n");
         }
-
-        int w_len = write(fd, text, strlen(text));
-        if (w_len <= 0) {
-            LOGE("Write %s fail, errno = %d\n", resutl_file, errno);
-        }
-        close(fd);
 
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
         ui_print("update.img Installation done.\n");
