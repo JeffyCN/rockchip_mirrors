@@ -1,7 +1,7 @@
-From 8aff1aacfc9217127151aa38133c9a20e7fce036 Mon Sep 17 00:00:00 2001
+From a53f23b63f94f32a55483ba49e23e06726d38e1f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 10 Jun 2022 11:44:04 +0800
-Subject: [PATCH 4/8] Add hooks for term switching
+Subject: [PATCH 4/9] Add hooks for term switching
 
 term foreground: /etc/frecon/term-switch on
 term background: /etc/frecon/term-switch off
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 7 insertions(+)
 
 diff --git a/term.c b/term.c
-index 1f69c47..95ffc9a 100644
+index 7b6383a..8f391ef 100644
 --- a/term.c
 +++ b/term.c
-@@ -983,6 +983,10 @@ void term_background(bool onetry)
+@@ -1013,6 +1013,10 @@ void term_background(bool onetry)
  	if (in_background)
  		return;
  	in_background = true;
@@ -26,7 +26,7 @@ index 1f69c47..95ffc9a 100644
  	drm_dropmaster(NULL);
  	while (!dbus_take_display_ownership() && retry--) {
  		if (onetry)
-@@ -1003,6 +1007,9 @@ void term_foreground(void)
+@@ -1033,6 +1037,9 @@ void term_foreground(void)
  		return;
  	in_background = false;
  

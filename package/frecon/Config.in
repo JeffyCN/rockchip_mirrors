@@ -17,4 +17,40 @@ config BR2_PACKAGE_FRECON_USE_GETTY
 	bool "use getty"
 	default n if BR2_TARGET_SERIAL_SHELL_SH
 
+config BR2_PACKAGE_FRECON_VTS
+	bool "enable vts"
+	default y
+
+config BR2_PACKAGE_FRECON_VT1
+	bool "enable vt1"
+	default y if !BR2_PACKAGE_WESTON && !BR2_PACKAGE_XORG7
+
+config BR2_PACKAGE_FRECON_ROTATE
+	int
+	default 90 if BR2_PACKAGE_FRECON_ROTATE_90
+	default 180 if BR2_PACKAGE_FRECON_ROTATE_180
+	default 270 if BR2_PACKAGE_FRECON_ROTATE_270
+
+choice
+        prompt "frecon rotate"
+        default BR2_PACKAGE_FRECON_ROTATE_0
+
+config BR2_PACKAGE_FRECON_ROTATE_0
+        bool "0"
+
+config BR2_PACKAGE_FRECON_ROTATE_90
+        bool "90"
+
+config BR2_PACKAGE_FRECON_ROTATE_180
+        bool "180"
+
+config BR2_PACKAGE_FRECON_ROTATE_270
+        bool "270"
+
+endchoice
+
+config BR2_PACKAGE_FRECON_SCALE
+	int "frecon scale"
+	range 1 100
+
 endif
