@@ -1005,13 +1005,14 @@ main(int argc, char **argv)
         rockchip_partition_check();
 
         for (i = 0; i < 5; i++) {
-            ret = ensure_path_mounted(update_package);
-            if (ret == 0)
+            if (!ensure_path_mounted(update_package)) {
+                printf("mounted %s Success.\n", update_package);
                 break;
+            }
+            printf("mounted %s Failed. retry %d\n", update_package, i + 1);
             sleep(1);
-            printf("mounted %s failed.\n", update_package);
         }
-        if (ret == 0) {
+        if (i != 5) {
             printf(">>>rkflash will update from %s\n", update_package);
 #ifdef USE_RKUPDATE
             status = do_rk_update(binary, update_package);
@@ -1036,7 +1037,8 @@ main(int argc, char **argv)
                 ui_print("update.img images failed!\n");
             }
         } else {
-            ui_print("update.img images failed!\n");
+            printf("mounted %s Failed.\n", update_package);
+            ui_print("mounted %s Failed.\n", update_package);
         }
 
         if (status != INSTALL_SUCCESS) ui_print("Installation aborted.\n");
