@@ -301,7 +301,7 @@ $(BUILD_DIR)/%/.stamp_configured:
 	$(call fixup-libtool-files,$(NAME),$(HOST_DIR))
 	$(call fixup-libtool-files,$(NAME),$(STAGING_DIR))
 	$(foreach hook,$($(PKG)_POST_PREPARE_HOOKS),$(call $(hook))$(sep))
-	@$(call run_commands,configure,$($(PKG)_PRE_CONFIGURE_HOOKS) \
+	$(Q)$(call run_commands,configure,$($(PKG)_PRE_CONFIGURE_HOOKS) \
 		$(PKG)_CONFIGURE_CMDS $($(PKG)_POST_CONFIGURE_HOOKS))
 	@$(call step_end,configure)
 	$(Q)touch $@
@@ -310,7 +310,7 @@ $(BUILD_DIR)/%/.stamp_configured:
 $(BUILD_DIR)/%/.stamp_built::
 	@$(call step_start,build)
 	@$(call MESSAGE,"Building")
-	@$(call run_commands,build,$($(PKG)_PRE_BUILD_HOOKS) \
+	$(Q)$(call run_commands,build,$($(PKG)_PRE_BUILD_HOOKS) \
 		$(PKG)_BUILD_CMDS $($(PKG)_POST_BUILD_HOOKS))
 	@$(call step_end,build)
 	$(Q)touch $@
@@ -319,7 +319,7 @@ $(BUILD_DIR)/%/.stamp_built::
 $(BUILD_DIR)/%/.stamp_host_installed:
 	@$(call step_start,install-host)
 	@$(call MESSAGE,"Installing to host directory")
-	@$(call run_commands,host_install,$($(PKG)_PRE_INSTALL_HOOKS) \
+	$(Q)$(call run_commands,host_install,$($(PKG)_PRE_INSTALL_HOOKS) \
 		$(PKG)_INSTALL_CMDS $($(PKG)_POST_INSTALL_HOOKS))
 	@$(call step_end,install-host)
 	$(Q)touch $@
@@ -381,7 +381,7 @@ endef
 $(BUILD_DIR)/%/.stamp_staging_installed:
 	@$(call step_start,install-staging)
 	@$(call MESSAGE,"Installing to staging directory")
-	@$(call run_commands,staging_install,$($(PKG)_PRE_INSTALL_STAGING_HOOKS) \
+	$(Q)$(call run_commands,staging_install,$($(PKG)_PRE_INSTALL_STAGING_HOOKS) \
 		$(PKG)_INSTALL_STAGING_CMDS $($(PKG)_POST_INSTALL_STAGING_HOOKS) \
 		POST_INSTALL_STAGING)
 	@$(call step_end,install-staging)
@@ -391,7 +391,7 @@ $(BUILD_DIR)/%/.stamp_staging_installed:
 $(BUILD_DIR)/%/.stamp_images_installed:
 	@$(call step_start,install-image)
 	@$(call MESSAGE,"Installing to images directory")
-	@$(call run_commands,image_install,$($(PKG)_PRE_INSTALL_IMAGES_HOOKS) \
+	$(Q)$(call run_commands,image_install,$($(PKG)_PRE_INSTALL_IMAGES_HOOKS) \
 		$(PKG)_INSTALL_IMAGES_CMDS $($(PKG)_POST_INSTALL_IMAGES_HOOKS))
 	@$(call step_end,install-image)
 	$(Q)touch $@
@@ -449,7 +449,7 @@ $(BUILD_DIR)/%/.stamp_target_installed:
 
 	@$(call step_start,install-target)
 	@$(call MESSAGE,"Installing to target")
-	@$(call run_commands,target_install, PRE_INSTALL_TARGET \
+	$(Q)$(call run_commands,target_install, PRE_INSTALL_TARGET \
 		$($(PKG)_PRE_INSTALL_TARGET_HOOKS) \
 		$(PKG)_INSTALL_TARGET_CMDS \
 		$(if $(BR2_INIT_SYSTEMD),$(PKG)_INSTALL_INIT_SYSTEMD) \
