@@ -1,5 +1,6 @@
 #include "base/base.config"
 #include "chips/rk3562_aarch64.config"
+#include "font/chinese.config"
 #include "gpu/gpu.config"
 #include "multimedia/audio.config"
 #include "multimedia/camera.config"
