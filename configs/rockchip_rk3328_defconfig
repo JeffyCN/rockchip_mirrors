@@ -1,5 +1,6 @@
 #include "base/base.config"
 #include "chips/rk3328_aarch64.config"
+#include "font/chinese.config"
 #include "fs/vfat.config"
 #include "gpu/gpu.config"
 #include "multimedia/audio.config"

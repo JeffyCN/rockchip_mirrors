@@ -1,5 +1,6 @@
 #include "base/base.config"
 #include "chips/rk3399_aarch64.config"
+#include "font/chinese.config"
 #include "fs/exfat.config"
 #include "fs/ntfs.config"
 #include "fs/vfat.config"

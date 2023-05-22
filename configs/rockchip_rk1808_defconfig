@@ -1,5 +1,6 @@
 #include "base/base.config"
 #include "chips/rk1808_aarch64.config"
+#include "font/chinese.config"
 #include "fs/vfat.config"
 #include "multimedia/audio.config"
 #include "multimedia/camera.config"
