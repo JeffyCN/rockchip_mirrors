@@ -23,6 +23,7 @@
 
 #include "roots.h"
 #include "sdboot.h"
+#include "common.h"
 
 extern size_t strlcpy(char *dst, const char *src, size_t dsize);
 extern size_t strlcat(char *dst, const char *src, size_t dsize);
@@ -33,7 +34,7 @@ bool is_boot_from_SD(void)
     char param[1024];
     int fd, ret;
     char *s = NULL;
-    printf("read cmdline\n");
+    LOGI("read cmdline\n");
     memset(param, 0, 1024);
 
     fd = open("/proc/cmdline", O_RDONLY);
@@ -42,10 +43,10 @@ bool is_boot_from_SD(void)
     s = strstr(param, "sdfwupdate");
     if (s != NULL) {
         bSDBoot = true;
-        printf(">>> Boot from SDcard\n");
+        LOGI(">>> Boot from SDcard\n");
     } else {
         bSDBoot = false;
-        printf(">>> Boot from non-SDcard\n");
+        LOGI(">>> Boot from non-SDcard\n");
     }
 
     close(fd);
@@ -60,7 +61,7 @@ void ensure_sd_mounted(bool *bSDMounted)
             *bSDMounted = true;
             break;
         } else {
-            printf("delay 1sec\n");
+            LOGI("delay 1sec\n");
             sleep(1);
         }
     }
@@ -88,7 +89,7 @@ static int get_cfg_Item(char *pFileName /*in*/, char *pKey /*in*/,
     while (!feof(fp)) {
         memset(lineBuf, 0, sizeof(lineBuf));
         fgets(lineBuf, MaxLine, fp);
-        printf("lineBuf: %s ", lineBuf);
+        LOGI("lineBuf: %s ", lineBuf);
 
         pTmp = strchr(lineBuf, '=');
         if (pTmp == NULL)
@@ -145,30 +146,30 @@ bool is_sdcard_update(void)
     char str_val[10] = {0};
     char *str_key = "fw_update";
 
-    printf("%s in\n", __func__);
+    LOGI("%s in\n", __func__);
     ensure_sd_mounted(&bSdMounted);
     if (!bSdMounted) {
-        printf("Error! SDcard not mounted\n");
+        LOGE("Error! SDcard not mounted\n");
         return false;
     }
 
     strlcpy(configFile, EX_SDCARD_ROOT, sizeof(configFile));
     strlcat(configFile, "/sd_boot_config.config", sizeof(configFile));
-    printf("configFile = %s \n", configFile);
+    LOGI("configFile = %s \n", configFile);
     ret = get_cfg_Item(configFile, str_key, str_val, &vlen);
 
     if (ret != 0) {
-        printf("func get_cfg_Item err:%d \n", ret);
+        LOGI("func get_cfg_Item err:%d \n", ret);
         return false;
     }
 
-    printf("\n %s:%s \n", str_key, str_val);
+    LOGI("\n %s:%s \n", str_key, str_val);
 
     if (strcmp(str_val, "1") != 0) {
         return false;
     }
 
-    printf("firmware update will from SDCARD. \n");
-    printf("%s out\n", __func__);
+    LOGI("firmware update will from SDCARD. \n");
+    LOGI("%s out\n", __func__);
     return true;
 }

@@ -83,10 +83,10 @@ static int get_bootloader_message_mtd(struct bootloader_message *out)
     if (r != size) return -1;
 
     memcpy(out, &data[CMD_OFFSET], sizeof(*out));
-    printf("out->command = %s.\n", out->command);
-    printf("out->status = %s.\n", out->status);
-    printf("out->recovery = %s.\n", out->recovery);
-    printf("out->systemFlag = %s.\n", out->systemFlag);
+    LOGI("out->command = %s.\n", out->command);
+    LOGI("out->status = %s.\n", out->status);
+    LOGI("out->recovery = %s.\n", out->recovery);
+    LOGI("out->systemFlag = %s.\n", out->systemFlag);
 
     return 0;
 }
@@ -148,12 +148,12 @@ static void wait_for_device(const char* fn)
         ++tries;
         ret = stat(fn, &buf);
         if (ret) {
-            printf("stat %s try %d: %s\n", fn, tries, strerror(errno));
+            LOGI("stat %s try %d: %s\n", fn, tries, strerror(errno));
             sleep(1);
         }
     } while (ret && tries < 10);
     if (ret) {
-        printf("failed to stat %s\n", fn);
+        LOGI("failed to stat %s\n", fn);
     }
 }
 

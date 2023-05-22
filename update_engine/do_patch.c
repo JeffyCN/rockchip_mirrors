@@ -42,6 +42,7 @@ __FBSDID("$FreeBSD: src/usr.bin/bsdiff/bspatch/bspatch.c,v 1.1 2005/08/06 01:59:
 #include <errno.h>
 #include <stdbool.h>
 #include "md5sum.h"
+#include "log.h"
 
 static off_t offtin(unsigned char *buf)
 {
@@ -107,12 +108,12 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
     struct stat old_stat, dst_stat;
 
     if ((fd_img = open(img, O_RDONLY, 0)) < 0) {
-        printf("open %s failed\n", img);
+        LOGE("open %s failed\n", img);
         return -1;
     }
     if (lseek(fd_img, offset + size - TAIL_SIZE, SEEK_SET) < 0) {
-        printf("%s: lseek to: %ld failed: %s\n", img,
-               offset + size - TAIL_SIZE, strerror(errno));
+        LOGE("%s: lseek to: %ld failed: %s\n", img,
+             offset + size - TAIL_SIZE, strerror(errno));
         close(fd_img);
         return -1;
     }
@@ -120,7 +121,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
     while (len != TAIL_SIZE) {
         ret = read(fd_img, tail + len, TAIL_SIZE - len);
         if (ret < 0) {
-            printf("read %s tail err\n", img);
+            LOGE("read %s tail err\n", img);
             close(fd_img);
             return -1;
         }
@@ -142,17 +143,17 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
      */
     if (stat(dst_file, &dst_stat) == 0 &&
         compareMd5sum(dst_file, (unsigned char *)md5sum, 0, dst_stat.st_size)) {
-        printf("Recovery from unecptected reboot successfully.");
+        LOGI("Recovery from unecptected reboot successfully.");
         return dst_stat.st_size;
     }
     /* If dst_file exist but md5sum is wrong, old image file is clean, hopefully */
 
     //check tail magic, return 0 if not exist
     if (j == 0 || strncmp(MAGIC_TAIL, token[TID_HEAD], strlen(MAGIC_TAIL)) != 0) {
-        printf("Not a diff image, ret = %ld\n", ret);
+        LOGW("Not a diff image, ret = %ld\n", ret);
         return 0;
     }
-    printf("This is a diff image, patching...\n");
+    LOGI("This is a diff image, patching...\n");
     if (j != TOKENS ||
         (oldsize = strtol(token[TID_OLD_SIZE], &saveptr, 10)) == 0 ||
         (errno == ERANGE && (oldsize == LONG_MAX || oldsize == LONG_MIN)) ||
@@ -161,7 +162,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
         (errno == ERANGE && (newsize == LONG_MAX || newsize == LONG_MIN)) ||
         saveptr == token[TID_NEW_SIZE] ||
         strlen(token[TID_MD5SUM]) != MD5SUM_LEN) {
-        printf("Bad Tail header of bsdiff patch\n");
+        LOGE("Bad Tail header of bsdiff patch\n");
         return -1;
     }
 
@@ -169,11 +170,11 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 
     /* Open patch file */
     if ((f = fopen(img, "r")) == NULL) {
-        printf("fopen %s err\n", img);
+        LOGE("fopen %s err\n", img);
         return -1;
     }
     if (fseeko(f, offset, SEEK_SET)) {
-        printf("fseeko %s err\n", img);
+        LOGE("fseeko %s err\n", img);
         fclose(f);
         return -1;
     }
@@ -194,7 +195,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 
     /* Read header */
     if (fread(header, 1, 32, f) < 32) {
-        printf("Read header err\n");
+        LOGE("Read header err\n");
         fclose(f);
         return -1;
     }
@@ -203,7 +204,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 
     /* Check for appropriate magic */
     if (memcmp(header, "BSDIFF40", 8) != 0) {
-        printf("Bad header, Corrupt patch\n");
+        LOGE("Bad header, Corrupt patch\n");
         return -1;
     }
 
@@ -212,7 +213,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
     bzdatalen = offtin(header + 16);
     newsize = offtin(header + 24);
     if ((bzctrllen < 0) || (bzdatalen < 0) || (newsize <= 0)) {
-        printf("Bad header len, Corrupt patch\n");
+        LOGE("Bad header len, Corrupt patch\n");
         return -1;
     }
 
@@ -220,42 +221,42 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
     if ((cpf = fopen(img, "r")) == NULL)
         return -1;
     if (fseeko(cpf, offset + 32, SEEK_SET)) {
-        printf("fseeko(%s, %lld) err\n", img, (long long)(32 + offset));
+        LOGE("fseeko(%s, %lld) err\n", img, (long long)(32 + offset));
         goto cleanup;
     }
     if ((cpfbz2 = BZ2_bzReadOpen(&cbz2err, cpf, 0, 0, NULL, 0)) == NULL) {
-        printf("BZ2_bzReadOpen, bz2err = %d, err\n", cbz2err);
+        LOGE("BZ2_bzReadOpen, bz2err = %d, err\n", cbz2err);
         goto cleanup;
     }
     if ((dpf = fopen(img, "r")) == NULL)
         goto cleanup;
     if (fseeko(dpf, offset + 32 + bzctrllen, SEEK_SET)) {
-        printf("fseeko(%s, %lld) err\n", img,
-               (long long)(offset + 32 + bzctrllen));
+        LOGE("fseeko(%s, %lld) err\n", img,
+             (long long)(offset + 32 + bzctrllen));
         goto cleanup;
     }
     if ((dpfbz2 = BZ2_bzReadOpen(&dbz2err, dpf, 0, 0, NULL, 0)) == NULL) {
-        printf("BZ2_bzReadOpen, bz2err = %d, err\n", dbz2err);
+        LOGE("BZ2_bzReadOpen, bz2err = %d, err\n", dbz2err);
         goto cleanup;
     }
     if ((epf = fopen(img, "r")) == NULL) {
-        printf("fopen(%s) err\n", img);
+        LOGE("fopen(%s) err\n", img);
         goto cleanup;
     }
     if (fseeko(epf, offset + 32 + bzctrllen + bzdatalen, SEEK_SET)) {
-        printf("fseeko(%s, %lld) err\n", img,
-               (long long)(offset + 32 + bzctrllen + bzdatalen));
+        LOGE("fseeko(%s, %lld) err\n", img,
+             (long long)(offset + 32 + bzctrllen + bzdatalen));
         goto cleanup;
     }
     if ((epfbz2 = BZ2_bzReadOpen(&ebz2err, epf, 0, 0, NULL, 0)) == NULL) {
-        printf("BZ2_bzReadOpen, bz2err = %d\n", ebz2err);
+        LOGE("BZ2_bzReadOpen, bz2err = %d\n", ebz2err);
         goto cleanup;
     }
 
     if (((fd = open(blk_dev, O_RDONLY, 0)) < 0) ||
         ((old = (unsigned char *)mmap(NULL, oldsize, PROT_READ,
                                       MAP_SHARED | MAP_POPULATE, fd, 0)) == MAP_FAILED)) {
-        printf("open %s err\n", blk_dev);
+        LOGE("open %s err\n", blk_dev);
         goto cleanup;
     }
     close(fd);
@@ -268,7 +269,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
         (lseek(fd, 0, SEEK_SET) != 0) ||
         ((new_ptr = (unsigned char *)mmap(NULL, newsize, PROT_READ | PROT_WRITE,
                                           MAP_SHARED, fd, 0)) == MAP_FAILED)) {
-        printf("mmap %s err\n", dst_file);
+        LOGE("mmap %s err\n", dst_file);
         goto cleanup;
     }
     close(fd);
@@ -281,7 +282,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
             lenread = BZ2_bzRead(&cbz2err, cpfbz2, buf, 8);
             if ((lenread < 8) || ((cbz2err != BZ_OK) &&
                                   (cbz2err != BZ_STREAM_END))) {
-                printf("Read control data: Corrupt patch\n");
+                LOGE("Read control data: Corrupt patch\n");
                 goto cleanup;
             }
             ctrl[i] = offtin(buf);
@@ -289,7 +290,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 
         /* Sanity-check */
         if (newpos + ctrl[0] > newsize) {
-            printf("Sanity-check: Corrupt patch\n");
+            LOGE("Sanity-check: Corrupt patch\n");
             goto cleanup;
         }
 
@@ -297,7 +298,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
         lenread = BZ2_bzRead(&dbz2err, dpfbz2, new_ptr + newpos, ctrl[0]);
         if ((lenread < ctrl[0]) ||
             ((dbz2err != BZ_OK) && (dbz2err != BZ_STREAM_END))) {
-            printf("Read diff string: Corrupt patch\n");
+            LOGE("Read diff string: Corrupt patch\n");
             goto cleanup;
         }
 
@@ -312,7 +313,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
 
         /* Sanity-check */
         if (newpos + ctrl[1] > newsize) {
-            printf("Sanity-check: Corrupt patch\n");
+            LOGE("Sanity-check: Corrupt patch\n");
             goto cleanup;
         }
 
@@ -320,7 +321,7 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
         lenread = BZ2_bzRead(&ebz2err, epfbz2, new_ptr + newpos, ctrl[1]);
         if ((lenread < ctrl[1]) ||
             ((ebz2err != BZ_OK) && (ebz2err != BZ_STREAM_END))) {
-            printf("Read extra string: Corrupt patch\n");
+            LOGE("Read extra string: Corrupt patch\n");
             goto cleanup;
         }
 
@@ -345,8 +346,8 @@ int do_patch_rkimg(const char *img, ssize_t offset, ssize_t size,
     if (!compareMd5sum(dst_file, (unsigned char *)md5sum, 0, newsize))
         return -1;
 
-    printf("Diff patch apply successfully for %s, size: %ld\n",
-           name, newsize);
+    LOGI("Diff patch apply successfully for %s, size: %ld\n",
+         name, newsize);
     return newsize;
 cleanup:
     if (new_ptr != NULL)

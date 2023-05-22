@@ -23,6 +23,7 @@
 
 #include "roots.h"
 #include "usbboot.h"
+#include "common.h"
 
 extern size_t strlcpy(char *dst, const char *src, size_t dsize);
 extern size_t strlcat(char *dst, const char *src, size_t dsize);
@@ -33,7 +34,7 @@ bool is_boot_from_udisk(void)
     char param[1024];
     int fd, ret;
     char *s = NULL;
-    printf("read cmdline\n");
+    LOGI("read cmdline\n");
     memset(param, 0, 1024);
 
     fd = open("/proc/cmdline", O_RDONLY);
@@ -42,10 +43,10 @@ bool is_boot_from_udisk(void)
     s = strstr(param, "usbfwupdate");
     if (s != NULL) {
         bUDisk = true;
-        printf(">>> Boot from U-Disk\n");
+        LOGI(">>> Boot from U-Disk\n");
     } else {
         bUDisk = false;
-        printf(">>> Boot from non-U-Disk\n");
+        LOGI(">>> Boot from non-U-Disk\n");
     }
 
     close(fd);
@@ -62,7 +63,7 @@ void ensure_udisk_mounted(bool *bMounted)
             bSucc = true;
             break;
         } else {
-            printf("delay 1 sec to try /mnt/udisk\n");
+            LOGI("delay 1 sec to try /mnt/udisk\n");
             sleep(1);
         }
     }
@@ -74,7 +75,7 @@ void ensure_udisk_mounted(bool *bMounted)
                 bSucc = true;
                 break;
             } else {
-                printf("delay 1 sec to try /mnt/usb_storage\n");
+                LOGI("delay 1 sec to try /mnt/usb_storage\n");
                 sleep(1);
             }
         }
@@ -103,7 +104,7 @@ static int get_cfg_Item(char *pFileName /*in*/, char *pKey /*in*/,
     while (!feof(fp)) {
         memset(lineBuf, 0, sizeof(lineBuf));
         fgets(lineBuf, MaxLine, fp);
-        printf("lineBuf: %s ", lineBuf);
+        LOGI("lineBuf: %s ", lineBuf);
 
         pTmp = strchr(lineBuf, '=');
         if (pTmp == NULL)
@@ -160,30 +161,30 @@ bool is_udisk_update(void)
     char str_val[10] = {0};
     char *str_key = "fw_update";
 
-    printf("%s in\n", __func__);
+    LOGI("%s in\n", __func__);
     ensure_udisk_mounted(&bUdiskMounted);
     if (!bUdiskMounted) {
-        printf("Error! U-Disk not mounted\n");
+        LOGI("Error! U-Disk not mounted\n");
         return false;
     }
 
     strlcpy(configFile, EX_UDISK_ROOT, sizeof(configFile));
     strlcat(configFile, "/sd_boot_config.config", sizeof(configFile));
-    printf("configFile = %s \n", configFile);
+    LOGI("configFile = %s \n", configFile);
     ret = get_cfg_Item(configFile, str_key, str_val, &vlen);
 
     if (ret != 0) {
-        printf("func get_cfg_Item err:%d \n", ret);
+        LOGI("func get_cfg_Item err:%d \n", ret);
         return false;
     }
 
-    printf("\n %s:%s \n", str_key, str_val);
+    LOGI("\n %s:%s \n", str_key, str_val);
 
     if (strcmp(str_val, "1") != 0) {
         return false;
     }
 
-    printf("firmware update will from UDisk.\n");
-    printf("%s out\n", __func__);
+    LOGI("firmware update will from UDisk.\n");
+    LOGI("%s out\n", __func__);
     return true;
 }

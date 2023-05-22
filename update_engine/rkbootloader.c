@@ -45,12 +45,12 @@ static void wait_for_device(const char* fn)
         ++tries;
         ret = stat(fn, &buf);
         if (ret) {
-            printf("stat %s try %d: %s\n", fn, tries, strerror(errno));
+            LOGI("stat %s try %d: %s\n", fn, tries, strerror(errno));
             sleep(1);
         }
     } while (ret && tries < 10);
     if (ret) {
-        printf("failed to stat %s\n", fn);
+        LOGW("failed to stat %s\n", fn);
     }
 }
 
@@ -358,16 +358,16 @@ int setSlotSucceed()
     }
 
     for (size_t i = 0; i < 4; i++) {
-        printf("info.mafic is %x\n", info.magic[i]);
+        LOGI("info.mafic is %x\n", info.magic[i]);
     }
     if (avb_safe_memcmp(info.magic, AVB_AB_MAGIC, AVB_AB_MAGIC_LEN) != 0) {
-        printf("Magic is incorrect.\n");
+        LOGE("Magic is incorrect.\n");
         return false;
     }
     if (info.slots[now_slot].priority != AVB_AB_MAX_PRIORITY) {
         /* Something could be wrong, correct it because this slot is bootable */
-        printf("Warning: current slot priorty is %d != %d, Correct it!\n",
-               info.slots[now_slot].priority, AVB_AB_MAX_PRIORITY);
+        LOGW("Warning: current slot priorty is %d != %d, Correct it!\n",
+             info.slots[now_slot].priority, AVB_AB_MAX_PRIORITY);
         info.slots[now_slot].priority = AVB_AB_MAX_PRIORITY;
     }
 #ifdef SUCCESSFUL_BOOT
@@ -517,12 +517,12 @@ int writeCustomMiscCmdline(void)
     lseek(fd, 0, SEEK_SET);
     ret = read(fd, (uint8_t *)&len, 2);
     if (ret != 2) {
-        printf("ERROR: failed to read %s\n", custom_cmdline_path);
+        LOGE("ERROR: failed to read %s\n", custom_cmdline_path);
         ret = -1;
         goto out;
     }
 
-    printf("len = %d\n", len);
+    LOGI("len = %d\n", len);
     buf = (uint8_t *)malloc(len + 2);
     if (!buf) {
         LOGE("ERROR: failed to malloc buf for cmdline\n");

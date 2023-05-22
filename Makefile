@@ -20,7 +20,8 @@ OBJ = recovery.o \
 	mtdutils/mounts.o \
 	mtdutils/mtdutils.o \
 	mtdutils/rk29.o \
-	minzip/DirUtil.o
+	minzip/DirUtil.o \
+	update_engine/log.o
 
 ifdef RecoveryNoUi
 OBJ += noui.o
@@ -60,6 +61,16 @@ UPDATE_ENGINE_OBJ = mtdutils/mounts.o \
 	update_engine/update.o \
 	update_engine/do_patch.o
 
+# build in buildroot, it need change work directory
+recovery_version:
+	cd $(PROJECT_DIR)/../../../../../external/recovery && \
+	COMMIT_HASH=$$(git rev-parse --verify --short HEAD) && \
+	GIT_COMMIT_TIME=$$(git log -1 --format=%cd --date=format:%y%m%d) && \
+	GIT_DIRTY=$$(git diff-index --quiet HEAD -- || echo "-dirty") && \
+	commit_info=-g$${COMMIT_HASH}-$${GIT_COMMIT_TIME}$${GIT_DIRTY} && \
+	cd $(PROJECT_DIR) && \
+	echo "#define GIT_COMMIT_INFO $${commit_info}" > recovery_autogenerate.h
+
 $(PROM): $(OBJ)
 	$(CC) -o $(PROM) $(OBJ) $(CFLAGS)
 
@@ -69,7 +80,7 @@ $(UPDATE_ENGINE): $(UPDATE_ENGINE_OBJ)
 %.o: %.cpp
 	$(CC) -c $< -o $@ $(CFLAGS)
 
-%.o: %.c
+%.o: %.c recovery_version
 	$(CC) -c $< -o $@ $(CFLAGS)
 
 clean:

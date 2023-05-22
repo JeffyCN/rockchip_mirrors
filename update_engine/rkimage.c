@@ -43,12 +43,12 @@ static void display_item(PRKIMAGE_ITEM pitem)
     //unsigned int usespace;
     //unsigned int size;
 
-    LOGD("name = %s", pitem->name);
-    LOGD("file = %s", pitem->file);
-    LOGD("offset = %d", pitem->offset);
-    LOGD("flash_offset = %d", pitem->flash_offset);
-    LOGD("usespace = %d", pitem->usespace);
-    LOGD("size = %d", pitem->size);
+    LOGD("name = %s\n", pitem->name);
+    LOGD("file = %s\n", pitem->file);
+    LOGD("offset = %d\n", pitem->offset);
+    LOGD("flash_offset = %d\n", pitem->flash_offset);
+    LOGD("usespace = %d\n", pitem->usespace);
+    LOGD("size = %d\n", pitem->size);
 }
 
 static void display_hdr(PRKIMAGE_HDR phdr)
@@ -62,14 +62,14 @@ static void display_hdr(PRKIMAGE_HDR phdr)
     //int item_count;
     //RKIMAGE_ITEM item[MAX_PACKAGE_FILES];
 
-    LOGD("tag = %d", phdr->tag);
-    LOGD("size = %d", phdr->size);
-    LOGD("machine_model = %s", phdr->machine_model);
-    LOGD("manufacturer = %s", phdr->manufacturer);
-    LOGD("version = %d", phdr->version);
+    LOGD("tag = %d\n", phdr->tag);
+    LOGD("size = %d\n", phdr->size);
+    LOGD("machine_model = %s\n", phdr->machine_model);
+    LOGD("manufacturer = %s\n", phdr->manufacturer);
+    LOGD("version = %d\n", phdr->version);
     LOGD("item = %d.\n", phdr->item_count);
     for (int i = 0; i < phdr->item_count; i++) {
-        LOGI("================================================");
+        LOGI("================================================\n");
         display_item(&(phdr->item[i]));
     }
 }

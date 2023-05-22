@@ -19,6 +19,7 @@
 
 #include <stdio.h>
 #include <stdbool.h>
+#include "update_engine/log.h"
 
 #define MISC_PARTITION_NAME_BLOCK "/dev/block/by-name/misc"
 #define MISC_PARTITION_NAME_MTD "misc"
@@ -78,17 +79,10 @@ void ui_reset_progress();
 
 #define MOD_TAG "RECOVERY"
 
-#define LOGE(...) fprintf(stdout, "[E/]"MOD_TAG" " __VA_ARGS__)
-#define LOGW(...) fprintf(stdout, "[W/]"MOD_TAG" " __VA_ARGS__)
-#define LOGI(...) fprintf(stdout, "[I/]"MOD_TAG" " __VA_ARGS__)
-#define LOGD(...) fprintf(stdout, "[D/]"MOD_TAG" " __VA_ARGS__)
 
 #define FUNC_ENTER() LOGD("%s:%d : Enter >>>>\n", __func__,__LINE__)
 #define FUNC_LEAVE() LOGD("%s:%d : Leave <<<<\n", __func__,__LINE__)
-#if 0
-#define LOGV(...) do {} while (0)
-#define LOGD(...) do {} while (0)
-#endif
+
 
 #define STRINGIFY(x) #x
 #define EXPAND(x) STRINGIFY(x)

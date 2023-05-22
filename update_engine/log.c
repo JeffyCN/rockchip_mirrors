@@ -8,14 +8,7 @@
  * You can modify this (for example with "#define LOG_NDEBUG 0"
  * at the top of your source file) to change that behavior.
  */
-#ifndef LOG_NDEBUG
-#ifdef NDEBUG
-#define LOG_NDEBUG 1
-#else
-#define LOG_NDEBUG 0
-#endif
-#endif
-
+#define LOG_LEVEL LOG_DEBUG
 #define LOG_BUF_SIZE 1024
 
 #include "log.h"
@@ -27,6 +20,10 @@ void InitLogging(int argc, const char* const* argv) {}
 
 void Log(const char* file, int line, LogPriority level, const char* fmt, ...)
 {
+    if (level < LOG_LEVEL) {
+        return;
+    }
+
     va_list ap;
     char buf[LOG_BUF_SIZE];
     va_start(ap, fmt);
@@ -34,13 +31,17 @@ void Log(const char* file, int line, LogPriority level, const char* fmt, ...)
     va_end(ap);
 
     switch (level) {
-    case LOG_ERROR: printf("LOG_ERROR : %s", buf); break;
-    case LOG_WARN: printf("LOG_WARN : %s", buf); break;
-    case LOG_INFO: printf("LOG_INFO :%s", buf); break;
+    case LOG_ERROR:
+        printf("LOG_ERROR: %s", buf);
+        break;
+    case LOG_WARN:
+        printf("LOG_WARN: %s", buf);
+        break;
+    case LOG_INFO:
+        printf("LOG_INFO: %s", buf);
+        break;
     case LOG_DEBUG:
-        //#if LOG_NDEBUG
-        printf("LOG_DEBUG :%s", buf);
-        //#endif
+        printf("LOG_DEBUG: %s", buf);
         break;
     default :
         break;

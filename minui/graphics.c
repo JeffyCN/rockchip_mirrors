@@ -135,7 +135,7 @@ static uint32_t* pixel_at(GRSurface* surf, int x, int y, int row_pixels)
     case ROTATION_LEFT:
         return (uint32_t*)(surf->data) + (surf->height - 1 - x) * row_pixels + y;
     default:
-        printf("invalid rotation %d", rotation);
+        LOGW("invalid rotation %d", rotation);
     }
     return NULL;
 }
@@ -169,7 +169,7 @@ void gr_text(int x, int y, const char *s)
     if (!font || !font->texture || (gr_current & alpha_mask) == 0) return;
 
     if (font->texture->pixel_bytes != 1) {
-        printf("gr_text: font has wrong format\n");
+        LOGW("gr_text: font has wrong format\n");
         return;
     }
 
@@ -203,7 +203,7 @@ void gr_texticon(int x, int y, GRSurface* icon)
     if (icon == NULL) return;
 
     if (icon->pixel_bytes != 1) {
-        printf("gr_texticon: source has wrong format\n");
+        LOGW("gr_texticon: source has wrong format\n");
         return;
     }
 
@@ -288,7 +288,7 @@ void gr_blit(gr_surface source, int sx, int sy, int w, int h, int dx, int dy)
     if (source == NULL) return;
 
     if (gr_draw->pixel_bytes != source->pixel_bytes) {
-        printf("gr_blit: source has wrong format\n");
+        LOGW("gr_blit: source has wrong format\n");
         return;
     }
 
@@ -354,7 +354,7 @@ static void gr_init_font(void)
         gr_font->char_width = gr_font->texture->width / 96;
         gr_font->char_height = gr_font->texture->height / 2;
     } else {
-        printf("failed to read font: res=%d, fall back to the compiled-in font\n", res);
+        LOGI("failed to read font: res=%d, fall back to the compiled-in font\n", res);
 
         // fall back to the compiled-in font.
         gr_font->texture = malloc(sizeof(*gr_font->texture));
@@ -525,7 +525,7 @@ void gr_fb_blank(bool blank)
 void gr_rotate(GRRotation rot)
 {
     rotation = rot;
-    printf("rotate degree: 0 - none, 1 - right, 2 - down, 3 - left.\n");
-    printf("current rotate degree is : %d\n", rot);
+    LOGI("rotate degree: 0 - none, 1 - right, 2 - down, 3 - left.\n");
+    LOGI("current rotate degree is : %d\n", rot);
 }
 

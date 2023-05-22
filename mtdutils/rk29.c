@@ -13,6 +13,7 @@
 #include <errno.h>
 #include "mtdutils.h"
 #include "rk29.h"
+#include "common.h"
 
 int run(const char *filename, char *const argv[])
 {
@@ -21,11 +22,11 @@ int run(const char *filename, char *const argv[])
     pid_t pid;
 
     if (stat(filename, &s) != 0) {
-        fprintf(stderr, "cannot find '%s'", filename);
+        LOGE("cannot find '%s'", filename);
         return -1;
     }
 
-    printf("executing '%s'\n", filename);
+    LOGI("executing '%s'\n", filename);
 
     pid = fork();
 
@@ -33,26 +34,26 @@ int run(const char *filename, char *const argv[])
         setpgid(0, getpid());
         /* execute */
         execv(filename, argv);
-        fprintf(stderr, "can't run %s (%s)\n", filename, strerror(errno));
+        LOGE("can't run %s (%s)\n", filename, strerror(errno));
         /* exit */
         _exit(0);
     }
 
     if (pid < 0) {
-        fprintf(stderr, "failed to fork and start '%s'\n", filename);
+        LOGE("failed to fork and start '%s'\n", filename);
         return -1;
     }
 
     if (-1 == waitpid(pid, &status, WCONTINUED | WUNTRACED)) {
-        fprintf(stderr, "wait for child error\n");
+        LOGE("wait for child error\n");
         return -1;
     }
 
     if (WIFEXITED(status)) {
-        printf("executed '%s' done\n", filename);
+        LOGI("executed '%s' done\n", filename);
     }
 
-    printf("executed '%s' return %d\n", filename, WEXITSTATUS(status));
+    LOGI("executed '%s' return %d\n", filename, WEXITSTATUS(status));
     return 0;
 }
 
@@ -65,13 +66,13 @@ int rk_check_and_resizefs(const char *filename)
 
     result = run(e2fsck_argv[0], (char **) e2fsck_argv);
     if (result) {
-        printf("e2fsck check '%s' failed!\n", filename);
+        LOGI("e2fsck check '%s' failed!\n", filename);
         return result;
     }
 
     result = run(resizefs_argv[0], (char **) resizefs_argv);
     if (result) {
-        printf("resizefs '%s' failed!\n", filename);
+        LOGI("resizefs '%s' failed!\n", filename);
     }
 
     return result;
@@ -86,13 +87,13 @@ int rk_check_and_resizefs_f2fs(const char *filename)
 
     result = run(e2fsck_argv[0], (char **) e2fsck_argv);
     if (result) {
-        printf("fsck_f2fs check '%s' failed!\n", filename);
+        LOGI("fsck_f2fs check '%s' failed!\n", filename);
         return result;
     }
 
     result = run(resizefs_argv[0], (char **) resizefs_argv);
     if (result) {
-        printf("resize.f2fs '%s' failed!\n", filename);
+        LOGI("resize.f2fs '%s' failed!\n", filename);
     }
 
     return result;
@@ -110,16 +111,16 @@ static int make_extfs(const char *path, const char *label, const char *type)
     };
     int result;
 
-    printf("format '%s' to %s filesystem\n", path, type);
+    LOGI("format '%s' to %s filesystem\n", path, type);
     result = run(mke2fs[0], (char **) mke2fs);
     if (result) {
-        printf("failed!\n");
+        LOGI("failed!\n");
         return result;
     }
 
     result = run(tune2fs[0], (char **) tune2fs);
     if (result) {
-        printf("failed!\n");
+        LOGI("failed!\n");
         return result;
     }
 
@@ -143,7 +144,7 @@ int make_vfat(const char *path, const char *label)
         "/sbin/mkdosfs", "-F", "32", "-n", label, path, NULL,
     };
 
-    printf("format '%s' to vfat filesystem\n", path);
+    LOGI("format '%s' to vfat filesystem\n", path);
     return run(mkdosfs[0], (char **) mkdosfs);
 }
 
@@ -154,7 +155,7 @@ int make_ntfs(const char *path, const char *label)
         "mkntfs", "-F", "C", "Q", "-L", label, path, NULL,
     };
 
-    printf("format '%s' to ntfs filesystem\n", path);
+    LOGI("format '%s' to ntfs filesystem\n", path);
     return run(mkntfs[0], (char **) mkntfs);
 }
 

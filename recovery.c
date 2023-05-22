@@ -43,6 +43,9 @@
 #include "sdboot.h"
 #include "usbboot.h"
 #include "mtdutils/mtdutils.h"
+#include "recovery_version.h"
+
+static const char *recovery_version = RECOVERY_VERSION_STRING;
 
 static const struct option OPTIONS[] = {
     { "send_intent", required_argument, NULL, 's' },
@@ -203,7 +206,7 @@ rockchip_partition_check()
         LOGE("\n === umount userdata fail === \n");
 
     ui_print("check userdata/oem partition success ...\n");
-    printf("check userdata/oem partition success ...\n");
+    LOGI("check userdata/oem partition success ...\n");
 }
 
 // command line args come from, in decreasing precedence:
@@ -330,7 +333,7 @@ finish_recovery(const char *send_intent)
         }
     }
 
-    printf("finish_recovery Enter.....\n");
+    LOGI("finish_recovery Enter.....\n");
 
     // Copy logs to cache so the system can find out what happened.
     copy_log_file(LOG_FILE, true);
@@ -841,7 +844,7 @@ main(int argc, char **argv)
     const char *usbupdate_package = NULL;
 
     while (access(coldboot_done, F_OK) != 0) {
-        printf("coldboot not done, wait...\n");
+        LOGI("coldboot not done, wait...\n");
         sleep(1);
     }
 
@@ -850,17 +853,16 @@ main(int argc, char **argv)
         // If these fail, there's not really anywhere to complain...
         freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
         freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
-    } else {
-        printf("\n");
-        printf("*********************************************************\n");
-        printf("            ROCKCHIP recovery system                     \n");
-        printf("*********************************************************\n");
-        printf("**** version : v1.0.1 ****\n");
     }
-    printf("Starting recovery on %s\n", ctime(&start));
+    printf("\n");
+    printf("*********************************************************\n");
+    printf("            ROCKCHIP recovery system                     \n");
+    printf("*********************************************************\n");
+    printf("**** version : %s ****\n", recovery_version);
+    LOGI("Starting recovery on %s\n", ctime(&start));
 
 #ifndef RecoveryNoUi
-    printf("Recovery System have UI defined.\n");
+    LOGI("Recovery System have UI defined.\n");
 #endif
 
     ui_init();
@@ -883,7 +885,7 @@ main(int argc, char **argv)
                     sdupdate_package = strdup(imageFile);
                     bSDBootUpdate = true;
                     ui_show_text(1);
-                    printf("sdupdate_package = %s\n", sdupdate_package);
+                    LOGI("sdupdate_package = %s\n", sdupdate_package);
                 }
             } else {
                 get_args(&argc, &argv);
@@ -898,7 +900,7 @@ main(int argc, char **argv)
                     usbupdate_package = strdup(imageFile);
                     bUdiskUpdate = true;
                     ui_show_text(1);
-                    printf("usbupdate_package = %s\n", usbupdate_package);
+                    LOGI("usbupdate_package = %s\n", usbupdate_package);
                 }
             } else {
                 get_args(&argc, &argv);
@@ -936,7 +938,7 @@ main(int argc, char **argv)
 
     device_recovery_start();
 
-    printf("Command:");
+    LOGI("Command:");
     for (arg = 0; arg < argc; arg++) {
         printf(" \"%s\"", argv[arg]);
     }
@@ -951,8 +953,8 @@ main(int argc, char **argv)
             char* modified_path = malloc(len);
             strlcpy(modified_path, "/cache/", len);
             strlcat(modified_path, update_package + 6, len);
-            printf("(replacing path \"%s\" with \"%s\")\n",
-                   update_package, modified_path);
+            LOGI("(replacing path \"%s\" with \"%s\")\n",
+                 update_package, modified_path);
             update_package = modified_path;
         }
     }
@@ -1006,14 +1008,14 @@ main(int argc, char **argv)
 
         for (i = 0; i < 5; i++) {
             if (!ensure_path_mounted(update_package)) {
-                printf("mounted %s Success.\n", update_package);
+                LOGI("mounted %s Success.\n", update_package);
                 break;
             }
-            printf("mounted %s Failed. retry %d\n", update_package, i + 1);
+            LOGW("mounted %s Failed. retry %d\n", update_package, i + 1);
             sleep(1);
         }
         if (i != 5) {
-            printf(">>>rkflash will update from %s\n", update_package);
+            LOGI(">>>rkflash will update from %s\n", update_package);
 #ifdef USE_RKUPDATE
             status = do_rk_update(binary, update_package);
 #endif
@@ -1037,7 +1039,7 @@ main(int argc, char **argv)
                 ui_print("update.img images failed!\n");
             }
         } else {
-            printf("mounted %s Failed.\n", update_package);
+            LOGE("mounted %s Failed.\n", update_package);
             ui_print("mounted %s Failed.\n", update_package);
         }
 
@@ -1050,7 +1052,7 @@ main(int argc, char **argv)
         // update image from sdcard
 #ifdef USE_RKUPDATE
         const char* binary = "/usr/bin/rkupdate";
-        printf(">>>sdboot update will update from %s\n", sdupdate_package);
+        LOGI(">>>sdboot update will update from %s\n", sdupdate_package);
         status = do_rk_update(binary, sdupdate_package);
 #endif
 
@@ -1062,7 +1064,7 @@ main(int argc, char **argv)
         if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
             int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
             if (tmp_fd < 0) {
-                printf("creat %s error.\n", CMD4RECOVERY_FILENAME);
+                LOGE("creat %s error.\n", CMD4RECOVERY_FILENAME);
                 status = INSTALL_ERROR;
             } else {
                 close(tmp_fd);
@@ -1072,7 +1074,7 @@ main(int argc, char **argv)
         }
 
         if (isMtdDevice()) {
-            printf("start flash write to /dev/mtd0.\n");
+            LOGI("start flash write to /dev/mtd0.\n");
             size_t total_size;
             size_t erase_size;
             mtd_scan_partitions();
@@ -1082,24 +1084,24 @@ main(int argc, char **argv)
             }
             if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
                 if ((!access(FACTORY_FIRMWARE_IMAGE, F_OK)) && mtd_find_partition_by_name("sfc_nor") != NULL) {
-                    printf("Info: start flash out_image.img to spi nor.\n");
+                    LOGI("Info: start flash out_image.img to spi nor.\n");
                     system("flashcp -v " FACTORY_FIRMWARE_IMAGE " /dev/mtd0");
                 } else
-                    printf("Error: Can't find rk-nand or spi-nand0.\n");
+                    LOGE("Error: Can't find rk-nand or spi-nand0.\n");
             } else {
                 system("flash_erase /dev/mtd0 0x0 0");
                 system("sh "CMD4RECOVERY_FILENAME);
             }
         } else {
-            printf("Start to dd data to emmc partition.\n");
+            LOGI("Start to dd data to emmc partition.\n");
             system("sh "CMD4RECOVERY_FILENAME);
-            printf("sdcard upgrade done\n");
+            LOGI("sdcard upgrade done\n");
         }
 
 #endif
 
         if (status == INSTALL_SUCCESS) {
-            printf("update.img Installation success.\n");
+            LOGI("update.img Installation success.\n");
             ui_print("update.img Installation success.\n");
             //ui_show_text(0);
         }
@@ -1109,7 +1111,7 @@ main(int argc, char **argv)
         // update image from udisk
 #ifdef USE_RKUPDATE
         const char* binary = "/usr/bin/rkupdate";
-        printf(">>>sdboot update will update from %s\n", usbupdate_package);
+        LOGI(">>>sdboot update will update from %s\n", usbupdate_package);
         status = do_rk_update(binary, usbupdate_package);
 #endif
 
@@ -1121,7 +1123,7 @@ main(int argc, char **argv)
         if ((access(FACTORY_FIRMWARE_IMAGE, F_OK)) && access(CMD4RECOVERY_FILENAME, F_OK)) {
             int tmp_fd = creat(CMD4RECOVERY_FILENAME, 0777);
             if (tmp_fd < 0) {
-                printf("creat %s error.\n", CMD4RECOVERY_FILENAME);
+                LOGE("creat %s error.\n", CMD4RECOVERY_FILENAME);
                 status = INSTALL_ERROR;
             } else {
                 close(tmp_fd);
@@ -1131,7 +1133,7 @@ main(int argc, char **argv)
         }
 
         if (isMtdDevice()) {
-            printf("start flash write to /dev/mtd0.\n");
+            LOGI("start flash write to /dev/mtd0.\n");
             size_t total_size;
             size_t erase_size;
             mtd_scan_partitions();
@@ -1141,23 +1143,23 @@ main(int argc, char **argv)
             }
             if (part == NULL || mtd_partition_info(part, &total_size, &erase_size, NULL)) {
                 if ((!access(FACTORY_FIRMWARE_IMAGE, F_OK)) && mtd_find_partition_by_name("sfc_nor") != NULL) {
-                    printf("Info: start flash out_image.img to spi nor.\n");
+                    LOGI("Info: start flash out_image.img to spi nor.\n");
                     system("flashcp -v " FACTORY_FIRMWARE_IMAGE " /dev/mtd0");
                 } else
-                    printf("Error: Can't find rk-nand or spi-nand0.\n");
+                    LOGE("Error: Can't find rk-nand or spi-nand0.\n");
             } else {
                 system("flash_erase /dev/mtd0 0x0 0");
                 system("sh "CMD4RECOVERY_FILENAME);
             }
         } else {
-            printf("Start to dd data to emmc partition.\n");
+            LOGI("Start to dd data to emmc partition.\n");
             system("sh "CMD4RECOVERY_FILENAME);
-            printf("usb upgrade done\n");
+            LOGI("usb upgrade done\n");
         }
 #endif
 
         if (status == INSTALL_SUCCESS) {
-            printf("update.img Installation success.\n");
+            LOGI("update.img Installation success.\n");
             ui_print("update.img Installation success.\n");
             //ui_show_text(0);
         }
@@ -1170,10 +1172,10 @@ main(int argc, char **argv)
         if (erase_volume("/userdata")) status = INSTALL_ERROR;
         if (status != INSTALL_SUCCESS) {
             ui_print("Data wipe failed.\n");
-            printf("userdata wipe failed.\n");
+            LOGE("userdata wipe failed.\n");
         } else {
             ui_print("Data wipe done.\n");
-            printf("userdata wipe done.\n");
+            LOGI("userdata wipe done.\n");
         }
 
         if (access("/dev/block/by-name/oem", F_OK) == 0) {
@@ -1201,7 +1203,7 @@ main(int argc, char **argv)
 
     if (status != INSTALL_SUCCESS) ui_set_background(BACKGROUND_ICON_ERROR);
     if (status != INSTALL_SUCCESS) {
-        printf("\n Install fail! \n");
+        LOGE("\n Install fail! \n");
         if (!bSDBootUpdate && !bUdiskUpdate && ui_text_visible())
             prompt_and_wait();
     }
@@ -1217,7 +1219,7 @@ main(int argc, char **argv)
              * updating is completely, remove SD CARD and reboot */
             fflush(stdout);
             freopen("/dev/console", "w", stdout);
-            printf("\nPlease remove SD CARD!!!, wait for reboot.\n");
+            LOGI("\nPlease remove SD CARD!!!, wait for reboot.\n");
             ui_print("Please remove SD CARD!!!, wait for reboot.");
 
             while (access(SDDdevice, F_OK) == 0) { sleep(1); }
@@ -1232,7 +1234,7 @@ main(int argc, char **argv)
              * updating is completely, remove U-disk and reboot */
             fflush(stdout);
             freopen("/dev/console", "w", stdout);
-            printf("\nPlease remove U DISK!!!, wait for reboot.\n");
+            LOGI("\nPlease remove U DISK!!!, wait for reboot.\n");
             ui_print("Please remove U DISK!!!, wait for reboot.");
 
             while (access(udiskDev, F_OK) == 0) { sleep(1); }
@@ -1243,7 +1245,7 @@ main(int argc, char **argv)
     // Otherwise, get ready to boot the main system...
     finish_recovery(send_intent);
     ui_print("Rebooting...\n");
-    printf("Reboot...\n");
+    LOGI("Reboot...\n");
     ui_show_text(0);
     fflush(stdout);
     sync();

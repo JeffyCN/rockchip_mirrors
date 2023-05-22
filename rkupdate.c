@@ -24,8 +24,7 @@ static int start_main (const char *binary, char *args[], int* pipefd)
     if (pid == 0) {
         close(pipefd[0]);
         execv(binary, args);
-        printf("E:Can't run %s (%s)\n", binary, strerror(errno));
-        fprintf(stdout, "E:Can't run %s (%s)\n", binary, strerror(errno));
+        LOGI("E:Can't run %s (%s)\n", binary, strerror(errno));
         _exit(-1);
     }
     close(pipefd[1]);
@@ -52,7 +51,7 @@ static int start_main (const char *binary, char *args[], int* pipefd)
         } else if (strcmp(command, "ui_print") == 0) {
             char* str = strtok(NULL, "\n");
             if (str) {
-                printf(" >>>>>> %s <<<<<<\n", str);
+                LOGI(" >>>>>> %s <<<<<<\n", str);
                 ui_print("%s", str);
             } else {
                 ui_print("\n");

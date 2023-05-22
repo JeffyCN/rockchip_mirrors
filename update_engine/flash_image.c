@@ -282,7 +282,7 @@ int flash_normal(char *src_path, void *pupdate_cmd)
         sync();
     } else {
         //mtd
-        printf("pcmd->flash_offset = %lld.\n", pcmd->flash_offset);
+        LOGI("pcmd->flash_offset = %lld.\n", pcmd->flash_offset);
         ret = mtd_write(src_path, pcmd->offset, pcmd->size, pcmd->flash_offset, pcmd->dest_path);
     }
     return ret;

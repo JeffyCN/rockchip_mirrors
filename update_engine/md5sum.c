@@ -50,7 +50,7 @@ bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long o
 
     printf("\n");
     buf[32] = '\0';
-    printf("read new md5: [%s]\n", buf);
+    LOGI("read new md5: [%s]\n", buf);
 
     unsigned char md5sum_tmp[32];
     for ( int ii = 0; ii < 32; ii += 2) {
@@ -63,7 +63,7 @@ bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long o
         j++;
     }
 
-    printf("new md5:");
+    LOGI("new md5:");
     for (int i = 0; i < 16; i++) {
         printf("%02x", md5sum[i]);
     }
@@ -116,8 +116,7 @@ bool checkdata(const char *dest_path, unsigned char *out_md5sum, long long offse
     MD5_Final(md5sum, &ctx);
     fclose(fp);
 
-    printf("\n");
-    printf("new md5:");
+    LOGI("new md5:");
     for (int i = 0; i < 16; i++) {
         printf("%02x", md5sum[i]);
     }

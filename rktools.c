@@ -29,10 +29,10 @@ char *getSerial()
     char *s = NULL;
     fd = open("/proc/cmdline", O_RDONLY);
     ret = read(fd, (char*)param, 1024);
-    printf("cmdline=%s\n", param);
+    LOGI("cmdline=%s\n", param);
     s = strstr(param, "console");
     if (s == NULL) {
-        printf("no found console in cmdline\n");
+        LOGI("no found console in cmdline\n");
         free(ans);
         ans = NULL;
         return ans;
@@ -53,7 +53,7 @@ char *getSerial()
             s++;
         }
         *str = '\0';
-        printf("read console from cmdline is %s\n", ans);
+        LOGI("read console from cmdline is %s\n", ans);
     }
 
     return ans;
@@ -72,7 +72,7 @@ int readFile(DIR* dir, char* filename)
     strcat(name, "/type");
     int fd = openat(dirfd(dir), name, O_RDONLY);
     if (fd == -1) {
-        printf("Error: openat %s error %s.\n", name, strerror(errno));
+        LOGE("Error: openat %s error %s.\n", name, strerror(errno));
         return -1;
     }
     char resultBuf[10] = {'\0'};
@@ -90,7 +90,7 @@ int readFile(DIR* dir, char* filename)
         }
     }
 
-    printf("Error:no found type!\n");
+    LOGE("Error:no found type!\n");
     return -1;
 }
 
@@ -130,12 +130,12 @@ static void wait_for_device(const char* fn)
         ++tries;
         ret = stat(fn, &buf);
         if (ret) {
-            printf("stat %s try %d: %s\n", fn, tries, strerror(errno));
+            LOGI("stat %s try %d: %s\n", fn, tries, strerror(errno));
             sleep(1);
         }
     } while (ret && tries < 10);
     if (ret) {
-        printf("failed to stat %s\n", fn);
+        LOGI("failed to stat %s\n", fn);
     }
 }
 
@@ -158,9 +158,9 @@ void setFlashPoint()
     if (access(name_t, F_OK) == 0)
         setenv(SD_POINT_NAME, name_t, 1);
 
-    printf("emmc_point is %s\n", getenv(EMMC_POINT_NAME));
-    printf("sd_point is %s\n", getenv(SD_POINT_NAME));
-    printf("sd_point_2 is %s\n", getenv(SD_POINT_NAME_2));
+    LOGI("emmc_point is %s\n", getenv(EMMC_POINT_NAME));
+    LOGI("sd_point is %s\n", getenv(SD_POINT_NAME));
+    LOGI("sd_point_2 is %s\n", getenv(SD_POINT_NAME_2));
 }
 
 #define MTD_PATH "/proc/mtd"
@@ -175,12 +175,12 @@ bool isMtdDevice()
     close(fd);
     s = strstr(param, "storagemedia");
     if (s == NULL) {
-        printf("no found storagemedia in cmdline, default is not MTD.\n");
+        LOGI("no found storagemedia in cmdline, default is not MTD.\n");
         return false;
     } else {
         s = strstr(s, "=");
         if (s == NULL) {
-            printf("no found storagemedia in cmdline, default is not MTD.\n");
+            LOGI("no found storagemedia in cmdline, default is not MTD.\n");
             return false;
         }
 
@@ -190,10 +190,10 @@ bool isMtdDevice()
         }
 
         if (strncmp(s, "mtd", 3) == 0 ) {
-            printf("Now is MTD.\n");
+            LOGI("Now is MTD.\n");
             return true;
         } else if (strncmp(s, "sd", 2) == 0) {
-            printf("Now is SD.\n");
+            LOGI("Now is SD.\n");
             if ( !access(MTD_PATH, F_OK) ) {
                 fd = open(MTD_PATH, O_RDONLY);
                 ret = read(fd, (char*)param, 2048);

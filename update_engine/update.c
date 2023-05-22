@@ -266,8 +266,8 @@ static int ota_recovery_cmds (long long flash_offset, const char *dest_path)
             dd_bs = j * SECTOR_SIZE;
             if ( !(flash_offset % dd_bs) ) {
                 dd_seek  = flash_offset / dd_bs;
-                printf ( "flash offset = [%#llx] j=%d bs=%#x  seek = %#llx  result = [%s]\n",
-                         flash_offset, j, dd_bs, dd_seek, (dd_bs * dd_seek == flash_offset) ? "YES" : "NO" );
+                LOGI( "flash offset = [%#llx] j=%d bs=%#x  seek = %#llx  result = [%s]\n",
+                      flash_offset, j, dd_bs, dd_seek, (dd_bs * dd_seek == flash_offset) ? "YES" : "NO" );
                 break;
             } else {
                 dd_bs = 1;
@@ -342,7 +342,7 @@ void RK_ota_start(RK_upgrade_callback cb, RK_print_callback print_cb)
                     continue;
                 }
                 // 下载固件到分区
-                printf("update_cmd.flash_offset = %lld.\n", update_cmd[i].flash_offset);
+                LOGI("update_cmd.flash_offset = %lld.\n", update_cmd[i].flash_offset);
                 if (update_cmd[i].cmd(_url, (void*)(&update_cmd[i])) != 0) {
                     LOGE("update %s error.\n", update_cmd[i].dest_path);
                     sprintf(prompt, "[%s] upgrade fail\n", update_cmd[i].name);

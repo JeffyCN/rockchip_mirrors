@@ -437,7 +437,7 @@ void ui_print(const char *fmt, ...)
     vsnprintf(buf, 256, fmt, ap);
     va_end(ap);
 
-    fputs(buf, stdout);
+    //fputs(buf, stdout);
 
     if (!gr_draw)
         return;

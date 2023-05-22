@@ -129,7 +129,7 @@ bool isMtdDevice()
             }
         }
     }
-    LOGI("Current device is not MTD");
+    LOGI("Current device is not MTD\n");
     return false;
 }
 

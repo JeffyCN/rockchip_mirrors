@@ -24,10 +24,10 @@ void InitLogging(int argc, const char* const* argv);
 void Log(const char* file, int line, LogPriority level, const char* fmt, ...);
 
 // Log APIs
-#define LOGE(...) Log(__FILE__, __LINE__, LOG_ERROR, __VA_ARGS__)
-#define LOGW(...) Log(__FILE__, __LINE__, LOG_WARN, __VA_ARGS__)
-#define LOGI(...) Log(__FILE__, __LINE__, LOG_INFO, __VA_ARGS__)
-#define LOGD(...) Log(__FILE__, __LINE__, LOG_DEBUG, __VA_ARGS__)
-#define LOGV(...) Log(__FILE__, __LINE__, LOG_VERBOSE, __VA_ARGS__)
+#define LOGE(...) Log(__FILE__, __LINE__, LOG_ERROR, ##__VA_ARGS__)
+#define LOGW(...) Log(__FILE__, __LINE__, LOG_WARN, ##__VA_ARGS__)
+#define LOGI(...) Log(__FILE__, __LINE__, LOG_INFO, ##__VA_ARGS__)
+#define LOGD(...) Log(__FILE__, __LINE__, LOG_DEBUG, ##__VA_ARGS__)
+#define LOGV(...) Log(__FILE__, __LINE__, LOG_VERBOSE, ##__VA_ARGS__)
 
 #endif  // update_engine_CORE_LOG_H_
