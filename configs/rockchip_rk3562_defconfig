@@ -17,6 +17,7 @@
 #include "benchmark.config"
 #include "chromium.config"
 #include "debug.config"
+#include "npu2.config"
 #include "powermanager.config"
 #include "test.config"
 #include "weston.config"
