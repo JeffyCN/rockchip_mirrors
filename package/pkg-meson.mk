@@ -143,9 +143,9 @@ define inner-meson-package
 ifndef $(2)_CONFIGURE_CMDS
 ifeq ($(4),target)
 
-$(2)_CFLAGS ?= $(TARGET_CFLAGS)
-$(2)_LDFLAGS ?= $(TARGET_LDFLAGS)
-$(2)_CXXFLAGS ?= $(TARGET_CXXFLAGS)
+$(2)_CFLAGS ?= $$(TARGET_CFLAGS)
+$(2)_LDFLAGS ?= $$(TARGET_LDFLAGS)
+$(2)_CXXFLAGS ?= $$(TARGET_CXXFLAGS)
 
 ifneq ($(BR2_TOOLCHAIN_PREFER_CLANG):$$($(2)_USE_CLANG),:)
 ifeq ($$($(2)_DISALLOW_CLANG),)
@@ -159,18 +159,16 @@ ifeq ($(BR2_STRIP_strip),y)
 $(2)_STRIP ?= $(HOST_DIR)/bin/llvm-strip
 endif
 
-$(2)_COMMON_FLAGS = --sysroot=$(STAGING_DIR)
-
 $(2)_CFLAGS += --sysroot=$(STAGING_DIR)
 $(2)_LDFLAGS += --sysroot=$(STAGING_DIR)
 $(2)_CXXFLAGS += --sysroot=$(STAGING_DIR)
 endif
 endif
 
-$(2)_CC ?= $(TARGET_CC)
-$(2)_CXX ?= $(TARGET_CXX)
-$(2)_AR ?= $(TARGET_AR)
-$(2)_STRIP ?= $(TARGET_STRIP)
+$(2)_CC ?= $$(TARGET_CC)
+$(2)_CXX ?= $$(TARGET_CXX)
+$(2)_AR ?= $$(TARGET_AR)
+$(2)_STRIP ?= $$(TARGET_STRIP)
 
 # Configure package for target
 #
