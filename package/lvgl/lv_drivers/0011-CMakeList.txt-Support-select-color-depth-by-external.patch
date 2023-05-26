@@ -1,0 +1,28 @@
+From e7b298d23ae5bd8c78b6f2e3f5787d6636993bc8 Mon Sep 17 00:00:00 2001
+From: Jiajian Wu <jair.wu@rock-chips.com>
+Date: Fri, 26 May 2023 11:44:39 +0800
+Subject: [PATCH] CMakeList.txt: Support select color depth by external config
+
+Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
+---
+ CMakeLists.txt | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 48500e97..27265208 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -27,6 +27,10 @@ if (LV_DRV_USE_RGA)
+     add_definitions(-DUSE_RGA=1)
+     include_directories(${CMAKE_SYSROOT}/usr/include/rga/)
+ endif()
++if (LV_COLOR_16_SWAP)
++    add_definitions(-DLV_COLOR_16_SWAP=1)
++endif()
++add_definitions(-DLV_COLOR_DEPTH=${LV_COLOR_DEPTH})
+ 
+ add_definitions(-g -DLV_CONF_INCLUDE_SIMPLE)
+ include_directories(${CMAKE_SYSROOT}/usr/include/libdrm/)
+-- 
+2.25.1
+

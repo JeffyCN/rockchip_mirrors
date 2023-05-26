@@ -4,11 +4,34 @@ menuconfig BR2_PACKAGE_LVGL
 	help
 	  Light and Versatile Graphics Library
 
-config BR2_PACKAGE_LVGL_USE_SDL
-	bool "Use SDL"
-	default n
-	depends on BR2_PACKAGE_LVGL
-	select BR2_PACKAGE_SDL2
-	select BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
-	help
-	  LVGL use SDL for graphic acceleration
+if BR2_PACKAGE_LVGL
+	config BR2_PACKAGE_LVGL_COLOR_DEPTH
+		int "Color Depth (1, 8, 16, 32)"
+		default 32
+		range 1 32
+		help
+		  LVGL color depth
+		  1  => 1BPP
+		  8  => RGB332
+		  16 => RGB565
+		  32 => ARGB8888
+
+	config BR2_PACKAGE_LVGL_COLOR_16_SWAP
+		bool "Color 16 Swap"
+		default y
+		depends on BR2_PACKAGE_LVGL_COLOR_DEPTH=16
+		help
+		  Swap the 2 bytes of RGB565 color.
+		  Useful if the display has an 8-bit interface.
+		  (e.g. SPI)
+
+	config BR2_PACKAGE_LVGL_USE_SDL
+		bool "Use SDL"
+		default n
+		depends on BR2_PACKAGE_LVGL
+		select BR2_PACKAGE_SDL2
+		select BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
+		help
+		  LVGL use SDL for graphic acceleration
+
+endif
