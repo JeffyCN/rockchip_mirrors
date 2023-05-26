@@ -38,3 +38,26 @@ choice
 		  Enbale lvgl demo custom
 
 endchoice
+
+config BR2_PACKAGE_RK_DEMO
+	bool "RK demo"
+	default n
+	select BR2_PACKAGE_RKWIFIBT_APP
+	help
+	  Rockchip LVGL demo
+
+choice
+	prompt "LVGL demo driver select"
+	config BR2_PACKAGE_LVGL_DEMO_USE_SDL
+		bool "sdl"
+		depends on BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
+		help
+		  Use SDL for display
+
+	config BR2_PACKAGE_LVGL_DEMO_USE_DRM
+		bool "drm"
+		depends on BR2_PACKAGE_LV_DRIVERS_USE_DRM
+		help
+		  Use DRM for display
+
+endchoice
