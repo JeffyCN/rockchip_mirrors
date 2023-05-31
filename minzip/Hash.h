@@ -9,7 +9,6 @@
 #ifndef _MINZIP_HASH
 #define _MINZIP_HASH
 
-#include "inline_magic.h"
 
 #include <stdlib.h>
 #include <stdbool.h>

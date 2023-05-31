@@ -6,7 +6,7 @@
 #ifndef _MINZIP_SYSUTIL
 #define _MINZIP_SYSUTIL
 
-#include "inline_magic.h"
+#include "Hash.h"
 
 #include <sys/types.h>
 

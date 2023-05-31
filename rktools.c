@@ -76,7 +76,9 @@ int readFile(DIR* dir, char* filename)
         return -1;
     }
     char resultBuf[10] = {'\0'};
-    read(fd, resultBuf, sizeof(resultBuf));
+    if (read(fd, resultBuf, sizeof(resultBuf)) < 1) {
+        return -1;
+    }
     for (i = 0; i < strlen(resultBuf); i++) {
         if (resultBuf[i] == '\n') {
             resultBuf[i] = '\0';

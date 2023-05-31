@@ -6,7 +6,7 @@
 #ifndef _MINZIP_BITS
 #define _MINZIP_BITS
 
-#include "inline_magic.h"
+#include "Hash.h"
 
 #include <stdlib.h>
 #include <string.h>

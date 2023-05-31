@@ -851,8 +851,14 @@ main(int argc, char **argv)
     time_t start = time(NULL);
     if (access("/.rkdebug", F_OK) != 0) {
         // If these fail, there's not really anywhere to complain...
-        freopen(TEMPORARY_LOG_FILE, "a", stdout); setbuf(stdout, NULL);
-        freopen(TEMPORARY_LOG_FILE, "a", stderr); setbuf(stderr, NULL);
+        if (freopen(TEMPORARY_LOG_FILE, "a", stdout) == NULL) {
+            LOGW("freopen stdout error");
+        }
+        setbuf(stdout, NULL);
+        if (freopen(TEMPORARY_LOG_FILE, "a", stderr) == NULL) {
+            LOGE("freopen stderr error");
+        }
+        setbuf(stderr, NULL);
     }
     printf("\n");
     printf("*********************************************************\n");

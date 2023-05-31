@@ -6,8 +6,6 @@
 #ifndef _MINZIP_ZIP
 #define _MINZIP_ZIP
 
-#include "inline_magic.h"
-
 #include <stdlib.h>
 #include <utime.h>
 

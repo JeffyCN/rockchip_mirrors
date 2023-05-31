@@ -82,6 +82,7 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
 
     struct stat sb;
     char mtd_write_erase_cmd[256] = {0};
+    int system_ret;
     stat(dest_path, &sb);
     long long dd_bs = 1;
     long long dd_skip = offset;
@@ -90,7 +91,7 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
     if ((sb.st_mode & S_IFMT) == S_IFCHR) {
         memset(mtd_write_erase_cmd, 0, sizeof(mtd_write_erase_cmd) / sizeof(mtd_write_erase_cmd[0]));
         sprintf(mtd_write_erase_cmd, "flash_erase %s 0 0", dest_path);
-        system(mtd_write_erase_cmd);
+        system_ret = system(mtd_write_erase_cmd);
 
         dd_bs = get_gcd(offset, size);
         dd_skip = offset / dd_bs;
@@ -99,7 +100,7 @@ static int mtd_write(char *src_path, long long offset, long long size, long long
         memset(mtd_write_erase_cmd, 0, sizeof(mtd_write_erase_cmd) / sizeof(mtd_write_erase_cmd[0]));
         sprintf(mtd_write_erase_cmd, "dd if=%s bs=%lld skip=%lld count=%lld | nandwrite -p %s",
                 src_path, dd_bs, dd_skip, dd_count, dest_path );
-        system(mtd_write_erase_cmd);
+        system_ret = system(mtd_write_erase_cmd);
     } else {
         LOGE("flash_erase: can't erase MTD \"%s\"\n", dest_path);
         return -1;
@@ -273,7 +274,9 @@ int flash_normal(char *src_path, void *pupdate_cmd)
         }
 
         lseek(fd, 0, SEEK_END);
-        write(fd, pattern, strlen(pattern));
+        if (write(fd, pattern, strlen(pattern)) != strlen(pattern)) {
+            LOGW("write len error");
+        }
         close(fd);
 
         sync();

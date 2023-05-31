@@ -28,7 +28,6 @@ OBJ += noui.o
 else
 OBJ += ui.o\
 	minzip/Hash.o \
-	minzip/Inlines.o \
 	minzip/SysUtil.o \
 	minzip/Zip.o \
 	minui/events.o \

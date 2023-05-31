@@ -34,8 +34,10 @@ bool checkdata_mtd(const char *dest_path, unsigned char* out_md5sum, long long o
     memset(nanddump_cmd, 0, sizeof(nanddump_cmd) / sizeof(nanddump_cmd[0]));
     sprintf(nanddump_cmd, "nanddump --bb=skipbad -l %lld -s %lld %s | md5sum > %s",
             checkSize, offset, dest_path, TMP_MD5SUM_NAME);
-    system(nanddump_cmd);
-
+    if (system(nanddump_cmd) == -1) {
+        LOGE("system cmd error");
+        return -1;
+    }
     int dest_fd = open(TMP_MD5SUM_NAME, O_RDONLY );
     if (dest_fd == 0) {
         LOGE("open file failed %s", TMP_MD5SUM_NAME);

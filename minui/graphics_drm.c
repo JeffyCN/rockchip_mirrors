@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+#define _GNU_SOURCE  //enable GUN extension for asprintf
 #include <drm_fourcc.h>
 #include <fcntl.h>
 #include <stdbool.h>

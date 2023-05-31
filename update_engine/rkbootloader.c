@@ -486,7 +486,9 @@ int readCustomMiscCmdline(void)
 
     readCustomMisc((char *)buf, len + 2);
 
-    ftruncate(fd, 0);
+    if (ftruncate(fd, 0) == -1) {
+        LOGW("ERROR :failed to ftruncate");
+    }
     lseek(fd, 0, SEEK_SET);
     ret = write(fd, &buf[2], len);
     if (ret == len) {

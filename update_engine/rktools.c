@@ -144,7 +144,10 @@ int getCurrentSlot()
 {
     char cmdline[CMDLINE_LENGTH];
     int fd = open("/proc/cmdline", O_RDONLY);
-    read(fd, (char*)cmdline, CMDLINE_LENGTH);
+    if (read(fd, (char*)cmdline, CMDLINE_LENGTH) < 1) {
+        close(fd);
+        return -1;
+    }
     close(fd);
     char *slot = strstr(cmdline, "android_slotsufix");
     if (slot == NULL) slot = strstr(cmdline, "androidboot.slot_suffix");

@@ -79,7 +79,9 @@ int do_rk_updateEngine(const char *binary, const char *path)
     char *update = "--update";
     char *update_sdboot = "--update=sdboot";
     int pipefd[2];
-    pipe(pipefd);
+    if (pipe(pipefd) == -1) {
+        LOGE("pipe error");
+    }
 
     //updateEngine --update --image_url=path --partition=0x3a0000
     char *args[6];
@@ -136,7 +138,9 @@ int do_rk_update(const char *binary, const char *path)
 {
     LOGI("[%s] start with main.\n", __func__);
     int pipefd[2];
-    pipe(pipefd);
+    if (pipe(pipefd) == -1) {
+        LOGE("pipe error");
+    }
 
     char* args[6];
     args[0] = (char* )binary;
