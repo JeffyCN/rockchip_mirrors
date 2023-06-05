@@ -1,4 +1,4 @@
-From d96e7ef0bbaeeb0aee7f240c598591818acae27b Mon Sep 17 00:00:00 2001
+From 4d890ce02a5fe7657140a2767cdd27b5a646cfa9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
 Subject: [PATCH 17/93] backend-drm: Support mirror mode
@@ -13,13 +13,13 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  include/libweston/libweston.h         |   4 +
  libweston/backend-drm/drm-gbm.c       |   4 +-
  libweston/backend-drm/drm-internal.h  |  10 +
- libweston/backend-drm/drm.c           | 330 +++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c           | 332 +++++++++++++++++++++++++-
  libweston/backend-drm/meson.build     |   3 +-
  libweston/backend-drm/state-propose.c |  23 +-
  libweston/compositor.c                |  24 +-
  libweston/input.c                     |   7 +
  meson.build                           |   5 +
- 11 files changed, 401 insertions(+), 21 deletions(-)
+ 11 files changed, 403 insertions(+), 21 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
 index 6eb9775..2d2fd83 100644
@@ -123,7 +123,7 @@ index af82922..037c937 100644
  
  void
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index a2f215f..159abee 100644
+index a2f215f..ec7e9be 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -68,6 +68,11 @@
@@ -138,7 +138,7 @@ index a2f215f..159abee 100644
  static const char default_seat[] = "seat0";
  
  static inline bool
-@@ -86,6 +91,118 @@ drm_head_is_external(struct drm_head *head)
+@@ -86,6 +91,120 @@ drm_head_is_external(struct drm_head *head)
  	}
  };
  
@@ -164,10 +164,12 @@ index a2f215f..159abee 100644
 +static inline RgaSURF_FORMAT
 +rga_get_format(const struct pixel_format_info *format)
 +{
-+	switch (format->bpp) {
-+	case 32:
++	switch (format->format) {
++	case DRM_FORMAT_XRGB8888:
 +		return RK_FORMAT_BGRX_8888;
-+	case 16:
++	case DRM_FORMAT_ARGB8888:
++		return RK_FORMAT_BGRA_8888;
++	case DRM_FORMAT_RGB565:
 +		return RK_FORMAT_RGB_565;
 +	default:
 +		return RK_FORMAT_UNKNOWN;
@@ -257,7 +259,7 @@ index a2f215f..159abee 100644
  static void
  drm_backend_update_outputs(struct drm_backend *b)
  {
-@@ -95,6 +212,28 @@ drm_backend_update_outputs(struct drm_backend *b)
+@@ -95,6 +214,28 @@ drm_backend_update_outputs(struct drm_backend *b)
  		return;
  
  	primary = b->primary_head->base.output;
@@ -286,7 +288,7 @@ index a2f215f..159abee 100644
  	if (!primary)
  		return;
  
-@@ -405,6 +544,69 @@ drm_output_render_pixman(struct drm_output_state *state,
+@@ -405,6 +546,69 @@ drm_output_render_pixman(struct drm_output_state *state,
  	return drm_fb_ref(output->dumb[output->current_image]);
  }
  
@@ -356,7 +358,7 @@ index a2f215f..159abee 100644
  void
  drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  {
-@@ -417,10 +619,13 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -417,10 +621,13 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  		&scanout_plane->props[WDRM_PLANE_FB_DAMAGE_CLIPS];
  	struct drm_backend *b = device->backend;
  	struct drm_mode *mode;
@@ -371,7 +373,7 @@ index a2f215f..159abee 100644
  
  	/* If we already have a client buffer promoted to scanout, then we don't
  	 * want to render. */
-@@ -428,6 +633,35 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -428,6 +635,35 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  	if (scanout_state->fb)
  		return;
  
@@ -407,7 +409,7 @@ index a2f215f..159abee 100644
  	/*
  	 * If we don't have any damage on the primary plane, and we already
  	 * have a renderer buffer active, we can reuse it; else we pass
-@@ -447,24 +681,86 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -447,24 +683,86 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  		fb = drm_output_render_gl(state, damage);
  	}
  
@@ -501,7 +503,7 @@ index a2f215f..159abee 100644
  
  	pixman_region32_subtract(&c->primary_plane.damage,
  				 &c->primary_plane.damage, damage);
-@@ -500,6 +796,12 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -500,6 +798,12 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  				  &scanout_state->damage_blob_id);
  
  	pixman_region32_fini(&scanout_damage);
@@ -514,7 +516,7 @@ index a2f215f..159abee 100644
  }
  
  static int
-@@ -1347,8 +1649,8 @@ drm_output_fini_pixman(struct drm_output *output)
+@@ -1347,8 +1651,8 @@ drm_output_fini_pixman(struct drm_output *output)
  	/* Destroying the Pixman surface will destroy all our buffers,
  	 * regardless of refcount. Ensure we destroy them here. */
  	if (!b->shutting_down &&
@@ -525,7 +527,7 @@ index a2f215f..159abee 100644
  		drm_plane_reset_state(output->scanout_plane);
  	}
  
-@@ -2067,6 +2369,8 @@ drm_output_destroy(struct weston_output *base)
+@@ -2067,6 +2371,8 @@ drm_output_destroy(struct weston_output *base)
  
  	assert(output->hdr_output_metadata_blob_id == 0);
  
@@ -534,7 +536,7 @@ index a2f215f..159abee 100644
  	free(output);
  }
  
-@@ -3442,6 +3746,12 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3442,6 +3748,12 @@ drm_backend_create(struct weston_compositor *compositor,
  	else
  		b->resize_freeze_ms = DRM_RESIZE_FREEZE_MS;
  
@@ -610,7 +612,7 @@ index 967b6bd..69d49bc 100644
  		state = drm_output_propose_state(output_base, pending_state, mode);
  		if (!state) {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 707d1a0..07743ff 100644
+index 2125f1a..eea8da2 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1426,7 +1426,7 @@ weston_view_assign_output(struct weston_view *ev)

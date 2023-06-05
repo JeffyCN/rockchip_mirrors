@@ -1,4 +1,4 @@
-From dcd6564a4fc4eef7c5ebcdaab6bc6f4e74c531b5 Mon Sep 17 00:00:00 2001
+From 290cda08c17b59459374bf2fffa24a96cd8200d3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 12 Jan 2022 18:22:03 +0800
 Subject: [PATCH 58/93] pixman-renderer: Allow DRM_FORMAT_ABGR8888 and
@@ -10,10 +10,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 6 insertions(+)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 4c69321..9a0f2c1 100644
+index 66d4518..216119d 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1671,6 +1671,12 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
+@@ -1673,6 +1673,12 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
  		case DRM_FORMAT_XRGB8888:
  			pixman_format = PIXMAN_x8r8g8b8;
  			break;

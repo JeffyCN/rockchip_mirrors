@@ -1,4 +1,4 @@
-From 1573d58b2a9612946e9b9fc1b8ebb94ad53dc620 Mon Sep 17 00:00:00 2001
+From ed85c816fe7f37d58743ce208324519ce65795ca Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
 Subject: [PATCH 42/93] backend-drm: Support modifier
@@ -26,10 +26,10 @@ index e175f16..12ee031 100644
  
  struct drm_connector {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 8ebee93..0a8b878 100644
+index e6d6bf4..0fe9525 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1258,6 +1258,42 @@ err:
+@@ -1260,6 +1260,42 @@ err:
  	return NULL;
  }
  
@@ -72,7 +72,7 @@ index 8ebee93..0a8b878 100644
  /**
   * Find, or create, a special-purpose plane
   *
-@@ -1272,7 +1308,10 @@ drm_output_find_special_plane(struct drm_device *device,
+@@ -1274,7 +1310,10 @@ drm_output_find_special_plane(struct drm_device *device,
  {
  	struct drm_backend *b = device->backend;
  	struct drm_plane *plane;
@@ -83,7 +83,7 @@ index 8ebee93..0a8b878 100644
  	wl_list_for_each(plane, &device->plane_list, link) {
  		struct weston_output *base;
  		bool found_elsewhere = false;
-@@ -1304,10 +1343,22 @@ drm_output_find_special_plane(struct drm_device *device,
+@@ -1306,10 +1345,22 @@ drm_output_find_special_plane(struct drm_device *device,
  		if (found_elsewhere)
  			continue;
  
@@ -106,7 +106,7 @@ index 8ebee93..0a8b878 100644
  	return NULL;
  }
  
-@@ -4268,9 +4319,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4270,9 +4321,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	compositor->backend = &b->base;
  
@@ -116,7 +116,7 @@ index 8ebee93..0a8b878 100644
  	/* Check if we run drm-backend using a compatible launcher */
  	compositor->launcher = weston_launcher_connect(compositor, seat_id, true);
  	if (compositor->launcher == NULL) {
-@@ -4303,15 +4351,42 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4305,15 +4353,42 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
@@ -161,7 +161,7 @@ index 8ebee93..0a8b878 100644
  		}
  	}
  
-@@ -4325,21 +4400,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4327,21 +4402,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	weston_setup_vt_switch_bindings(compositor);
  

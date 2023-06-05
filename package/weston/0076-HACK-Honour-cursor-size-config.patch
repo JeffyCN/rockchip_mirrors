@@ -1,7 +1,7 @@
-From 95ab257860d41f6d0cc688c6929e35582c8a6389 Mon Sep 17 00:00:00 2001
+From c1d56102c51593ebab9b690bd11423f43aa9acde Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
-Subject: [PATCH 76/92] HACK: Honour cursor-size config
+Subject: [PATCH 76/93] HACK: Honour cursor-size config
 
 By scaling the cursor surface.
 
@@ -61,10 +61,10 @@ index 9d9c5c6..f6f4ecc 100644
  		/*
  		 * If src_width != wl_fixed_from_int(-1),
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index d8b8623..2506ef8 100644
+index b92e364..56df760 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -4366,6 +4366,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4368,6 +4368,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
