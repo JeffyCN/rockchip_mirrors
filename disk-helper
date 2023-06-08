@@ -43,7 +43,12 @@ device_from_attr()
 	done
 
 	# Fallback to /dev/block/by-name
-	echo /dev/block/by-name/$1
+	if [ -b /dev/block/by-name/$1 ]; then
+		echo /dev/block/by-name/$1
+		return
+	fi
+
+	echo $1
 }
 
 prepare_ubi()
@@ -293,7 +298,12 @@ prepare_part()
 
 	# Find real dev for root dev
 	if is_rootfs; then
-		DEV=/dev/block/$(mountpoint -d /)
+		DEVNO=$(mountpoint -d /)
+		if [ -b "/dev/block/$DEVNO" ]; then
+			DEV=/dev/block/$DEVNO
+		else
+			DEV=$(lsblk -pr | grep -w "$DEVNO" | cut -d' ' -f1)
+		fi
 	fi
 
 	DEV=$(realpath $DEV 2>/dev/null)
