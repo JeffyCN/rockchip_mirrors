@@ -15,6 +15,9 @@ export GST_INSPECT_NO_COLORS=1
 # Convert to NV12(using RGA) when output format is NV12_10.
 # export GST_MPP_DEC_DISABLE_NV12_10=1
 
+# Convert to NV12(using RGA) when output format is NV16_10.
+# export GST_MPP_DEC_DISABLE_NV16_10=1
+
 # Convert to NV12(using RGA) when output format is not NV12.
 # export GST_MPP_VIDEODEC_DEFAULT_FORMAT=NV12
 
