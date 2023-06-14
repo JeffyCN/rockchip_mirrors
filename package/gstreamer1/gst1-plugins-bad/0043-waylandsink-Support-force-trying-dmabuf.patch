@@ -1,4 +1,4 @@
-From 29cb7dd9ccb89c04a476349d9818299cfd2afe2c Mon Sep 17 00:00:00 2001
+From e4f3a0e8236c9130b8d1258dd51a22c2921c2d09 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 14 Jun 2023 10:04:42 +0800
 Subject: [PATCH 43/43] waylandsink: Support force trying dmabuf
@@ -19,14 +19,14 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 24 insertions(+), 12 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 591f8e4..16bf7d5 100644
+index 591f8e4..be74c95 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -252,6 +252,8 @@ gst_wayland_sink_class_init (GstWaylandSinkClass * klass)
  static void
  gst_wayland_sink_init (GstWaylandSink * self)
  {
-+  gchar *env;
++  const gchar *env;
 +
    g_mutex_init (&self->display_lock);
    g_mutex_init (&self->render_lock);
