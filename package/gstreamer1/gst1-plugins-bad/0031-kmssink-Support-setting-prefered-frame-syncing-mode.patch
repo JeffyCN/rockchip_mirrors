@@ -1,7 +1,7 @@
-From ed5a00ecfcc75962b0656002416a1d9c154177e0 Mon Sep 17 00:00:00 2001
+From 1c4211f51e94b64bf9b5ef6689452b71eae8ad89 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 25 Feb 2022 17:48:58 +0800
-Subject: [PATCH 31/41] kmssink: Support setting prefered frame syncing mode
+Subject: [PATCH 31/43] kmssink: Support setting prefered frame syncing mode
 
 Tested with:
 gst-launch-1.0 videotestsrc ! kmssink sync-mode=vblank
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 62 insertions(+), 3 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 3740e57..0db743c 100644
+index 3740e57..bab6ba8 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -107,11 +107,14 @@ enum
@@ -27,7 +27,7 @@ index 3740e57..0db743c 100644
  
  static GParamSpec *g_properties[PROP_N] = { NULL, };
  
-+static GstKMSSyncMode DEFAULT_SYNC_MODE = GST_KMS_SYNC_AUTO;
++#define DEFAULT_SYNC_MODE GST_KMS_SYNC_AUTO
 +
  #ifdef HAVE_DRM_HDR
  enum hdmi_metadata_type
@@ -91,7 +91,7 @@ index 3740e57..0db743c 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -2539,6 +2559,7 @@ gst_kms_sink_init (GstKMSSink * sink)
+@@ -2539,11 +2559,15 @@ gst_kms_sink_init (GstKMSSink * sink)
    sink->saved_zpos = -1;
    sink->can_scale = TRUE;
    sink->keep_aspect = TRUE;
@@ -99,7 +99,15 @@ index 3740e57..0db743c 100644
    gst_poll_fd_init (&sink->pollfd);
    sink->poll = gst_poll_new (TRUE);
    gst_video_info_init (&sink->vinfo);
-@@ -2556,6 +2577,25 @@ gst_kms_sink_init (GstKMSSink * sink)
+   sink->skip_vsync = FALSE;
+ 
++  if (g_getenv ("KMSSINK_DISABLE_VSYNC"))
++    sink->skip_vsync = TRUE;
++
+ #ifdef HAVE_DRM_HDR
+   sink->no_infoframe = FALSE;
+   sink->has_hdr_info = FALSE;
+@@ -2556,6 +2580,25 @@ gst_kms_sink_init (GstKMSSink * sink)
  #endif
  }
  
@@ -125,13 +133,10 @@ index 3740e57..0db743c 100644
  static void
  gst_kms_sink_class_init (GstKMSSinkClass * klass)
  {
-@@ -2752,6 +2792,15 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+@@ -2752,6 +2795,12 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
        "When enabled, scaling will respect original aspect ratio", TRUE,
        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  
-+  if (g_getenv ("KMSSINK_DISABLE_VSYNC"))
-+    DEFAULT_SYNC_MODE = GST_KMS_SYNC_NONE;
-+
 +  g_properties[PROP_SYNC_MODE] =
 +      g_param_spec_enum ("sync-mode", "Sync mode",
 +      "Prefered frame syncing mode",
