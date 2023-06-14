@@ -1,7 +1,7 @@
-From db85c04dfa356bb61c64a738309f511f8243d557 Mon Sep 17 00:00:00 2001
+From e41dc6584d0abbb7b61ab132625e96d9b1d1cd8f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Jun 2020 10:11:42 +0800
-Subject: [PATCH 09/41] waylandsink: Support setting toplevel window position
+Subject: [PATCH 09/43] waylandsink: Support setting toplevel window position
 
 Needs hacked wayland server, tested with:
 	waylandsink render-rectangle="<100,200,300,400>"
@@ -9,11 +9,11 @@ Needs hacked wayland server, tested with:
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  ext/gtk/gstgtkwaylandsink.c        |  6 +++---
- ext/wayland/gstwaylandsink.c       | 25 +++++++++++++++----------
+ ext/wayland/gstwaylandsink.c       | 27 ++++++++++++++++-----------
  ext/wayland/gstwaylandsink.h       |  2 ++
  gst-libs/gst/wayland/gstwlwindow.c | 26 ++++++++++++++++++++------
  gst-libs/gst/wayland/gstwlwindow.h |  5 +++--
- 5 files changed, 43 insertions(+), 21 deletions(-)
+ 5 files changed, 44 insertions(+), 22 deletions(-)
 
 diff --git a/ext/gtk/gstgtkwaylandsink.c b/ext/gtk/gstgtkwaylandsink.c
 index e4dd06e..9030982 100644
@@ -47,7 +47,7 @@ index e4dd06e..9030982 100644
    /* Make subsurfaces syncronous during resizes.
     * Unfortunately GTK/GDK does not provide easier to use signals.
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 5d2721c..1870ba3 100644
+index 5d2721c..5ee0b9f 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -294,7 +294,8 @@ gst_wayland_sink_set_property (GObject * object,
@@ -82,14 +82,15 @@ index 5d2721c..1870ba3 100644
 -  }
  
 -  GST_DEBUG_OBJECT (self, "window geometry changed to (%d, %d) %d x %d",
+-      x, y, w, h);
+-  gst_wl_window_set_render_rectangle (self->window, x, y, w, h);
 +  if (self->window) {
 +    GST_DEBUG_OBJECT (self, "window geometry changed to (%d, %d) %d x %d",
 +        x, y, w, h);
 +    gst_wl_window_set_render_rectangle (self->window, x, y, w, h, TRUE);
 +  } else {
 +    GST_DEBUG_OBJECT (self, "window geometry changed to (%d, %d) %d x %d",
-       x, y, w, h);
--  gst_wl_window_set_render_rectangle (self->window, x, y, w, h);
++        x, y, w, h);
 +    self->render_rectangle.x = x;
 +    self->render_rectangle.y = y;
 +    self->render_rectangle.w = w;

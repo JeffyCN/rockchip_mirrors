@@ -1,3 +1,5 @@
+#!/bin/sh
+
 export GST_DEBUG_NO_COLOR=1
 export GST_INSPECT_NO_COLORS=1
 
@@ -28,6 +30,9 @@ export GST_INSPECT_NO_COLORS=1
 
 # Put video surface above UI window in waylandsink.
 # export WAYLANDSINK_PLACE_ABOVE=1
+
+# Force trying dmabuf in waylandsink
+export WAYLANDSINK_FORCE_DMABUF=1
 
 # Preferred formats for V4L2
 export GST_V4L2_PREFERRED_FOURCC=NV12:YU12:NV16:YUY2
