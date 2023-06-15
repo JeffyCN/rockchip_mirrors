@@ -778,7 +778,7 @@ target-finalize: $(PACKAGES) $(TARGET_DIR) host-finalize
 		\( -name '*.la' -o -name '*.prl' \) -print0 | xargs -0 rm -f
 ifneq ($(BR2_PACKAGE_GCC_TARGET),y)
 	rm -rf $(TARGET_DIR)/usr/include \
-		$(TARGET_DIR)/usr/lib/pkgconfig $(TARGET_DIR)/usr/share/pkgconfig \
+		$(TARGET_DIR)/usr/lib/pkgconfig $(TARGET_DIR)/usr/share/pkgconfig
 	find $(TARGET_DIR)/lib/ $(TARGET_DIR)/usr/lib/ $(TARGET_DIR)/usr/libexec/ \
 		-name '*.a' -print0 | xargs -0 rm -f
 endif
