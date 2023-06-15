@@ -8,17 +8,30 @@ set -e
 # Usage: savedefconfig <output defconfig> [input defconfig]
 savedefconfig()
 {
-	# Save original .config
-	gzip -fk "$CONFIG" &>/dev/null || true
+	TARGET="$1"
+	TMP_CONFIG="${CONFIG}.tmp"
 
-	[ -z "$2" ] || \
-		"$SCRIPT_DIR/parse_defconfig.sh" "$2" "$CONFIG" > /dev/null
+	if [ "$2" ]; then
+		"$SCRIPT_DIR/parse_defconfig.sh" "$2" "$TMP_CONFIG" >/dev/null
+	else
+		cp -f "$CONFIG" "$TMP_CONFIG"
+	fi
 
-	echo "BR2_DEFCONFIG=\"$1\"" >> "$CONFIG"
-	HOSTCC=gcc make O="$OUTPUT_DIR" savedefconfig >/dev/null
+	sed -i "/BR2_DEFCONFIG/d" "$TMP_CONFIG"
+	echo "BR2_DEFCONFIG=\"$TARGET\"" >> "$TMP_CONFIG"
 
-	# Restore original .config
-	gunzip -fk "$CONFIG.gz" &>/dev/null || true
+	# Based on buildroot/Makefile's savedefconfig
+	BR2_DEFCONFIG="$TARGET" BR2_CONFIG="$TMP_CONFIG" \
+		KCONFIG_AUTOCONFIG=$CONFIG_DIR/auto.conf \
+		KCONFIG_AUTOHEADER=$CONFIG_DIR/autoconf.h \
+		KCONFIG_TRISTATE=$CONFIG_DIR/tristate.config \
+		BASE_DIR="$OUTPUT_DIR" SKIP_LEGACY= \
+		HOST_GCC_VERSION="$HOST_GCC_VERSION" \
+		CUSTOM_KERNEL_VERSION="$CUSTOM_KERNEL_VERSION" \
+		HOSTARCH="$HOSTARCH" BR2_VERSION_FULL="$BR2_VERSION_FULL" \
+		$CONFIG_DIR/conf --savedefconfig="$TARGET" \
+		Config.in >/dev/null
+	sed -i '/^BR2_DEFCONFIG=/d' "$TARGET"
 }
 
 BOARD="$(basename "${1%_defconfig}")"
@@ -39,6 +52,15 @@ ORIG_DEFCONFIG="$OUTPUT_DIR/.defconfig"
 BASE_DEFCONFIG="$OUTPUT_DIR/.base_defconfig"
 NEW_DEFCONFIG="$OUTPUT_DIR/.new_defconfig"
 FRAGMENT="$OUTPUT_DIR/.fragment"
+
+CONFIG_DIR="$OUTPUT_DIR/build/buildroot-config"
+HOST_GCC_VERSION="$(gcc --version | head -n 1 | xargs -n 1 | \
+	tail -n 1 | cut -d'.' -f1)"
+CUSTOM_KERNEL_VERSION="$(head -n 2 "$BUILDROOT_DIR/../kernel/Makefile" | \
+	cut -d' ' -f3 | paste -sd'.')"
+HOSTARCH="$(uname -m)"
+BR2_VERSION_FULL="$(grep "export BR2_VERSION := " \
+	"$BUILDROOT_DIR/Makefile" | xargs -n 1 | tail -n 1)"
 
 # Generate original defconfig
 if [ ! -r "$CONFIG" ]; then
@@ -121,7 +143,7 @@ fi
 
 # Strip unneeded config resets
 TEMP_FILE=$(mktemp)
-for CFG in $(grep " is reset to default$" "$DEFCONFIG") ; do
+for CFG in $(grep " is reset to default$" "$DEFCONFIG" | cut -d' ' -f2); do
 	grep -wv "$CFG" "$DEFCONFIG" > $TEMP_FILE
 	savedefconfig "$NEW_DEFCONFIG" $TEMP_FILE
 	if ! diff "$ORIG_DEFCONFIG" "$NEW_DEFCONFIG" | grep -q ""; then
