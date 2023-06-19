@@ -97,6 +97,11 @@ main() {
         # urlencode must be "urlencode"
         [ "${urlencode}" != "urlencode" ] && urlencode=""
 
+	# Use kgithub instead of github when unable to access google
+	if ! ping google.com -c 1 -W 1 &>/dev/null; then
+		uri=${uri/\/\/github.com\//\/\/kgithub.com\/}
+	fi
+
         # tmpd is a temporary directory in which backends may store
         # intermediate by-products of the download.
         # tmpf is the file in which the backends should put the downloaded
