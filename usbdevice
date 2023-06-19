@@ -19,8 +19,7 @@
 # #!/bin/sh
 # UVC_INSTANCES="uvc.gs1 uvc.gs2"
 
-# Uncomment below to see more logs
-# set -x
+[ -z "$DEBUG" ] || set -x
 
 # Load default env variables from profiles
 . /etc/profile
@@ -176,7 +175,7 @@ usb_start_daemon()
 		while usb_is_enabled; do
 			# Don't spawn after stopped
 			[ ! -f $TAG_FILE ] ||
-				start-stop-daemon -Sqx $@ || true
+				/sbin/start-stop-daemon -Sqx $@ || true
 			sleep .5
 		done
 	}&
@@ -189,7 +188,7 @@ usb_stop_daemon()
 
 	# Stop and disable spawn
 	rm -f $TAG_FILE
-	start-stop-daemon -Kqox $@
+	/sbin/start-stop-daemon -Kqox $@
 }
 
 usb_load_config()
@@ -614,10 +613,12 @@ fi
 exec 3<$0
 flock -x 3
 
-echo "Starting $0 ${ACTION}, log saved to $LOG_FILE"
+if [ -z "$DEBUG" ]; then
+	echo "Starting $0 ${ACTION}, log saved to $LOG_FILE"
 
-# Redirect outputs to log file
-exec >>$LOG_FILE 2>&1
+	# Redirect outputs to log file
+	exec >>$LOG_FILE 2>&1
+fi
 
 usb_msg "Handling ${ACTION} request"
 
