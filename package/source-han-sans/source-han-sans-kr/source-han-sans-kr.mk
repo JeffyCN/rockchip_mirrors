@@ -24,7 +24,8 @@ endef
 endif
 
 define SOURCE_HAN_SANS_KR_INSTALL_TARGET_CMDS
-	cp -r $(@D)/SourceHanSansKR $(TARGET_DIR)/usr/share/fonts/source-han-sans-kr
+	rsync -a $(@D)/SubsetOTF/*/ \
+		$(TARGET_DIR)/usr/share/fonts/source-han-sans-kr/
 	$(SOURCE_HAN_SANS_KR_INSTALL_FONTCONFIG_CONF)
 endef
 
