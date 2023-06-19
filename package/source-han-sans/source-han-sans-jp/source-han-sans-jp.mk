@@ -24,7 +24,8 @@ endef
 endif
 
 define SOURCE_HAN_SANS_JP_INSTALL_TARGET_CMDS
-	cp -r $(@D)/SourceHanSansJP $(TARGET_DIR)/usr/share/fonts/source-han-sans-jp
+	rsync -a $(@D)/SubsetOTF/*/ \
+		$(TARGET_DIR)/usr/share/fonts/source-han-sans-jp/
 	$(SOURCE_HAN_SANS_JP_INSTALL_FONTCONFIG_CONF)
 endef
 
