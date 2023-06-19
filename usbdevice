@@ -62,7 +62,7 @@ usb_msg()
 
 usb_pid()
 {
-	case "$(echo $USB_FUNCS | xargs -n 1 | sort | paste -sd'-')" in
+	case "$(echo $USB_FUNCS | xargs -n 1 | sort | xargs | tr ' ' '-')" in
 		ums)		echo 0x0000;;
 		mtp)		echo 0x0001;;
 		uvc)		echo 0x0005;;
