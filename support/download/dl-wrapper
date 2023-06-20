@@ -19,9 +19,25 @@ set -e
 
 export BR_BACKEND_DL_GETOPTS=":hc:d:o:n:N:H:lru:qf:e"
 
+check_kgithub() {
+    if wget -q --delete-after \
+        https://raw.kgithub.com/git/git/master/README.md; then
+        if git ls-remote https://kgithub.com/git/git &>/dev/null; then
+            return 0
+        fi
+    fi
+
+    echo -e "\e[35m"
+    echo "Your DNS doesn't support kgithub.com"
+    echo "Please modify it:"
+    echo "sudo sed -i '\$a 43.154.68.204\tkgithub.com' /etc/hosts"
+    echo "sudo sed -i '\$a 43.155.83.75\traw.kgithub.com objects.githubusercontent.kgithub.com' /etc/hosts"
+    echo -e "\e[0m"
+}
+
 main() {
     local OPT OPTARG
-    local backend output hfile large_file recurse quiet rc
+    local backend output hfile large_file recurse quiet rc use_kgithub
     local -a uris
 
     # Parse our options; anything after '--' is for the backend
@@ -47,6 +63,13 @@ main() {
 
     # Forget our options, and keep only those for the backend
     shift $((OPTIND-1))
+
+    if echo "${uris[@]}" | grep -wq github.com; then
+        # Use kgithub instead of github when unable to access google
+        if ! ping google.com -c 1 -W 1 &>/dev/null; then
+            use_kgithub=1
+        fi
+    fi
 
     if [ -z "${output}" ]; then
         error "no output specified, use -o\n"
@@ -99,11 +122,10 @@ main() {
         # urlencode must be "urlencode"
         [ "${urlencode}" != "urlencode" ] && urlencode=""
 
-	# Use kgithub instead of github when unable to access google
-	if ! ping google.com -c 1 -W 1 &>/dev/null; then
-		uri=${uri/\/\/github.com\//\/\/kgithub.com\/}
-		uri=${uri/\/\/raw.githubusercontent.com\//\/\/raw.kgithub.com\/}
-	fi
+        if [ "$use_kgithub" ]; then
+            uri=${uri/\/\/github.com\//\/\/kgithub.com\/}
+            uri=${uri/\/\/raw.githubusercontent.com\//\/\/raw.kgithub.com\/}
+        fi
 
         # tmpd is a temporary directory in which backends may store
         # intermediate by-products of the download.
@@ -179,6 +201,7 @@ main() {
     # We tried every URI possible, none seems to work or to check against the
     # available hash. *ABORT MISSION*
     if [ "${download_and_check}" -eq 0 ]; then
+        [ -z "$use_kgithub" ] || check_kgithub
         rm -rf "${tmpd}"
         exit 1
     fi
