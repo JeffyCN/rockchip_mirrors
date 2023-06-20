@@ -100,6 +100,7 @@ main() {
 	# Use kgithub instead of github when unable to access google
 	if ! ping google.com -c 1 -W 1 &>/dev/null; then
 		uri=${uri/\/\/github.com\//\/\/kgithub.com\/}
+		uri=${uri/\/\/raw.githubusercontent.com\//\/\/raw.kgithub.com\/}
 	fi
 
         # tmpd is a temporary directory in which backends may store
