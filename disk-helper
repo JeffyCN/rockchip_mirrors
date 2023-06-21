@@ -294,7 +294,9 @@ convert_mount_opts()
 prepare_part()
 {
 	# Ignore external storages
-	echo $MOUNT_POINT | grep -q "^\/mnt\/" && return 1
+	case "$MOUNT_POINT" in
+		/mnt/* | /media/*) return 1 ;;
+	esac
 
 	# Find real dev for root dev
 	if is_rootfs; then
