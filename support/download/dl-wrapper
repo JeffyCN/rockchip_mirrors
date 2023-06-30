@@ -27,6 +27,14 @@ check_kgithub() {
         fi
     fi
 
+    if grep -q kgithub /etc/hosts; then
+        echo -e "\e[35m"
+        echo "Oops! The kgithub is down!"
+        echo "Please setup a VPN or export BR2_NO_KGITHUB=1."
+        echo -e "\e[0m"
+        return 0
+    fi
+
     echo -e "\e[35m"
     echo "Your DNS doesn't support kgithub.com"
     echo "Please modify it:"
@@ -62,9 +70,14 @@ main() {
     # Forget our options, and keep only those for the backend
     shift $((OPTIND-1))
 
-    if echo "${uris[@]}" | grep -wq github.com; then
+    if [ -z "BR2_NO_KGITHUB" ] && echo "${uris[@]}" | grep -wq github.com; then
         # Use kgithub instead of github when unable to access google
         if ! ping google.com -c 1 -W 1 &>/dev/null; then
+            echo -e "\e[35m"
+            echo "Using kgithub instead of github since unable to access google.com!"
+            echo "Setup a VPN or export BR2_NO_KGITHUB=1 to disable this."
+            echo -e "\e[0m"
+
             use_kgithub=1
         fi
     fi
