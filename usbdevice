@@ -137,18 +137,23 @@ usb_try_symlink()
 usb_write()
 {
 	if echo "x$1" | grep -q "^x-"; then
-		OPTS=$1
+		OPTS="$1"
 		shift
 	fi
 
-	FILE=$1
+	FILE="$1"
 	shift
 
-	if [ -r $FILE ] && [ "$(cat $FILE)" = "$@" ]; then
+	if [ ! -w "$FILE" ]; then
+		echo "$FILE not writable!"
+		return 1
+	fi
+
+	if [ -r "$FILE" ] && [ "$(cat "$FILE")" = "$*" ]; then
 		return 0
 	fi
 
-	echo $OPTS "$@" > $FILE
+	echo $OPTS $@ > "$FILE"
 }
 
 usb_try_write()
@@ -520,7 +525,15 @@ usb_prepare()
 	fi
 
 	USB_STATE=$(cat /sys/class/android_usb/android0/state)
+	usb_msg "USB state: $USB_STATE"
+
 	USB_UDC=$(ls /sys/class/udc/ | head -n 1)
+	if [ -z "$USB_UDC" ]; then
+		usb_msg "Failed to find a valid UDC device..."
+		return 1
+	fi
+
+	usb_msg "Using USB UDC device: $USB_UDC"
 
 	# Parse started USB functions
 	OLD_FUNCS=$(usb_get_started)
