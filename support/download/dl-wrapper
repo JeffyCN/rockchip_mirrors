@@ -28,19 +28,15 @@ check_kgithub() {
     fi
 
     if grep -q kgithub /etc/hosts; then
-        echo -e "\e[35m"
         echo "Oops! The kgithub is down!"
-        echo "Please setup a VPN or export BR2_NO_KGITHUB=1."
-        echo -e "\e[0m"
-        return 0
+        return 1
     fi
 
-    echo -e "\e[35m"
     echo "Your DNS doesn't support kgithub.com"
     echo "Please modify it:"
     echo "sudo sed -i '\$a 43.154.68.204\tkgithub.com' /etc/hosts"
     echo "sudo sed -i '\$a 43.155.83.75\traw.kgithub.com objects.githubusercontent.kgithub.com' /etc/hosts"
-    echo -e "\e[0m"
+    return 1
 }
 
 main() {
@@ -72,15 +68,19 @@ main() {
     # Forget our options, and keep only those for the backend
     shift $((OPTIND-1))
 
-    if [ -z "BR2_NO_KGITHUB" ] && echo "${uris[@]}" | grep -wq github.com; then
-        # Use kgithub instead of github when unable to access google
-        if ! ping google.com -c 1 -W 1 &>/dev/null; then
+    if [ -z "$BR2_NO_KGITHUB" ] && echo "${uris[@]}" | grep -wq github.com; then
+        if ! git ls-remote https://github.com/git/git &>/dev/null; then
             echo -e "\e[35m"
-            echo "Using kgithub instead of github since unable to access google.com!"
-            echo "Setup a VPN or export BR2_NO_KGITHUB=1 to disable this."
-            echo -e "\e[0m"
 
-            use_kgithub=1
+            echo "Unable to access github.com! Trying kgithub now..."
+            if check_kgithub; then
+                echo "Using kgithub instead..."
+                echo "Setup a VPN or export BR2_NO_KGITHUB=1 to disable this."
+
+                use_kgithub=1
+            fi
+
+            echo -e "\e[0m"
         fi
     fi
 
@@ -214,7 +214,6 @@ main() {
     # We tried every URI possible, none seems to work or to check against the
     # available hash. *ABORT MISSION*
     if [ "${download_and_check}" -eq 0 ]; then
-        [ -z "$use_kgithub" ] || check_kgithub
         rm -rf "${tmpd}"
         exit 1
     fi
