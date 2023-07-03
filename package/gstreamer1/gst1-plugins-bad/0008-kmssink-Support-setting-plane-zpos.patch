@@ -133,7 +133,7 @@ index a769d9b..f221eb6 100644
    gint crtc_id;
    gint plane_id;
    guint pipe;
-+  guint saved_zpos;
++  gint saved_zpos;
  
    /* crtc data */
    guint16 hdisplay, vdisplay;
