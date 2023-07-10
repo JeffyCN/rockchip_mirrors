@@ -10,8 +10,9 @@ case "$1" in
 		ifconfig wlan0 down
                ;;
        thaw|resume)
+		kilall brcm_patchram_plus1
 		ifconfig wlan0 up
-		hciconfig hci0 up
+		bt_init.sh&
                ;;
        *) exit $NA
                ;;
