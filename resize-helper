@@ -23,8 +23,13 @@ do_part()
 	FSTYPE=$3
 	OPTS=$4
 
-	# Not in /etc/fstab
-	cat /etc/fstab | xargs | grep -q " $MOUNT_POINT/* " || return
+	# Check /etc/fstab
+	if ! sed "s/#.*//" /etc/fstab | xargs -n 6 | cut -d' ' -f2 | \
+		grep -q "^$MOUNT_POINT/*$"; then
+		if [ "$MOUNT_POINT" != "/" ]; then
+			return 0
+		fi
+	fi
 
 	echo "Handling $DEV $MOUNT_POINT $FSTYPE $OPTS"
 
@@ -43,7 +48,7 @@ do_part()
 
 resize_all()
 {
-	echo "Will now resize all partitions in both of /proc/mounts and /etc/fstab"
+	echo "Will now resize all mounted partitions in /etc/fstab or root"
 
 	while read LINE;do
 		do_part $LINE
