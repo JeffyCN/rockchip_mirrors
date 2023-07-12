@@ -30,6 +30,11 @@ endif
 ifeq ($(BR2_PACKAGE_STRACE_STATIC),y)
 STRACE_CONF_OPTS += --enable-static
 STRACE_CONF_ENV += CFLAGS="$(TARGET_CFLAGS) -static"
+
+# HACK for libunwind libs
+ifeq ($(BR2_PACKAGE_LIBUNWIND)$(BR2_PACKAGE_XZ),yy)
+STRACE_CONF_ENV += LIBS="-llzma"
+endif
 endif
 
 ifeq ($(BR2_PACKAGE_PERL),)
