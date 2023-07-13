@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 #
 # Usage:
 # usbdevice [start|update|stop]
@@ -23,6 +23,9 @@
 
 # Load default env variables from profiles
 . /etc/profile
+
+# Enable error out after loading env
+set -e
 
 LOG_FILE=/tmp/usbdevice.log
 USB_FUNCS_FILE=/tmp/.usbdevice
