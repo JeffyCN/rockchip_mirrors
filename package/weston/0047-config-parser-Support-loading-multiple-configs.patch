@@ -1,4 +1,4 @@
-From 25f4291538b48b416a3efda7825778201b35b439 Mon Sep 17 00:00:00 2001
+From af34025ea52bdf8a33c2b6978953851e7cda95f4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 7 Apr 2021 08:25:57 +0800
 Subject: [PATCH 47/93] config-parser: Support loading multiple configs
@@ -10,15 +10,31 @@ Tested with:
 [core]
 use-pixman=true
 
-And strip leading spaces.
-
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- shared/config-parser.c | 144 ++++++++++++++++++++++++++++++++++-------
- 1 file changed, 121 insertions(+), 23 deletions(-)
+ compositor/main.c      |   5 +-
+ shared/config-parser.c | 146 ++++++++++++++++++++++++++++++++++-------
+ 2 files changed, 127 insertions(+), 24 deletions(-)
 
+diff --git a/compositor/main.c b/compositor/main.c
+index 6ec89f3..7a1cc20 100644
+--- a/compositor/main.c
++++ b/compositor/main.c
+@@ -1209,8 +1209,11 @@ load_configuration(struct weston_config **config, int32_t noconfig,
+ 	if (config_file)
+ 		file = config_file;
+ 
+-	if (noconfig == 0)
++	if (noconfig == 0) {
++		setenv("WESTON_MAIN_PARSE", "1", 1);
+ 		*config = weston_config_parse(file);
++		unsetenv("WESTON_MAIN_PARSE");
++	}
+ 
+ 	if (*config) {
+ 		full_path = weston_config_get_full_path(*config);
 diff --git a/shared/config-parser.c b/shared/config-parser.c
-index 30779ae..2a62342 100644
+index 30779ae..e474963 100644
 --- a/shared/config-parser.c
 +++ b/shared/config-parser.c
 @@ -31,6 +31,7 @@
@@ -59,7 +75,7 @@ index 30779ae..2a62342 100644
  	section = zalloc(sizeof *section);
  	if (section == NULL)
  		return NULL;
-@@ -355,10 +372,31 @@ config_add_section(struct weston_config *config, const char *name)
+@@ -355,10 +372,33 @@ config_add_section(struct weston_config *config, const char *name)
  
  static struct weston_config_entry *
  section_add_entry(struct weston_config_section *section,
@@ -77,9 +93,11 @@ index 30779ae..2a62342 100644
 +	/* drop old entry */
 +	entry = config_section_get_entry(section, key);
 +	if (entry) {
-+		printf("%s: \"%s/%s\" from \"%s\" to \"%s\"\n",
-+		       file_name ?: "unknown", section->name, entry->key,
-+		       entry->value ?: "", value ?: "");
++		if (getenv("WESTON_MAIN_PARSE")) {
++			printf("%s: \"%s/%s\" from \"%s\" to \"%s\"\n",
++			       file_name ?: "unknown", section->name,
++			       entry->key, entry->value ?: "", value ?: "");
++		}
 +		wl_list_remove(&entry->link);
 +		free(entry->key);
 +		free(entry->value);
@@ -92,7 +110,7 @@ index 30779ae..2a62342 100644
  	entry = zalloc(sizeof *entry);
  	if (entry == NULL)
  		return NULL;
-@@ -382,14 +420,13 @@ section_add_entry(struct weston_config_section *section,
+@@ -382,14 +422,13 @@ section_add_entry(struct weston_config_section *section,
  }
  
  static bool
@@ -109,7 +127,7 @@ index 30779ae..2a62342 100644
  	while (fgets(line, sizeof line, fp)) {
  		switch (line[0]) {
  		case '#':
-@@ -422,7 +459,7 @@ weston_config_parse_internal(struct weston_config *config, FILE *fp)
+@@ -422,7 +461,7 @@ weston_config_parse_internal(struct weston_config *config, FILE *fp)
  				p[i - 1] = '\0';
  				i--;
  			}
@@ -118,7 +136,7 @@ index 30779ae..2a62342 100644
  			continue;
  		}
  	}
-@@ -438,7 +475,8 @@ weston_config_parse_fp(FILE *file)
+@@ -438,7 +477,8 @@ weston_config_parse_fp(FILE *file)
  	if (config == NULL)
  		return NULL;
  
@@ -128,7 +146,7 @@ index 30779ae..2a62342 100644
  		weston_config_destroy(config);
  		return NULL;
  	}
-@@ -446,48 +484,108 @@ weston_config_parse_fp(FILE *file)
+@@ -446,48 +486,108 @@ weston_config_parse_fp(FILE *file)
  	return config;
  }
  
@@ -211,8 +229,8 @@ index 30779ae..2a62342 100644
 +			free(config);
 +			return NULL;
 +		}
- 	}
- 
++	}
++
 +	strcpy(path, config->path);
 +	strcat(path, ".d");
 +	if (stat(path, &st) < 0 || !S_ISDIR(st.st_mode))
@@ -245,8 +263,8 @@ index 30779ae..2a62342 100644
 +			config = NULL;
 +			break;
 +		}
-+	}
-+
+ 	}
+ 
 +	for (; i < n; i++)
 +		free(namelist[i]);
 +

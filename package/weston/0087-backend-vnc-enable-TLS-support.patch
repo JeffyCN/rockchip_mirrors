@@ -1,7 +1,7 @@
-From 8aa93562acd2426fdb99e6a91db2f6d781ba9c82 Mon Sep 17 00:00:00 2001
+From b00c7ec03ce46936a042f1ea1c0ad74bace9f4bc Mon Sep 17 00:00:00 2001
 From: Philipp Zabel <p.zabel@pengutronix.de>
 Date: Thu, 6 Oct 2022 12:18:04 +0200
-Subject: [PATCH 87/92] backend-vnc: enable TLS support
+Subject: [PATCH 87/93] backend-vnc: enable TLS support
 
 Add TLS key and certificate parameters to enable encryption support.
 
@@ -16,7 +16,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 62 insertions(+), 3 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index e30f27e..ed5c818 100644
+index aee3f24..a168c98 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -730,6 +730,8 @@ usage(int error_code)
@@ -28,7 +28,7 @@ index e30f27e..ed5c818 100644
  		"\n");
  #endif
  
-@@ -3253,6 +3255,8 @@ load_vnc_backend(struct weston_compositor *c,
+@@ -3256,6 +3258,8 @@ load_vnc_backend(struct weston_compositor *c,
  		{ WESTON_OPTION_INTEGER, "height", 0, &parsed_options->height },
  		{ WESTON_OPTION_STRING,  "address", 0, &config.bind_address },
  		{ WESTON_OPTION_INTEGER, "port", 0, &config.port },
@@ -37,7 +37,7 @@ index e30f27e..ed5c818 100644
  	};
  
  	parse_options(vnc_options, ARRAY_LENGTH(vnc_options), argc, argv);
-@@ -3267,6 +3271,8 @@ load_vnc_backend(struct weston_compositor *c,
+@@ -3270,6 +3274,8 @@ load_vnc_backend(struct weston_compositor *c,
  					     &config.base);
  
  	free(config.bind_address);
