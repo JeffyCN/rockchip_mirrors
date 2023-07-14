@@ -1,4 +1,4 @@
-From 70fac45f78053effaeb1cacd98b9c30a15c620ba Mon Sep 17 00:00:00 2001
+From 166f76a549f570e70f0fbfaf143487ca7d649b2e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 15 Jun 2022 12:08:39 +0800
 Subject: [PATCH 48/93] config-parser: Strip leading spaces
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 7 insertions(+), 2 deletions(-)
 
 diff --git a/shared/config-parser.c b/shared/config-parser.c
-index 2a62342..0102df6 100644
+index e474963..e5195bd 100644
 --- a/shared/config-parser.c
 +++ b/shared/config-parser.c
-@@ -424,13 +424,18 @@ weston_config_parse_internal(struct weston_config *config, FILE *fp,
+@@ -426,13 +426,18 @@ weston_config_parse_internal(struct weston_config *config, FILE *fp,
  			     const char *file_name)
  {
  	struct weston_config_section *section = NULL;

@@ -1,7 +1,7 @@
-From b6b8fd27559be65191f9160b6952373ed3b4e149 Mon Sep 17 00:00:00 2001
+From 99e73c78fe530b89b110f0369458089591d192a6 Mon Sep 17 00:00:00 2001
 From: Stefan Agner <stefan@agner.ch>
 Date: Sun, 22 Sep 2019 19:40:04 +0200
-Subject: [PATCH 83/92] backend-vnc: add VNC support using Neat VNC library
+Subject: [PATCH 83/93] backend-vnc: add VNC support using Neat VNC library
 
 This adds basic VNC protocol support using the Neat VNC library
 (https://github.com/any1/neatvnc). Neat VNC depends on the AML main
@@ -47,7 +47,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  create mode 100644 libweston/backend-vnc/vnc.c
 
 diff --git a/compositor/main.c b/compositor/main.c
-index c3af8ee..e30f27e 100644
+index a9ad103..aee3f24 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -61,6 +61,7 @@
@@ -84,7 +84,7 @@ index c3af8ee..e30f27e 100644
  #if defined(BUILD_WAYLAND_COMPOSITOR)
  	fprintf(out,
  		"Options for wayland-backend.so:\n\n"
-@@ -3174,6 +3187,90 @@ load_rdp_backend(struct weston_compositor *c,
+@@ -3177,6 +3190,90 @@ load_rdp_backend(struct weston_compositor *c,
  	return ret;
  }
  
@@ -175,7 +175,7 @@ index c3af8ee..e30f27e 100644
  static int
  x11_backend_output_configure(struct weston_output *output)
  {
-@@ -3419,6 +3516,8 @@ load_backend(struct weston_compositor *compositor, const char *backend,
+@@ -3422,6 +3519,8 @@ load_backend(struct weston_compositor *compositor, const char *backend,
  		return load_headless_backend(compositor, argc, argv, config);
  	else if (strstr(backend, "rdp-backend.so"))
  		return load_rdp_backend(compositor, argc, argv, config);
