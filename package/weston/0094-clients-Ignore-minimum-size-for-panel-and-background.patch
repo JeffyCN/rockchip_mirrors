@@ -1,0 +1,42 @@
+From 7707854c710c31e4bbff049f30d89f3a149169fb Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Mon, 17 Jul 2023 18:26:11 +0800
+Subject: [PATCH 94/94] clients: Ignore minimum size for panel and background
+
+The toy toolkit clients would use the initial size as minimum size.
+
+We don't need that for panel and background, since the output is
+resizable now.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ clients/desktop-shell.c | 6 ++++++
+ 1 file changed, 6 insertions(+)
+
+diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
+index 0ce571a..2eb8a44 100644
+--- a/clients/desktop-shell.c
++++ b/clients/desktop-shell.c
+@@ -674,6 +674,9 @@ panel_create(struct desktop *desktop, struct output *output)
+ 
+ 	panel_add_launchers(panel, desktop);
+ 
++	/* HACK: Set an dummy initial size for no minimum size */
++	window_schedule_resize(panel->window, 1, 1);
++
+ 	return panel;
+ }
+ 
+@@ -1188,6 +1191,9 @@ background_create(struct desktop *desktop, struct output *output)
+ 
+ 	free(type);
+ 
++	/* HACK: Set an dummy initial size for no minimum size */
++	window_schedule_resize(background->window, 1, 1);
++
+ 	return background;
+ }
+ 
+-- 
+2.20.1
+
