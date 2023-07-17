@@ -96,8 +96,8 @@ define log_commands
 	$(Q)$(file >> $(SCRIPT),[ -z "$$DEBUG" ] || set -x)
 	$(Q)$(file >> $(SCRIPT), \
 		echo "########## $($(PKG)_BASENAME): $(subst _, ,$(1)) ##########")
-	$(Q)$(file >> $(SCRIPT),cd $(TOPDIR))
-	$(Q)$(foreach cmd,$(2),$(file >> $(SCRIPT),$($(cmd)))$(sep))
+	$(Q)$(foreach cmd,$(2),$(file >> $(SCRIPT),cd $(TOPDIR))
+		$(file >> $(SCRIPT),$($(cmd)))$(sep))
 	$(Q)$(SED) 's/^[ \t@-]*//' -e '/^$$/d' $(SCRIPT)
 	$(Q)chmod +x $(SCRIPT)
 endef
