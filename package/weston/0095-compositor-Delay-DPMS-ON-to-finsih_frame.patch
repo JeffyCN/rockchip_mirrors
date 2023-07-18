@@ -1,0 +1,69 @@
+From 155240b6658ea3ebd278a1dffdd228a4621b79d4 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Tue, 18 Jul 2023 09:42:32 +0800
+Subject: [PATCH 95/95] compositor: Delay DPMS-ON to finsih_frame()
+
+To make sure that the new frame is ready when turning on outputs.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ include/libweston/libweston.h |  1 +
+ libweston/compositor.c        | 21 ++++++++++++++++++++-
+ 2 files changed, 21 insertions(+), 1 deletion(-)
+
+diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
+index 06a9ab9..2fda659 100644
+--- a/include/libweston/libweston.h
++++ b/include/libweston/libweston.h
+@@ -574,6 +574,7 @@ struct weston_output {
+ 	void (*detach_head)(struct weston_output *output,
+ 			    struct weston_head *head);
+ 
++	bool pending_active;
+ 	bool unavailable;
+ 	bool freezing;
+ 
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index 24f4f36..2229411 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -3659,6 +3659,13 @@ weston_output_finish_frame(struct weston_output *output,
+ 	struct timespec vblank_monotonic;
+ 	int64_t msec_rel;
+ 
++	/* Delayed DPMS-ON to avoid showing old frame */
++	if (output->pending_active) {
++		output->pending_active = false;
++		if (output->set_dpms)
++			output->set_dpms(output, WESTON_DPMS_ON);
++	}
++
+ 	/*
+ 	 * If timestamp of latest vblank is given, it must always go forwards.
+ 	 * If not given, INVALID flag must be set.
+@@ -5546,9 +5553,21 @@ weston_compositor_dpms(struct weston_compositor *compositor,
+ {
+ 	struct weston_output *output;
+ 
+-	wl_list_for_each(output, &compositor->output_list, link)
++	wl_list_for_each(output, &compositor->output_list, link) {
++		/**
++		 * Delay to weston_output_finish_frame() to avoid showing
++		 * old frame
++		 */
++		if (state == WESTON_DPMS_ON) {
++			output->pending_active = true;
++			weston_output_schedule_repaint(output);
++			continue;
++		}
++		output->pending_active = false;
++
+ 		if (output->set_dpms)
+ 			output->set_dpms(output, state);
++	}
+ }
+ 
+ /** Restores the compositor to active status
+-- 
+2.20.1
+
