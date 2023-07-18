@@ -112,7 +112,7 @@ define DOWNLOAD
 		flock $($(2)_DL_DIR)/.lock $(DL_WRAPPER) \
 		-c '$($(2)_DL_VERSION)' \
 		-d '$($(2)_DL_DIR)' \
-		-D '$(DL_DIR)' \
+		-D '$(TOPDIR)/archives' \
 		-f '$(notdir $(1))' \
 		$(foreach f,$($(2)_HASH_FILES),-H '$(f)') \
 		-n '$($(2)_BASENAME_RAW)' \
