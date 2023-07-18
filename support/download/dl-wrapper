@@ -68,22 +68,6 @@ main() {
     # Forget our options, and keep only those for the backend
     shift $((OPTIND-1))
 
-    if [ -z "$BR2_NO_KGITHUB" ] && echo "${uris[@]}" | grep -wq github.com; then
-        if ! git ls-remote https://github.com/git/git &>/dev/null; then
-            echo -e "\e[35m"
-
-            echo "Unable to access github.com! Trying kgithub now..."
-            if check_kgithub; then
-                echo "Using kgithub instead..."
-                echo "Setup a VPN or export BR2_NO_KGITHUB=1 to disable this."
-
-                use_kgithub=1
-            fi
-
-            echo -e "\e[0m"
-        fi
-    fi
-
     if [ -z "${output}" ]; then
         error "no output specified, use -o\n"
     fi
@@ -116,6 +100,22 @@ main() {
         fi
         rm -f "${output}"
         warn "Re-downloading '%s'...\n" "${output##*/}"
+    fi
+
+    if [ -z "$BR2_NO_KGITHUB" ] && echo "${uris[@]}" | grep -wq github.com; then
+        if ! git ls-remote https://github.com/git/git &>/dev/null; then
+            echo -e "\e[35m"
+
+            echo "Unable to access github.com! Trying kgithub now..."
+            if check_kgithub; then
+                echo "Using kgithub instead..."
+                echo "Setup a VPN or export BR2_NO_KGITHUB=1 to disable this."
+
+                use_kgithub=1
+            fi
+
+            echo -e "\e[0m"
+        fi
     fi
 
     # Look through all the uris that we were given to download the package
