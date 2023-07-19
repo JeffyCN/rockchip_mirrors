@@ -1,4 +1,4 @@
-From 155240b6658ea3ebd278a1dffdd228a4621b79d4 Mon Sep 17 00:00:00 2001
+From 35c92cffc9d5b464e3d9abab9cfd818fd6017016 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Jul 2023 09:42:32 +0800
 Subject: [PATCH 95/95] compositor: Delay DPMS-ON to finsih_frame()
@@ -8,8 +8,9 @@ To make sure that the new frame is ready when turning on outputs.
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  include/libweston/libweston.h |  1 +
+ libweston/backend-drm/drm.c   |  4 +---
  libweston/compositor.c        | 21 ++++++++++++++++++++-
- 2 files changed, 21 insertions(+), 1 deletion(-)
+ 3 files changed, 22 insertions(+), 4 deletions(-)
 
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
 index 06a9ab9..2fda659 100644
@@ -23,8 +24,23 @@ index 06a9ab9..2fda659 100644
  	bool unavailable;
  	bool freezing;
  
+diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
+index ae95261..594fd57 100644
+--- a/libweston/backend-drm/drm.c
++++ b/libweston/backend-drm/drm.c
+@@ -3857,9 +3857,7 @@ config_handle_output(struct drm_backend *b, const char *name,
+ 				continue;
+ 
+ 			output->base.freezing = false;
+-
+-			if (!output->virtual)
+-				drm_set_dpms(&output->base, WESTON_DPMS_ON);
++			output->base.pending_active = 1;
+ 
+ 			weston_output_damage(&output->base);
+ 		} else if (!strncmp(config, "down-scale=",
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 24f4f36..2229411 100644
+index 24f4f36..24099c5 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3659,6 +3659,13 @@ weston_output_finish_frame(struct weston_output *output,
@@ -53,7 +69,7 @@ index 24f4f36..2229411 100644
 +		 */
 +		if (state == WESTON_DPMS_ON) {
 +			output->pending_active = true;
-+			weston_output_schedule_repaint(output);
++			weston_output_damage(output);
 +			continue;
 +		}
 +		output->pending_active = false;

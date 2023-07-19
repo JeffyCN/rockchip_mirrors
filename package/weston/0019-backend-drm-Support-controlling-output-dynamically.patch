@@ -1,7 +1,7 @@
-From cb16dec3fba6bfa7d1a7b7c1717e96a07c437c62 Mon Sep 17 00:00:00 2001
+From 4609c6ab89148d2549a2be9b8a8946b7f352edd8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 19/93] backend-drm: Support controlling output dynamically
+Subject: [PATCH 19/95] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -33,14 +33,14 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                |  58 +++++-
  include/libweston/libweston.h        |   7 +
  libweston/backend-drm/drm-internal.h |  16 ++
- libweston/backend-drm/drm.c          | 265 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 261 ++++++++++++++++++++++++++-
  libweston/backend-drm/modes.c        |  20 +-
  libweston/compositor.c               |  30 ++-
  libweston/libinput-seat.c            |  43 +++++
  libweston/libweston-internal.h       |   3 +
  libweston/pixman-renderer.c          |   3 +
  libweston/renderer-gl/gl-renderer.c  |   4 +
- 11 files changed, 437 insertions(+), 26 deletions(-)
+ 11 files changed, 433 insertions(+), 26 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index dcfe85b..d65f8aa 100644
@@ -246,7 +246,7 @@ index 037c937..532593e 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index fc035b9..4e47fd3 100644
+index fc035b9..b580ace 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -41,6 +41,7 @@
@@ -347,7 +347,7 @@ index fc035b9..4e47fd3 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -3617,6 +3635,239 @@ static const struct weston_drm_output_api api = {
+@@ -3617,6 +3635,235 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_max_bpc,
  };
  
@@ -484,10 +484,6 @@ index fc035b9..4e47fd3 100644
 +			if (!output->virtual)
 +				drm_set_dpms(&output->base, WESTON_DPMS_ON);
 +
-+			drm_output_update_complete(output, 0, 0, 0);
-+			output->page_flip_pending = false;
-+			output->atomic_complete_pending = false;
-+
 +			weston_output_damage(&output->base);
 +		} else if (!strncmp(config, "down-scale=",
 +				    strlen("down-scale="))) {
@@ -587,7 +583,7 @@ index fc035b9..4e47fd3 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3960,6 +4211,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3960,6 +4207,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b->drm);
  
