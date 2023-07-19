@@ -1,7 +1,7 @@
-From e5f11a4b1e46085810fd4c114d38773bdbe97b83 Mon Sep 17 00:00:00 2001
+From e658e9cd1713515cd019c34260bcde8f951da255 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
-Subject: [PATCH 53/93] HACK: pixman-renderer: Support passing dma fd to pixman
+Subject: [PATCH 53/95] HACK: pixman-renderer: Support passing dma fd to pixman
 
 Usage:
 pixman_image_set_destroy_function(image, NULL, (void *)(ptrdiff_t)dma_fd)
@@ -28,10 +28,10 @@ index 12ee031..f7f042d 100644
  	uint32_t plane_mask;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index fc37b5a..66d4518 100644
+index 805e428..84c2248 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1693,6 +1693,9 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
+@@ -1698,6 +1698,9 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
  						 output->dumb[i]->strides[0]);
  		if (!output->image[i])
  			goto err;
@@ -84,10 +84,10 @@ index 4cb2cbe..8c4c49c 100644
  	drmModeRmFB(device->drm.fd, fb->fb_id);
  err_bo:
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index d53fe42..22edaa5 100644
+index 5753d51..4e9e704 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -881,6 +881,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -878,6 +878,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  					     data->ptr + attributes->offset[0],
  					     attributes->stride[0]);
  

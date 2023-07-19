@@ -1,4 +1,4 @@
-From 4609c6ab89148d2549a2be9b8a8946b7f352edd8 Mon Sep 17 00:00:00 2001
+From 7d216da6668ce78ab02bdf586126562e3be691e5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 19/95] backend-drm: Support controlling output dynamically
@@ -33,14 +33,13 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                |  58 +++++-
  include/libweston/libweston.h        |   7 +
  libweston/backend-drm/drm-internal.h |  16 ++
- libweston/backend-drm/drm.c          | 261 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 266 ++++++++++++++++++++++++++-
  libweston/backend-drm/modes.c        |  20 +-
  libweston/compositor.c               |  30 ++-
  libweston/libinput-seat.c            |  43 +++++
  libweston/libweston-internal.h       |   3 +
- libweston/pixman-renderer.c          |   3 +
  libweston/renderer-gl/gl-renderer.c  |   4 +
- 11 files changed, 433 insertions(+), 26 deletions(-)
+ 10 files changed, 435 insertions(+), 26 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index dcfe85b..d65f8aa 100644
@@ -246,7 +245,7 @@ index 037c937..532593e 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index fc035b9..b580ace 100644
+index fc035b9..6c7a567 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -41,6 +41,7 @@
@@ -279,18 +278,23 @@ index fc035b9..b580ace 100644
  	ts.tv_sec = sec;
  	ts.tv_nsec = usec * 1000;
  
-@@ -689,8 +698,8 @@ out:
+@@ -689,8 +698,13 @@ out:
  		return;
  	}
  
 -	sw = fb->width;
 -	sh = fb->height;
++	if (output->base.down_scale != 1.0f && b->use_pixman) {
++		weston_log("pixman renderer could not support down-scale\n");
++		output->base.down_scale = 1.0f;
++	}
++
 +	sw = fb->width * output->base.down_scale;
 +	sh = fb->height * output->base.down_scale;
  
  	dx = output->plane_bounds.x1;
  	dy = output->plane_bounds.y1;
-@@ -832,7 +841,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -832,7 +846,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
  	now_ms = timespec_to_msec(&now);
@@ -300,7 +304,7 @@ index fc035b9..b580ace 100644
  		/* Resize fullscreen/maxmium views(not always success) */
  		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
  			wl_signal_emit(&b->compositor->output_resized_signal,
-@@ -841,7 +851,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -841,7 +856,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  		weston_output_damage(output_base);
  		weston_output_finish_frame(output_base, NULL,
  					   WP_PRESENTATION_FEEDBACK_INVALID);
@@ -309,7 +313,7 @@ index fc035b9..b580ace 100644
  	}
  
  	/* If planes have been disabled in the core, we might not have
-@@ -872,7 +882,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -872,7 +887,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  err:
  	drm_output_state_free(state);
@@ -319,7 +323,7 @@ index fc035b9..b580ace 100644
  }
  
  /* Determine the type of vblank synchronization to use for the output.
-@@ -2296,6 +2307,8 @@ drm_output_enable(struct weston_output *base)
+@@ -2296,6 +2312,8 @@ drm_output_enable(struct weston_output *base)
  	output->base.switch_mode = drm_output_switch_mode;
  	output->base.set_gamma = drm_output_set_gamma;
  
@@ -328,7 +332,7 @@ index fc035b9..b580ace 100644
  	output->state_invalid = true;
  
  	weston_log("Output %s (crtc %d) video modes:\n",
-@@ -3188,6 +3201,7 @@ drm_destroy(struct weston_compositor *ec)
+@@ -3188,6 +3206,7 @@ drm_destroy(struct weston_compositor *ec)
  
  	udev_input_destroy(&b->input);
  
@@ -336,7 +340,7 @@ index fc035b9..b580ace 100644
  	wl_event_source_remove(b->hotplug_timer);
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
-@@ -3608,6 +3622,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -3608,6 +3627,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -347,7 +351,7 @@ index fc035b9..b580ace 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -3617,6 +3635,235 @@ static const struct weston_drm_output_api api = {
+@@ -3617,6 +3640,235 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_max_bpc,
  };
  
@@ -583,7 +587,7 @@ index fc035b9..b580ace 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -3960,6 +4207,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -3960,6 +4212,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b->drm);
  
@@ -809,20 +813,6 @@ index 8bdac33..39d9e85 100644
  /* weston_plane */
  
  void
-diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 62c2cb1..22e7a42 100644
---- a/libweston/pixman-renderer.c
-+++ b/libweston/pixman-renderer.c
-@@ -158,6 +158,9 @@ pixman_renderer_compute_transform(pixman_transform_t *transform_out,
- 	   specified buffer transform/scale */
- 	matrix = output->inverse_matrix;
- 
-+	weston_matrix_scale(&matrix,
-+			    1 / output->down_scale, 1 / output->down_scale, 1);
-+
- 	if (ev->transform.enabled) {
- 		weston_matrix_multiply(&matrix, &ev->transform.inverse);
- 	} else {
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
 index db4c7b1..3437bf2 100644
 --- a/libweston/renderer-gl/gl-renderer.c

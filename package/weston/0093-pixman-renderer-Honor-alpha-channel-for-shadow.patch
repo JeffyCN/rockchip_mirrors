@@ -1,7 +1,7 @@
-From ce64894d9496f9c065ecf090dfdd4793b3ab7b78 Mon Sep 17 00:00:00 2001
+From 0fc0b609631e9d67f7a51015e0cdc070335448e8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 May 2023 11:23:57 +0800
-Subject: [PATCH 93/93] pixman-renderer: Honor alpha channel for shadow
+Subject: [PATCH 93/95] pixman-renderer: Honor alpha channel for shadow
 
 Use AR2 instead of XR24 for gbm format with alpha channel.
 
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 342a266..710e101 100644
+index 7678587..60cb7a1 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -1495,7 +1495,7 @@ pixman_renderer_output_create(struct weston_output *output,
+@@ -1492,7 +1492,7 @@ pixman_renderer_output_create(struct weston_output *output,
  		h = output->current_mode->height;
  
  		po->shadow_image =

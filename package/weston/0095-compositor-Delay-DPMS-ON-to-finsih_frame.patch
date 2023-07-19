@@ -1,4 +1,4 @@
-From 35c92cffc9d5b464e3d9abab9cfd818fd6017016 Mon Sep 17 00:00:00 2001
+From 4ef522b7ff6679bc41cb799b77c209770d1b8067 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Jul 2023 09:42:32 +0800
 Subject: [PATCH 95/95] compositor: Delay DPMS-ON to finsih_frame()
@@ -25,10 +25,10 @@ index 06a9ab9..2fda659 100644
  	bool freezing;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index ae95261..594fd57 100644
+index 658e2c3..e410fe9 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -3857,9 +3857,7 @@ config_handle_output(struct drm_backend *b, const char *name,
+@@ -3862,9 +3862,7 @@ config_handle_output(struct drm_backend *b, const char *name,
  				continue;
  
  			output->base.freezing = false;
