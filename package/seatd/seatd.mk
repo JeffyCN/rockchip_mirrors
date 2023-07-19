@@ -46,6 +46,14 @@ define SEATD_INSTALL_INIT_SYSTEMD
 		$(TARGET_DIR)/usr/lib/systemd/system/seatd.service
 endef
 
+ifeq ($(BR2_PACKAGE_SEATD_DAEMON_VT_BOUND),)
+define SEATD_INSTALL_TARGET_VT_ENV
+	echo "export SEATD_VTBOUND=0" > \
+		$(TARGET_DIR)/etc/profile.d/seatd.sh
+endef
+SEATD_POST_INSTALL_TARGET_HOOKS += SEATD_INSTALL_TARGET_VT_ENV
+endif
+
 else
 SEATD_CONF_OPTS += -Dlibseat-seatd=disabled -Dserver=disabled
 endif
