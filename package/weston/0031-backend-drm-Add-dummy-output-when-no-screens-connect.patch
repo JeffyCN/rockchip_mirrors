@@ -1,7 +1,7 @@
-From 89af81228fc51cd37fbb89983e531546bd306aca Mon Sep 17 00:00:00 2001
+From 9e309cd48d3689b6fb0a37f830f520104b5f8994 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 31/93] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 31/95] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -86,7 +86,7 @@ index 532593e..e175f16 100644
  		return NULL;
  	return container_of(base, struct drm_output, base);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 2190703..e1fda06 100644
+index 191cf36..7715d9b 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -213,8 +213,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -174,7 +174,7 @@ index 2190703..e1fda06 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->config_timer);
-@@ -3905,6 +3930,182 @@ config_timer_handler(void *data)
+@@ -3901,6 +3926,182 @@ config_timer_handler(void *data)
  	return 0;
  }
  
@@ -357,7 +357,7 @@ index 2190703..e1fda06 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4142,6 +4343,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4138,6 +4339,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  
