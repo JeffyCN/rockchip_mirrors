@@ -20,4 +20,11 @@ config BR2_PACKAGE_SEATD_DAEMON
 	help
 	  Build the seatd daemon and support for it inside libseat.
 
+if BR2_PACKAGE_SEATD_DAEMON
+
+config BR2_PACKAGE_SEATD_DAEMON_VT_BOUND
+	bool "VT-bound seatd daemon"
+
+endif
+
 endif

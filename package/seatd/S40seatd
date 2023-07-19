@@ -4,6 +4,9 @@ DAEMON="seatd"
 DAEMON_EXE="/usr/bin/${DAEMON}"
 PIDFILE="/run/${DAEMON}.pid"
 
+# Load default env variables from profiles(e.g. /etc/profile.d/seatd.sh)
+. /etc/profile
+
 start() {
 	printf 'Starting %s: ' "${DAEMON}"
 	start-stop-daemon -S -x "${DAEMON_EXE}" -p "${PIDFILE}" -m -b -- -g video
