@@ -1,7 +1,7 @@
-From 37be9808bda2b3d8408ef820c16afdf306cc68d4 Mon Sep 17 00:00:00 2001
+From b727c545a985640aecaf07c3e3e5100e57914bd2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
-Subject: [PATCH 30/93] HACK: backend-drm: Consider linear and invalid modifier
+Subject: [PATCH 30/95] HACK: backend-drm: Consider linear and invalid modifier
  are the same
 
 That is true with Rockchip BSP drivers and packages.
@@ -135,10 +135,10 @@ index 7590171..10b3ed9 100644
  			   (unsigned long long) modifier);
  		free(modifier_name);
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 5ab4b55..5609b66 100644
+index 7339541..c8b7b88 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -737,8 +737,7 @@ pixman_renderer_prepare_dmabuf(struct linux_dmabuf_buffer *dmabuf)
+@@ -734,8 +734,7 @@ pixman_renderer_prepare_dmabuf(struct linux_dmabuf_buffer *dmabuf)
  	total_size = lseek(attributes->fd[0], 0, SEEK_END);
  
  	for (i = 0; i < attributes->n_planes; i++) {

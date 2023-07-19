@@ -1,7 +1,7 @@
-From baec9753c2eea0e9da28ae05311fa26c5813774b Mon Sep 17 00:00:00 2001
+From 16302ea084be281cbd71bb40ceda7d30b1c44eff Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:53:52 +0800
-Subject: [PATCH 25/93] HACK: pixman-renderer: Support mali egl client and egl
+Subject: [PATCH 25/95] HACK: pixman-renderer: Support mali egl client and egl
  buffer attaching
 
 The mali clients requires mali_buffer_sharing extension, and it needs
@@ -35,7 +35,7 @@ index 313a84f..6a845cc 100644
  
  lib_weston = shared_library(
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 29d2b60..5ab4b55 100644
+index 07b7888..7339541 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -47,6 +47,19 @@
@@ -94,7 +94,7 @@ index 29d2b60..5ab4b55 100644
  static inline struct pixman_output_state *
  get_output_state(struct weston_output *output)
  {
-@@ -672,6 +707,91 @@ pixman_renderer_surface_set_color(struct weston_surface *es,
+@@ -669,6 +704,91 @@ pixman_renderer_surface_set_color(struct weston_surface *es,
  	ps->image = pixman_image_create_solid_fill(&color);
  }
  
@@ -186,7 +186,7 @@ index 29d2b60..5ab4b55 100644
  static void
  pixman_renderer_attach_dmabuf(struct weston_surface *es,
  			      struct weston_buffer *buffer,
-@@ -683,14 +803,12 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -680,14 +800,12 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  	pixman_format_code_t pixman_format;
  	size_t vstride;
  
@@ -206,7 +206,7 @@ index 29d2b60..5ab4b55 100644
  
  	buffer->width = attributes->width;
  	buffer->height = attributes->height;
-@@ -755,11 +873,7 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -752,11 +870,7 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  #endif
  	default:
  		weston_log("Unsupported dmabuf format\n");
@@ -219,7 +219,7 @@ index 29d2b60..5ab4b55 100644
  	break;
  	}
  
-@@ -772,6 +886,11 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -769,6 +883,11 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  		buffer_state_handle_buffer_destroy;
  	wl_signal_add(&buffer->destroy_signal,
  		      &ps->buffer_destroy_listener);
@@ -231,7 +231,7 @@ index 29d2b60..5ab4b55 100644
  }
  
  static void
-@@ -779,7 +898,6 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
+@@ -776,7 +895,6 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
  {
  	struct pixman_surface_state *ps = get_surface_state(es);
  	struct wl_shm_buffer *shm_buffer;
@@ -239,7 +239,7 @@ index 29d2b60..5ab4b55 100644
  	const struct pixel_format_info *pixel_info;
  
  	weston_buffer_reference(&ps->buffer_ref, buffer,
-@@ -813,17 +931,40 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
+@@ -810,17 +928,40 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
  		return;
  	}
  
@@ -290,7 +290,7 @@ index 29d2b60..5ab4b55 100644
  		return;
  	}
  
-@@ -852,6 +993,70 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
+@@ -849,6 +990,70 @@ pixman_renderer_attach(struct weston_surface *es, struct weston_buffer *buffer)
  		      &ps->buffer_destroy_listener);
  }
  
@@ -361,7 +361,7 @@ index 29d2b60..5ab4b55 100644
  static void
  pixman_renderer_surface_state_destroy(struct pixman_surface_state *ps)
  {
-@@ -931,6 +1136,21 @@ pixman_renderer_destroy(struct weston_compositor *ec)
+@@ -928,6 +1133,21 @@ pixman_renderer_destroy(struct weston_compositor *ec)
  {
  	struct pixman_renderer *pr = get_renderer(ec);
  
@@ -383,7 +383,7 @@ index 29d2b60..5ab4b55 100644
  	wl_signal_emit(&pr->destroy_signal, pr);
  	weston_binding_destroy(pr->debug_binding);
  
-@@ -994,80 +1214,11 @@ debug_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+@@ -991,80 +1211,11 @@ debug_binding(struct weston_keyboard *keyboard, const struct timespec *time,
  	}
  }
  
@@ -465,7 +465,7 @@ index 29d2b60..5ab4b55 100644
  }
  
  static const struct weston_drm_format_array *
-@@ -1123,6 +1274,89 @@ out:
+@@ -1120,6 +1271,89 @@ out:
  	return ret;
  }
  
@@ -555,7 +555,7 @@ index 29d2b60..5ab4b55 100644
  WL_EXPORT int
  pixman_renderer_init(struct weston_compositor *ec)
  {
-@@ -1144,6 +1378,9 @@ pixman_renderer_init(struct weston_compositor *ec)
+@@ -1141,6 +1375,9 @@ pixman_renderer_init(struct weston_compositor *ec)
  	renderer->base.destroy = pixman_renderer_destroy;
  	renderer->base.surface_copy_content =
  		pixman_renderer_surface_copy_content;
@@ -565,7 +565,7 @@ index 29d2b60..5ab4b55 100644
  	ec->renderer = &renderer->base;
  	ec->capabilities |= WESTON_CAP_ROTATION_ANY;
  	ec->capabilities |= WESTON_CAP_VIEW_CLIP_MASK;
-@@ -1184,6 +1421,10 @@ pixman_renderer_init(struct weston_compositor *ec)
+@@ -1181,6 +1418,10 @@ pixman_renderer_init(struct weston_compositor *ec)
  	renderer->base.get_supported_formats =
  		pixman_renderer_get_supported_formats;
  
