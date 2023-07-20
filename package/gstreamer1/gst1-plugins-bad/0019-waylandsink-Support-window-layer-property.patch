@@ -1,7 +1,7 @@
-From 4dc621faa702285e385c8dc3fb42463a0774c4d8 Mon Sep 17 00:00:00 2001
+From 78fdb1abc730d97e5937ee3414779b9bbdff0413 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Mar 2021 10:15:51 +0800
-Subject: [PATCH 19/41] waylandsink: Support window layer property
+Subject: [PATCH 19/43] waylandsink: Support window layer property
 
 Support setting top|normal|bottom window layer.
 
@@ -17,7 +17,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 103 insertions(+), 5 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 7917c69..56a6849 100644
+index 071bc5a..f492d72 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -61,6 +61,7 @@ enum
@@ -141,7 +141,7 @@ index d4c3764..a417788 100644
    gchar *display_name;
  
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index dd6e1c2..fed1c97 100644
+index dd6e1c2..7a3016c 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
 @@ -252,6 +252,43 @@ gst_wl_window_new_internal (GstWlDisplay * display, GMutex * render_lock)
@@ -154,7 +154,7 @@ index dd6e1c2..fed1c97 100644
 +  GstWlWindowPrivate *priv;
 +
 +  /* TODO: support non-toplevel */
-+  if (!gst_wl_window_is_toplevel (self))
++  if (!self || !gst_wl_window_is_toplevel (self))
 +    return;
 +
 +  priv = gst_wl_window_get_instance_private (self);
