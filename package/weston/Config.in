@@ -71,6 +71,10 @@ config BR2_PACKAGE_WESTON_VNC
 	bool "VNC compositor"
 	select BR2_PACKAGE_NEATVNC
 
+config BR2_PACKAGE_WESTON_PIPEWIRE
+	bool "Pipewire compositor"
+	select BR2_PACKAGE_PIPEWIRE
+
 # FreeRDP needs threads and !static, already the case for weston
 config BR2_PACKAGE_WESTON_RDP
 	bool "RDP compositor"

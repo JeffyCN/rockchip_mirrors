@@ -1,7 +1,7 @@
-From bb075f005d993e43b306059b5ea2d466e10d6b06 Mon Sep 17 00:00:00 2001
+From 35091a82c6c4b8804a5fa3de390c0448e55eecce Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 3 Nov 2022 11:57:59 +0800
-Subject: [PATCH 04/79] Revert "libweston: Check output placement"
+Subject: [PATCH 04/86] Revert "libweston: Check output placement"
 
 This reverts commit 7e7198bd881859b20f74cbdae46b5700ff1cc5d4.
 
@@ -9,16 +9,16 @@ Allow outputs overlapping.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/compositor.c | 56 ------------------------------------------
- 1 file changed, 56 deletions(-)
+ libweston/compositor.c | 55 ------------------------------------------
+ 1 file changed, 55 deletions(-)
 
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 6cfcba25..7b157695 100644
+index 379cf39..69e4673 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -6616,18 +6616,6 @@ weston_output_set_position(struct weston_output *output, int x, int y)
- WL_EXPORT void
- weston_output_move(struct weston_output *output, int x, int y)
+@@ -6507,18 +6507,6 @@ WL_EXPORT void
+ weston_output_move(struct weston_output *output,
+ 		   struct weston_coord_global pos)
  {
 -	/* XXX: we should probably perform some sanity checking here
 -	 * as we do for weston_output_enable, and allow moves to fail.
@@ -33,9 +33,9 @@ index 6cfcba25..7b157695 100644
 -	 */
 -
  	output->compositor->output_flow_dirty = true;
- 	weston_output_set_position(output, x, y);
+ 	weston_output_set_position(output, pos);
  }
-@@ -7250,45 +7238,6 @@ weston_output_create_heads_string(struct weston_output *output)
+@@ -7139,45 +7127,6 @@ weston_output_create_heads_string(struct weston_output *output)
  	return str;
  }
  
@@ -81,18 +81,17 @@ index 6cfcba25..7b157695 100644
  /** Constructs a weston_output object that can be used by the compositor.
   *
   * \param output The weston_output object that needs to be enabled. Must not
-@@ -7368,11 +7317,6 @@ weston_output_enable(struct weston_output *output)
- 	weston_output_transform_scale_init(output, output->transform, output->scale);
+@@ -7257,10 +7206,6 @@ weston_output_enable(struct weston_output *output)
  
  	weston_output_init_geometry(output, output->x, output->y);
--
+ 
 -	/* At this point we have a valid region so we can check placement. */
 -	if (!weston_output_placement_ok(output))
 -		return -1;
 -
- 	weston_output_damage(output);
- 
  	wl_list_init(&output->animation_list);
+ 	wl_list_init(&output->feedback_list);
+ 	wl_list_init(&output->paint_node_list);
 -- 
 2.20.1
 
