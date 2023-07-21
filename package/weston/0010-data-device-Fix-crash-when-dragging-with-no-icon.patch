@@ -1,0 +1,39 @@
+From 8177ef5199199eddcd8f38862d40899448261967 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 20 Jul 2023 16:24:20 +0800
+Subject: [PATCH 10/90] data-device: Fix crash when dragging with no icon
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/data-device.c | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/libweston/data-device.c b/libweston/data-device.c
+index fbec4e18..ab6dfdd2 100644
+--- a/libweston/data-device.c
++++ b/libweston/data-device.c
+@@ -990,7 +990,9 @@ weston_pointer_start_drag(struct weston_pointer *pointer,
+ 	if (keyboard)
+ 		weston_keyboard_start_grab(keyboard, &drag->base.keyboard_grab);
+ 
+-	drag->base.offset = weston_coord_surface(0, 0, icon);
++	if (icon)
++		drag->base.offset = weston_coord_surface(0, 0, icon);
++
+ 	return 0;
+ }
+ 
+@@ -1055,7 +1057,9 @@ weston_touch_start_drag(struct weston_touch *touch,
+ 
+ 	drag_grab_touch_focus(drag);
+ 
+-	drag->base.offset = weston_coord_surface(0, 0, icon);
++	if (icon)
++		drag->base.offset = weston_coord_surface(0, 0, icon);
++
+ 	return 0;
+ }
+ 
+-- 
+2.20.1
+

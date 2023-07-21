@@ -1,0 +1,31 @@
+From 7821a193f85b6800c9caec0d7f0a78074b8f68be Mon Sep 17 00:00:00 2001
+From: Derek Foreman <derek.foreman@collabora.com>
+Date: Mon, 26 Jun 2023 11:19:23 -0500
+Subject: [PATCH 02/90] toy-toolkit: Fix rotations
+
+Ever since commit 3012934 some rotations have been broken. This is because
+I transposed xy and yx in the cairo_matrix_init() call.
+
+Signed-off-by: Derek Foreman <derek.foreman@collabora.com>
+(cherry picked from commit f0196739ae42195f178ce889e12460228a7a25cb)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ clients/window.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/clients/window.c b/clients/window.c
+index 1c42dfd2..a4856b1c 100644
+--- a/clients/window.c
++++ b/clients/window.c
+@@ -1661,7 +1661,7 @@ widget_cairo_update_transform(struct widget *widget, cairo_t *cr)
+ 				     surface->allocation.width,
+ 				     surface->allocation.height,
+ 				     surface->buffer_scale);
+-	cairo_matrix_init(&m, matrix.d[0], matrix.d[4], matrix.d[1],
++	cairo_matrix_init(&m, matrix.d[0], matrix.d[1], matrix.d[4],
+ 			  matrix.d[5], matrix.d[12], matrix.d[13]);
+ 	cairo_transform(cr, &m);
+ }
+-- 
+2.20.1
+

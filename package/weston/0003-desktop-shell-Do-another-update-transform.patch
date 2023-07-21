@@ -1,0 +1,33 @@
+From edde2624c0786cbb262c23572853bb6400d22b6f Mon Sep 17 00:00:00 2001
+From: Marius Vlad <marius.vlad@collabora.com>
+Date: Wed, 19 Apr 2023 12:02:08 +0300
+Subject: [PATCH 03/90] desktop-shell: Do another update transform
+
+This is similar to commit 'libweston: Update view transforms more often', where
+we update the view's transform when getting the panel dimensions.
+
+Fixes #740
+
+Signed-off-by: Marius Vlad <marius.vlad@collabora.com>
+(cherry picked from commit 51f377b813c99d1bcdb15a654200435f65f8af85)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ desktop-shell/shell.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
+index e695008a..b08e4f3c 100644
+--- a/desktop-shell/shell.c
++++ b/desktop-shell/shell.c
+@@ -365,6 +365,8 @@ get_output_panel_size(struct desktop_shell *shell,
+ 
+ 	wl_list_for_each(view, &shell->panel_layer.view_list.link, layer_link.link) {
+ 		if (view->surface->output == output) {
++			weston_view_update_transform(view);
++
+ 			get_panel_size(shell, view, width, height);
+ 			return;
+ 		}
+-- 
+2.20.1
+
