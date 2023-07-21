@@ -1,0 +1,27 @@
+From ee53e7371f662cd072a64fbbeb2f7704969d41b7 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Wed, 19 Jul 2023 16:06:30 +0800
+Subject: [PATCH 09/90] drm: Fix null pointer error for main drm device
+
+By adding the missing gem_handle_refcnt creation.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/drm.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
+index 1078b89b..787da709 100644
+--- a/libweston/backend-drm/drm.c
++++ b/libweston/backend-drm/drm.c
+@@ -3701,6 +3701,7 @@ drm_backend_create(struct weston_compositor *compositor,
+ 	device->state_invalid = true;
+ 	device->drm.fd = -1;
+ 	device->backend = b;
++	device->gem_handle_refcnt = hash_table_create();
+ 
+ 	b->drm = device;
+ 	wl_list_init(&b->kms_list);
+-- 
+2.20.1
+
