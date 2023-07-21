@@ -24,47 +24,13 @@ static int run_system(const char *command)
 	} else {
 		if (WIFEXITED(status)) {
 			if (WEXITSTATUS(status)) {
-				printf("ERROR: system command failed\n");
+				// printf("ERROR: system command failed\n");
 				return -1;
 			}
 		}
 	}
 
 	return 0;
-}
-
-static int grep_string(const char *dst, const char *target)
-{
-	int i;
-
-	for (i = 0; i < strlen(dst); i++) {
-		if (!memcmp(&dst[i], target, strlen(target)))
-			return 0;
-	}
-	return -1;
-}
-
-static int check_ramdisk_env(const char *file)
-{
-	FILE *fp;
-	char buf[1000];
-
-	fp = fopen(file, "r");
-	if (!fp) {
-		printf("ERROR: bad node\n");
-		return -1;
-	}
-
-	while (!feof(fp)) {
-		fgets(buf, 1000, fp);
-		if (!grep_string(buf, "none / rootfs")) {
-			fclose(fp);
-			return 0;
-		}
-	};
-
-	fclose(fp);
-	return -1;
 }
 
 static void dump_hex(char *var_name, const uint8_t *data,
@@ -333,21 +299,16 @@ int main(int argc, char *argv[])
 		return process_recovery(argc, argv);
 	}
 
-	/* check proc has mounted */
-	if (run_system("/bin/mount -t proc proc /proc")) {
-		printf("ERROR: failed to run system command\n");
-		return -1;
-	}
+	/* Force proc has mounted */
+	run_system("/bin/mount -t proc proc /proc");
 
 	/* check run at ramdisk */
-	if (run_system("cat /proc/mounts > /tmp/proc_test")) {
-		printf("ERROR: failed to run system command\n");
+	if (run_system("cat /proc/mounts | grep \"/\" -w")) {
+		printf("ERROR: Cannot get root info");
 		return -1;
 	}
 
-	status = check_ramdisk_env("/tmp/proc_test");
-	remove("/tmp/proc_test");
-	if (status)
+	if (!run_system("cat /proc/mounts | grep \"/\" -w | cut -d ' ' -f 1 | grep \"/\""))
 		return -1;
 
 	return process_ramfs();
