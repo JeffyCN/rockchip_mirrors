@@ -8,12 +8,14 @@ if BR2_PACKAGE_LV_DRIVERS
 	config BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
 		bool "sdl"
 		default n
+		select BR2_PACKAGE_SDL2
 		help
 		  Enbale sdl renderer
 
 	config BR2_PACKAGE_LV_DRIVERS_USE_DRM
 		bool "drm"
 		default n
+		select BR2_PACKAGE_LIBDRM
 		help
 		  Enbale drm renderer
 
