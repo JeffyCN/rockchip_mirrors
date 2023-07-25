@@ -37,14 +37,13 @@ choice
 		help
 		  Enbale lvgl demo custom
 
-endchoice
+	config BR2_PACKAGE_RK_DEMO
+		bool "RK demo"
+		select BR2_PACKAGE_RKWIFIBT_APP
+		help
+		  Rockchip LVGL demo
 
-config BR2_PACKAGE_RK_DEMO
-	bool "RK demo"
-	default n
-	select BR2_PACKAGE_RKWIFIBT_APP
-	help
-	  Rockchip LVGL demo
+endchoice
 
 choice
 	prompt "LVGL demo driver select"
