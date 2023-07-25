@@ -113,6 +113,7 @@ config BR2_PACKAGE_CAMERA_ENGINE
 menu "Rockchip BSP packages"
 	source "package/rockchip/camera-engine-rkaiq/Config.in"
 	source "package/rockchip/camera-engine-rkisp/Config.in"
+	source "package/rockchip/common_algorithm/Config.in"
 	source "package/rockchip/gstreamer1-rockchip/Config.in"
 	source "package/rockchip/libv4l-rkmpp/Config.in"
 	source "package/rockchip/npu_powerctrl/Config.in"
