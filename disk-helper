@@ -300,12 +300,10 @@ prepare_part()
 
 	# Find real dev for root dev
 	if is_rootfs; then
-		DEVNO=$(mountpoint -d /)
-		if [ -b "/dev/block/$DEVNO" ]; then
-			DEV=/dev/block/$DEVNO
-		else
-			DEV=$(lsblk -pr | grep -w "$DEVNO" | cut -d' ' -f1)
-		fi
+		DEV_NO=$(mountpoint -d /)
+		DEV_NAME=$(grep -l "^$DEV_NO$" /sys/class/block/*/dev | \
+			cut -d'/' -f5)
+		DEV=/dev/$DEV_NAME
 	fi
 
 	DEV=$(realpath $DEV 2>/dev/null)
