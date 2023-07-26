@@ -1,7 +1,7 @@
-From 55f232ea6eabbae41995a2d8e42af77a317b693e Mon Sep 17 00:00:00 2001
+From f1deeeb60b516980290f33cb2a851a4c2dfbf3d9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 25/90] backend-drm: Support controlling output dynamically
+Subject: [PATCH 25/92] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -248,7 +248,7 @@ index 9929c934..88c4a2cf 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 17d8c754..7288220e 100644
+index 17d8c754..e200ba07 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -41,6 +41,7 @@
@@ -492,7 +492,7 @@ index 17d8c754..7288220e 100644
 +			double down_scale =
 +				atof(config + strlen("down-scale="));
 +			if (down_scale == output->base.down_scale ||
-+			    down_scale <= 0.125 || down_scale > 1)
++			    down_scale < 0.125 || down_scale > 1)
 +				continue;
 +
 +			output->base.down_scale = down_scale;

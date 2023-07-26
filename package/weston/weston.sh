@@ -1,5 +1,9 @@
 # The env variables below can be overridden
 
+# HACK for old chromium, see:
+# https://bugs.chromium.org/p/chromium/issues/detail?id=1279574
+export WL_OUTPUT_VERSION=3
+
 # Comment out this for atomic related functions, e.g. sprites
 export WESTON_DISABLE_ATOMIC=1
 
