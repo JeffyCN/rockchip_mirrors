@@ -1,7 +1,7 @@
-From 37c2a3e93298bf20882cb8e0d07dd8f62ed27cfa Mon Sep 17 00:00:00 2001
+From 7838daf9920fad753f3d982e57a8d3563689d5ef Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 7 Apr 2021 08:25:57 +0800
-Subject: [PATCH 53/90] config-parser: Support loading multiple configs
+Subject: [PATCH 53/93] config-parser: Support loading multiple configs
 
 Try loading .ini configs under "<config>.d/".
 
@@ -13,8 +13,8 @@ use-pixman=true
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  compositor/main.c      |   5 +-
- shared/config-parser.c | 152 ++++++++++++++++++++++++++++++++++-------
- 2 files changed, 130 insertions(+), 27 deletions(-)
+ shared/config-parser.c | 149 ++++++++++++++++++++++++++++++++++-------
+ 2 files changed, 127 insertions(+), 27 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 5a80870a..6132fd07 100644
@@ -34,7 +34,7 @@ index 5a80870a..6132fd07 100644
  	if (*config) {
  		full_path = weston_config_get_full_path(*config);
 diff --git a/shared/config-parser.c b/shared/config-parser.c
-index 749158df..03fb78e6 100644
+index 749158df..e8ba2940 100644
 --- a/shared/config-parser.c
 +++ b/shared/config-parser.c
 @@ -31,6 +31,7 @@
@@ -59,14 +59,12 @@ index 749158df..03fb78e6 100644
  	if (name[0] == '/') {
  		snprintf(c->path, sizeof c->path, "%s", name);
  		return open(name, O_RDONLY | O_CLOEXEC);
-@@ -368,6 +376,15 @@ config_add_section(struct weston_config *config, const char *name)
+@@ -368,6 +376,13 @@ config_add_section(struct weston_config *config, const char *name)
  {
  	struct weston_config_section *section;
  
 +	/* squash single sessions */
-+	if (strcmp(name, "launcher") && strcmp(name, "ivi-launcher") &&
-+	    strcmp(name, "output") && strcmp(name, "remote-output") &&
-+	    strcmp(name, "pipewire-output")) {
++	if (!strstr(name, "launcher") && !strstr(name, "output")) {
 +		section = weston_config_get_section(config, name, NULL, NULL);
 +		if (section)
 +			return section;
@@ -75,7 +73,7 @@ index 749158df..03fb78e6 100644
  	section = zalloc(sizeof *section);
  	if (section == NULL)
  		return NULL;
-@@ -386,10 +403,33 @@ config_add_section(struct weston_config *config, const char *name)
+@@ -386,10 +401,33 @@ config_add_section(struct weston_config *config, const char *name)
  
  static struct weston_config_entry *
  section_add_entry(struct weston_config_section *section,
@@ -110,7 +108,7 @@ index 749158df..03fb78e6 100644
  	entry = zalloc(sizeof *entry);
  	if (entry == NULL)
  		return NULL;
-@@ -413,14 +453,13 @@ section_add_entry(struct weston_config_section *section,
+@@ -413,14 +451,13 @@ section_add_entry(struct weston_config_section *section,
  }
  
  static bool
@@ -127,7 +125,7 @@ index 749158df..03fb78e6 100644
  	while (fgets(line, sizeof line, fp)) {
  		switch (line[0]) {
  		case '#':
-@@ -453,7 +492,7 @@ weston_config_parse_internal(struct weston_config *config, FILE *fp)
+@@ -453,7 +490,7 @@ weston_config_parse_internal(struct weston_config *config, FILE *fp)
  				p[i - 1] = '\0';
  				i--;
  			}
@@ -136,7 +134,7 @@ index 749158df..03fb78e6 100644
  			continue;
  		}
  	}
-@@ -469,7 +508,8 @@ weston_config_parse_fp(FILE *file)
+@@ -469,7 +506,8 @@ weston_config_parse_fp(FILE *file)
  	if (config == NULL)
  		return NULL;
  
@@ -146,7 +144,7 @@ index 749158df..03fb78e6 100644
  		weston_config_destroy(config);
  		return NULL;
  	}
-@@ -477,51 +517,111 @@ weston_config_parse_fp(FILE *file)
+@@ -477,51 +515,110 @@ weston_config_parse_fp(FILE *file)
  	return config;
  }
  
@@ -253,7 +251,6 @@ index 749158df..03fb78e6 100644
 +		strcpy(fpath, path);
 +		strcat(fpath, sep);
 +		strcat(fpath, file);
-+		free(namelist[i]);
 +
 +		fp = weston_open_config_file(NULL, fpath);
 +		if (!fp)
