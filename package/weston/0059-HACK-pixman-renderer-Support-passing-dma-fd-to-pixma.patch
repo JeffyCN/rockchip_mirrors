@@ -1,7 +1,7 @@
-From 207f7995fd89b46d7ce52ee50b9fa2031f3a70d1 Mon Sep 17 00:00:00 2001
+From 2a1c2539fa358bfc0e61c7dad33949d4d1de67ad Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
-Subject: [PATCH 59/90] HACK: pixman-renderer: Support passing dma fd to pixman
+Subject: [PATCH 59/93] HACK: pixman-renderer: Support passing dma fd to pixman
 
 Usage:
 pixman_image_set_destroy_function(image, NULL, (void *)(ptrdiff_t)dma_fd)
@@ -28,10 +28,10 @@ index aa35d62a..311d86d6 100644
  	uint32_t plane_mask;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 55333c90..60a909d4 100644
+index 930d677a..3c223869 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1907,15 +1907,21 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
+@@ -1904,15 +1904,21 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
  
  	/* FIXME error checking */
  	for (i = 0; i < ARRAY_LENGTH(output->dumb); i++) {
@@ -97,10 +97,10 @@ index e7e96fe7..87cbedf2 100644
  	drmModeRmFB(device->drm.fd, fb->fb_id);
  err_bo:
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 13bbe44b..4cbabd49 100644
+index 984f8280..a59728e8 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -978,6 +978,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -981,6 +981,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  					     data->ptr + attributes->offset[0],
  					     attributes->stride[0]);
  
@@ -109,7 +109,7 @@ index 13bbe44b..4cbabd49 100644
  	ps->buffer_destroy_listener.notify =
  		buffer_state_handle_buffer_destroy;
  	wl_signal_add(&buffer->destroy_signal,
-@@ -1700,18 +1702,25 @@ pixman_renderer_create_image_from_ptr(struct weston_output *output,
+@@ -1703,18 +1705,25 @@ pixman_renderer_create_image_from_ptr(struct weston_output *output,
  	struct pixman_output_state *po = get_output_state(output);
  	struct pixman_renderbuffer *renderbuffer;
  

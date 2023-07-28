@@ -1,7 +1,7 @@
-From d8f15ef72e8dccf0b3a99977764881fd910ab495 Mon Sep 17 00:00:00 2001
+From 6571f0842b845387e26257d3642afffc575a21c6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Jul 2023 09:42:32 +0800
-Subject: [PATCH 89/90] compositor: Delay DPMS-ON to finsih_frame()
+Subject: [PATCH 89/93] compositor: Delay DPMS-ON to finsih_frame()
 
 To make sure that the new frame is ready when turning on outputs.
 
@@ -25,10 +25,10 @@ index c4fca6fe..7d8edcaf 100644
  	bool freezing;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 0caf5f5c..17028a50 100644
+index 94d5bda2..044804e7 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -4427,9 +4427,7 @@ config_handle_output(struct drm_backend *b, const char *name,
+@@ -4424,9 +4424,7 @@ config_handle_output(struct drm_backend *b, const char *name,
  				continue;
  
  			output->base.freezing = false;

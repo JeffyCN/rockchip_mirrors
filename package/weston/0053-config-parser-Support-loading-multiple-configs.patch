@@ -1,4 +1,4 @@
-From 7838daf9920fad753f3d982e57a8d3563689d5ef Mon Sep 17 00:00:00 2001
+From 9ded05f7845ffdf35ad47bb5ecd97a7ee6639283 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 7 Apr 2021 08:25:57 +0800
 Subject: [PATCH 53/93] config-parser: Support loading multiple configs
@@ -13,8 +13,8 @@ use-pixman=true
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  compositor/main.c      |   5 +-
- shared/config-parser.c | 149 ++++++++++++++++++++++++++++++++++-------
- 2 files changed, 127 insertions(+), 27 deletions(-)
+ shared/config-parser.c | 150 ++++++++++++++++++++++++++++++++++-------
+ 2 files changed, 128 insertions(+), 27 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 5a80870a..6132fd07 100644
@@ -34,7 +34,7 @@ index 5a80870a..6132fd07 100644
  	if (*config) {
  		full_path = weston_config_get_full_path(*config);
 diff --git a/shared/config-parser.c b/shared/config-parser.c
-index 749158df..e8ba2940 100644
+index 749158df..6932a772 100644
 --- a/shared/config-parser.c
 +++ b/shared/config-parser.c
 @@ -31,6 +31,7 @@
@@ -144,7 +144,7 @@ index 749158df..e8ba2940 100644
  		weston_config_destroy(config);
  		return NULL;
  	}
-@@ -477,51 +515,110 @@ weston_config_parse_fp(FILE *file)
+@@ -477,51 +515,111 @@ weston_config_parse_fp(FILE *file)
  	return config;
  }
  
@@ -251,6 +251,7 @@ index 749158df..e8ba2940 100644
 +		strcpy(fpath, path);
 +		strcat(fpath, sep);
 +		strcat(fpath, file);
++		free(namelist[i]);
 +
 +		fp = weston_open_config_file(NULL, fpath);
 +		if (!fp)
@@ -268,7 +269,7 @@ index 749158df..e8ba2940 100644
 +		}
 +	}
 +
-+	for (; i < n; i++)
++	for (i++; i < n; i++)
 +		free(namelist[i]);
 +
 +	free(namelist);
