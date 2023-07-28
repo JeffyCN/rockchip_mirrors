@@ -1,7 +1,7 @@
-From f1deeeb60b516980290f33cb2a851a4c2dfbf3d9 Mon Sep 17 00:00:00 2001
+From 25369301497974906b31029ae6cea44c9110f739 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 25/92] backend-drm: Support controlling output dynamically
+Subject: [PATCH 25/93] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -38,9 +38,9 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/compositor.c               |  29 ++-
  libweston/libinput-seat.c            |  43 +++++
  libweston/libweston-internal.h       |   3 +
- libweston/pixman-renderer.c          |  30 ++-
+ libweston/pixman-renderer.c          |  29 +++
  libweston/renderer-gl/gl-renderer.c  |   3 +
- 11 files changed, 461 insertions(+), 27 deletions(-)
+ 11 files changed, 462 insertions(+), 25 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 363cbb10..d8183dfb 100644
@@ -806,7 +806,7 @@ index aaf94366..077bf23b 100644
  
  void
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index b4806f2f..c109f2ce 100644
+index b4806f2f..12ea7804 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -349,6 +349,26 @@ repaint_region(struct weston_paint_node *pnode,
@@ -836,12 +836,10 @@ index b4806f2f..c109f2ce 100644
  	if (ps->buffer_ref.buffer)
  		wl_shm_buffer_begin_access(ps->buffer_ref.buffer->shm_buffer);
  
-@@ -562,8 +582,14 @@ copy_to_hw_buffer(struct weston_output *output, pixman_region32_t *region)
+@@ -562,6 +582,15 @@ copy_to_hw_buffer(struct weston_output *output, pixman_region32_t *region)
  
  	weston_region_global_to_output(&output_region, output, &output_region);
  
--	pixman_image_set_clip_region32 (po->hw_buffer, &output_region);
--	pixman_region32_fini(&output_region);
 +	if (output->down_scale != 1.0f) {
 +		struct weston_matrix matrix;
 +		weston_matrix_init(&matrix);
@@ -850,9 +848,10 @@ index b4806f2f..c109f2ce 100644
 +		weston_matrix_transform_region(&output_region,
 +					       &matrix, &output_region);
 +	}
++
+ 	pixman_image_set_clip_region32 (po->hw_buffer, &output_region);
+ 	pixman_region32_fini(&output_region);
  
- 	pixman_image_composite32(PIXMAN_OP_SRC,
- 				 po->shadow_image, /* src */
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
 index 339bd789..62b2b3c1 100644
 --- a/libweston/renderer-gl/gl-renderer.c
