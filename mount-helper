@@ -43,7 +43,7 @@ do_part()
 
 	if mountpoint -q $MOUNT_POINT && ! is_rootfs; then
 		# Make sure other partitions are unmounted.
-		umount $MOUNT_POINT &>/dev/null || return
+		umount $MOUNT_POINT >/dev/null 2>/dev/null || return
 	fi
 
 	# Check and repair

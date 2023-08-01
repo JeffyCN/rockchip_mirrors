@@ -134,7 +134,7 @@ usb_symlink()
 
 usb_try_symlink()
 {
-	usb_symlink $@ &>/dev/null || true
+	usb_symlink $@ >/dev/null 2>/dev/null || true
 }
 
 usb_write()
@@ -161,7 +161,7 @@ usb_write()
 
 usb_try_write()
 {
-	usb_write $@ &>/dev/null || true
+	usb_write $@ >/dev/null 2>/dev/null || true
 }
 
 usb_start_daemon()
@@ -561,12 +561,14 @@ usb_start()
 		for instance in $(usb_instances $func); do
 			usb_msg "Preparing instance: $instance"
 
-			if ! mkdir -p $USB_FUNCTIONS_DIR/$instance 2>/dev/null; then
+			if ! mkdir -p $USB_FUNCTIONS_DIR/$instance \
+				2>/dev/null; then
 				usb_msg "Failed to create instance: $instance"
 				continue
 			fi
 
-			cd $USB_FUNCTIONS_DIR/$instance &>/dev/null || continue
+			cd $USB_FUNCTIONS_DIR/$instance \
+				>/dev/null 2>/dev/null || continue
 
 			usb_run_stage $func prepare
 
@@ -580,7 +582,8 @@ usb_start()
 
 	for func in $USB_FUNCS; do
 		for instance in $(usb_instances $func); do
-			cd $USB_FUNCTIONS_DIR/$instance &>/dev/null || continue
+			cd $USB_FUNCTIONS_DIR/$instance \
+				>/dev/null 2>/dev/null || continue
 
 			usb_msg "Starting instance: $instance"
 			usb_run_stage $func start
@@ -601,7 +604,8 @@ usb_stop()
 
 	for func in $USB_FUNCS; do
 		for instance in $(usb_instances $func); do
-			cd $USB_FUNCTIONS_DIR/$instance &>/dev/null || continue
+			cd $USB_FUNCTIONS_DIR/$instance \
+				>/dev/null 2>/dev/null || continue
 
 			usb_msg "Stopping instance: $instance"
 			usb_run_stage $func stop

@@ -37,7 +37,8 @@ do_part()
 	prepare_part || return
 
 	# Store ro/rw
-	MOUNTED_RO_RW=$(touch $MOUNT_POINT &>/dev/null && echo rw || echo ro)
+	MOUNTED_RO_RW=$(touch $MOUNT_POINT >/dev/null 2>/dev/null && \
+		echo rw || echo ro)
 
 	# Resize partition if needed
 	resize_part

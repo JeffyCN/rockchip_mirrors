@@ -381,13 +381,13 @@ function chk_env()
 {
 	echo_msg "$0 version: $VERSION"
 	# if error, exit -1
-	which io &>/dev/null
+	which io >/dev/null 2>/dev/null
 	if [ $? -ne 0 ]; then
 		echo_msg "install io command first!!!"
 		exit -1
 	fi
 
-	which hexdump &>/dev/null
+	which hexdump >/dev/null 2>/dev/null
 	if [ $? -eq 0 ]; then
 		TOOL_HEXDUMP="YES"
 	fi

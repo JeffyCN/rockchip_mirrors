@@ -97,10 +97,10 @@ bootanim_stop()
 
 	{
 		# Pause animation -> unfreeze display -> kill animation
-		kill -STOP $CPID &>/dev/null || true
+		kill -STOP $CPID >/dev/null 2>/dev/null || true
 		bootanim_deinit
 		sleep .1
-		kill -9 $CPID &>/dev/null || true
+		kill -9 $CPID >/dev/null 2>/dev/null || true
 	}&
 	wait
 }
