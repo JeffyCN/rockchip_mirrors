@@ -1,7 +1,7 @@
-From 7a7ca574d5805dfa89efd35f1c38d6582a77dd7a Mon Sep 17 00:00:00 2001
+From 81b2c8e55562825fb181f9f704ed65b57c0c1dd6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 May 2023 09:38:03 +0800
-Subject: [PATCH 42/42] kmssink: Avoid src size overflow
+Subject: [PATCH 42/43] kmssink: Avoid src size overflow
 
 The scaled video source size might overflow in
 gst_kms_sink_calculate_display_ratio()
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 12 insertions(+)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 48d3f5b..bf26793 100644
+index 60097dd..c2267f3 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -1706,6 +1706,18 @@ gst_kms_sink_calculate_display_ratio (GstKMSSink * self, GstVideoInfo * vinfo,
+@@ -1711,6 +1711,18 @@ gst_kms_sink_calculate_display_ratio (GstKMSSink * self, GstVideoInfo * vinfo,
      *scaled_height = video_height;
    }
  
