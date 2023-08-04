@@ -1,7 +1,7 @@
-From e88197662beecf9c35c825f45508cf4bfdac9d42 Mon Sep 17 00:00:00 2001
+From 2b551efbd3aae97136335bb5d69322e9586599f7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 28 Jul 2023 14:54:30 +0800
-Subject: [PATCH 93/93] desktop-shell: Support desktop launchers
+Subject: [PATCH 93/94] desktop-shell: Support desktop launchers
 
 Tested on RK3588 EVB with:
 1/ sed -i "s/\[\(launcher\)/[desktop-\1/" /etc/xdg/weston/weston.ini.d/*
@@ -9,11 +9,11 @@ Tested on RK3588 EVB with:
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- clients/desktop-shell.c | 617 +++++++++++++++++++++++++++++++++++++++-
- 1 file changed, 605 insertions(+), 12 deletions(-)
+ clients/desktop-shell.c | 700 +++++++++++++++++++++++++++++++++++++++-
+ 1 file changed, 688 insertions(+), 12 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index 08b64e44..97f706e1 100644
+index 08b64e44..bf759271 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -128,6 +128,8 @@ struct background {
@@ -34,7 +34,7 @@ index 08b64e44..97f706e1 100644
  	int x;
  	int y;
  	struct panel *panel;
-@@ -164,6 +168,67 @@ struct panel_clock {
+@@ -164,6 +168,72 @@ struct panel_clock {
  	time_t refresh_timer;
  };
  
@@ -55,6 +55,11 @@ index 08b64e44..97f706e1 100644
 +	char *name;
 +	uint32_t row;
 +	uint32_t column;
++
++	struct desktop_launcher_group *left_of;
++	struct desktop_launcher_group *right_of;
++	struct desktop_launcher_group *top_of;
++	struct desktop_launcher_group *bottom_of;
 +
 +	double padding_left;
 +	double padding_right;
@@ -102,7 +107,7 @@ index 08b64e44..97f706e1 100644
  struct unlock_dialog {
  	struct window *window;
  	struct widget *widget;
-@@ -248,7 +313,7 @@ check_desktop_ready(struct window *window)
+@@ -248,7 +318,7 @@ check_desktop_ready(struct window *window)
  }
  
  static void
@@ -111,7 +116,7 @@ index 08b64e44..97f706e1 100644
  {
  	pid_t pid;
  
-@@ -264,8 +329,8 @@ panel_launcher_activate(struct panel_launcher *widget)
+@@ -264,8 +334,8 @@ panel_launcher_activate(struct panel_launcher *widget)
  	if (setsid() == -1)
  		exit(EXIT_FAILURE);
  
@@ -122,7 +127,7 @@ index 08b64e44..97f706e1 100644
  			strerror(errno));
  		exit(1);
  	}
-@@ -383,8 +448,7 @@ panel_launcher_button_handler(struct widget *widget,
+@@ -383,8 +453,7 @@ panel_launcher_button_handler(struct widget *widget,
  	launcher = widget_get_user_data(widget);
  	widget_schedule_redraw(widget);
  	if (state == WL_POINTER_BUTTON_STATE_RELEASED)
@@ -132,7 +137,7 @@ index 08b64e44..97f706e1 100644
  }
  
  static void
-@@ -409,7 +473,7 @@ panel_launcher_touch_up_handler(struct widget *widget, struct input *input,
+@@ -409,7 +478,7 @@ panel_launcher_touch_up_handler(struct widget *widget, struct input *input,
  	launcher = widget_get_user_data(widget);
  	launcher->focused = 0;
  	widget_schedule_redraw(widget);
@@ -141,7 +146,7 @@ index 08b64e44..97f706e1 100644
  }
  
  static void
-@@ -443,7 +507,7 @@ panel_launcher_tablet_tool_up_handler(struct widget *widget,
+@@ -443,7 +512,7 @@ panel_launcher_tablet_tool_up_handler(struct widget *widget,
  	struct panel_launcher *launcher;
  
  	launcher = widget_get_user_data(widget);
@@ -150,7 +155,7 @@ index 08b64e44..97f706e1 100644
  }
  
  static void
-@@ -459,7 +523,7 @@ panel_launcher_tablet_tool_button_handler(struct widget *widget,
+@@ -459,7 +528,7 @@ panel_launcher_tablet_tool_button_handler(struct widget *widget,
  	launcher = widget_get_user_data(widget);
  
  	if (state == ZWP_TABLET_TOOL_V2_BUTTON_STATE_RELEASED)
@@ -159,7 +164,7 @@ index 08b64e44..97f706e1 100644
  }
  
  static void
-@@ -903,6 +967,165 @@ background_draw(struct widget *widget, void *data)
+@@ -903,6 +972,194 @@ background_draw(struct widget *widget, void *data)
  	check_desktop_ready(background->window);
  }
  
@@ -190,7 +195,8 @@ index 08b64e44..97f706e1 100644
 +		else
 +			width = allocation.width / row / (1 + group->spacing_x);
 +	}
-+	spacing_x = PERCENT_VALUE(group->spacing_x, width);
++	spacing_x = PERCENT_VALUE(group->spacing_x ? group->spacing_x : 0.1,
++				  width);
 +	row = MAX(row ? row : allocation.width / (width + spacing_x), 1);
 +
 +	if (!height) {
@@ -203,12 +209,14 @@ index 08b64e44..97f706e1 100644
 +		else
 +			height = allocation.height / column / (1 + group->spacing_y);
 +	}
-+	spacing_y = PERCENT_VALUE(group->spacing_y, height);
++	spacing_y = PERCENT_VALUE(group->spacing_y ? group->spacing_y : 0.1,
++				  height);
 +	column = MAX(column ? column : allocation.height / (height + spacing_y), 1);
 +
-+	if (!group->row)
++	/* Auto spacing */
++	if (!group->spacing_x)
 +		spacing_x = allocation.width / row - width;
-+	if (!group->column)
++	if (!group->spacing_y)
 +		spacing_y = allocation.height / column - height;
 +
 +	/* Fit group size */
@@ -279,19 +287,45 @@ index 08b64e44..97f706e1 100644
 +	}
 +
 +	wl_list_for_each(group, &background->launcher_group_list, link) {
++		struct rectangle allocation;
 +		int left, right, top, bottom, x, y, w, h;
 +		int max_width, max_height;
 +
-+		left = PERCENT_VALUE(group->padding_left, width);
-+		right = width - PERCENT_VALUE(group->padding_right, width);
-+		top = PERCENT_VALUE(group->padding_top, height);
-+		bottom = height - PERCENT_VALUE(group->padding_bottom, height);
++		left = top = 0;
++		right = width;
++		bottom = height;
++
++		if (group->left_of) {
++			widget_get_allocation(group->left_of->widget,
++					      &allocation);
++			right = allocation.x - start_x;
++		}
++		if (group->right_of) {
++			widget_get_allocation(group->right_of->widget,
++					      &allocation);
++			left = allocation.x + allocation.width - start_x;
++		}
++		if (group->top_of) {
++			widget_get_allocation(group->top_of->widget,
++					      &allocation);
++			bottom = allocation.y - start_y;
++		}
++		if (group->bottom_of) {
++			widget_get_allocation(group->bottom_of->widget,
++					      &allocation);
++			top = allocation.y + allocation.height - start_y;
++		}
++
++		left += PERCENT_VALUE(group->padding_left, width);
++		right -= PERCENT_VALUE(group->padding_right, width);
++		top += PERCENT_VALUE(group->padding_top, height);
++		bottom -= PERCENT_VALUE(group->padding_bottom, height);
 +
 +		max_width = PERCENT_VALUE(group->max_width, width);
 +		max_height = PERCENT_VALUE(group->max_height, height);
 +
-+		w = MIN(max_width ? max_width : width, right - left);
-+		h = MIN(max_height ? max_height : height, bottom - top);
++		w = MAX(MIN(max_width ? max_width : width, right - left),0);
++		h = MAX(MIN(max_height ? max_height : height, bottom - top),0);
 +
 +		switch (group->gravity) {
 +		case LEFT_TOP:
@@ -325,7 +359,7 @@ index 08b64e44..97f706e1 100644
  static void
  background_destroy(struct background *background);
  
-@@ -1191,6 +1414,351 @@ static const struct weston_desktop_shell_listener listener = {
+@@ -1191,6 +1448,400 @@ static const struct weston_desktop_shell_listener listener = {
  	desktop_shell_grab_cursor
  };
  
@@ -566,22 +600,68 @@ index 08b64e44..97f706e1 100644
 +	}
 +}
 +
++static struct desktop_launcher_group *
++background_find_group(struct background *background, const char *name)
++{
++	struct desktop_launcher_group *group;
++
++	if (!name)
++		return NULL;
++
++	wl_list_for_each(group, &background->launcher_group_list, link) {
++		if (group->name && !strcmp(group->name, name))
++			return group;
++	}
++	return NULL;
++}
++
 +static void
 +background_add_group(struct background *background,
 +		     struct weston_config_section *s, struct desktop *desktop)
 +{
 +	struct desktop_launcher_group *group;
-+	char *gravity;
++	char *gravity, *name;
 +
 +	group = xzalloc(sizeof *group);
 +	group->background = background;
-+	wl_list_insert(background->launcher_group_list.prev, &group->link);
 +
 +	weston_config_section_get_string(s, "name", &group->name, NULL);
 +
 +	/* Auto calculated by default */
 +	weston_config_section_get_uint(s, "row", &group->row, 0);
 +	weston_config_section_get_uint(s, "column", &group->column, 0);
++
++	weston_config_section_get_string(s, "left-to", &name, NULL);
++	group->left_of = background_find_group(background, name);
++	if (name && !group->left_of) {
++		fprintf(stderr, "unknown left-of: %s\n", name);
++		free(group);
++		return;
++	}
++
++	weston_config_section_get_string(s, "right-of", &name, NULL);
++	group->right_of = background_find_group(background, name);
++	if (name && !group->right_of) {
++		fprintf(stderr, "unknown right-of: %s\n", name);
++		free(group);
++		return;
++	}
++
++	weston_config_section_get_string(s, "top-of", &name, NULL);
++	group->top_of = background_find_group(background, name);
++	if (name && !group->top_of) {
++		fprintf(stderr, "unknown top-of: %s\n", name);
++		free(group);
++		return;
++	}
++
++	weston_config_section_get_string(s, "bottom-of", &name, NULL);
++	group->bottom_of = background_find_group(background, name);
++	if (name && !group->bottom_of) {
++		fprintf(stderr, "unknown bottom-of: %s\n", name);
++		free(group);
++		return;
++	}
 +
 +	weston_config_section_get_double(s, "padding-left",
 +					 &group->padding_left, 0.05);
@@ -619,8 +699,9 @@ index 08b64e44..97f706e1 100644
 +	weston_config_section_get_double(s, "launcher-height",
 +					 &group->launcher_height, 0);
 +
-+	weston_config_section_get_double(s, "spacing-x", &group->spacing_x, 0.1);
-+	weston_config_section_get_double(s, "spacing-y", &group->spacing_y, 0.1);
++	/* Auto spacing by default */
++	weston_config_section_get_double(s, "spacing-x", &group->spacing_x, 0);
++	weston_config_section_get_double(s, "spacing-y", &group->spacing_y, 0);
 +
 +	weston_config_section_get_color(s, "color", &group->color, 0x11FFFFFF);
 +
@@ -641,6 +722,8 @@ index 08b64e44..97f706e1 100644
 +
 +	wl_list_init(&group->launcher_list);
 +	desktop_add_launchers(group, desktop);
++
++	wl_list_insert(background->launcher_group_list.prev, &group->link);
 +}
 +
 +static void
@@ -677,7 +760,7 @@ index 08b64e44..97f706e1 100644
  static void
  background_destroy(struct background *background)
  {
-@@ -1215,6 +1783,7 @@ background_create(struct desktop *desktop, struct output *output)
+@@ -1215,6 +1866,7 @@ background_create(struct desktop *desktop, struct output *output)
  	background->widget = window_add_widget(background->window, background);
  	window_set_user_data(background->window, background);
  	widget_set_redraw_handler(background->widget, background_draw);
@@ -685,7 +768,7 @@ index 08b64e44..97f706e1 100644
  	widget_set_transparent(background->widget, 0);
  
  	s = weston_config_get_section(desktop->config, "shell", NULL, NULL);
-@@ -1246,6 +1815,9 @@ background_create(struct desktop *desktop, struct output *output)
+@@ -1246,6 +1898,9 @@ background_create(struct desktop *desktop, struct output *output)
  
  	free(type);
  
@@ -695,7 +778,7 @@ index 08b64e44..97f706e1 100644
  	return background;
  }
  
-@@ -1296,6 +1868,7 @@ output_destroy(struct output *output)
+@@ -1296,6 +1951,7 @@ output_destroy(struct output *output)
  	wl_output_destroy(output->output);
  	wl_list_remove(&output->link);
  
@@ -703,7 +786,7 @@ index 08b64e44..97f706e1 100644
  	free(output);
  }
  
-@@ -1377,11 +1950,30 @@ output_handle_scale(void *data,
+@@ -1377,11 +2033,30 @@ output_handle_scale(void *data,
  		window_set_buffer_scale(output->background->window, scale);
  }
  
@@ -735,7 +818,7 @@ index 08b64e44..97f706e1 100644
  };
  
  static void
-@@ -1403,7 +1995,7 @@ output_init(struct output *output, struct desktop *desktop)
+@@ -1403,7 +2078,7 @@ output_init(struct output *output, struct desktop *desktop)
  }
  
  static void
@@ -744,7 +827,7 @@ index 08b64e44..97f706e1 100644
  {
  	struct output *output;
  
-@@ -1413,7 +2005,8 @@ create_output(struct desktop *desktop, uint32_t id)
+@@ -1413,7 +2088,8 @@ create_output(struct desktop *desktop, uint32_t id)
  
  	output->desktop = desktop;
  	output->output =
@@ -754,7 +837,7 @@ index 08b64e44..97f706e1 100644
  	output->server_output_id = id;
  
  	wl_output_add_listener(output->output, &output_listener, output);
-@@ -1495,7 +2088,7 @@ global_handler(struct display *display, uint32_t id,
+@@ -1495,7 +2171,7 @@ global_handler(struct display *display, uint32_t id,
  						  &listener,
  						  desktop);
  	} else if (!strcmp(interface, "wl_output")) {
