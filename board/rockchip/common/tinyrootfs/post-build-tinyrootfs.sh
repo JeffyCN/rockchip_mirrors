@@ -1,11 +1,6 @@
 #!/bin/bash
 
-BUILDROOT=$(pwd)
 TARGET=$1
-NAME=$(whoami)
-HOST=$(hostname)
-KERNEL_DIR=$BUILDROOT/../kernel
-OUTPUT_DIR=$TARGET/../
 
 rm -rf $TARGET/lib/udev/v4l_id
 rm -f $TARGET/lib/udev/rules.d/75-net-description.rules
