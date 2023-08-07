@@ -10,7 +10,7 @@ for dir in $(ls "$OVERLAYS"); do
 
 	if [ -x "$OVERLAY_DIR/install.sh" ]; then
 		echo "Installing $OVERLAY_DIR"
-		"$OVERLAY_DIR/install.sh"
+		"$OVERLAY_DIR/install.sh" "$OVERLAY_DIR" "$TARGET_DIR"
 	else
 		echo "Copying $OVERLAY_DIR"
                 rsync -av --chmod=u=rwX,go=rX \
