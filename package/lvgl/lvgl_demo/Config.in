@@ -40,6 +40,7 @@ choice
 	config BR2_PACKAGE_RK_DEMO
 		bool "RK demo"
 		select BR2_PACKAGE_RKWIFIBT_APP
+		select BR2_PACKAGE_RKADK
 		help
 		  Rockchip LVGL demo
 
