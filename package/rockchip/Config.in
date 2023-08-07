@@ -56,6 +56,11 @@ config BR2_PACKAGE_RK3326
 	help
 	  Use rockchip's rk3326 chip
 
+config BR2_PACKAGE_RK3328
+	bool "rk3328 chip"
+	help
+	  Use rockchip's rk3328 chip
+
 config BR2_PACKAGE_RK3358
 	bool "rk3358 chip"
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
