@@ -1,5 +1,6 @@
 menuconfig BR2_PACKAGE_LVGL
 	bool "LVGL"
+	select BR2_PACKAGE_FREETYPE
 	default n
 	help
 	  Light and Versatile Graphics Library
