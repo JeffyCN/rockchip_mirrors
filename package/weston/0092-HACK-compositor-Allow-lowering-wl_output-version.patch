@@ -1,7 +1,7 @@
-From 01c9510f6cb93928cb28be546821f82d1647d65c Mon Sep 17 00:00:00 2001
+From 6f6b1ee7302a6850784048cad342b30737e03266 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 26 Jul 2023 10:01:33 +0800
-Subject: [PATCH 92/92] HACK: compositor: Allow lowering wl_output version
+Subject: [PATCH 92/94] HACK: compositor: Allow lowering wl_output version
 
 This is for old chromium, see:
 https://bugs.chromium.org/p/chromium/issues/detail?id=1279574
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 13 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 76503f2b..e212db94 100644
+index b130593b..a5ddcc5d 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -5621,11 +5621,23 @@ bind_output(struct wl_client *client,
+@@ -5626,11 +5626,23 @@ bind_output(struct wl_client *client,
  static void
  weston_head_add_global(struct weston_head *head)
  {
