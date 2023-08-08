@@ -1,7 +1,7 @@
-From ea2c51f91d16f788c8e7da337573222e0cc3af83 Mon Sep 17 00:00:00 2001
+From ef21cc3f1b847f87108a3d541297c322c1351753 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 35/90] backend-drm: Support controlling compositor dynamically
+Subject: [PATCH 35/94] backend-drm: Support controlling compositor dynamically
 
 Use config file to control compositor's state.
 
@@ -21,14 +21,15 @@ echo "compositor:hotplug:force" > /tmp/.weston_drm.conf
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/backend-drm/drm.c | 39 ++++++++++++++++++++++++++++++++++++-
- 1 file changed, 38 insertions(+), 1 deletion(-)
+ libweston/backend-drm/drm.c | 48 ++++++++++++++++++++++++++++++++++++-
+ libweston/compositor.c      |  7 +++++-
+ 2 files changed, 53 insertions(+), 2 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 7288220e..fcef8deb 100644
+index dbebbe59..9328e774 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -4394,6 +4394,39 @@ config_handle_output(struct drm_backend *b, const char *name,
+@@ -4400,6 +4400,48 @@ config_handle_output(struct drm_backend *b, const char *name,
  	}
  }
  
@@ -44,10 +45,19 @@ index 7288220e..fcef8deb 100644
 +		} else if (!strncmp(value, "freeze", strlen("freeze"))) {
 +			udev_input_disable(&b->input);
 +			weston_compositor_offscreen(b->compositor);
++		} else if (!strncmp(value, "offscreen", strlen("offscreen"))) {
++			/* HACK: offscreen + DPMS off */
++			weston_compositor_sleep(b->compositor);
++			weston_compositor_offscreen(b->compositor);
++			udev_input_enable(&b->input);
 +		} else if (!strncmp(value, "off", strlen("off"))) {
 +			udev_input_disable(&b->input);
 +			weston_compositor_sleep(b->compositor);
 +		} else {
++			/* HACK: Force waking from offscreen */
++			if (b->compositor->state == WESTON_COMPOSITOR_OFFSCREEN)
++				b->compositor->state = WESTON_COMPOSITOR_IDLE;
++
 +			weston_compositor_wake(b->compositor);
 +			weston_compositor_damage_all(b->compositor);
 +
@@ -68,7 +78,7 @@ index 7288220e..fcef8deb 100644
  static int
  config_timer_handler(void *data)
  {
-@@ -4425,7 +4458,9 @@ config_timer_handler(void *data)
+@@ -4431,7 +4473,9 @@ config_timer_handler(void *data)
  
  	/**
  	 * Parse configs, formated with <type>:<key>:<value>
@@ -79,7 +89,7 @@ index 7288220e..fcef8deb 100644
  	 */
  	while (3 == fscanf(conf_fp,
  			   "%" STR(MAX_CONF_LEN) "[^:]:"
-@@ -4433,6 +4468,8 @@ config_timer_handler(void *data)
+@@ -4439,6 +4483,8 @@ config_timer_handler(void *data)
  			   "%" STR(MAX_CONF_LEN) "[^\n]%*c", type, key, value)) {
  		if (!strcmp(type, "output"))
  			config_handle_output(b, key, value);
@@ -88,6 +98,34 @@ index 7288220e..fcef8deb 100644
  	}
  
  	fclose(conf_fp);
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index 9bd1d01c..4205c933 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -5350,6 +5350,10 @@ weston_compositor_wake(struct weston_compositor *compositor)
+ {
+ 	uint32_t old_state = compositor->state;
+ 
++	/* HACK: Avoid waking up by input */
++	if (old_state == WESTON_COMPOSITOR_OFFSCREEN)
++		return;
++
+ 	/* The state needs to be changed before emitting the wake
+ 	 * signal because that may try to schedule a repaint which
+ 	 * will not work if the compositor is still sleeping */
+@@ -5357,10 +5361,11 @@ weston_compositor_wake(struct weston_compositor *compositor)
+ 
+ 	switch (old_state) {
+ 	case WESTON_COMPOSITOR_SLEEPING:
++		wl_signal_emit(&compositor->wake_signal, compositor);
++		/* fall through */
+ 	case WESTON_COMPOSITOR_IDLE:
+ 	case WESTON_COMPOSITOR_OFFSCREEN:
+ 		weston_compositor_dpms(compositor, WESTON_DPMS_ON);
+-		wl_signal_emit(&compositor->wake_signal, compositor);
+ 		/* fall through */
+ 	default:
+ 		wl_event_source_timer_update(compositor->idle_source,
 -- 
 2.20.1
 

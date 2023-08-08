@@ -1,7 +1,7 @@
-From 42e5db399e20e9d57c02c5a56bc3f0316c12b06e Mon Sep 17 00:00:00 2001
+From 0e8b645d22d056c01317eca8ac25166b2e3b461a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 37/90] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 37/94] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -87,7 +87,7 @@ index 88c4a2cf..6c817c95 100644
  		return NULL;
  	return container_of(base, struct drm_output, base);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index fcef8deb..003a535a 100644
+index 9328e774..2730a775 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -216,8 +216,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -175,7 +175,7 @@ index fcef8deb..003a535a 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->config_timer);
-@@ -4479,6 +4504,183 @@ config_timer_handler(void *data)
+@@ -4494,6 +4519,183 @@ config_timer_handler(void *data)
  	return 0;
  }
  
@@ -359,7 +359,7 @@ index fcef8deb..003a535a 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4736,6 +4938,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4751,6 +4953,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  
@@ -385,10 +385,10 @@ index 19afce05..4e358293 100644
  
  			if (weston_head_is_enabled(head_base))
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 9bd1d01c..f1d06c9d 100644
+index 4205c933..44d82d6f 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -6814,6 +6814,9 @@ weston_output_set_color_outcome(struct weston_output *output)
+@@ -6819,6 +6819,9 @@ weston_output_set_color_outcome(struct weston_output *output)
  	struct weston_color_manager *cm = output->compositor->color_manager;
  	struct weston_output_color_outcome *colorout;
  

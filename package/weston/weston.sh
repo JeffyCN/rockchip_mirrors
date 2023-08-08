@@ -53,7 +53,8 @@ export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 # export WESTON_DRM_CONFIG=/tmp/.weston_drm.conf
 #
 # Dynamic config examples:
-# echo "compositor:state:sleep" > /tmp/.weston_drm.conf # off + input wakeable
+# echo "compositor:state:offscreen" > /tmp/.weston_drm.conf # off + input
+# echo "compositor:state:sleep" > /tmp/.weston_drm.conf # off + input(wakeable)
 # echo "compositor:state:block" > /tmp/.weston_drm.conf # no input
 # echo "compositor:state:freeze" > /tmp/.weston_drm.conf # no input + freeze
 # echo "compositor:state:off" > /tmp/.weston_drm.conf # no input + off
