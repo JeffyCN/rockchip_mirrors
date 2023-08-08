@@ -8,7 +8,7 @@ LVGL_DEMO_SITE = $(TOPDIR)/../app/lvgl_demo
 LVGL_DEMO_SITE_METHOD = local
 
 # add dependencies
-LVGL_DEMO_DEPENDENCIES = lvgl
+LVGL_DEMO_DEPENDENCIES += lvgl
 
 LVGL_DEMO_INSTALL_STAGING = YES
 
@@ -37,6 +37,7 @@ LVGL_DEMO_CONF_OPTS += -DLV_USE_DEMO_CUSTOM=1
 endif
 
 ifeq ($(BR2_PACKAGE_RK_DEMO), y)
+LVGL_DEMO_DEPENDENCIES += rkadk rkwifibt-app
 LVGL_DEMO_CONF_OPTS += -DLV_USE_RK_DEMO=1
 endif
 
