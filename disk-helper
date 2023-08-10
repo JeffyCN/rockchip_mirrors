@@ -22,32 +22,57 @@ check_tool()
 	return 1
 }
 
+is_rootfs()
+{
+	[ $MOUNT_POINT = "/" ]
+}
+
+rootfs_device()
+{
+	DEV_NO=$(mountpoint -d /)
+	stat -c "%n %Hr:%Lr" /dev/* | grep " $DEV_NO$" | cut -d' ' -f1
+}
+
 device_from_attr()
 {
-	# It's a block device
-	if [ -b "$1" ]; then
-		echo $1
-		return
-	fi
+	case "$1" in
+		"") return ;;
+		/dev/root)
+			rootfs_device
+			return
+			;;
+		/dev/*)
+			echo $1
+			return
+			;;
+	esac
 
 	# Parse from blkid
-	blkid 2>/dev/null | grep -w "$1" | head -n 1 | \
-		grep -o "^[^:]*" && return
+	if blkid 2>/dev/null | grep -w "$1" | head -n 1 | \
+		grep -o "^[^:]*"; then
+		return
+	fi
 
 	# Check mtdblock name
 	for d in $(ls /dev/ | grep mtdblock); do
 		if grep -q "^$1$" /sys/block/$d/device/name; then
-			echo $d
+			echo /dev/$d
 			return
 		fi
 	done
 
-	# Fallback to /dev/block/by-name
-	if [ -b /dev/block/by-name/$1 ]; then
-		echo /dev/block/by-name/$1
+	# Try udev rules symlink
+	if find /dev/block/by-name/$1 2>/dev/null; then
 		return
 	fi
 
+	# Check mtd
+	if grep -q "\"$1\"$" /proc/mtd 2>/dev/null; then
+		echo "/dev/$(grep "\"$1\"$" /proc/mtd | cut -d':' -f1)"
+		return
+	fi
+
+	# Give up
 	echo $1
 }
 
@@ -130,11 +155,6 @@ format_ubifs()
 		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
 		ubiblock -c /dev/ubi${PART_NO}_0 || return 1
 	fi
-}
-
-is_rootfs()
-{
-	[ $MOUNT_POINT = "/" ]
 }
 
 remount_part()
@@ -300,17 +320,14 @@ prepare_part()
 
 	# Find real dev for root dev
 	if is_rootfs; then
-		DEV_NO=$(mountpoint -d /)
-		DEV_NAME=$(grep -l "^$DEV_NO$" /sys/class/block/*/dev | \
-			cut -d'/' -f5)
-		DEV=/dev/$DEV_NAME
+		DEV=$(rootfs_device)
 	fi
 
 	DEV=$(realpath $DEV 2>/dev/null)
 	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
 
-	# Only accept block device
-	[ -b "$DEV" ] || return 1
+	# Only accept block or char device
+	[ -b "$DEV" -o -c "$DEV" ] || return 1
 
 	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
 	if [ -f "$SYS_PATH/name" ]; then
