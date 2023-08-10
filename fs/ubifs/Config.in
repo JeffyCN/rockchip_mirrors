@@ -19,12 +19,22 @@ config BR2_TARGET_ROOTFS_UBIFS_MINIOSIZE
 	  Minimum I/O unit size. The value provided here is passed
 	  to the -m/--min-io-size option of mkfs.ubifs/ubinize.
 
+config BR2_TARGET_ROOTFS_UBIFS_MAX_SIZE
+	int "max size (M)"
+	default 0
+	help
+	  The max size of the filesystem.
+
+if BR2_TARGET_ROOTFS_UBIFS_MAX_SIZE = 0
+
 config BR2_TARGET_ROOTFS_UBIFS_MAXLEBCNT
 	int "maximum logical eraseblock count"
 	default 2048
 	help
 	  Maximum logical eraseblock (LEB) count. The value provided
 	  here is passed to the -c/--max-leb-cnt option of mkfs.ubifs.
+
+endif
 
 choice
 	prompt "ubifs runtime compression"
