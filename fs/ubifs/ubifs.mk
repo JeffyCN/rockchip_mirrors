@@ -4,9 +4,17 @@
 #
 ################################################################################
 
+ifeq ($(BR2_TARGET_ROOTFS_UBIFS_MAX_SIZE),0)
+UBIFS_MAXLEBCNT = $(BR2_TARGET_ROOTFS_UBIFS_MAXLEBCNT)
+else
+UBIFS_LEBSIZE = $(shell printf "%d" $(BR2_TARGET_ROOTFS_UBIFS_LEBSIZE))
+UBIFS_MAX_SIZE = $(shell echo "$(BR2_TARGET_ROOTFS_UBIFS_MAX_SIZE)*1024" | bc)
+UBIFS_MAXLEBCNT = $(shell echo "$(UBIFS_MAX_SIZE)*1024/$(UBIFS_LEBSIZE)" | bc)
+endif
+
 UBIFS_OPTS = \
 	-e $(BR2_TARGET_ROOTFS_UBIFS_LEBSIZE) \
-	-c $(BR2_TARGET_ROOTFS_UBIFS_MAXLEBCNT) \
+	-c $(UBIFS_MAXLEBCNT) \
 	-m $(BR2_TARGET_ROOTFS_UBIFS_MINIOSIZE)
 
 ifeq ($(BR2_TARGET_ROOTFS_UBIFS_RT_ZLIB),y)
