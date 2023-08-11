@@ -48,7 +48,7 @@ device_from_attr()
 	esac
 
 	# Parse from blkid
-	if blkid 2>/dev/null | grep -w "$1" | head -n 1 | \
+	if blkid 2>/dev/null | grep -w "$1" | tail -n 1 | \
 		grep -o "^[^:]*"; then
 		return
 	fi
@@ -86,32 +86,36 @@ prepare_ubi()
 
 	[ "$PART_NO" ] || { echo "No valid part number!" && return 1; }
 
+	MTD_DEV=/dev/mtd${PART_NO}
+	UBI_DEV=/dev/ubi${PART_NO}
+	UBIVOL_DEV=/dev/ubi${PART_NO}_0
+	UBIBLOCK_DEV=/dev/ubiblock${PART_NO}_0
+
 	if [ "$FSGROUP" = ubifs ]; then
-		DEV=/dev/ubi${PART_NO}_0
+		DEV=$UBIVOL_DEV
 	else
-		DEV=/dev/ubiblock${PART_NO}_0
+		DEV=$UBIBLOCK_DEV
 	fi
 
-	MTDDEV=/dev/mtd${PART_NO}
 
-	echo "Preparing $DEV from $MTDDEV"
+	echo "Preparing $DEV from $MTD_DEV"
 
 	echo "Remove ubi block device"
 	if echo $DEV | grep -q ubiblock; then
 		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
-		ubiblock -r /dev/ubi${PART_NO}_0 >/dev/null 2>/dev/null
+		ubiblock -r $UBIVOL_DEV >/dev/null 2>/dev/null
 	fi
 
 	echo "Detach ubi device"
 	check_tool ubidetach BR2_PACKAGE_MTD_UBIDETACH || return 1
-	ubidetach -p $MTDDEV >/dev/null 2>/dev/null
+	ubidetach -p $MTD_DEV >/dev/null 2>/dev/null
 
 	echo "Attach ubi device"
 	check_tool ubiattach BR2_PACKAGE_MTD_UBIATTACH || return 1
 	ubiattach /dev/ubi_ctrl -m $PART_NO -d $PART_NO || return 1
 
 	echo "Check for valid volume"
-	if [ ! -e /dev/ubi${PART_NO}_0 ]; then
+	if [ ! -e $UBIVOL_DEV ]; then
 		echo "No valid ubi volume"
 		return 1
 	fi
@@ -119,7 +123,7 @@ prepare_ubi()
 	echo "Create ubi block device"
 	if echo $DEV | grep -q ubiblock; then
 		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
-		ubiblock -c /dev/ubi${PART_NO}_0 || return 1
+		ubiblock -c $UBIVOL_DEV || return 1
 	fi
 
 	return 0
@@ -127,33 +131,33 @@ prepare_ubi()
 
 format_ubifs()
 {
-	echo "Formatting $MTDDEV for $DEV"
+	echo "Formatting $MTD_DEV for $DEV"
 
 	echo "Remove ubi block device"
 	if echo $DEV | grep -q ubiblock; then
 		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
-		ubiblock -r /dev/ubi${PART_NO}_0 >/dev/null 2>/dev/null
+		ubiblock -r $UBIVOL_DEV >/dev/null 2>/dev/null
 	fi
 
 	echo "Detach ubi device"
 	check_tool ubidetach BR2_PACKAGE_MTD_UBIDETACH || return 1
-	ubidetach -p $MTDDEV >/dev/null 2>/dev/null
+	ubidetach -p $MTD_DEV >/dev/null 2>/dev/null
 
 	echo "Format device"
 	check_tool ubiformat BR2_PACKAGE_MTD_UBIFORMAT || return 1
-	ubiformat -yq $MTDDEV || return 1
+	ubiformat -yq $MTD_DEV || return 1
 
 	echo "Attach ubi device"
 	ubiattach /dev/ubi_ctrl -m $PART_NO -d $PART_NO || return 1
 
 	echo "Create ubi volume"
 	check_tool ubimkvol BR2_PACKAGE_MTD_UBIMKVOL || return 1
-	ubimkvol /dev/ubi$PART_NO -N $PART_NAME -m || return 1
+	ubimkvol $UBI_DEV -N $PART_NAME -m || return 1
 
 	echo "Create ubi block device"
 	if echo $DEV | grep -q ubiblock; then
 		check_tool ubiblock BR2_PACKAGE_MTD_UBIBLOCK || return 1
-		ubiblock -c /dev/ubi${PART_NO}_0 || return 1
+		ubiblock -c $UBIVOL_DEV || return 1
 	fi
 }
 
@@ -271,8 +275,8 @@ resize_ntfs()
 
 resize_part()
 {
-	# Fixed size or already resized
-	[ -f $MOUNT_POINT/.fixed -o -f $MOUNT_POINT/.resized ] && return
+	# Already resized
+	[ -f $MOUNT_POINT/.resized ] && return
 
 	if [ -z "$FSRESIZE" ]; then
 		echo "No resize for $FSTYPE"
@@ -401,8 +405,8 @@ prepare_part()
 	esac
 	MOUNT_OPTS=${OPTS:+" -o ${OPTS%,}"}
 
-	# Prepare for UBI
-	if [ "$FSGROUP" = ubifs ]; then
+	# Prepare for ubi (consider /dev/mtdX as ubiblock)
+	if [ "$FSGROUP" = ubifs ] || echo $DEV | grep -q "/dev/mtd[0-9]";then
 		if ! prepare_ubi; then
 			echo "Failed to prepare ubi for $DEV"
 			[ "$AUTO_MKFS" ] || return
