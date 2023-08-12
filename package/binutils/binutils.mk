@@ -11,7 +11,7 @@ ifeq ($(BINUTILS_VERSION),)
 ifeq ($(BR2_arc),y)
 BINUTILS_VERSION = arc-2020.09-release
 else
-BINUTILS_VERSION = 2.38
+BINUTILS_VERSION = 2.40
 endif
 endif # BINUTILS_VERSION
 
@@ -54,7 +54,8 @@ BINUTILS_CONF_OPTS = \
 	--with-system-zlib \
 	--disable-gprofng \
 	$(BINUTILS_DISABLE_GDB_CONF_OPTS) \
-	$(BINUTILS_EXTRA_CONFIG_OPTIONS)
+	$(BINUTILS_EXTRA_CONFIG_OPTIONS) \
+	--without-zstd
 
 ifeq ($(BR2_PACKAGE_BINUTILS_ENABLE_GOLD),y)
 BINUTILS_CONF_OPTS += --enable-gold
@@ -94,7 +95,8 @@ HOST_BINUTILS_CONF_OPTS = \
 	--enable-plugins \
 	--enable-lto \
 	$(BINUTILS_DISABLE_GDB_CONF_OPTS) \
-	$(BINUTILS_EXTRA_CONFIG_OPTIONS)
+	$(BINUTILS_EXTRA_CONFIG_OPTIONS) \
+	--without-zstd
 
 ifeq ($(BR2_BINUTILS_GPROFNG),y)
 HOST_BINUTILS_DEPENDENCIES += host-bison
@@ -111,12 +113,19 @@ endif
 # our TARGET_CONFIGURE_ARGS are taken into consideration for those
 BINUTILS_MAKE_ENV = $(TARGET_CONFIGURE_ARGS)
 
+ifeq ($(BR2_PACKAGE_BINUTILS_HAS_LIBSFRAME),y)
+define BINUTILS_INSTALL_STAGING_LIBSFRAME
+	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/libsframe DESTDIR=$(STAGING_DIR) install
+endef
+endif
+
 # We just want libbfd, libiberty and libopcodes,
 # not the full-blown binutils in staging
 define BINUTILS_INSTALL_STAGING_CMDS
 	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/bfd DESTDIR=$(STAGING_DIR) install
 	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/opcodes DESTDIR=$(STAGING_DIR) install
 	$(TARGET_MAKE_ENV) $(MAKE) -C $(@D)/libiberty DESTDIR=$(STAGING_DIR) install
+	$(BINUTILS_INSTALL_STAGING_LIBSFRAME)
 endef
 
 # If we don't want full binutils on target
