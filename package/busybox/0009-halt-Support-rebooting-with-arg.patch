@@ -1,7 +1,7 @@
-From 1643107aa592271413603601161b47681287065e Mon Sep 17 00:00:00 2001
+From 2d56c20bb71494eb01f7b88ce019269f26347135 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Sep 2018 11:32:04 +0800
-Subject: [PATCH 5/8] halt: Support rebooting with arg
+Subject: [PATCH 09/12] halt: Support rebooting with arg
 
 Support passing reboot arg(e.g. loader, fastboot, etc.) to kernel.
 
