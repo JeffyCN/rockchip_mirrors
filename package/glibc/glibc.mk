@@ -10,7 +10,7 @@
 ifeq ($(BR2_PACKAGE_GLIBC_2_28),y)
 GLIBC_VERSION = 2.28-69-g1e5c5303a522764d7e9d2302a60e4a32cdb902f1
 else
-GLIBC_VERSION = 2.36-81-g4f4d7a13edfd2fdc57c9d76e1fd6d017fb47550c
+GLIBC_VERSION = 2.37-2-g9f8513dc64119a424b312db97cef5d87d376defa
 endif
 # Upstream doesn't officially provide an https download link.
 # There is one (https://sourceware.org/git/glibc.git) but it's not reliable,
