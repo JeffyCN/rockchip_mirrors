@@ -25,6 +25,8 @@ do_part()
 	echo $1 | grep -q "^#" && return
 
 	DEV=$(device_from_attr ${1##*=})
+	[ "$DEV" ] || return
+
 	MOUNT_POINT=$2
 	FSTYPE=$3
 	OPTS=$4

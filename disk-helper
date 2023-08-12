@@ -36,7 +36,9 @@ rootfs_device()
 device_from_attr()
 {
 	case "$1" in
-		"") return ;;
+		""|tmpfs|proc|devtmpfs|devpts|sysfs|configfs|debugfs|pstore)
+			return
+			;;
 		/dev/root)
 			rootfs_device
 			return
@@ -46,6 +48,14 @@ device_from_attr()
 			return
 			;;
 	esac
+
+	# Check partition name
+	for d in $(ls /sys/class/block/); do
+		if grep -q "^PARTNAME=$1$" /sys/class/block/$d/uevent; then
+			echo /dev/$d
+			return
+		fi
+	done
 
 	# Parse from blkid
 	if blkid 2>/dev/null | grep -w "$1" | tail -n 1 | \
@@ -61,14 +71,14 @@ device_from_attr()
 		fi
 	done
 
-	# Try udev rules symlink
-	if find /dev/block/by-name/$1 2>/dev/null; then
-		return
-	fi
-
 	# Check mtd
 	if grep -q "\"$1\"$" /proc/mtd 2>/dev/null; then
 		echo "/dev/$(grep "\"$1\"$" /proc/mtd | cut -d':' -f1)"
+		return
+	fi
+
+	# Try udev rules symlink
+	if find /dev/block/by-name/$1 2>/dev/null; then
 		return
 	fi
 
