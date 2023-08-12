@@ -41,6 +41,8 @@ choice
 		bool "RK demo"
 		select BR2_PACKAGE_RKWIFIBT_APP
 		select BR2_PACKAGE_RKADK
+		select BR2_PACKAGE_COMMON_ALGORITHM
+		select BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS
 		help
 		  Rockchip LVGL demo
 
