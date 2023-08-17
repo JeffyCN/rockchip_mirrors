@@ -28,14 +28,18 @@ check_kgithub() {
     fi
 
     if grep -q kgithub /etc/hosts; then
+        echo -e "\e[31m"
         echo "Oops! The kgithub is down!"
+        echo -e "\e[0m"
         return 1
     fi
 
+    echo -e "\e[31m"
     echo "Your DNS doesn't support kgithub.com"
     echo "Please modify it:"
     echo "sudo sed -i '\$a 43.154.68.204\tkgithub.com' /etc/hosts"
     echo "sudo sed -i '\$a 43.155.83.75\traw.kgithub.com objects.githubusercontent.kgithub.com' /etc/hosts"
+    echo -e "\e[0m"
     return 1
 }
 
