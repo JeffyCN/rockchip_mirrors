@@ -1,0 +1,81 @@
+From d0b85bc57be9ac77716975e502e432f34c8d5495 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Tue, 18 Jul 2023 09:42:32 +0800
+Subject: [PATCH 88/95] compositor: Delay DPMS-ON to finsih_frame()
+
+To make sure that the new frame is ready when turning on outputs.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ include/libweston/libweston.h |  1 +
+ libweston/backend-drm/drm.c   |  4 +---
+ libweston/compositor.c        | 19 +++++++++++++++++++
+ 3 files changed, 21 insertions(+), 3 deletions(-)
+
+diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
+index c4fca6f..7d8edca 100644
+--- a/include/libweston/libweston.h
++++ b/include/libweston/libweston.h
+@@ -595,6 +595,7 @@ struct weston_output {
+ 	void (*detach_head)(struct weston_output *output,
+ 			    struct weston_head *head);
+ 
++	bool pending_active;
+ 	bool unavailable;
+ 	bool freezing;
+ 
+diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
+index b688ea2..15efa25 100644
+--- a/libweston/backend-drm/drm.c
++++ b/libweston/backend-drm/drm.c
+@@ -4424,9 +4424,7 @@ config_handle_output(struct drm_backend *b, const char *name,
+ 				continue;
+ 
+ 			output->base.freezing = false;
+-
+-			if (!output->virtual)
+-				drm_set_dpms(&output->base, WESTON_DPMS_ON);
++			output->base.pending_active = 1;
+ 
+ 			weston_output_damage(&output->base);
+ 		} else if (!strncmp(config, "down-scale=",
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index ba7aa4c..b130593 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -3467,6 +3467,13 @@ weston_output_finish_frame(struct weston_output *output,
+ 	struct timespec vblank_monotonic;
+ 	int64_t msec_rel;
+ 
++	/* Delayed DPMS-ON to avoid showing old frame */
++	if (output->pending_active) {
++		output->pending_active = false;
++		if (output->set_dpms)
++			output->set_dpms(output, WESTON_DPMS_ON);
++	}
++
+ 	/*
+ 	 * If timestamp of latest vblank is given, it must always go forwards.
+ 	 * If not given, INVALID flag must be set.
+@@ -5366,6 +5373,18 @@ weston_compositor_dpms(struct weston_compositor *compositor,
+ 
+ 	wl_list_for_each(output, &compositor->output_list, link) {
+ 		dpms = output->power_state == WESTON_OUTPUT_POWER_FORCED_OFF ? WESTON_DPMS_OFF : state;
++
++		/**
++		 * Delay to weston_output_finish_frame() to avoid showing
++		 * old frame
++		 */
++		if (dpms == WESTON_DPMS_ON) {
++			output->pending_active = true;
++			weston_output_damage(output);
++			continue;
++		}
++		output->pending_active = false;
++
+ 		if (output->set_dpms)
+ 			output->set_dpms(output, dpms);
+ 	}
+-- 
+2.20.1
+

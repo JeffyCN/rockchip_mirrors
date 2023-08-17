@@ -1,7 +1,7 @@
-From 93e85780b05aa41d198522898c2f614640f29947 Mon Sep 17 00:00:00 2001
+From 2b6de9b73c3ddfdfb0894bedd3d5731dfd7ee272 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 24 Jun 2020 11:59:42 +0800
-Subject: [PATCH 22/90] backend-drm: Support virtual screen size
+Subject: [PATCH 22/95] backend-drm: Support virtual screen size
 
 Support setting virtual screen size, for example:
 export WESTON_DRM_VIRTUAL_SIZE=1024x768
@@ -10,12 +10,12 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  libweston/backend-drm/drm-internal.h |  22 ++++++
  libweston/backend-drm/drm.c          |  22 +++++-
- libweston/backend-drm/kms.c          | 107 ++++++++++++++++++++++-----
+ libweston/backend-drm/kms.c          | 111 ++++++++++++++++++++++-----
  libweston/backend-drm/modes.c        |  22 +++++-
- 4 files changed, 150 insertions(+), 23 deletions(-)
+ 4 files changed, 154 insertions(+), 23 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 9782f1ac..48c2c916 100644
+index 9782f1a..48c2c91 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -173,6 +173,7 @@ enum wdrm_plane_property {
@@ -83,7 +83,7 @@ index 9782f1ac..48c2c916 100644
  drm_property_get_range_values(struct drm_property_info *info,
  			      const drmModeObjectProperties *props);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 8d00c05f..2f8c49c5 100644
+index 8d00c05..2f8c49c 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -334,6 +334,11 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
@@ -153,7 +153,7 @@ index 8d00c05f..2f8c49c5 100644
  	if (buf)
  		b->resize_freeze_ms = atoi(buf);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index b7955b55..19afce05 100644
+index b7955b5..9af260c 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -81,6 +81,15 @@ struct drm_property_enum_info plane_rotation_enums[] = {
@@ -238,7 +238,7 @@ index b7955b55..19afce05 100644
  
  	wl_list_for_each(head, &output->base.head_list, base.output_link) {
  		assert(n_conn < MAX_CLONED_CONNECTORS);
-@@ -844,30 +886,36 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+@@ -844,30 +886,38 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
  	if (!scanout_state || !scanout_state->fb)
  		return 0;
  
@@ -258,9 +258,6 @@ index b7955b55..19afce05 100644
  	assert(scanout_state->in_fence_fd == -1);
  
  	mode = to_drm_mode(output->base.current_mode);
-+
-+	scaling = scanout_state->src_w >> 16 != scanout_state->dest_w ||
-+		scanout_state->src_h >> 16 != scanout_state->dest_h;
 +
  	if (output->state_invalid ||
 -	    !scanout_plane->state_cur->fb ||
@@ -282,7 +279,12 @@ index b7955b55..19afce05 100644
 +			}
 +		}
 +
-+		if (n_conn == 1 || scaling)
++		if (scanout_state->dest_x || scanout_state->dest_y ||
++		    scanout_state->dest_w != mode->mode_info.hdisplay ||
++		    scanout_state->dest_h != mode->mode_info.vdisplay ||
++		    scanout_state->src_x || scanout_state->src_y ||
++		    scanout_state->src_w != scanout_state->dest_w ||
++		    scanout_state->src_h != scanout_state->dest_h)
 +			fb_id = output->fb_dummy->fb_id;
  
  		ret = drmModeSetCrtc(device->drm.fd, crtc->crtc_id,
@@ -292,10 +294,12 @@ index b7955b55..19afce05 100644
  				     connectors, n_conn,
  				     &mode->mode_info);
  		if (ret) {
-@@ -881,6 +929,27 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+@@ -881,6 +931,29 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
  			drm_output_reset_legacy_gamma(output);
  	}
  
++	scaling = scanout_state->src_w >> 16 != scanout_state->dest_w ||
++		scanout_state->src_h >> 16 != scanout_state->dest_h;
 +	if (scaling && !output->scanout_plane->can_scale) {
 +		weston_log("Couldn't do scaling on output %s\n",
 +			   output->base.name);
@@ -321,7 +325,7 @@ index b7955b55..19afce05 100644
  	drm_debug(backend, "\t[CRTC:%u, PLANE:%u] FORMAT: %s\n",
  			   crtc->crtc_id, scanout_state->plane->plane_id,
 diff --git a/libweston/backend-drm/modes.c b/libweston/backend-drm/modes.c
-index 901372bb..e31fc9cf 100644
+index 901372b..e31fc9c 100644
 --- a/libweston/backend-drm/modes.c
 +++ b/libweston/backend-drm/modes.c
 @@ -461,6 +461,7 @@ drm_refresh_rate_mHz(const drmModeModeInfo *info)
