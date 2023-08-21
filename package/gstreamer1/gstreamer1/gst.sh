@@ -3,6 +3,9 @@
 export GST_DEBUG_NO_COLOR=1
 export GST_INSPECT_NO_COLORS=1
 
+# Disable videodecoder's QoS by default
+export GST_VIDEO_DECODER_QOS=0
+
 # Set dma-feature in kmssrc
 # export GST_KMSSRC_DMA_FEATURE=1
 
