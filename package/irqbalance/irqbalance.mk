@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-IRQBALANCE_VERSION = 1.8.0
+IRQBALANCE_VERSION = 1.9.0
 IRQBALANCE_SITE = $(call github,irqbalance,irqbalance,v$(IRQBALANCE_VERSION))
 IRQBALANCE_LICENSE = GPL-2.0
 IRQBALANCE_LICENSE_FILES = COPYING
@@ -40,8 +40,6 @@ IRQBALANCE_CONF_OPTS += --with-systemd
 else
 IRQBALANCE_CONF_OPTS += --without-systemd
 endif
-
-IRQBALANCE_PRE_CONFIGURE_HOOKS += IRQBALANCE_PRECONFIGURE
 
 ifeq ($(BR2_PACKAGE_IRQBALANCE_FORCE_CORE),y)
 define IRQBALANCE_INSTALL_FORCE_CORE
