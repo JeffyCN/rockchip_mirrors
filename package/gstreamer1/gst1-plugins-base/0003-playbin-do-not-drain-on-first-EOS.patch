@@ -1,7 +1,7 @@
-From d1f8653d907d5a6b96dbe7e287a35cbc595a24f2 Mon Sep 17 00:00:00 2001
+From 5b0fb569e6ac83d42c132839fb3c01293be46dce Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Cerveau?= <scerveau@collabora.com>
 Date: Mon, 9 Aug 2021 18:02:57 +0200
-Subject: [PATCH 03/14] playbin: do not drain on first EOS
+Subject: [PATCH 03/21] playbin: do not drain on first EOS
 
 In a case of audio/video media, the decodebin
 should wait for each branch to be on EOS before
@@ -189,7 +189,7 @@ index 51751ff..4098fb9 100644
      REMOVE_SIGNAL (group->uridecodebin, group->autoplug_select_id);
      REMOVE_SIGNAL (group->uridecodebin, group->autoplug_continue_id);
 diff --git a/gst/playback/gsturidecodebin.c b/gst/playback/gsturidecodebin.c
-index a128d92..7031600 100644
+index 0e7ab34..0967e50 100644
 --- a/gst/playback/gsturidecodebin.c
 +++ b/gst/playback/gsturidecodebin.c
 @@ -148,6 +148,8 @@ struct _GstURIDecodeBinClass

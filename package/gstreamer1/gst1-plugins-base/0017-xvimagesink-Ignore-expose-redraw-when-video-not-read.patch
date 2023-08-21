@@ -1,7 +1,7 @@
-From 9207e4ac764e0dce11aedc2807c2f121a76f46ed Mon Sep 17 00:00:00 2001
+From d926226527e6f02b800f5b8aa086ad197676b126 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 4 May 2023 09:12:49 +0800
-Subject: [PATCH 17/20] xvimagesink: Ignore expose-redraw when video not ready
+Subject: [PATCH 17/21] xvimagesink: Ignore expose-redraw when video not ready
 
 See:
 https://github.com/JeffyCN/rockchip_mirrors/issues/26

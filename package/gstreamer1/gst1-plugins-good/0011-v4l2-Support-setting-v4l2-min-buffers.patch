@@ -1,4 +1,4 @@
-From 27c5416b50ff2a62ca38c82bb45196e1e8ad1035 Mon Sep 17 00:00:00 2001
+From 3a5d453247bc6fc214400196d63d32d093a44713 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 23 Jun 2022 16:04:18 +0800
 Subject: [PATCH 11/12] v4l2: Support setting v4l2 min buffers
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 26 insertions(+), 1 deletion(-)
 
 diff --git a/sys/v4l2/gstv4l2object.c b/sys/v4l2/gstv4l2object.c
-index 09fabf0..4c8791a 100644
+index 9a50948..e15fab0 100644
 --- a/sys/v4l2/gstv4l2object.c
 +++ b/sys/v4l2/gstv4l2object.c
 @@ -58,6 +58,8 @@ GST_DEBUG_CATEGORY_EXTERN (v4l2_debug);

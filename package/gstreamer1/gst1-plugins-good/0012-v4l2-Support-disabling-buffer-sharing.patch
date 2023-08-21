@@ -1,4 +1,4 @@
-From 423ddda18526fe3ad8b84992429ff5225dd993ad Mon Sep 17 00:00:00 2001
+From 006a53c247532db3384e5fb11e6748975e0f737d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 27 Jun 2022 17:48:30 +0800
 Subject: [PATCH 12/12] v4l2: Support disabling buffer sharing
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 24 insertions(+), 1 deletion(-)
 
 diff --git a/sys/v4l2/gstv4l2object.c b/sys/v4l2/gstv4l2object.c
-index 4c8791a..4b9402f 100644
+index e15fab0..959d3db 100644
 --- a/sys/v4l2/gstv4l2object.c
 +++ b/sys/v4l2/gstv4l2object.c
 @@ -59,6 +59,7 @@ GST_DEBUG_CATEGORY_EXTERN (v4l2_debug);
@@ -76,7 +76,7 @@ index 4c8791a..4b9402f 100644
      default:
        return FALSE;
        break;
-@@ -5100,6 +5117,9 @@ gst_v4l2_object_decide_allocation (GstV4l2Object * obj, GstQuery * query)
+@@ -5105,6 +5122,9 @@ gst_v4l2_object_decide_allocation (GstV4l2Object * obj, GstQuery * query)
    if (min + obj->min_buffers + 1 > VIDEO_MAX_FRAME)
      can_share_own_pool = FALSE;
  

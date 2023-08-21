@@ -1,7 +1,7 @@
-From 94c32fccde6eb7de6858624e23bb1f567c6e3d35 Mon Sep 17 00:00:00 2001
+From 40362c941aa421a8cc0d32b9cc846f1165d49bcf Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 20 Nov 2018 17:33:22 +0800
-Subject: [PATCH 04/41] kmssink: Support render rectangle for plane
+Subject: [PATCH 04/42] kmssink: Support render rectangle for plane
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

@@ -1,7 +1,7 @@
-From 094b728bb0ab22c917928d334358b4491b04b163 Mon Sep 17 00:00:00 2001
+From c32162cf31d1cc4d2f70395755dd72ed1a54fc0d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 28 Dec 2021 14:06:19 +0800
-Subject: [PATCH 20/41] waylandsink: Support window alpha property
+Subject: [PATCH 20/42] waylandsink: Support window alpha property
 
 Tested with:
 gst-launch-1.0 videotestsrc ! waylandsink alpha=0.5
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 45 insertions(+)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 56a6849..008c774 100644
+index f492d72..9af23ec 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -62,6 +62,7 @@ enum
@@ -118,7 +118,7 @@ index a417788..0339ef7 100644
    gchar *display_name;
  
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index fed1c97..f470338 100644
+index 7a3016c..a5dcbb6 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
 @@ -24,6 +24,7 @@

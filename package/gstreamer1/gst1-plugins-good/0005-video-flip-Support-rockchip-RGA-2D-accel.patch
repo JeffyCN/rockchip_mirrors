@@ -1,4 +1,4 @@
-From 02517deddcd968b332eb6d996d00609b4784a980 Mon Sep 17 00:00:00 2001
+From 5bd680c8f516ac3d586af04988b81c02f6693b17 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 8 Nov 2019 17:36:20 +0800
 Subject: [PATCH 05/12] video-flip: Support rockchip RGA 2D accel
@@ -288,7 +288,7 @@ index d7b6788..1a594c6 100644
    install_dir : plugins_install_dir,
  )
 diff --git a/meson.build b/meson.build
-index c21a5ad..0f3f2f2 100644
+index 4c7afc9..67e82f0 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -382,6 +382,9 @@ gst_plugins_good_args = ['-DHAVE_CONFIG_H']

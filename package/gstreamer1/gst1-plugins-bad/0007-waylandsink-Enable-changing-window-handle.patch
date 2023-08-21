@@ -1,7 +1,7 @@
-From e08ec38efffdff645e1eb50bc9d3bb2e847ea029 Mon Sep 17 00:00:00 2001
+From 7f4cd5662fb29e411c0a7ada9741c47ea71f994c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 25 Dec 2018 16:20:35 +0800
-Subject: [PATCH 07/41] waylandsink: Enable changing window handle
+Subject: [PATCH 07/42] waylandsink: Enable changing window handle
 
 Changing window handle is dangerous, but we need this feature for:
 https://redmine.rockchip.com.cn/issues/184629

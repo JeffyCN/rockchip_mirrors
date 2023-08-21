@@ -1,7 +1,7 @@
-From f0fb72e564a241e07150cb17ac57bbe7e82b783d Mon Sep 17 00:00:00 2001
+From 7fa6e80cf1ff51dfcb0fab743abe2200fc715b6e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 17:56:40 +0800
-Subject: [PATCH 38/41] kmssink: Improve monitor and plane selection
+Subject: [PATCH 38/42] kmssink: Improve monitor and plane selection
 
 Major changes:
 1/ Filter out disconnected monitors.
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 71 insertions(+), 3 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 0db743c..3bb55e6 100644
+index bab6ba8..0f0c2e5 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -515,13 +515,38 @@ kms_open (gchar ** driver)

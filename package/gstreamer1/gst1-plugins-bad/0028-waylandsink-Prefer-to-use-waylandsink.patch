@@ -1,7 +1,7 @@
-From 667045d951b8a40b237934221a1724b6b8fedd8f Mon Sep 17 00:00:00 2001
+From a0b8f77cc7f3419f9e984be88f7b95e69ba78174 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 27 Dec 2021 21:37:06 +0800
-Subject: [PATCH 28/41] waylandsink: Prefer to use waylandsink
+Subject: [PATCH 28/42] waylandsink: Prefer to use waylandsink
 
 Increase rank to primary.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index d75f2e4..262805e 100644
+index 2f7f319..6cbdd50 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -118,7 +118,7 @@ static void gst_wayland_sink_expose (GstVideoOverlay * overlay);

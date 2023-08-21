@@ -1,7 +1,7 @@
-From 597a05827a6feb3751b74cfe367ac19a375e2310 Mon Sep 17 00:00:00 2001
+From 2e1d7e8b7d9f0fdb7b38cd9eb186b502d083fb3c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 26 Nov 2020 11:31:58 +0800
-Subject: [PATCH 03/41] waylandsink: release frame callback when finalizing
+Subject: [PATCH 03/42] waylandsink: release frame callback when finalizing
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

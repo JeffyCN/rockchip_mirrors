@@ -1,7 +1,7 @@
-From 32633a633a282ca5dec2f4b54653b0bbcac3bdde Mon Sep 17 00:00:00 2001
+From e49b78d1d62b800c477ce688d80580d6b1f12041 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:18:07 +0800
-Subject: [PATCH 40/43] kmssink: Support fullscreen prop
+Subject: [PATCH 40/42] kmssink: Support fullscreen prop
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

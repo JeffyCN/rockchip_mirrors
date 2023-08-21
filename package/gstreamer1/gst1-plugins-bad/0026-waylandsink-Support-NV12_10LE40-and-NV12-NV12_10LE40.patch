@@ -1,7 +1,7 @@
-From 11b559342c5bed99b46652b68e35bfea171d1a86 Mon Sep 17 00:00:00 2001
+From 844cdb0bf21146518e0af39957ea36fb51676460 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
-Subject: [PATCH 26/41] waylandsink: Support NV12_10LE40 and
+Subject: [PATCH 26/42] waylandsink: Support NV12_10LE40 and
  NV12|NV12_10LE40|NV16 (AFBC)
 
 Tested on RK356x with:
@@ -21,7 +21,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  8 files changed, 243 insertions(+), 11 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 5e142e9..b26b7ee 100644
+index a64957f..dcf4c88 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -74,7 +74,7 @@ GST_DEBUG_CATEGORY (gstwayland_debug);
@@ -407,7 +407,7 @@ index bc36a08..abf579c 100644
  void gst_wl_videoformat_init_once (void);
  
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index 7dc0da5..df60a67 100644
+index e74c8af..57d21bb 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
 @@ -66,6 +66,9 @@ typedef struct _GstWlWindowPrivate

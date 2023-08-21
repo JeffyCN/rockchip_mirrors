@@ -1,7 +1,7 @@
-From 116949acd01739948291470552b34517e02ac295 Mon Sep 17 00:00:00 2001
+From 435848238d13ba3b7c23a0fd2d96f913ef5311e2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 8 Nov 2021 18:45:00 +0800
-Subject: [PATCH 24/41] waylandsink: Support frame-sync mode
+Subject: [PATCH 24/42] waylandsink: Support frame-sync mode
 
 Set env "WAYLANDSINK_SYNC_FRAME" to enable frame syncing.
 
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 10 insertions(+)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 2c5b295..5e142e9 100644
+index c818dd2..a64957f 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -254,6 +254,7 @@ gst_wayland_sink_init (GstWaylandSink * self)
