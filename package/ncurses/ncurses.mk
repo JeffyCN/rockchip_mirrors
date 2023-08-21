@@ -78,12 +78,16 @@ NCURSES_CONF_OPTS = \
 	$(if $(BR2_PACKAGE_NCURSES_TARGET_PROGS),,--without-progs) \
 	--without-manpages
 
-ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_NCURSES_STATIC),)
+ifeq ($(BR2_STATIC_LIBS),y)
 NCURSES_CONF_OPTS += --without-shared --with-normal
 else ifeq ($(BR2_SHARED_LIBS),y)
 NCURSES_CONF_OPTS += --with-shared --without-normal
 else ifeq ($(BR2_SHARED_STATIC_LIBS),y)
 NCURSES_CONF_OPTS += --with-shared --with-normal
+endif
+
+ifeq ($(BR2_PACKAGE_NCURSES_STATIC),y)
+NCURSES_CONF_OPTS += --with-normal
 endif
 
 # configure can't find the soname for libgpm when cross compiling
