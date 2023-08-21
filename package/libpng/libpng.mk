@@ -29,5 +29,9 @@ else
 LIBPNG_CONF_OPTS += --disable-intel-sse
 endif
 
+ifeq ($(BR2_PACKAGE_LIBPNG_STATIC),y)
+LIBPNG_CONF_OPTS += --enable-static
+endif
+
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))

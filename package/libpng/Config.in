@@ -6,3 +6,11 @@ config BR2_PACKAGE_LIBPNG
 	  images.
 
 	  http://www.libpng.org/
+
+if BR2_PACKAGE_LIBPNG
+
+config BR2_PACKAGE_LIBPNG_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
+endif
