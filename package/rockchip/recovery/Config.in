@@ -1,5 +1,6 @@
 config BR2_PACKAGE_RECOVERY
 	bool "Rockchip recovery for linux"
+	depends on BR2_TOOLCHAIN_HAS_THREADS # libpthread-stubs
 	select BR2_PACKAGE_LIBDRM
 	select BR2_PACKAGE_LIBPNG
 	select BR2_PACKAGE_LIBPTHREAD_STUBS
@@ -44,6 +45,7 @@ config BR2_PACKAGE_RECOVERY_USE_RKUPDATE
 
 config BR2_PACKAGE_RECOVERY_USE_UPDATEENGINE
 	bool "updateEngine"
+	select BR2_PACKAGE_RECOVERY_UPDATEENGINEBIN
 
 endchoice
 
@@ -52,5 +54,12 @@ config BR2_PACKAGE_RECOVERY_RECOVERYBIN
 
 config BR2_PACKAGE_RECOVERY_UPDATEENGINEBIN
 	bool "updateEngine bin"
+
+config BR2_PACKAGE_RECOVERY_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+	select BR2_PACKAGE_LIBCURL_STATIC
+	select BR2_PACKAGE_LIBDRM_STATIC
+	select BR2_PACKAGE_LIBPNG_STATIC
 
 endif
