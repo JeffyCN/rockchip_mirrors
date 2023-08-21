@@ -192,6 +192,10 @@ LIBCURL_CONF_OPTS += \
 	--disable-tftp
 endif
 
+ifeq ($(BR2_PACKAGE_LIBCURL_STATIC),y)
+LIBCURL_CONF_OPTS += --enable-static
+endif
+
 define LIBCURL_FIX_DOT_PC
 	printf 'Requires: openssl\n' >>$(@D)/libcurl.pc.in
 endef

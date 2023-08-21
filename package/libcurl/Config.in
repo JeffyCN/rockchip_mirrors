@@ -91,4 +91,8 @@ config BR2_PACKAGE_LIBCURL_TLS_NONE
 
 endchoice
 
+config BR2_PACKAGE_LIBCURL_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
 endif
