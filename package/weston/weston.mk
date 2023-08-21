@@ -13,13 +13,19 @@ WESTON_CPE_ID_VENDOR = wayland
 WESTON_INSTALL_STAGING = YES
 
 WESTON_DEPENDENCIES = host-pkgconf wayland wayland-protocols \
-	libxkbcommon pixman libpng udev cairo libinput libdrm seatd
+	libxkbcommon pixman libpng udev cairo libinput libdrm
 
 WESTON_CONF_OPTS = \
 	-Ddoc=false \
 	-Dremoting=false \
-	-Dlauncher-libseat=true \
 	-Dtools=calibrator,debug,info,terminal,touch-calibrator
+
+ifeq ($(BR2_PACKAGE_SEATD_DAEMON),y)
+WESTON_DEPENDENCIES += seatd
+WESTON_CONF_OPTS += -Dlauncher-libseat=true
+else
+WESTON_CONF_OPTS += -Dlauncher-libseat=false
+endif
 
 ifeq ($(BR2_PACKAGE_JPEG),y)
 WESTON_CONF_OPTS += -Dimage-jpeg=true
