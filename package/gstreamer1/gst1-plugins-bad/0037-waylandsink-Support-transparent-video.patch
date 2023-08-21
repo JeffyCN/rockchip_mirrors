@@ -1,7 +1,7 @@
-From 6a61cdce84223376a91fe6690854a76b2cc43349 Mon Sep 17 00:00:00 2001
+From ff65adad4a48b0393d01ef5543f0763819c85dbf Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Aug 2022 11:39:00 +0800
-Subject: [PATCH 37/41] waylandsink: Support transparent video
+Subject: [PATCH 37/42] waylandsink: Support transparent video
 
 Tested with transparent png picture.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 26 insertions(+), 10 deletions(-)
 
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index 21cd476..36afd3f 100644
+index 9944632..0a35083 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
 @@ -69,6 +69,9 @@ typedef struct _GstWlWindowPrivate

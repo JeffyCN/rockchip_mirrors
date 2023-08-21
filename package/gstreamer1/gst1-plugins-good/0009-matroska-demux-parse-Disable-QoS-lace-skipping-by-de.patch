@@ -1,4 +1,4 @@
-From 7706971089dbae3a24b3073ecf2b7a225715d6a6 Mon Sep 17 00:00:00 2001
+From d386653257ecff99002b18ba5efd7478d2d0811c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 24 May 2022 12:40:03 +0800
 Subject: [PATCH 09/12] matroska-{demux,parse}: Disable QoS lace skipping by
@@ -43,10 +43,10 @@ index 3fcb5c5..ff22ec2 100644
            stream->index_table && parse->common.segment.rate > 0.0) {
          GstMatroskaTrackVideoContext *videocontext =
 diff --git a/gst/matroska/matroska-read-common.c b/gst/matroska/matroska-read-common.c
-index 6fadbba..eff8812 100644
+index 0e9d0b6..add6b13 100644
 --- a/gst/matroska/matroska-read-common.c
 +++ b/gst/matroska/matroska-read-common.c
-@@ -3417,6 +3417,8 @@ gst_matroska_read_common_reset (GstElement * element,
+@@ -3418,6 +3418,8 @@ gst_matroska_read_common_reset (GstElement * element,
      ctx->internal_toc = NULL;
    }
    ctx->toc_updated = FALSE;

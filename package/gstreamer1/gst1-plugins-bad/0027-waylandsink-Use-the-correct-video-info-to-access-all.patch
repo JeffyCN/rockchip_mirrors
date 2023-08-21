@@ -1,7 +1,7 @@
-From 32ca76a1002b7cd5772ff1e425e42e5e216705b9 Mon Sep 17 00:00:00 2001
+From 6e75fea5aace2a7af25ced95ce2bab13fbe8070b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 22 Dec 2021 16:04:46 +0800
-Subject: [PATCH 27/41] waylandsink: Use the correct video info to access
+Subject: [PATCH 27/42] waylandsink: Use the correct video info to access
  allocated buffer
 
 The video info might changed after pool activated.
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 6 insertions(+), 5 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index b26b7ee..d75f2e4 100644
+index dcf4c88..2f7f319 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -956,7 +956,6 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)

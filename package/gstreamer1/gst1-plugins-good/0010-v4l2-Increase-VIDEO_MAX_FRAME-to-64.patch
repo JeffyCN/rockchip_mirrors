@@ -1,4 +1,4 @@
-From ae4b29413dc135810186bad14162407e7c9edf0e Mon Sep 17 00:00:00 2001
+From 3d1ed8d55146926263e8d16cc3aa57f7581d6e50 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 23 Jun 2022 16:01:56 +0800
 Subject: [PATCH 10/12] v4l2: Increase VIDEO_MAX_FRAME to 64

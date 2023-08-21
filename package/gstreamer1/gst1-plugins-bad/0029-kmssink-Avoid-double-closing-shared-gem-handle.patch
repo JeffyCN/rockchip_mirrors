@@ -1,7 +1,7 @@
-From 6431eeddd0b6004d67f70900d4da449b1363c9a7 Mon Sep 17 00:00:00 2001
+From 7c1edd6790fcf6dee314f8eea1ab578b76836e09 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Jan 2022 12:20:10 +0800
-Subject: [PATCH 29/41] kmssink: Avoid double-closing shared gem handle
+Subject: [PATCH 29/42] kmssink: Avoid double-closing shared gem handle
 
 The gem handle could be shared between multiple planes.
 

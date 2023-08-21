@@ -1,7 +1,7 @@
-From 78fdb1abc730d97e5937ee3414779b9bbdff0413 Mon Sep 17 00:00:00 2001
+From 4176e37c139dcc6e9ae447b745895289332e803b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Mar 2021 10:15:51 +0800
-Subject: [PATCH 19/43] waylandsink: Support window layer property
+Subject: [PATCH 19/42] waylandsink: Support window layer property
 
 Support setting top|normal|bottom window layer.
 

@@ -1,7 +1,7 @@
-From a3bf49424b3a7518fd7764ee23c7c965d01097ff Mon Sep 17 00:00:00 2001
+From 533b8060efd95235a8ea20c26f5b276daf20f44e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 26 Mar 2019 17:33:37 +0800
-Subject: [PATCH 22/41] HACK: kmssink: Open drm devnode directly
+Subject: [PATCH 22/42] HACK: kmssink: Open drm devnode directly
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

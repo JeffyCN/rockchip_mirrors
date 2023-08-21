@@ -1,7 +1,7 @@
-From e41dc6584d0abbb7b61ab132625e96d9b1d1cd8f Mon Sep 17 00:00:00 2001
+From b95c53708028dd365742b65e91ba1c62541a5780 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Jun 2020 10:11:42 +0800
-Subject: [PATCH 09/43] waylandsink: Support setting toplevel window position
+Subject: [PATCH 09/42] waylandsink: Support setting toplevel window position
 
 Needs hacked wayland server, tested with:
 	waylandsink render-rectangle="<100,200,300,400>"
@@ -16,10 +16,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 44 insertions(+), 22 deletions(-)
 
 diff --git a/ext/gtk/gstgtkwaylandsink.c b/ext/gtk/gstgtkwaylandsink.c
-index e4dd06e..9030982 100644
+index d47b801..54f025a 100644
 --- a/ext/gtk/gstgtkwaylandsink.c
 +++ b/ext/gtk/gstgtkwaylandsink.c
-@@ -254,7 +254,7 @@ widget_size_allocate_cb (GtkWidget * widget, GtkAllocation * allocation,
+@@ -255,7 +255,7 @@ widget_size_allocate_cb (GtkWidget * widget, GtkAllocation * allocation,
    GST_DEBUG_OBJECT (self, "window geometry changed to (%d, %d) %d x %d",
        allocation->x, allocation->y, allocation->width, allocation->height);
    gst_wl_window_set_render_rectangle (priv->wl_window, allocation->x,
@@ -28,7 +28,7 @@ index e4dd06e..9030982 100644
  
    g_mutex_unlock (&priv->render_lock);
  
-@@ -425,7 +425,7 @@ scrollable_window_adjustment_changed_cb (GtkAdjustment * adjustment,
+@@ -426,7 +426,7 @@ scrollable_window_adjustment_changed_cb (GtkAdjustment * adjustment,
    gtk_widget_get_allocation (priv->gtk_widget, &allocation);
    calculate_adjustment (priv->gtk_widget, &allocation);
    gst_wl_window_set_render_rectangle (priv->wl_window, allocation.x,
@@ -37,7 +37,7 @@ index e4dd06e..9030982 100644
  
    return FALSE;
  }
-@@ -481,7 +481,7 @@ setup_wl_window (GstGtkWaylandSink * self)
+@@ -482,7 +482,7 @@ setup_wl_window (GstGtkWaylandSink * self)
    gtk_widget_get_allocation (priv->gtk_widget, &allocation);
    calculate_adjustment (priv->gtk_widget, &allocation);
    gst_wl_window_set_render_rectangle (priv->wl_window, allocation.x,

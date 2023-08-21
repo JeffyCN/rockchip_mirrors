@@ -1,7 +1,7 @@
-From e4f3a0e8236c9130b8d1258dd51a22c2921c2d09 Mon Sep 17 00:00:00 2001
+From 681d9e4e9f076b232a6ba0c5e528538005cbc5c0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 14 Jun 2023 10:04:42 +0800
-Subject: [PATCH 43/43] waylandsink: Support force trying dmabuf
+Subject: [PATCH 42/42] waylandsink: Support force trying dmabuf
 
 Not all source plugins would provide dma feature for dmabuf.
 

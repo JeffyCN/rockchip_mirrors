@@ -1,4 +1,4 @@
-From 4afea2f2bca17555b9f76e47099861ac85512579 Mon Sep 17 00:00:00 2001
+From 743a7740b2a2270b2b729db2c46f22add65820a6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 11 May 2022 17:06:25 +0800
 Subject: [PATCH 07/12] v4l2src: Filter out unavailable RK sources

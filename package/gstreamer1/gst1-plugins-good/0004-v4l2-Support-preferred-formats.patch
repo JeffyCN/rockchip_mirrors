@@ -1,4 +1,4 @@
-From 7c5f1171ff553accc588bd00500bf03b8a5de517 Mon Sep 17 00:00:00 2001
+From 05487af419a7a744f910bf02385837f877eb626e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Nov 2019 15:07:44 +0800
 Subject: [PATCH 04/12] v4l2: Support preferred formats
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 54 insertions(+)
 
 diff --git a/sys/v4l2/gstv4l2object.c b/sys/v4l2/gstv4l2object.c
-index 032fd69..19ae751 100644
+index 83466a8..a382a88 100644
 --- a/sys/v4l2/gstv4l2object.c
 +++ b/sys/v4l2/gstv4l2object.c
 @@ -25,6 +25,7 @@
@@ -25,7 +25,7 @@ index 032fd69..19ae751 100644
  #include <string.h>
  #include <sys/mman.h>
  #include <sys/ioctl.h>
-@@ -1142,6 +1143,22 @@ gst_v4l2_object_format_get_rank (const struct v4l2_fmtdesc *fmt)
+@@ -1143,6 +1144,22 @@ gst_v4l2_object_format_get_rank (const struct v4l2_fmtdesc *fmt)
        break;
    }
  

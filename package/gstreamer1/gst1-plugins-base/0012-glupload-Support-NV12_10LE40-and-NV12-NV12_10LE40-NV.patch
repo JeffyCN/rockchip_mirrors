@@ -1,7 +1,7 @@
-From c3dce1eaba3d7e75c288319cc8ce41b5c7735393 Mon Sep 17 00:00:00 2001
+From 89273006c3761065991665344a4c72d42d1d42ce Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 24 May 2022 16:16:33 +0800
-Subject: [PATCH 12/14] glupload: Support NV12_10LE40 and NV12|NV12_10LE40|NV16
+Subject: [PATCH 12/21] glupload: Support NV12_10LE40 and NV12|NV12_10LE40|NV16
  (AFBC)
 
 Tested on RK356x with:

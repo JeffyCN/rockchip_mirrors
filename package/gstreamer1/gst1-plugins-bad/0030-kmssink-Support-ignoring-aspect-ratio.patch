@@ -1,7 +1,7 @@
-From e226214c97d057cfcc861ae64272a52331375f3f Mon Sep 17 00:00:00 2001
+From eefa2ec728bcf7061cdb01cfa627db2dab48e608 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 19 Jan 2022 16:37:40 +0800
-Subject: [PATCH 30/41] kmssink: Support ignoring aspect ratio
+Subject: [PATCH 30/42] kmssink: Support ignoring aspect ratio
 
 Set "force-aspect-ratio" property to false to ignore aspect ratio.
 

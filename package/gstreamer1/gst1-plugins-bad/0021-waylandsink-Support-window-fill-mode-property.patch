@@ -1,7 +1,7 @@
-From 4e301bfe0bafe8fd9b6ca88bae11a8b6f055e41a Mon Sep 17 00:00:00 2001
+From 77ce8987a69bfbdb18f75c5bdef3ed5e6e72de4c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 07:08:06 +0800
-Subject: [PATCH 21/41] waylandsink: Support window fill-mode property
+Subject: [PATCH 21/42] waylandsink: Support window fill-mode property
 
 Tested with:
 gst-launch-1.0 videotestsrc ! waylandsink fullscreen=1 fill-mode=crop
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 110 insertions(+), 1 deletion(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 008c774..2c5b295 100644
+index 9af23ec..c818dd2 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -63,9 +63,12 @@ enum
@@ -153,7 +153,7 @@ index 0339ef7..7abfea1 100644
    gchar *display_name;
  
 diff --git a/gst-libs/gst/wayland/gstwlwindow.c b/gst-libs/gst/wayland/gstwlwindow.c
-index f470338..7dc0da5 100644
+index a5dcbb6..e74c8af 100644
 --- a/gst-libs/gst/wayland/gstwlwindow.c
 +++ b/gst-libs/gst/wayland/gstwlwindow.c
 @@ -71,6 +71,8 @@ typedef struct _GstWlWindowPrivate
