@@ -1,7 +1,7 @@
-From bd36653e2a4ecf2c2e4c1bb7c854d5e211e45522 Mon Sep 17 00:00:00 2001
+From e0a921d7dd4bf42574f4df634fde3972e7741e2e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 37/95] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 37/97] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -87,7 +87,7 @@ index 88c4a2c..6c817c9 100644
  		return NULL;
  	return container_of(base, struct drm_output, base);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c7c53a6..f107c7e 100644
+index f55e40f..4ab0e92 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -216,8 +216,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -106,7 +106,7 @@ index c7c53a6..f107c7e 100644
  
  	primary = b->primary_head->base.output;
  
-@@ -1488,6 +1494,10 @@ drm_output_find_special_plane(struct drm_device *device,
+@@ -1486,6 +1492,10 @@ drm_output_find_special_plane(struct drm_device *device,
  		struct weston_output *base;
  		bool found_elsewhere = false;
  
@@ -117,7 +117,7 @@ index c7c53a6..f107c7e 100644
  		if (plane->type != type)
  			continue;
  		if (!drm_plane_is_available(plane, output))
-@@ -2952,11 +2962,15 @@ drm_head_destroy(struct weston_head *base)
+@@ -2950,11 +2960,15 @@ drm_head_destroy(struct weston_head *base)
  
  	weston_head_release(&head->base);
  
@@ -133,7 +133,7 @@ index c7c53a6..f107c7e 100644
  	free(head);
  }
  
-@@ -3421,8 +3435,9 @@ drm_backend_update_connectors(struct drm_device *device,
+@@ -3419,8 +3433,9 @@ drm_backend_update_connectors(struct drm_device *device,
  	wl_list_for_each_safe(base, base_next,
  			      &b->compositor->head_list, compositor_link) {
  		head = to_drm_head(base);
@@ -144,7 +144,7 @@ index c7c53a6..f107c7e 100644
  		connector_id = head->connector.connector_id;
  
  		if (head->connector.device != device)
-@@ -3470,6 +3485,9 @@ drm_backend_update_connectors(struct drm_device *device,
+@@ -3468,6 +3483,9 @@ drm_backend_update_connectors(struct drm_device *device,
  				continue;
  
  			head = to_drm_head(base);
@@ -154,7 +154,7 @@ index c7c53a6..f107c7e 100644
  			conn = head->connector.conn;
  
  			if (conn->connection != DRM_MODE_CONNECTED ||
-@@ -3499,6 +3517,8 @@ drm_backend_update_connectors(struct drm_device *device,
+@@ -3497,6 +3515,8 @@ drm_backend_update_connectors(struct drm_device *device,
  	}
  match_done:
  
@@ -163,7 +163,7 @@ index c7c53a6..f107c7e 100644
  	drm_backend_update_outputs(b);
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
-@@ -3685,6 +3705,11 @@ drm_destroy(struct weston_backend *backend)
+@@ -3683,6 +3703,11 @@ drm_destroy(struct weston_backend *backend)
  	struct drm_crtc *crtc, *crtc_tmp;
  	struct drm_writeback *writeback, *writeback_tmp;
  
@@ -175,7 +175,7 @@ index c7c53a6..f107c7e 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->config_timer);
-@@ -4488,6 +4513,183 @@ config_timer_handler(void *data)
+@@ -4486,6 +4511,183 @@ config_timer_handler(void *data)
  	return 0;
  }
  
@@ -359,7 +359,7 @@ index c7c53a6..f107c7e 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4745,6 +4947,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4743,6 +4945,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  

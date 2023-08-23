@@ -1,7 +1,7 @@
-From 909561b7547849801c76f432ccb66330cd2b90e7 Mon Sep 17 00:00:00 2001
+From 7c7066a9c1cda4422061016f812e37aa912c609e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 25/95] backend-drm: Support controlling output dynamically
+Subject: [PATCH 25/97] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -248,7 +248,7 @@ index 9929c93..88c4a2c 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 17d8c75..e200ba0 100644
+index de30db2..7d8d2d9 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -41,6 +41,7 @@
@@ -281,7 +281,7 @@ index 17d8c75..e200ba0 100644
  	if (output->state_cur->tear)
  		flags |= WESTON_FINISH_FRAME_TEARING;
  
-@@ -690,8 +699,8 @@ out:
+@@ -688,8 +697,8 @@ out:
  		return;
  	}
  
@@ -292,7 +292,7 @@ index 17d8c75..e200ba0 100644
  
  	dx = output->plane_bounds.x1;
  	dy = output->plane_bounds.y1;
-@@ -982,7 +991,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -980,7 +989,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
  	now_ms = timespec_to_msec(&now);
@@ -302,7 +302,7 @@ index 17d8c75..e200ba0 100644
  		/* Resize fullscreen/maxmium views(not always success) */
  		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
  			wl_signal_emit(&b->compositor->output_resized_signal,
-@@ -991,7 +1001,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -989,7 +999,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  		weston_output_damage(output_base);
  		weston_output_finish_frame(output_base, NULL,
  					   WP_PRESENTATION_FEEDBACK_INVALID);
@@ -311,7 +311,7 @@ index 17d8c75..e200ba0 100644
  	}
  
  	/* If planes have been disabled in the core, we might not have
-@@ -1024,7 +1034,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -1022,7 +1032,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  err:
  	drm_output_state_free(state);
@@ -321,7 +321,7 @@ index 17d8c75..e200ba0 100644
  }
  
  /* Determine the type of vblank synchronization to use for the output.
-@@ -2538,6 +2549,8 @@ drm_output_enable(struct weston_output *base)
+@@ -2536,6 +2547,8 @@ drm_output_enable(struct weston_output *base)
  	output->base.switch_mode = drm_output_switch_mode;
  	output->base.set_gamma = drm_output_set_gamma;
  
@@ -330,7 +330,7 @@ index 17d8c75..e200ba0 100644
  	output->state_invalid = true;
  
  	if (device->atomic_modeset && !base->disable_planes)
-@@ -3674,6 +3687,7 @@ drm_destroy(struct weston_backend *backend)
+@@ -3672,6 +3685,7 @@ drm_destroy(struct weston_backend *backend)
  
  	udev_input_destroy(&b->input);
  
@@ -338,7 +338,7 @@ index 17d8c75..e200ba0 100644
  	wl_event_source_remove(b->hotplug_timer);
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
-@@ -4183,6 +4197,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -4181,6 +4195,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -349,7 +349,7 @@ index 17d8c75..e200ba0 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -4193,6 +4211,237 @@ static const struct weston_drm_output_api api = {
+@@ -4191,6 +4209,237 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_content_type,
  };
  
@@ -587,7 +587,7 @@ index 17d8c75..e200ba0 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4556,6 +4805,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4554,6 +4803,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b->drm);
  
