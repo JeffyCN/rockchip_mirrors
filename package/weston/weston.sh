@@ -7,6 +7,9 @@ export WL_OUTPUT_VERSION=3
 # Comment out this for atomic related functions, e.g. sprites
 export WESTON_DISABLE_ATOMIC=1
 
+# Increasing this can help to reduce tearing when dumping low-level DRM buffers
+export WESTON_DRM_MIN_BUFFERS=2
+
 # Allow using drm modifier, e.g. ARM AFBC
 # export WESTON_ALLOW_GBM_MODIFIERS=1
 
