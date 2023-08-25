@@ -159,6 +159,7 @@ F:	package/htpdate/
 F:	package/i2c-tools/
 F:	package/jq/
 F:	package/libapparmor/
+F:	package/libasio/
 F:	package/libb64/
 F:	package/mender/
 F:	package/mender-artifact/
