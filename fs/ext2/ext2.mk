@@ -27,6 +27,7 @@ ROOTFS_EXT2_OPTS = \
 
 ROOTFS_EXT2_DEPENDENCIES = host-e2fsprogs
 
+ifneq ($(ROOTFS_EXT2_SIZE),auto)
 define ROOTFS_EXT2_CMD
 	rm -f $@
 	$(HOST_DIR)/sbin/mkfs.ext$(BR2_TARGET_ROOTFS_EXT2_GEN) $(ROOTFS_EXT2_OPTS) $@ \
@@ -36,6 +37,18 @@ define ROOTFS_EXT2_CMD
 	     exit $$ret; \
 	}
 endef
+else
+define ROOTFS_EXT2_CMD
+	rm -f $@
+	ROOTFS_SIZE="$$(du -shm $(TARGET_DIR) | cut -f1)"
+	$(HOST_DIR)/sbin/mkfs.ext$(BR2_TARGET_ROOTFS_EXT2_GEN) \
+		$(ROOTFS_EXT2_OPTS) \
+		$@ "$$(($$ROOTFS_SIZE + 50 + \
+		$$ROOTFS_SIZE * (8 + $(BR2_TARGET_ROOTFS_EXT2_RESBLKS)) / 100))M"
+	$(HOST_DIR)/sbin/resize2fs -M $@
+	$(HOST_DIR)/sbin/e2fsck -fy $@
+endef
+endif
 
 ifneq ($(BR2_TARGET_ROOTFS_EXT2_GEN),2)
 define ROOTFS_EXT2_SYMLINK
