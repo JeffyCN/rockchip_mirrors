@@ -118,6 +118,7 @@ QT5WEBENGINE_CONF_OPTS += \
 	-no-webengine-pepper-plugins \
 	-no-webengine-printing-and-pdf \
 	-no-webengine-spellchecker \
+	-no-webengine-webrtc \
 	-no-webengine-webrtc-pipewire \
 	-no-feature-webengine-developer-build \
 	-no-feature-webengine-full-debug-info \
@@ -125,12 +126,6 @@ QT5WEBENGINE_CONF_OPTS += \
 	-no-feature-webengine-noexecstack \
 	-no-feature-webengine-system-minizip \
 	-no-feature-webengine-system-gn
-
-ifeq ($(BR2_PACKAGE_QT5WEBENGINE_WEBRTC),y)
-QT5WEBENGINE_CONF_OPTS += -webengine-webrtc
-else
-QT5WEBENGINE_CONF_OPTS += -no-webengine-webrtc
-endif
 
 ifeq ($(BR2_PACKAGE_QT5WEBENGINE_PROPRIETARY_CODECS),y)
 QT5WEBENGINE_CONF_OPTS += -webengine-proprietary-codecs
@@ -182,18 +177,5 @@ QT5WEBENGINE_ENV += \
 
 QT5WEBENGINE_CONF_ENV = $(QT5WEBENGINE_ENV)
 QT5WEBENGINE_MAKE_ENV = $(QT5WEBENGINE_ENV)
-
-define QT5WEBENGINE_INSTALL_TARGET_ENV
-	$(INSTALL) -D -m 644 $(QT5WEBENGINE_PKGDIR)/qtwebengine.sh \
-		$(TARGET_DIR)/etc/profile.d/qtwebengine.sh
-endef
-QT5WEBENGINE_POST_INSTALL_TARGET_HOOKS += QT5WEBENGINE_INSTALL_TARGET_ENV
-
-ifeq ($(BR2_PACKAGE_LIBV4L_RKMPP),y)
-define QT5WEBENGINE_INSTALL_INIT_SYSV
-	$(INSTALL) -D -m 755 $(QT5WEBENGINE_PKGDIR)/S99qtwebengine.sh \
-		$(TARGET_DIR)/etc/init.d/S99qtwebengine.sh
-endef
-endif
 
 $(eval $(qmake-package))

@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-QT5WAYLAND_VERSION = 36659e6130ed3fc2b3f0c91423408ef5ecb7b991
+QT5WAYLAND_VERSION = 8faf74a7966b520f0ac3eb4d88235f8ec63b31b8
 QT5WAYLAND_SITE = $(QT5_SITE)/qtwayland/-/archive/$(QT5WAYLAND_VERSION)
 QT5WAYLAND_SOURCE = qtwayland-$(QT5WAYLAND_VERSION).tar.bz2
 QT5WAYLAND_DEPENDENCIES = wayland
@@ -24,16 +24,6 @@ QT5WAYLAND_LICENSE_FILES = LICENSE.GPL2 LICENSE.GPL3 LICENSE.GPL3-EXCEPT LICENSE
 
 ifeq ($(BR2_PACKAGE_QT5WAYLAND_COMPOSITOR),y)
 QT5WAYLAND_CONF_OPTS += CONFIG+=wayland-compositor
-else
-QT5WAYLAND_CONFIG += --no-feature-wayland-server
 endif
-
-QT5WAYLAND_CONF_OPTS += -- $(QT5WAYLAND_CONFIG)
-
-define QT5WAYLAND_FORCE_XDG_SHELL
-	cd $(TARGET_DIR)/usr/lib/qt/plugins/wayland-shell-integration/ && \
-		ls | grep -wv libxdg-shell.so | xargs rm -rf
-endef
-QT5WAYLAND_POST_INSTALL_TARGET_HOOKS += QT5WAYLAND_FORCE_XDG_SHELL
 
 $(eval $(qmake-package))

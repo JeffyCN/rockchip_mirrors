@@ -48,7 +48,6 @@ config BR2_PACKAGE_QT6BASE_LINUXFB
 
 config BR2_PACKAGE_QT6BASE_XCB
 	bool "X.org XCB support"
-	default y
 	depends on BR2_PACKAGE_XORG7
 	select BR2_PACKAGE_XLIB_LIBX11
 	select BR2_PACKAGE_LIBXCB
@@ -63,7 +62,6 @@ comment "X.org XCB backend available if X.org is enabled"
 
 config BR2_PACKAGE_QT6BASE_EGLFS
 	bool "eglfs support"
-	default y if !BR2_PACKAGE_QT6BASE_XCB
 	depends on BR2_PACKAGE_HAS_LIBEGL
 	depends on BR2_PACKAGE_HAS_LIBGBM
 	depends on BR2_PACKAGE_QT6_GL_SUPPORTS
@@ -71,8 +69,6 @@ config BR2_PACKAGE_QT6BASE_EGLFS
 
 config BR2_PACKAGE_QT6BASE_DEFAULT_QPA
 	string "Default graphical platform"
-	default "xcb" if BR2_PACKAGE_QT6BASE_XCB
-	default "eglfs" if BR2_PACKAGE_QT6BASE_EGLFS
 	help
 	  Choose the default platform abstraction to use for graphical
 	  applications (e.g xcb, linuxfb, eglfs, ...). If this is
@@ -86,7 +82,6 @@ config BR2_PACKAGE_QT6BASE_DEFAULT_QPA
 
 config BR2_PACKAGE_QT6BASE_OPENGL
 	bool "OpenGL support"
-	default y
 	depends on BR2_PACKAGE_QT6_GL_SUPPORTS
 	help
 	  This option enables OpenGL support.
@@ -98,7 +93,6 @@ if BR2_PACKAGE_QT6BASE_OPENGL
 
 choice
 	prompt "OpenGL API"
-	default BR2_PACKAGE_QT6BASE_OPENGL_ES2
 	help
 	  Select OpenGL API.
 
@@ -171,6 +165,7 @@ endif
 
 config BR2_PACKAGE_QT6BASE_NETWORK
 	bool "network module"
+	select BR2_PACKAGE_LIBOPENSSL_ENABLE_PSK if BR2_PACKAGE_LIBOPENSSL
 	help
 	  This options enables the Qt6Network library.
 
@@ -240,12 +235,5 @@ config BR2_PACKAGE_QT6BASE_XML
 	bool "XML module"
 	help
 	  This options enables the Qt6Xml library.
-
-config BR2_PACKAGE_QT6BASE_EXAMPLES
-	bool "Compile and install examples (with code)"
-	select BR2_PACKAGE_QT6BASE_NETWORK
-	select BR2_PACKAGE_QT6BASE_XML
-	help
-	  If unsure, say N.
 
 endif

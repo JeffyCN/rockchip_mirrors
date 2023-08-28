@@ -1,5 +1,5 @@
 config BR2_PACKAGE_QT5_GL_AVAILABLE
-	bool "OpenGL available"
+	bool
 	default y
 	depends on BR2_PACKAGE_HAS_LIBGL || BR2_PACKAGE_HAS_LIBGLES
 
@@ -50,7 +50,6 @@ source "package/qt5/qt5lottie/Config.in"
 source "package/qt5/qt5mqtt/Config.in"
 source "package/qt5/qt5multimedia/Config.in"
 source "package/qt5/qt5opcua/Config.in"
-source "package/qt5/qt5quick3d/Config.in"
 source "package/qt5/qt5quickcontrols/Config.in"
 source "package/qt5/qt5quickcontrols2/Config.in"
 source "package/qt5/qt5quicktimeline/Config.in"
