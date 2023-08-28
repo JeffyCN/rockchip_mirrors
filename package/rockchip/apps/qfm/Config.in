@@ -1,5 +1,0 @@
-config BR2_PACKAGE_QFM
-	bool "qfm"
-	depends on BR2_PACKAGE_QT5
-	help
-	  Rockchip File Manager application based on Qt

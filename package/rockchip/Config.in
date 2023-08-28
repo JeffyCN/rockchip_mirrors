@@ -141,8 +141,4 @@ menu "Rockchip BSP packages"
 	source "package/rockchip/slt_gpu_light/Config.in"
 endmenu
 
-menu "Rockchip Qt demos"
-	source "package/rockchip/apps/Config.in"
-endmenu
-
 endif
