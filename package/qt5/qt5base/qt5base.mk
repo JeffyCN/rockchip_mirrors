@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-QT5BASE_VERSION = 2ffb7ad8a1079a0444b9c72affe3d19b089b60de
+QT5BASE_VERSION = e44097b63d17ba3178a637df7fac51ddc51cb48b
 QT5BASE_SITE = $(QT5_SITE)/qtbase/-/archive/$(QT5BASE_VERSION)
 QT5BASE_SOURCE = qtbase-$(QT5BASE_VERSION).tar.bz2
 
@@ -40,11 +40,6 @@ QT5BASE_CONFIGURE_OPTS += \
 	-shared \
 	-no-feature-relocatable
 
-ifeq ($(BR2_PACKAGE_BINUTILS_ENABLE_GOLD),y)
-QT5BASE_CONFIGURE_OPTS += \
-	-linker gold
-endif
-
 # starting from version 5.9.0, -optimize-debug is enabled by default
 # for debug builds and it overrides -O* with -Og which is not what we
 # want.
@@ -56,10 +51,6 @@ QT5BASE_CXXFLAGS = $(TARGET_CXXFLAGS)
 ifeq ($(BR2_TOOLCHAIN_HAS_GCC_BUG_90620),y)
 QT5BASE_CFLAGS += -O0
 QT5BASE_CXXFLAGS += -O0
-endif
-
-ifeq ($(BR2_ARM_CPU_HAS_NEON),y)
-QT5BASE_CFLAGS += -mfpu=neon
 endif
 
 ifeq ($(BR2_X86_CPU_HAS_SSE2),)
@@ -234,15 +225,6 @@ endif
 ifeq ($(BR2_PACKAGE_QT5BASE_EGLFS),y)
 QT5BASE_CONFIGURE_OPTS += -eglfs
 QT5BASE_DEPENDENCIES   += libegl
-
-# Avoid conflict with Rockchip BSP kernel's logo.
-define QT5BASE_INSTALL_TARGET_ENV
-	echo "export QT_QPA_EGLFS_ALWAYS_SET_MODE=1" > $(@D)/qt_eglfs.sh
-	$(INSTALL) -D -m 0644 $(@D)/qt_eglfs.sh \
-		$(TARGET_DIR)/etc/profile.d/qt_eglfs.sh
-endef
-QT5BASE_POST_INSTALL_TARGET_HOOKS += QT5BASE_INSTALL_TARGET_ENV
-
 else
 QT5BASE_CONFIGURE_OPTS += -no-eglfs
 endif
@@ -302,24 +284,6 @@ QT5BASE_CONFIGURE_OPTS += -journald
 QT5BASE_DEPENDENCIES += systemd
 else
 QT5BASE_CONFIGURE_OPTS += -no-journald
-endif
-
-ifeq ($(BR2_PACKAGE_QT5BASE_USE_RGA),y)
-QT5BASE_CONFIGURE_OPTS += \
-	QMAKE_CXXFLAGS+=-DQT_USE_RGA QMAKE_LFLAGS+=-lrga
-QT5BASE_DEPENDENCIES += rockchip-rga
-endif
-
-ifeq ($(BR2_PACKAGE_QT5BASE_LINUXFB_RGB565),y)
-QT5BASE_CONFIGURE_OPTS += QMAKE_CXXFLAGS+=-DQT_FB_DRM_RGB565
-else ifeq ($(BR2_PACKAGE_QT5BASE_LINUXFB_RGB32),y)
-QT5BASE_CONFIGURE_OPTS += QMAKE_CXXFLAGS+=-DQT_FB_DRM_RGB32
-else ifeq ($(BR2_PACKAGE_QT5BASE_LINUXFB_ARGB32),y)
-QT5BASE_CONFIGURE_OPTS += QMAKE_CXXFLAGS+=-DQT_FB_DRM_ARGB32
-endif
-
-ifeq ($(BR2_PACKAGE_QT5BASE_LINUXFB_DIRECT_PAINTING),y)
-QT5BASE_CONFIGURE_OPTS += QMAKE_CXXFLAGS+=-DQT_FB_DIRECT_PAINTING
 endif
 
 ifeq ($(BR2_PACKAGE_QT5BASE_SYSLOG),y)
