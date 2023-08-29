@@ -15,8 +15,15 @@ LOCKFILE_PROGS_BINS = \
 	$(addprefix lockfile-,check create remove touch) \
 	$(addprefix mail-,lock touchlock unlock)
 
+LOCKFILE_PROGS_LDFLAGS = $(TARGET_LDFLAGS)
+
+ifeq ($(BR2_PACKAGE_LOCKFILE_PROGS_STATIC),y)
+LOCKFILE_PROGS_LDFLAGS += -static
+endif
+
 define LOCKFILE_PROGS_BUILD_CMDS
-	$(MAKE) $(TARGET_CONFIGURE_OPTS) -C $(@D)
+	$(MAKE) $(TARGET_CONFIGURE_OPTS) \
+		LDFLAGS="$(LOCKFILE_PROGS_LDFLAGS)" -C $(@D)
 endef
 
 define LOCKFILE_PROGS_INSTALL_TARGET_CMDS

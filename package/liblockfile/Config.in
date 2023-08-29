@@ -5,3 +5,11 @@ config BR2_PACKAGE_LIBLOCKFILE
 	  NFS-safe locking library.
 
 	  https://github.com/miquels/liblockfile
+
+if BR2_PACKAGE_LIBLOCKFILE
+
+config BR2_PACKAGE_LIBLOCKFILE_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
+endif

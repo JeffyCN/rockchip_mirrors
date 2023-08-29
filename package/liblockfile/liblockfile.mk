@@ -17,4 +17,8 @@ LIBLOCKFILE_AUTORECONF = YES
 LIBLOCKFILE_INSTALL_STAGING = YES
 LIBLOCKFILE_CONF_OPTS = --mandir=/usr/share/man
 
+ifeq ($(BR2_PACKAGE_LIBLOCKFILE_STATIC),y)
+LIBLOCKFILE_CONF_OPTS += --enable-static
+endif
+
 $(eval $(autotools-package))
