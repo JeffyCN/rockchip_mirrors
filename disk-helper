@@ -27,63 +27,60 @@ is_rootfs()
 	[ $MOUNT_POINT = "/" ]
 }
 
-rootfs_device()
+normalize_device()
 {
-	DEV_NO=$(mountpoint -d /)
-	stat -c "%n %Hr:%Lr" /dev/* | grep " $DEV_NO$" | cut -d' ' -f1
-}
+	if is_rootfs; then
+		DEV_NO="$(mountpoint -d /)"
+		ROOT_DEV="$(find /sys/dev/ -name "$DEV_NO")"
+		echo "/dev/$(basename "$(realpath "$ROOT_DEV")")"
+		return
+	fi
 
-device_from_attr()
-{
-	case "$1" in
+	case "$DEV" in
 		""|tmpfs|proc|devtmpfs|devpts|sysfs|configfs|debugfs|pstore)
 			return
 			;;
-		/dev/root)
-			rootfs_device
-			return
-			;;
 		/dev/*)
-			echo $1
+			echo $DEV
 			return
 			;;
 	esac
 
 	# Check partition name
 	for d in $(ls /sys/class/block/); do
-		if grep -q "^PARTNAME=$1$" /sys/class/block/$d/uevent; then
-			echo /dev/$d
+		if grep -q "^PARTNAME=$DEV$" /sys/class/block/$d/uevent; then
+			echo "/dev/$d"
 			return
 		fi
 	done
 
 	# Parse from blkid
-	if blkid 2>/dev/null | grep -w "$1" | tail -n 1 | \
+	if blkid 2>/dev/null | grep -w "$DEV" | tail -n 1 | \
 		grep -o "^[^:]*"; then
 		return
 	fi
 
 	# Check mtdblock name
 	for d in $(ls /dev/ | grep mtdblock); do
-		if grep -q "^$1$" /sys/block/$d/device/name; then
-			echo /dev/$d
+		if grep -q "^$DEV$" /sys/block/$d/device/name; then
+			echo "/dev/$d"
 			return
 		fi
 	done
 
 	# Check mtd
-	if grep -q "\"$1\"$" /proc/mtd 2>/dev/null; then
-		echo "/dev/$(grep "\"$1\"$" /proc/mtd | cut -d':' -f1)"
+	if grep -q "\"$DEV\"$" /proc/mtd 2>/dev/null; then
+		echo "/dev/$(grep "\"$DEV\"$" /proc/mtd | cut -d':' -f1)"
 		return
 	fi
 
 	# Try udev rules symlink
-	if find /dev/block/by-name/$1 2>/dev/null; then
+	if find /dev/block/by-name/$DEV 2>/dev/null; then
 		return
 	fi
 
 	# Give up
-	echo $1
+	echo $DEV
 }
 
 prepare_ubi()
@@ -106,7 +103,6 @@ prepare_ubi()
 	else
 		DEV=$UBIBLOCK_DEV
 	fi
-
 
 	echo "Preparing $DEV from $MTD_DEV"
 
@@ -332,16 +328,13 @@ prepare_part()
 		/mnt/* | /media/*) return 1 ;;
 	esac
 
-	# Find real dev for root dev
-	if is_rootfs; then
-		DEV=$(rootfs_device)
-	fi
-
-	DEV=$(realpath $DEV 2>/dev/null)
-	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
+	DEV="$(realpath "$(normalize_device)" 2>/dev/null)"
+	[ "$DEV" ] || return 1
 
 	# Only accept block or char device
 	[ -b "$DEV" -o -c "$DEV" ] || return 1
+
+	echo "Handling $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
 
 	SYS_PATH=$(echo /sys/class/*/${DEV##*/})
 	if [ -f "$SYS_PATH/name" ]; then
@@ -350,6 +343,7 @@ prepare_part()
 		PART_NAME=$(grep PARTNAME ${SYS_PATH}/uevent | cut -d '=' -f 2)
 	fi
 	PART_NAME=${PART_NAME:-${DEV##*/}}
+	PART_NO=$(echo $DEV | grep -oE "[0-9]*$")
 
 	case $FSTYPE in
 		ext[234])

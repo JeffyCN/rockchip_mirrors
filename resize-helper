@@ -31,8 +31,6 @@ do_part()
 		fi
 	fi
 
-	echo "Handling $DEV $MOUNT_POINT $FSTYPE $OPTS"
-
 	# Setup check/mount tools and do some prepare
 	prepare_part || return
 

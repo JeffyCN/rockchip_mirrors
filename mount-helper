@@ -24,15 +24,11 @@ do_part()
 	# Ignore comments
 	echo $1 | grep -q "^#" && return
 
-	DEV=$(device_from_attr ${1##*=})
-	[ "$DEV" ] || return
-
+	DEV=${1##*=}
 	MOUNT_POINT=$2
 	FSTYPE=$3
 	OPTS=$4
 	PASS=$6 # Skip fsck when pass is 0
-
-	echo "Handling $DEV $MOUNT_POINT $FSTYPE $OPTS $PASS"
 
 	# Setup check/mount tools and do some prepare
 	prepare_part || return
