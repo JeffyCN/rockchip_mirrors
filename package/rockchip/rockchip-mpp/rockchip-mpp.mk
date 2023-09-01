@@ -24,11 +24,21 @@ ifeq ($(BR2_PACKAGE_ROCKCHIP_MPP_TESTS),y)
 ROCKCHIP_MPP_CONF_OPTS += "-DBUILD_TEST=ON"
 endif
 
-define ROCKCHIP_MPP_LINK_GIT
-	rm -rf $(@D)/.git
-	ln -s $(SRCDIR)/.git $(@D)/
+ifeq ($(BR2_PACKAGE_RK3328),y)
+define ROCKCHIP_MPP_H265_SUPPORTED_FIRMWARE
+	mkdir -p $(TARGET_DIR)/lib/firmware/
+
+	if test -e $(ROCKCHIP_MPP_SITE)/../rktoolkit/monet.bin ; then \
+		$(INSTALL) -m 0644 -D $(ROCKCHIP_MPP_SITE)/../rktoolkit/monet.bin \
+			$(TARGET_DIR)/lib/firmware/ ; \
+	else \
+		$(INSTALL) -m 0644 -D package/rockchip/rockchip-mpp/monet.bin \
+			$(TARGET_DIR)/lib/firmware/ ; \
+	fi
 endef
-ROCKCHIP_MPP_POST_RSYNC_HOOKS += ROCKCHIP_MPP_LINK_GIT
+ROCKCHIP_MPP_POST_INSTALL_TARGET_HOOKS += ROCKCHIP_MPP_H265_SUPPORTED_FIRMWARE
+endif
+>>>>>>> 8f2efda8810... pkg-generic: Symlink .git for local sources
 
 define ROCKCHIP_MPP_REMOVE_NOISY_LOGS
 	sed -i -e "/pp_enable %d/d" \
