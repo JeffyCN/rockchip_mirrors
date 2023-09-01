@@ -251,7 +251,8 @@ $(BUILD_DIR)/%/.stamp_rsynced:
 	@$(call step_end,rsync)
 	$(Q)touch $@
 
-	@test -d $(SRCDIR)/.git && (cd $(SRCDIR) && git status --ignored -s | \
+	@test -d $(SRCDIR)/.git && ln -rsf $(SRCDIR)/.git $(@D) && \
+		(cd $(SRCDIR) && git status --ignored -s | \
 		grep "" && echo "WARN: $(SRCDIR) is dirty!") || true
 
 # Patch
