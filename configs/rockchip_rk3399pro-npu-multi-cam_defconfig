@@ -3,7 +3,6 @@
 #include "multimedia/camera.config"
 # BR2_PACKAGE_ANDROID_TOOLS is reset to default
 # BR2_PACKAGE_E2FSPROGS is reset to default
-BR2_PACKAGE_IO=y
 BR2_PACKAGE_LIBDRM_INSTALL_TESTS=y
 BR2_PACKAGE_LIBUSB=y
 BR2_PACKAGE_LIBXML2=y
