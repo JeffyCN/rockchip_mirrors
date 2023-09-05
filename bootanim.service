@@ -6,7 +6,7 @@ After=local-fs.target
 [Service]
 ExecStart=/usr/bin/bootanim
 Type=forking
-KillMode=none
+KillMode=mixed
 SendSIGKILL=no
 
 [Install]
