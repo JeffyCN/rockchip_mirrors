@@ -110,7 +110,6 @@ define BLUEZ5_UTILS_POST_INSTALL_TARGET_HOOK1
 	install -C $($(PKG)_BUILDDIR)tools/gatt-service $(TARGET_DIR)/usr/bin
         install -C $($(PKG)_BUILDDIR)tools/hciconfig $(TARGET_DIR)/usr/bin
         install -C $($(PKG)_BUILDDIR)tools/hcitool $(TARGET_DIR)/usr/bin
-        install -C package/bluez5_utils/bluez5_utils_wifi_config.sh $(TARGET_DIR)/usr/bin/
 endef
 
 BLUEZ5_UTILS_POST_INSTALL_TARGET_HOOKS += BLUEZ5_UTILS_POST_INSTALL_TARGET_HOOK1

@@ -11,7 +11,7 @@ case "$1" in
                ;;
        thaw|resume)
 		ifconfig wlan0 up
-		bt_init.sh&
+		wifibt-init.sh
                ;;
        *) exit $NA
                ;;
