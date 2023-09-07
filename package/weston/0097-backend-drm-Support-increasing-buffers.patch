@@ -1,4 +1,4 @@
-From 8621fe8678b2742eedb410e95c01dccca3930606 Mon Sep 17 00:00:00 2001
+From ee0e4542de78c07a292905560ee8c2cc2897a89e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Aug 2023 18:18:58 +0800
 Subject: [PATCH 97/97] backend-drm: Support increasing buffers
@@ -309,7 +309,7 @@ index 79f42d3..925c3b1 100644
  
  	struct vaapi_recorder *recorder;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c8eb6de..8715017 100644
+index ac39890..714fbf4 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -552,13 +552,14 @@ drm_output_render_pixman(struct drm_output_state *state,
@@ -340,7 +340,7 @@ index c8eb6de..8715017 100644
  	return drm_fb_ref(fb);
  }
  
-@@ -1899,7 +1900,7 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
+@@ -1903,7 +1904,7 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
  		goto err;
  
  	/* FIXME error checking */
@@ -349,7 +349,7 @@ index c8eb6de..8715017 100644
  		struct pixman_renderer_dma_buf dma_buf;
  
  		output->dumb[i] = drm_fb_create_dumb(device, w, h,
-@@ -1961,8 +1962,11 @@ drm_output_fini_pixman(struct drm_output *output)
+@@ -1965,8 +1966,11 @@ drm_output_fini_pixman(struct drm_output *output)
  	}
  
  	for (i = 0; i < ARRAY_LENGTH(output->dumb); i++) {
@@ -363,7 +363,7 @@ index c8eb6de..8715017 100644
  		output->dumb[i] = NULL;
  		output->renderbuffer[i] = NULL;
  	}
-@@ -3070,6 +3074,7 @@ drm_output_create(struct weston_backend *backend, const char *name)
+@@ -3074,6 +3078,7 @@ drm_output_create(struct weston_backend *backend, const char *name)
  	struct drm_backend *b = container_of(backend, struct drm_backend, base);
  	struct drm_device *device;
  	struct drm_output *output;
@@ -371,7 +371,7 @@ index c8eb6de..8715017 100644
  
  	device = drm_device_find_by_output(b->compositor, name);
  	if (!device)
-@@ -3089,6 +3094,14 @@ drm_output_create(struct weston_backend *backend, const char *name)
+@@ -3093,6 +3098,14 @@ drm_output_create(struct weston_backend *backend, const char *name)
  	output->gbm_bo_flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING;
  #endif
  

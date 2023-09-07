@@ -1,4 +1,4 @@
-From 01933249dbba437cdb658c1ef8b252bd12d10400 Mon Sep 17 00:00:00 2001
+From 50cf7ba539af7a571de454fe0d4d1e6a661380e2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 15:17:39 +0800
 Subject: [PATCH 67/97] backend-drm: Stop disabling unused CRTCs by default
@@ -27,7 +27,7 @@ index 14440ee..79f42d3 100644
  	bool head_fallback;
  	bool head_fallback_all;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 6d35d63..d6c5733 100644
+index 96ed8ae..f551fdc 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -2558,6 +2558,10 @@ drm_output_detach_crtc(struct drm_output *output)
@@ -53,7 +53,7 @@ index 6d35d63..d6c5733 100644
  	if (buf && buf[0] == '1')
  		b->single_head = true;
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index b2d572b..accc6ea 100644
+index ffbb155..a38fe88 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1500,7 +1500,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
@@ -74,7 +74,7 @@ index b2d572b..accc6ea 100644
  		/* If we need to reset all our state (e.g. because we've
  		 * just started, or just been VT-switched in), explicitly
  		 * disable all the CRTCs we aren't using. This also disables
-@@ -1781,6 +1781,7 @@ int
+@@ -1790,6 +1790,7 @@ int
  drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
  {
  	struct drm_device *device = pending_state->device;
@@ -82,7 +82,7 @@ index b2d572b..accc6ea 100644
  	struct drm_output_state *output_state, *tmp;
  	struct drm_crtc *crtc;
  	int has_error = 0;
-@@ -1789,7 +1790,7 @@ drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
+@@ -1798,7 +1799,7 @@ drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
  		return drm_pending_state_apply_atomic(pending_state,
  						      DRM_STATE_APPLY_SYNC);
  

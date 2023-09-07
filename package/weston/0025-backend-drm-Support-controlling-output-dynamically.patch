@@ -1,4 +1,4 @@
-From 7c7066a9c1cda4422061016f812e37aa912c609e Mon Sep 17 00:00:00 2001
+From 82f1af28942fd183659a98a530b800804d5a0d31 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 25/97] backend-drm: Support controlling output dynamically
@@ -13,6 +13,7 @@ Supported configs format is "output:<output name>:<config>", for
 example:
 echo "output:DSI-1:off" >> /tmp/.weston_drm.conf
 echo "output:eDP-1:freeze" >> /tmp/.weston_drm.conf
+echo "output:DSI-1:offscreen" >> /tmp/.weston_drm.conf
 echo "output:all:rotate90" >> /tmp/.weston_drm.conf
 echo "output:all:rect=<100,20,1636,2068>" >> /tmp/.weston_drm.conf
 echo "output:HDMI-A-1:mode=800x600" >> /tmp/.weston_drm.conf
@@ -34,13 +35,14 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  include/libweston/libweston.h        |   7 +
  libweston/backend-drm/drm-internal.h |  16 ++
  libweston/backend-drm/drm.c          | 263 ++++++++++++++++++++++++++-
+ libweston/backend-drm/kms.c          |   9 +
  libweston/backend-drm/modes.c        |  20 +-
  libweston/compositor.c               |  29 ++-
  libweston/libinput-seat.c            |  43 +++++
  libweston/libweston-internal.h       |   3 +
  libweston/pixman-renderer.c          |  29 +++
  libweston/renderer-gl/gl-renderer.c  |   3 +
- 11 files changed, 462 insertions(+), 25 deletions(-)
+ 12 files changed, 471 insertions(+), 25 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 363cbb1..d8183df 100644
@@ -248,7 +250,7 @@ index 9929c93..88c4a2c 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index de30db2..7d8d2d9 100644
+index de30db2..2cb4a7e 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -41,6 +41,7 @@
@@ -472,15 +474,15 @@ index de30db2..7d8d2d9 100644
 +			drm_output_modeset(output, config + strlen("mode="));
 +		} else if (!strcmp(config, "freeze")) {
 +			output->base.freezing = true;
++		} else if (!strcmp(config, "offscreen")) {
++			if (!output->virtual)
++				drm_set_dpms(&output->base, WESTON_DPMS_OFF);
 +		} else if (!strcmp(config, "off")) {
 +			output->base.freezing = true;
 +			if (!output->virtual)
 +				drm_set_dpms(&output->base, WESTON_DPMS_OFF);
 +		} else if (!strcmp(config, "unfreeze") ||
 +			   !strcmp(config, "on")) {
-+			if (!output->base.freezing)
-+				continue;
-+
 +			output->base.freezing = false;
 +
 +			if (!output->virtual)
@@ -598,6 +600,26 @@ index de30db2..7d8d2d9 100644
  	return b;
  
  err_udev_monitor:
+diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
+index 9af260c..712684f 100644
+--- a/libweston/backend-drm/kms.c
++++ b/libweston/backend-drm/kms.c
+@@ -1704,6 +1704,15 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
+ 		struct drm_output *output = output_state->output;
+ 		int ret;
+ 
++		if (output_state->dpms != WESTON_DPMS_ON) {
++			output->state_invalid = true;
++			drm_output_assign_state(output_state,
++						DRM_STATE_APPLY_SYNC);
++			weston_output_finish_frame(&output->base, NULL,
++						   WP_PRESENTATION_FEEDBACK_INVALID);
++			continue;
++		}
++
+ 		if (output->virtual) {
+ 			drm_output_assign_state(output_state,
+ 						DRM_STATE_APPLY_ASYNC);
 diff --git a/libweston/backend-drm/modes.c b/libweston/backend-drm/modes.c
 index e31fc9c..e3dbd46 100644
 --- a/libweston/backend-drm/modes.c
