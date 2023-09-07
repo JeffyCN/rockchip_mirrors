@@ -1,4 +1,4 @@
-From 6963a168bccb95c4d5acdbef0f893be33ac7c86e Mon Sep 17 00:00:00 2001
+From 13d0bad3d8dcf605bd79f2194be84f65853a4030 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Jul 2023 09:42:32 +0800
 Subject: [PATCH 88/97] compositor: Delay DPMS-ON to finsih_frame()
@@ -8,9 +8,9 @@ To make sure that the new frame is ready when turning on outputs.
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  include/libweston/libweston.h |  1 +
- libweston/backend-drm/drm.c   |  4 +---
- libweston/compositor.c        | 19 +++++++++++++++++++
- 3 files changed, 21 insertions(+), 3 deletions(-)
+ libweston/backend-drm/drm.c   | 11 ++++++-----
+ libweston/compositor.c        | 20 ++++++++++++++++++++
+ 3 files changed, 27 insertions(+), 5 deletions(-)
 
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
 index c4fca6f..7d8edca 100644
@@ -25,22 +25,36 @@ index c4fca6f..7d8edca 100644
  	bool freezing;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index cb07a03..c8eb6de 100644
+index 5dde226..ac39890 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -4422,9 +4422,7 @@ config_handle_output(struct drm_backend *b, const char *name,
- 				continue;
+@@ -1016,7 +1016,11 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+ 		state = drm_output_state_duplicate(output->state_cur,
+ 						   pending_state,
+ 						   DRM_OUTPUT_STATE_CLEAR_PLANES);
+-	state->dpms = WESTON_DPMS_ON;
++
++	if (output_base->pending_active)
++		state->dpms = WESTON_DPMS_ON;
++	else
++		state->dpms = output->state_cur->dpms;
  
+ 	if (output_base->allow_protection)
+ 		state->protection = output_base->desired_protection;
+@@ -4422,10 +4426,7 @@ config_handle_output(struct drm_backend *b, const char *name,
+ 		} else if (!strcmp(config, "unfreeze") ||
+ 			   !strcmp(config, "on")) {
  			output->base.freezing = false;
 -
 -			if (!output->virtual)
 -				drm_set_dpms(&output->base, WESTON_DPMS_ON);
-+			output->base.pending_active = 1;
- 
+-
++			output->base.pending_active = true;
  			weston_output_damage(&output->base);
  		} else if (!strncmp(config, "down-scale=",
+ 				    strlen("down-scale="))) {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index ba7aa4c..b130593 100644
+index ba7aa4c..e20ad7c 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3467,6 +3467,13 @@ weston_output_finish_frame(struct weston_output *output,
@@ -48,7 +62,7 @@ index ba7aa4c..b130593 100644
  	int64_t msec_rel;
  
 +	/* Delayed DPMS-ON to avoid showing old frame */
-+	if (output->pending_active) {
++	if (stamp && output->pending_active) {
 +		output->pending_active = false;
 +		if (output->set_dpms)
 +			output->set_dpms(output, WESTON_DPMS_ON);
@@ -76,6 +90,14 @@ index ba7aa4c..b130593 100644
  		if (output->set_dpms)
  			output->set_dpms(output, dpms);
  	}
+@@ -6744,6 +6763,7 @@ weston_compositor_add_output(struct weston_compositor *compositor,
+ 	wl_list_remove(&output->link);
+ 	wl_list_insert(compositor->output_list.prev, &output->link);
+ 	output->enabled = true;
++	output->pending_active = true;
+ 
+ 	wl_signal_emit(&compositor->output_created_signal, output);
+ 
 -- 
 2.20.1
 

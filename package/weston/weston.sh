@@ -64,6 +64,7 @@ export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 # echo "compositor:state:on" > /tmp/.weston_drm.conf
 # echo "output:DSI-1:off" > /tmp/.weston_drm.conf
 # echo "output:eDP-1:freeze" > /tmp/.weston_drm.conf
+# echo "output:DSI-1:offscreen" > /tmp/.weston_drm.conf
 # echo "output:DSI-1:on" > /tmp/.weston_drm.conf
 # echo "output:all:rotate90" > /tmp/.weston_drm.conf
 # echo "output:all:rect=<100,20,1636,2068>" > /tmp/.weston_drm.conf
