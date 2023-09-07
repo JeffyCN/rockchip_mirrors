@@ -27,8 +27,11 @@
 # Enable error out after loading env
 set -e
 
-LOG_FILE=/tmp/usbdevice.log
-USB_FUNCS_FILE=/tmp/.usbdevice
+TAG_DIR=/var/run/
+LOG_FILE=/var/log/usbdevice.log
+USB_FUNCS_FILE=/var/run/.usbdevice
+
+ln -rsf "$LOG_FILE" /tmp/
 
 alias usb_enable='touch $USB_FUNCS_FILE'
 alias usb_disable='rm -f $USB_FUNCS_FILE'
@@ -166,8 +169,8 @@ usb_try_write()
 
 usb_start_daemon()
 {
-	NAME=$(echo $1 | sed "s#^[^ ]*/\([^ ]*\).*#\1#")
-	TAG_FILE=/tmp/.usb_$NAME
+	NAME=$(echo $1 | sed "s~^[^ ]*/\([^ ]*\).*~\1~")
+	TAG_FILE=$TAG_DIR.usb_$NAME
 
 	# Enable spawn
 	touch $TAG_FILE
@@ -191,8 +194,8 @@ usb_start_daemon()
 
 usb_stop_daemon()
 {
-	NAME=$(echo $1 | sed "s#^[^ ]*/\([^ ]*\).*#\1#")
-	TAG_FILE=/tmp/.usb_$NAME
+	NAME=$(echo $1 | sed "s~^[^ ]*/\([^ ]*\).*~\1~")
+	TAG_FILE=$TAG_DIR.usb_$NAME
 
 	# Stop and disable spawn
 	rm -f $TAG_FILE
