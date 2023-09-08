@@ -1,0 +1,4 @@
+#include "chips/rk3308_arm.config"
+#include "base/tiny.config"
+
+BR2_ROOTFS_POST_BUILD_SCRIPT+="board/rockchip/common/tinyrecovery/post-build-tinyrecovery.sh"
