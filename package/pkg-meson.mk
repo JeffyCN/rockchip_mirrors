@@ -99,7 +99,7 @@ define PKG_MESON_CROSSCONFIG_SED_COMMON
         -e "s%@PKGCONF_HOST_BINARY@%$(HOST_DIR)/bin/pkgconf%g" \
         -e "s%@HOST_DIR@%$(HOST_DIR)%g" \
         -e "s%@STAGING_DIR@%$(STAGING_DIR)%g" \
-        -e "s%@STATIC@%$(if $(BR2_STATIC_LIBS),true,false)%g" \
+        -e "s%@STATIC@%$(if $$($$(PKG)_STATIC),true,false)%g" \
         $(TOPDIR)/support/misc/cross-compilation.conf.in
 endef
 
@@ -170,6 +170,8 @@ $(2)_CXX ?= $$(TARGET_CXX)
 $(2)_AR ?= $$(TARGET_AR)
 $(2)_STRIP ?= $$(TARGET_STRIP)
 
+$(2)_STATIC ?= $(BR2_STATIC_LIBS)
+
 # Configure package for target
 #
 #
@@ -187,7 +189,7 @@ define $(2)_CONFIGURE_CMDS
 	$$(MESON) setup \
 		--prefix=/usr \
 		--libdir=lib \
-		--default-library=$(if $(BR2_STATIC_LIBS),static,$(if $(BR2_SHARED_STATIC_LIBS),both,shared)) \
+		--default-library=$(if $$($$(PKG)_STATIC),static,$(if $(BR2_SHARED_STATIC_LIBS),both,shared)) \
 		--buildtype=$(if $(BR2_ENABLE_RUNTIME_DEBUG),debug,release) \
 		--cross-file=$$($$(PKG)_SRCDIR)/build/cross-compilation.conf \
 		-Db_pie=false \
