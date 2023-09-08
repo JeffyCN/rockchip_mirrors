@@ -41,8 +41,6 @@ else
 IRQBALANCE_CONF_OPTS += --without-systemd
 endif
 
-IRQBALANCE_PRE_CONFIGURE_HOOKS += IRQBALANCE_PRECONFIGURE
-
 ifeq ($(BR2_PACKAGE_IRQBALANCE_FORCE_CORE),y)
 define IRQBALANCE_INSTALL_FORCE_CORE
 	$(INSTALL) -D -m 755 package/irqbalance/force_core.sh \
