@@ -1,6 +1,7 @@
 config BR2_PACKAGE_CHROMIUM_WAYLAND
 	bool "chromium-ozone-wayland"
 	depends on (BR2_arm && BR2_GCC_TARGET_FLOAT_ABI = "hard") || BR2_aarch64
+	depends on BR2_PACKAGE_AT_SPI2_CORE
 	depends on BR2_PACKAGE_CAIRO
 	depends on BR2_PACKAGE_JPEG_TURBO
 	depends on BR2_PACKAGE_JPEG_TURBO_JPEG6
@@ -25,7 +26,6 @@ config BR2_PACKAGE_CHROMIUM_WAYLAND
 	select BR2_PACKAGE_WEBP
 	select BR2_PACKAGE_WEBP_DEMUX
 	select BR2_PACKAGE_WEBP_MUX
-	select BR2_PACKAGE_AT_SPI2_ATK
 	help
 	  Chromium browser for wayland
 
