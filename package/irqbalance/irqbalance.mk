@@ -41,6 +41,11 @@ else
 IRQBALANCE_CONF_OPTS += --without-systemd
 endif
 
+ifeq ($(BR2_PACKAGE_IRQBALANCE_STATIC),y)
+IRQBALANCE_CONF_ENV += CFLAGS="$(TARGET_CFLAGS) -static" \
+	LDFLAGS="$(TARGET_LDFLAGS) -static"
+endif
+
 ifeq ($(BR2_PACKAGE_IRQBALANCE_FORCE_CORE),y)
 define IRQBALANCE_INSTALL_FORCE_CORE
 	$(INSTALL) -D -m 755 package/irqbalance/force_core.sh \
