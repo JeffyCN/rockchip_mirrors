@@ -26,4 +26,9 @@ config BR2_PACKAGE_IRQBALANCE_FORCE_CORE
 	help
 	  Force using core balance level for all irqs.
 
+config BR2_PACKAGE_IRQBALANCE_STATIC
+	bool "Enable static"
+	depends on BR2_PACKAGE_LIBGLIB2_STATIC
+	default y if BR2_STATIC_LIBS
+
 endif
