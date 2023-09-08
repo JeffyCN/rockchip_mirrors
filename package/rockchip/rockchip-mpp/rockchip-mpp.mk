@@ -38,7 +38,6 @@ define ROCKCHIP_MPP_H265_SUPPORTED_FIRMWARE
 endef
 ROCKCHIP_MPP_POST_INSTALL_TARGET_HOOKS += ROCKCHIP_MPP_H265_SUPPORTED_FIRMWARE
 endif
->>>>>>> 8f2efda8810... pkg-generic: Symlink .git for local sources
 
 define ROCKCHIP_MPP_REMOVE_NOISY_LOGS
 	sed -i -e "/pp_enable %d/d" \
