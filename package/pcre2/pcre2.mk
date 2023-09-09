@@ -31,6 +31,10 @@ endif
 # needed for qt6base
 HOST_PCRE2_CONF_OPTS = --enable-pcre2-16
 
+ifeq ($(BR2_PACKAGE_PCRE2_STATIC),y)
+PCRE2_CONF_OPTS += --enable-static
+endif
+
 define PCRE2_TARGET_INSTALL_REMOVE_TOOLS
 	rm -f $(TARGET_DIR)/usr/bin/pcre2*
 endef

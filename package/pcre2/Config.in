@@ -41,4 +41,8 @@ comment "JIT support needs a toolchain w/ threads"
 	depends on BR2_PACKAGE_PCRE2_JIT_ARCH_SUPPORTS
 	depends on !BR2_TOOLCHAIN_HAS_THREADS
 
+config BR2_PACKAGE_PCRE2_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
 endif
