@@ -20,6 +20,7 @@ if BR2_PACKAGE_LIBGLIB2
 
 config BR2_PACKAGE_LIBGLIB2_STATIC
 	bool "Enable static"
+	select BR2_PACKAGE_PCRE2_STATIC
 	default y if BR2_STATIC_LIBS
 
 endif
