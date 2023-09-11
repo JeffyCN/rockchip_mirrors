@@ -15,7 +15,7 @@ set +e
 . $(dirname $0)/disk-helper
 
 LOGFILE=/var/log/resize-all.log
-ln -rsf "$LOGFILE" /tmp/
+ln -sf "$LOGFILE" /tmp/
 
 do_part()
 {

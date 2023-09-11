@@ -19,7 +19,7 @@ PID_FILE=/var/run/bootanim.pid
 LOG_FILE=/var/log/bootanim.log
 TIMEOUT=${2:-${BOOTANIM_DEFAULT_TIMEOUT:-5}}
 
-ln -rsf "$LOG_FILE" /tmp/
+ln -sf "$LOG_FILE" /tmp/
 
 pid_by_sid()
 {
