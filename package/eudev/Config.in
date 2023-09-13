@@ -35,6 +35,10 @@ config BR2_PACKAGE_EUDEV_ENABLE_HWDB
 	help
 	  Enables hardware database installation to /etc/udev/hwdb.bin
 
+config BR2_PACKAGE_EUDEV_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
 endif
 
 comment "eudev needs eudev /dev management"
