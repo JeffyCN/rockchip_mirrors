@@ -1,0 +1,86 @@
+From a7098bc67290930e04126b7c8e29249377576a6b Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Wed, 13 Sep 2023 10:55:24 +0800
+Subject: [PATCH 10/10] Support enabling features by env
+
+Add support for env FRECON_GETTY, FRECON_VTS and FRECON_VT1.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ main.c |  6 ++++++
+ term.c | 22 ++++++++++++++--------
+ 2 files changed, 20 insertions(+), 8 deletions(-)
+
+diff --git a/main.c b/main.c
+index 61a54f1..8ca6a66 100644
+--- a/main.c
++++ b/main.c
+@@ -301,6 +301,12 @@ int main(int argc, char* argv[])
+ 	splash_t* splash;
+ 	drm_t* drm;
+ 
++	if (getenv("FRECON_VTS"))
++		command_flags.enable_vts = true;
++
++	if (getenv("FRECON_VT1"))
++		command_flags.enable_vt1 = true;
++
+ 	legacy_print_resolution(argc, argv);
+ 
+ 	fix_stdio();
+diff --git a/term.c b/term.c
+index 9015818..2aab2af 100644
+--- a/term.c
++++ b/term.c
+@@ -50,8 +50,7 @@ struct _terminal_t {
+ 	char** exec;
+ };
+ 
+-#ifdef USE_GETTY
+-static char* interactive_cmd_line[] =
++static char* interactive_cmd_getty[] =
+ {
+ 	"/sbin/getty",
+ 	"-",
+@@ -59,14 +58,13 @@ static char* interactive_cmd_line[] =
+ 	"xterm",
+ 	NULL
+ };
+-#else
+-static char* interactive_cmd_line[] =
++
++static __attribute__((unused)) char* interactive_cmd_sh[] =
+ {
+ 	"/bin/sh",
+ 	"-il",
+ 	NULL
+ };
+-#endif
+ 
+ static bool in_background = false;
+ static bool hotplug_occured = false;
+@@ -536,10 +534,18 @@ terminal_t* term_init(unsigned vt, int pts_fd)
+ 		return NULL;
+ 	}
+ 
+-	if (interactive)
+-		new_terminal->exec = interactive_cmd_line;
+-	else
++	if (interactive) {
++#ifdef USE_GETTY
++		new_terminal->exec = interactive_cmd_getty;
++#else
++		new_terminal->exec = interactive_cmd_sh;
++#endif
++
++		if (getenv("FRECON_GETTY"))
++			new_terminal->exec = interactive_cmd_getty;
++	} else {
+ 		new_terminal->exec = NULL;
++	}
+ 
+ 	status = tsm_screen_new(&new_terminal->term->screen,
+ 			log_tsm, new_terminal->term);
+-- 
+2.20.1
+

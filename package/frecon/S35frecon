@@ -3,8 +3,6 @@
 # Provides:          frecon
 # Required-Start:    mountvirtfs
 # Required-Stop:
-# Should-Start:
-# Should-Stop:
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: frecon daemon
@@ -12,17 +10,15 @@
 
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
-FRECON_ARGS=
-
 case "$1" in
 	start)
 		echo -n "starting frecon... "
-		frecon --daemon $FRECON_ARGS
+		frecon --daemon
 		echo "done."
 		;;
 	stop)
 		echo -n "stoping frecon... "
-		killall frecon
+		killall -q frecon
 		echo "done."
 		;;
 	*)
