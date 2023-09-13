@@ -45,6 +45,10 @@ else
 EUDEV_CONF_OPTS += --disable-selinux
 endif
 
+ifeq ($(BR2_PACKAGE_EUDEV_STATIC),y)
+EUDEV_CONF_OPTS += --enable-static
+endif
+
 define EUDEV_INSTALL_INIT_SYSV
 	$(INSTALL) -D -m 0755 package/eudev/S10udev $(TARGET_DIR)/etc/init.d/S10udev
 endef
