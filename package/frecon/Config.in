@@ -9,7 +9,7 @@ config BR2_PACKAGE_FRECON
 	  This is a terminal emulator that replaces the kernel Virtual
 	  Terminal (VT) console.  It uses the Kernel Mode Setting (KMS)
 	  support in the kernel.  It is similar to the kmscon project:
-            https://www.freedesktop.org/wiki/Software/kmscon
+	    https://www.freedesktop.org/wiki/Software/kmscon
 
 if BR2_PACKAGE_FRECON
 
@@ -27,30 +27,39 @@ config BR2_PACKAGE_FRECON_VT1
 
 config BR2_PACKAGE_FRECON_ROTATE
 	int
-	default 90 if BR2_PACKAGE_FRECON_ROTATE_90
-	default 180 if BR2_PACKAGE_FRECON_ROTATE_180
 	default 270 if BR2_PACKAGE_FRECON_ROTATE_270
+	default 180 if BR2_PACKAGE_FRECON_ROTATE_180
+	default 90 if BR2_PACKAGE_FRECON_ROTATE_90
+	default 0
 
 choice
-        prompt "frecon rotate"
-        default BR2_PACKAGE_FRECON_ROTATE_0
+	prompt "frecon rotate"
+	default BR2_PACKAGE_FRECON_ROTATE_0
 
 config BR2_PACKAGE_FRECON_ROTATE_0
-        bool "0"
+	bool "0"
 
 config BR2_PACKAGE_FRECON_ROTATE_90
-        bool "90"
+	bool "90"
 
 config BR2_PACKAGE_FRECON_ROTATE_180
-        bool "180"
+	bool "180"
 
 config BR2_PACKAGE_FRECON_ROTATE_270
-        bool "270"
+	bool "270"
 
 endchoice
 
 config BR2_PACKAGE_FRECON_SCALE
 	int "frecon scale"
 	range 1 100
+
+config BR2_PACKAGE_FRECON_STATIC
+	bool "Enable static"
+	select BR2_PACKAGE_EUDEV_STATIC if BR2_PACKAGE_EUDEV
+	select BR2_PACKAGE_LIBDRM_STATIC
+	select BR2_PACKAGE_LIBPNG_STATIC
+	select BR2_PACKAGE_LIBTSM_STATIC
+	default y if BR2_STATIC_LIBS
 
 endif

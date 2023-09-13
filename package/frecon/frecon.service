@@ -1,0 +1,12 @@
+[Unit]
+Description=Frecon terminal emulator daemon
+DefaultDependencies=no
+After=local-fs.target
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/frecon --daemon
+ExecStop=/usr/bin/killall -q frecon
+
+[Install]
+WantedBy=sysinit.target

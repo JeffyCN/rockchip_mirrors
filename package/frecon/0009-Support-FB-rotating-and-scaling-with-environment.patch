@@ -1,7 +1,7 @@
-From fc58fcee33d9466952756ab4ca063c499543d6c7 Mon Sep 17 00:00:00 2001
+From 596d2644a174008604bb310b2cf1091d5b8f1c2d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 17 May 2023 10:42:01 +0800
-Subject: [PATCH 9/9] Support FB rotating and scaling with environment
+Subject: [PATCH 09/10] Support FB rotating and scaling with environment
 
 Tested with:
 FRECON_FB_ROTATE=90 FRECON_FB_SCALE=2 frecon
