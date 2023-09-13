@@ -8,3 +8,11 @@ menuconfig BR2_PACKAGE_LIBTSM
 		compatibility to existing emulators.
 
 		https://github.com/Aetf/libtsm
+
+if BR2_PACKAGE_LIBTSM
+
+config BR2_PACKAGE_LIBTSM_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
+endif
