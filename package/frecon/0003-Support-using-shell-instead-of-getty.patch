@@ -1,7 +1,7 @@
-From 42b56fd583ff37fdd965a6e037a4cf69e6971441 Mon Sep 17 00:00:00 2001
+From beeb0f147a75f0865d3627ffb6b0f72f6162af81 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 9 Jun 2022 17:00:32 +0800
-Subject: [PATCH 3/9] Support using shell instead of getty
+Subject: [PATCH 03/10] Support using shell instead of getty
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

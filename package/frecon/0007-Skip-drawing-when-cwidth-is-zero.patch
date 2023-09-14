@@ -1,7 +1,7 @@
-From cdd62a22e8cea368d187c2deedd29c8aecba5243 Mon Sep 17 00:00:00 2001
+From 2c7c1b87c87a781c9bd128792b8b46ea6c7d9487 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 10 Jun 2022 17:15:12 +0800
-Subject: [PATCH 7/9] Skip drawing when cwidth is zero
+Subject: [PATCH 07/10] Skip drawing when cwidth is zero
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

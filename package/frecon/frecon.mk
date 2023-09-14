@@ -26,22 +26,19 @@ define FRECON_BUILD_CMDS
 endef
 
 ifeq ($(BR2_PACKAGE_FRECON_USE_GETTY),y)
-FRECON_ENV += "export FRECON_GETTY=1"
+FRECON_ENV += "export FRECON_SHELL=getty"
+else ifeq ($(BR2_PACKAGE_BASH),y)
+FRECON_ENV += "export FRECON_SHELL=bash"
 else
-FRECON_MAKE_ENV += USE_GETTY=0
-FRECON_ENV += "\#export FRECON_GETTY=1"
+FRECON_ENV += "export FRECON_SHELL=sh"
 endif
 
 ifeq ($(BR2_PACKAGE_FRECON_VTS),y)
 FRECON_ENV += "export FRECON_VTS=1"
-else
-FRECON_ENV += "\#export FRECON_VTS=1"
 endif
 
 ifeq ($(BR2_PACKAGE_FRECON_VT1),y)
 FRECON_ENV += "export FRECON_VT1=1"
-else
-FRECON_ENV += "\#export FRECON_VT1=1"
 endif
 
 FRECON_ENV += "export FRECON_FB_ROTATE=$(BR2_PACKAGE_FRECON_ROTATE)"
@@ -49,7 +46,7 @@ FRECON_ENV += "export FRECON_FB_SCALE=$(BR2_PACKAGE_FRECON_SCALE)"
 
 define FRECON_INSTALL_TARGET_CMDS
 	cp $(@D)/frecon $(TARGET_DIR)/usr/bin/
-	cp -rp $(FRECON_PKGDIR)/frecon $(TARGET_DIR)/etc/
+	cp -rp $(FRECON_PKGDIR)/etc $(TARGET_DIR)/
 endef
 
 define FRECON_INSTALL_INIT_SYSV

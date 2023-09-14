@@ -1,20 +1,29 @@
-From a53f23b63f94f32a55483ba49e23e06726d38e1f Mon Sep 17 00:00:00 2001
+From 67ed8abdc04d85313175dc5d733a162ac566f8fb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 10 Jun 2022 11:44:04 +0800
-Subject: [PATCH 4/9] Add hooks for term switching
+Subject: [PATCH 04/10] Add hooks for term switching
 
 term foreground: /etc/frecon/term-switch on
 term background: /etc/frecon/term-switch off
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- term.c | 7 +++++++
- 1 file changed, 7 insertions(+)
+ term.c | 9 ++++++++-
+ 1 file changed, 8 insertions(+), 1 deletion(-)
 
 diff --git a/term.c b/term.c
-index 7b6383a..8f391ef 100644
+index 7b6383a..0d3e0a3 100644
 --- a/term.c
 +++ b/term.c
+@@ -68,7 +68,7 @@ static char* interactive_cmd_line[] =
+ };
+ #endif
+ 
+-static bool in_background = false;
++static bool in_background = true;
+ static bool hotplug_occured = false;
+ 
+ 
 @@ -1013,6 +1013,10 @@ void term_background(bool onetry)
  	if (in_background)
  		return;

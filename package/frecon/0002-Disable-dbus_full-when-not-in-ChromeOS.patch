@@ -1,7 +1,7 @@
-From 98ead7437f2c3e96c87230e5d7fde61fdfb4bb99 Mon Sep 17 00:00:00 2001
+From b0ef23aaa0fde8cf6f7f7dcc30d0444369d63e0d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 9 Jun 2022 16:59:54 +0800
-Subject: [PATCH 2/9] Disable dbus_full when not in ChromeOS
+Subject: [PATCH 02/10] Disable dbus_full when not in ChromeOS
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

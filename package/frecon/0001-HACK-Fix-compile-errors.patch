@@ -1,7 +1,7 @@
-From 468e457e57a46d2e5dd7d7831826992ab31f68d2 Mon Sep 17 00:00:00 2001
+From f5c36f6f02f16268b5b7da9d83c0f38566a5886f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 9 Jun 2022 16:15:07 +0800
-Subject: [PATCH 1/9] HACK: Fix compile errors
+Subject: [PATCH 01/10] HACK: Fix compile errors
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
