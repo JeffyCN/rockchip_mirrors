@@ -1,7 +1,7 @@
-From 3a9799364be4c5b0bb24528f2ca4f61df1cc395d Mon Sep 17 00:00:00 2001
+From dc2553bd97e3bc264f72c573d66e055919a34ae9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 10 Jun 2022 12:16:21 +0800
-Subject: [PATCH 5/9] Allow ignoring drm master
+Subject: [PATCH 05/10] Allow ignoring drm master
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

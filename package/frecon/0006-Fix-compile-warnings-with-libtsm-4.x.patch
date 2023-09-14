@@ -1,7 +1,7 @@
-From 57acefb1d5f2793ba80addb5f837ab624e836c17 Mon Sep 17 00:00:00 2001
+From 5f9b9c025fb1982e7e3635a2ed711ef712d50d2a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 10 Jun 2022 16:39:32 +0800
-Subject: [PATCH 6/9] Fix compile warnings with libtsm 4.x
+Subject: [PATCH 06/10] Fix compile warnings with libtsm 4.x
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

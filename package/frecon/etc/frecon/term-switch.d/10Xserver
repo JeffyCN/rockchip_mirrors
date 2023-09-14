@@ -1,0 +1,16 @@
+#!/bin/sh -e
+
+FRECON_TERM=${VT_EMULATED:-/var/run/frecon/term-on}
+
+type X >/dev/null 2>/dev/null || exit 0
+
+case $1 in
+	on)
+		touch /dev/null "$FRECON_TERM"
+		killall -q -USR1 Xorg X || true
+		;;
+	off)
+		rm -rf "$FRECON_TERM"
+		killall -q -USR1 Xorg X || true
+		;;
+esac
