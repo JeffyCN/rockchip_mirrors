@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/sh
 ### BEGIN INIT INFO
 # Provides:          frecon
 # Required-Start:    mountvirtfs
@@ -9,6 +9,9 @@
 ### END INIT INFO
 
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
+
+# Load default env variables from profiles
+. /etc/profile
 
 case "$1" in
 	start)
