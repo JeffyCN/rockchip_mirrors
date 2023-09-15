@@ -46,16 +46,18 @@ FRECON_ENV += "export FRECON_FB_SCALE=$(BR2_PACKAGE_FRECON_SCALE)"
 
 define FRECON_INSTALL_TARGET_CMDS
 	cp $(@D)/frecon $(TARGET_DIR)/usr/bin/
-	cp -rp $(FRECON_PKGDIR)/etc $(TARGET_DIR)/
+	cp -rp $(FRECON_PKGDIR)/frecon $(TARGET_DIR)/etc/
 endef
 
 define FRECON_INSTALL_INIT_SYSV
-	$(INSTALL) -m 0755 -D $(FRECON_PKGDIR)/S35frecon \
+	$(INSTALL) -D -m 0755 $(FRECON_PKGDIR)/S35frecon \
 		$(TARGET_DIR)/etc/init.d/
 endef
 FRECON_INSTALL_INIT_SYSV_HOOKS += FRECON_INSTALL_INIT_SYSV
 
 define FRECON_INSTALL_INIT_SYSTEMD
+	$(INSTALL) -D -m 0755 $(FRECON_PKGDIR)/S35frecon \
+		$(TARGET_DIR)/etc/init.d/frecon
 	$(INSTALL) -D -m 0644 $(FRECON_PKGDIR)/frecon.service \
 		$(TARGET_DIR)/usr/lib/systemd/system/
 endef

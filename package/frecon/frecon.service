@@ -5,8 +5,8 @@ After=local-fs.target
 
 [Service]
 Type=forking
-ExecStart=/usr/bin/frecon --daemon
-ExecStop=/usr/bin/killall -q frecon
+ExecStart=/etc/init.d/frecon start
+ExecStop=/etc/init.d/frecon stop
 
 [Install]
 WantedBy=sysinit.target
