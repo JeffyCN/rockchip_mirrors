@@ -9,7 +9,7 @@ ERASE_MISC_SCRIPT="$TARGET/usr/bin/RK_OTA_erase_misc.sh"
 PROJECT_FILE_RECOVERY_LUNCH_SCRIPT=$TARGET/etc/init.d/S99lunch_recovery
 PROJECT_FILE_RECOVERY_SCRIPT=$TARGET/etc/init.d/S15linkmount_recovery
 PARAMETER_FILE=$CHIP_DIR/$RK_PARAMETER
-RKLUNCH_FILE=./RkLnuch_recovery.sh
+RKLUNCH_FILE=$TARGET/../../../board/rockchip/common/tinyrecovery/RkLunch-recovery.sh
 
 mkdir -p $(dirname $PROJECT_FILE_RECOVERY_LUNCH_SCRIPT)
 cat > $PROJECT_FILE_RECOVERY_LUNCH_SCRIPT <<EOF
@@ -160,7 +160,7 @@ echo "#!/bin/sh" > $PROJECT_FILE_RECOVERY_SCRIPT
 cat >> $PROJECT_FILE_RECOVERY_SCRIPT <<EOF
 partition_names="uboot trust misc recovery boot rootfs oem userdata"
 linkdev(){
-	if [-e /dev/mmcblk0 ]; then
+	if [ -e /dev/mmcblk0 ]; then
 		storage_dev_prefix=mmcblk0p
 		part_num=1
 	elif [ -e /dev/rkflash0 ]; then
@@ -350,5 +350,5 @@ EOF
 
 chmod a+x $PROJECT_FILE_RECOVERY_SCRIPT
 
-cp -fa ./RkLunch-recovery.sh $TARGET/usr/bin/RkLunch.sh
-chmod 777 $TARGET/usr/bin/RkLunch.sh
+cp -fa $RKLUNCH_FILE $TARGET/usr/bin/RkLunch.sh
+chmod a+x $TARGET/usr/bin/RkLunch.sh
