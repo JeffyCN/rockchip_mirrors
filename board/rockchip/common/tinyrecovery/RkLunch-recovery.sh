@@ -21,6 +21,11 @@ if [ -f "$input_file" ]; then
 
   echo "Update package: $UPDATE_PACKAGE"
   mkdir -p $UPDATE_OTA_DIR_PATH
+  tar -xvf $UPDATE_PACKAGE -C $UPDATE_OTA_DIR_PATH
+  if [ $? -ne 0 ]; then
+    echo "Error: Decompression failed, please check the update package(tar)."
+    exit 1
+  fi
 
   sh $UPDATE_OTA_DIR_PATH/RK_OTA_update.sh
   if [ $? -eq 0 ]; then
