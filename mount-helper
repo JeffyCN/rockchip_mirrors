@@ -15,7 +15,6 @@ set +e
 . $(dirname $0)/disk-helper
 
 LOGFILE=/var/log/mount-all.log
-ln -sf "$LOGFILE" /tmp/
 
 do_part()
 {

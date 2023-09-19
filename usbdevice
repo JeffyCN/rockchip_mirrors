@@ -31,8 +31,6 @@ TAG_DIR=/var/run/
 LOG_FILE=/var/log/usbdevice.log
 USB_FUNCS_FILE=/var/run/.usbdevice
 
-ln -sf "$LOG_FILE" /tmp/
-
 alias usb_enable='touch $USB_FUNCS_FILE'
 alias usb_disable='rm -f $USB_FUNCS_FILE'
 alias usb_is_enabled='[ -f $USB_FUNCS_FILE ]'

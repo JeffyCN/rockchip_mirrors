@@ -19,8 +19,6 @@ PID_FILE=/var/run/bootanim.pid
 LOG_FILE=/var/log/bootanim.log
 TIMEOUT=${2:-${BOOTANIM_DEFAULT_TIMEOUT:-5}}
 
-ln -sf "$LOG_FILE" /tmp/
-
 pid_by_sid()
 {
 	sed "s/(.*)//" /proc/*/stat | cut -d' ' -f1,6 | grep -w "$1$" |
