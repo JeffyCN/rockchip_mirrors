@@ -17,4 +17,8 @@ config BR2_PACKAGE_INPUT_EVENT_DAEMON_POWER_KEY
 	help
 	  Handle power-key events (suspend/power-off).
 
+config BR2_PACKAGE_INPUT_EVENT_DAEMON_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
 endif
