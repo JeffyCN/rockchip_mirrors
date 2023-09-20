@@ -93,7 +93,7 @@ for item in "\${items[@]}"; do
 	fi
 done
 
-case bootmedium in
+case \$bootmedium in
 	emmc|spi_nor)
 		for image in \$(ls /dev/block/by-name)
 		do
