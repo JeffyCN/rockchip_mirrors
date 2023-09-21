@@ -1070,6 +1070,8 @@ $(1)-clean-for-reconfigure: $(1)-clean-for-rebuild
 
 $(1)-reconfigure:	$(1)-clean-for-reconfigure .WAIT $(1)
 
+$(1)-recreate:		$$($(2)_TARGET_DIRCLEAN) $(1)
+
 # define the PKG variable for all targets, containing the
 # uppercase package variable prefix
 $$($(2)_TARGET_INSTALL):		PKG=$(2)
