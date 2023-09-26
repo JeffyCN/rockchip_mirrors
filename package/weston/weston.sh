@@ -62,6 +62,11 @@ export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 # echo "compositor:state:freeze" > /tmp/.weston_drm.conf # no input + freeze
 # echo "compositor:state:off" > /tmp/.weston_drm.conf # no input + off
 # echo "compositor:state:on" > /tmp/.weston_drm.conf
+# echo "compositor:hotplug:off" > /tmp/.weston_drm.conf
+# echo "compositor:hotplug:on" > /tmp/.weston_drm.conf
+# echo "compositor:hotplug:force" > /tmp/.weston_drm.conf
+# echo "compositor:cursor:hide" > /tmp/.weston_drm.conf
+# echo "compositor:cursor:show" > /tmp/.weston_drm.conf
 # echo "output:DSI-1:off" > /tmp/.weston_drm.conf
 # echo "output:eDP-1:freeze" > /tmp/.weston_drm.conf
 # echo "output:DSI-1:offscreen" > /tmp/.weston_drm.conf

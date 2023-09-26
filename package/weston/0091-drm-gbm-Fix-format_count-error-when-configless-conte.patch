@@ -1,0 +1,46 @@
+From ee73d938ddb9c1f6b75fdbd768d1799a210cab43 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Tue, 25 Jul 2023 11:15:16 +0800
+Subject: [PATCH 91/98] drm-gbm: Fix format_count error when configless context
+ not supported
+
+Tested on RK3288 EVB, no more:
+gl_renderer_get_egl_config: Assertion `formats[i]' failed.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/drm-gbm.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/libweston/backend-drm/drm-gbm.c b/libweston/backend-drm/drm-gbm.c
+index e7fb831..13842b4 100644
+--- a/libweston/backend-drm/drm-gbm.c
++++ b/libweston/backend-drm/drm-gbm.c
+@@ -79,21 +79,20 @@ fallback_format_for(const struct pixel_format_info *format)
+ static int
+ drm_backend_create_gl_renderer(struct drm_backend *b)
+ {
+-	const struct pixel_format_info *format[3] = {
++	const struct pixel_format_info *format[2] = {
+ 		b->format,
+ 		fallback_format_for(b->format),
+-		NULL,
+ 	};
+ 	struct gl_renderer_display_options options = {
+ 		.egl_platform = EGL_PLATFORM_GBM_KHR,
+ 		.egl_native_display = b->gbm,
+ 		.egl_surface_type = EGL_WINDOW_BIT,
+ 		.formats = format,
+-		.formats_count = 2,
++		.formats_count = 1,
+ 	};
+ 
+ 	if (format[1])
+-		options.formats_count = 3;
++		options.formats_count = 2;
+ 
+ 	return weston_compositor_init_renderer(b->compositor,
+ 					       WESTON_RENDERER_GL,
+-- 
+2.20.1
+
