@@ -1,0 +1,30 @@
+From b35c843c9f11215cc187d9d23864f9a047c79ddb Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 20 Jul 2023 18:09:50 +0800
+Subject: [PATCH 90/98] pixman-renderer: Disable bilinear by default
+
+It's too slow.
+
+Set env "WESTON_PIXMAN_ALLOW_BILINEAR"=1 to enable it.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/pixman-renderer.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
+index a59728e..660bd59 100644
+--- a/libweston/pixman-renderer.c
++++ b/libweston/pixman-renderer.c
+@@ -392,7 +392,7 @@ repaint_region(struct weston_paint_node *pnode,
+ 	weston_matrix_to_pixman_transform(&transform,
+ 					  &pnode->output_to_buffer_matrix);
+ 
+-	if (pnode->needs_filtering)
++	if (getenv("WESTON_PIXMAN_ALLOW_BILINEAR") && pnode->needs_filtering)
+ 		filter = PIXMAN_FILTER_BILINEAR;
+ 	else
+ 		filter = PIXMAN_FILTER_NEAREST;
+-- 
+2.20.1
+

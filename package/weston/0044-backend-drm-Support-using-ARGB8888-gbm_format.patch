@@ -1,0 +1,56 @@
+From 3fea53eea9522ba8e7e0f231c783e689a9a99b38 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 23 Oct 2020 17:37:04 +0800
+Subject: [PATCH 44/98] backend-drm: Support using ARGB8888 gbm_format
+
+Tested with:
+/etc/xdg/weston/weston.ini:
+[core]
+gbm-format=argb8888
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/drm-gbm.c | 6 ++++--
+ libweston/pixman-renderer.c     | 2 +-
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/libweston/backend-drm/drm-gbm.c b/libweston/backend-drm/drm-gbm.c
+index 68fbfa8..e7fb831 100644
+--- a/libweston/backend-drm/drm-gbm.c
++++ b/libweston/backend-drm/drm-gbm.c
+@@ -305,6 +305,7 @@ drm_output_render_gl(struct drm_output_state *state, pixman_region32_t *damage)
+ 	struct drm_device *device = output->device;
+ 	struct gbm_bo *bo;
+ 	struct drm_fb *ret;
++	bool is_opaque;
+ 
+ 	output->base.compositor->renderer->repaint_output(&output->base,
+ 							  damage, NULL);
+@@ -316,8 +317,9 @@ drm_output_render_gl(struct drm_output_state *state, pixman_region32_t *damage)
+ 		return NULL;
+ 	}
+ 
+-	/* The renderer always produces an opaque image. */
+-	ret = drm_fb_get_from_bo(bo, device, true, BUFFER_GBM_SURFACE);
++	is_opaque = pixel_format_is_opaque(output->format);
++
++	ret = drm_fb_get_from_bo(bo, device, is_opaque, BUFFER_GBM_SURFACE);
+ 	if (!ret) {
+ 		weston_log("failed to get drm_fb for bo\n");
+ 		gbm_surface_release_buffer(output->gbm_surface, bo);
+diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
+index e39dbf3..413cc8d 100644
+--- a/libweston/pixman-renderer.c
++++ b/libweston/pixman-renderer.c
+@@ -1649,7 +1649,7 @@ pixman_renderer_output_create(struct weston_output *output,
+ 	output->renderer_state = po;
+ 
+ 	if (options->use_shadow)
+-		po->shadow_format = pixel_format_get_info(DRM_FORMAT_XRGB8888);
++		po->shadow_format = options->format;
+ 
+ 	wl_list_init(&po->renderbuffer_list);
+ 
+-- 
+2.20.1
+
