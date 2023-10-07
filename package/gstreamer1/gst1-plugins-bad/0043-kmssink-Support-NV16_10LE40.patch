@@ -1,0 +1,71 @@
+From 19f297d44811d4a8be8e7cd3df5207d7d9d7106e Mon Sep 17 00:00:00 2001
+From: Jiajian Wu <jair.wu@rock-chips.com>
+Date: Tue, 13 Jun 2023 14:13:49 +0800
+Subject: [PATCH 43/45] kmssink: Support NV16_10LE40
+
+Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
+---
+ sys/kms/gstkmssink.c  | 2 ++
+ sys/kms/gstkmsutils.c | 3 +++
+ sys/kms/gstkmsutils.h | 4 ++++
+ 3 files changed, 9 insertions(+)
+
+diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
+index c2267f3..1601b56 100644
+--- a/sys/kms/gstkmssink.c
++++ b/sys/kms/gstkmssink.c
+@@ -1030,6 +1030,8 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+         fmt = GST_VIDEO_FORMAT_NV12;
+       else if (plane->formats[j] == DRM_FORMAT_YUV420_10BIT)
+         fmt = GST_VIDEO_FORMAT_NV12_10LE40;
++      else if (plane->formats[j] == DRM_FORMAT_NV20)
++        fmt = GST_VIDEO_FORMAT_NV16_10LE40;
+       else if (afbc && plane->formats[j] == DRM_FORMAT_YUYV)
+         fmt = GST_VIDEO_FORMAT_NV16;
+       else
+diff --git a/sys/kms/gstkmsutils.c b/sys/kms/gstkmsutils.c
+index 23f04da..a0d52ef 100644
+--- a/sys/kms/gstkmsutils.c
++++ b/sys/kms/gstkmsutils.c
+@@ -70,6 +70,7 @@ static const struct
+   DEF_FMT (NV16, NV16),
+   DEF_FMT (NV12_10, NV12_10LE40),
+   DEF_FMT (NV15, NV12_10LE40),
++  DEF_FMT (NV20, NV16_10LE40),
+   DEF_FMT (UYVY, UYVY),
+   DEF_FMT (YVYU, YVYU),
+   DEF_FMT (YUYV, YUY2),
+@@ -133,6 +134,7 @@ gst_drm_bpp_from_drm (guint32 drmfmt)
+     case DRM_FORMAT_P010:
+     case DRM_FORMAT_NV12_10:
+     case DRM_FORMAT_NV15:
++    case DRM_FORMAT_NV20:
+       bpp = 10;
+       break;
+     case DRM_FORMAT_UYVY:
+@@ -174,6 +176,7 @@ gst_drm_height_from_drm (guint32 drmfmt, guint32 height)
+       break;
+     case DRM_FORMAT_NV16:
+     case DRM_FORMAT_NV61:
++    case DRM_FORMAT_NV20:
+       ret = height * 2;
+       break;
+     case DRM_FORMAT_NV24:
+diff --git a/sys/kms/gstkmsutils.h b/sys/kms/gstkmsutils.h
+index 742372a..500405a 100644
+--- a/sys/kms/gstkmsutils.h
++++ b/sys/kms/gstkmsutils.h
+@@ -38,6 +38,10 @@ G_BEGIN_DECLS
+ #define DRM_FORMAT_NV15 fourcc_code('N', 'V', '1', '5')
+ #endif
+ 
++#ifndef DRM_FORMAT_NV20
++#define DRM_FORMAT_NV20 fourcc_code('N', 'V', '2', '0')
++#endif
++
+ #ifndef DRM_FORMAT_YUV420_8BIT
+ #define DRM_FORMAT_YUV420_8BIT fourcc_code('Y', 'U', '0', '8')
+ #endif
+-- 
+2.20.1
+
