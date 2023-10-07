@@ -1,0 +1,44 @@
+From 43832ca9e246cbfcddf1e04bb5b59a01503aa869 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?V=C3=ADctor=20Manuel=20J=C3=A1quez=20Leal?=
+ <vjaquez@igalia.com>
+Date: Wed, 15 Feb 2023 19:02:35 +0100
+Subject: [PATCH 44/45] jpegparse: Parse AVI1 tag in app0.
+
+---
+ gst/jpegformat/gstjpegparse.c | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)
+
+diff --git a/gst/jpegformat/gstjpegparse.c b/gst/jpegformat/gstjpegparse.c
+index b58fead..6050e6a 100644
+--- a/gst/jpegformat/gstjpegparse.c
++++ b/gst/jpegformat/gstjpegparse.c
+@@ -50,6 +50,7 @@
+  *  + APP3 -- meta (same as exif)
+  *  + APP12 -- Photoshop Save for Web: Ducky / Picture info
+  *  + APP13 -- Adobe IRB
++ *  + check for interlaced mjpeg
+  */
+ 
+ #ifdef HAVE_CONFIG_H
+@@ -436,6 +437,18 @@ gst_jpeg_parse_app0 (GstJpegParse * parse, GstJpegSegment * seg)
+     return TRUE;
+   }
+ 
++  /* https://exiftool.org/TagNames/JPEG.html#AVI1 */
++  if (g_strcmp0 (id_str, "AVI1") == 0) {
++    /* polarity */
++    if (!gst_byte_reader_get_uint8 (&reader, &unit))
++      return FALSE;
++
++    /* TODO: update caps for interlaced MJPEG */
++    GST_DEBUG_OBJECT (parse, "MJPEG interleaved field: %d", unit);
++
++    return TRUE;
++  }
++
+   return FALSE;
+ }
+ 
+-- 
+2.20.1
+
