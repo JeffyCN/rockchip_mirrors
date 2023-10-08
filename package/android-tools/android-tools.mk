@@ -14,10 +14,6 @@ ANDROID_TOOLS_LICENSE_FILES = debian/copyright
 ANDROID_TOOLS_DEPENDENCIES = host-pkgconf
 HOST_ANDROID_TOOLS_DEPENDENCIES = host-pkgconf
 
-ifeq ($(BR2_PACKAGE_ANDROID_TOOLS_STATIC),y)
-ANDROID_TOOLS_LDFLAGS = -static -ldl
-endif
-
 # Extract the Debian tarball inside the sources
 define ANDROID_TOOLS_DEBIAN_EXTRACT
 	$(call suitable-extractor,$(notdir $(ANDROID_TOOLS_EXTRA_DOWNLOADS))) \
@@ -82,8 +78,7 @@ endef
 define ANDROID_TOOLS_BUILD_CMDS
 	$(foreach t,$(ANDROID_TOOLS_TARGETS),\
 		mkdir -p $(@D)/build-$(t) && \
-		$(TARGET_MAKE_ENV) $(TARGET_CONFIGURE_OPTS) \
-			LDFLAGS="$(ANDROID_TOOLS_LDFLAGS)" $(MAKE) SRCDIR=$(@D) \
+		$(TARGET_MAKE_ENV) $(TARGET_CONFIGURE_OPTS) $(MAKE) SRCDIR=$(@D) \
 			-C $(@D)/build-$(t) -f $(@D)/debian/makefiles/$(t).mk$(sep))
 endef
 
@@ -96,47 +91,6 @@ define ANDROID_TOOLS_INSTALL_TARGET_CMDS
 	$(foreach t,$(ANDROID_TOOLS_TARGETS),\
 		$(INSTALL) -D -m 0755 $(@D)/build-$(t)/$(t) $(TARGET_DIR)/usr/bin/$(t)$(sep))
 endef
-
-ifeq ($(BR2_PACKAGE_ANDROID_TOOLS_ADBD),y)
-define ANDROID_TOOLS_INSTALL_TARGET_SHELL
-	mkdir -p $(TARGET_DIR)/etc/profile.d
-	echo "[ -x /bin/bash ] && export ADBD_SHELL=/bin/bash" > \
-		$(TARGET_DIR)/etc/profile.d/adbd.sh
-endef
-ANDROID_TOOLS_PRE_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_SHELL
-
-ifneq ($(BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT),0)
-define ANDROID_TOOLS_INSTALL_TARGET_TCP_PORT
-	echo "export ADB_TCP_PORT=$(BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT)" >> \
-		$(TARGET_DIR)/etc/profile.d/adbd.sh
-endef
-ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_TCP_PORT
-endif
-
-ADBD_AUTH_PASSWORD = $(call qstrip,$(BR2_PACKAGE_ANDROID_TOOLS_AUTH_PASSWORD))
-ifneq ($(ADBD_AUTH_PASSWORD),)
-ADBD_AUTH_PASSWORD_MD5=$(shell echo $(ADBD_AUTH_PASSWORD) | md5sum)
-
-define ANDROID_TOOLS_INSTALL_TARGET_PASSWORD
-	$(INSTALL) -D -m 0755 $(ANDROID_TOOLS_PKGDIR)/adbd-auth \
-		$(TARGET_DIR)/usr/bin/adbd-auth
-	sed -i "s/AUTH_PASSWORD/${ADBD_AUTH_PASSWORD_MD5}/g" \
-		$(TARGET_DIR)/usr/bin/adbd-auth
-endef
-ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_PASSWORD
-endif
-
-ADBD_RSA_KEY = $(call qstrip,$(BR2_PACKAGE_ANDROID_TOOLS_AUTH_RSA_KEY))
-ifneq ($(ADBD_RSA_KEY),)
-define ANDROID_TOOLS_INSTALL_TARGET_RSA_KEY
-	echo "export ADBD_RSA_KEY_FILE=/etc/adbkey.pub" >> \
-		$(TARGET_DIR)/etc/profile.d/adbd.sh
-	$(INSTALL) -D -m 0644 $(ADBD_RSA_KEY) $(TARGET_DIR)/etc/adbkey.pub
-endef
-ANDROID_TOOLS_POST_INSTALL_TARGET_HOOKS += ANDROID_TOOLS_INSTALL_TARGET_RSA_KEY
-endif
-
-endif
 
 $(eval $(generic-package))
 $(eval $(host-generic-package))
