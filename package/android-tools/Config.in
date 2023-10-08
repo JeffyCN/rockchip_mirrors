@@ -19,10 +19,6 @@ config BR2_PACKAGE_ANDROID_TOOLS
 
 if BR2_PACKAGE_ANDROID_TOOLS
 
-config BR2_PACKAGE_ANDROID_TOOLS_STATIC
-	bool "Enable static"
-	default y if BR2_STATIC_LIBS
-
 # We need kernel headers that support the __SANE_USERSPACE_TYPES__
 # mechanism for 64 bits architectures, so that u64 gets defined as
 # "unsigned long long" and not "unsigned long". We know that >= 3.16
@@ -76,20 +72,6 @@ config BR2_PACKAGE_ANDROID_TOOLS_ADBD
 	  This option will build and install the adbd utility for the
 	  target, which can be used to interact with a host machine
 	  implementing the ADB protocol.
-
-if BR2_PACKAGE_ANDROID_TOOLS_ADBD
-
-config BR2_PACKAGE_ANDROID_TOOLS_TCP_PORT
-	int "adb tcp port"
-	default 5555
-
-config BR2_PACKAGE_ANDROID_TOOLS_AUTH_PASSWORD
-	string "adb auth password"
-
-config BR2_PACKAGE_ANDROID_TOOLS_AUTH_RSA_KEY
-	string "adbd rsa key path, e.g. ~/.android/adbkey.pub"
-
-endif
 
 endif
 
