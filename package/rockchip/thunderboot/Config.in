@@ -51,7 +51,7 @@ if BR2_THUNDERBOOT_SIMPLIFY_USB
 
 config BR2_THUNDERBOOT_USB_ADBD
 	bool "rockchip thunderboot USB ADBD"
-	select BR2_PACKAGE_ANDROID_TOOLS
+	select BR2_PACKAGE_ANDROID_ADBD
 	help
 	  Use simplify ADB configuration.
 

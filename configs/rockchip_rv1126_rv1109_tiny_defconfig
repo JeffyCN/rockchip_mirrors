@@ -10,7 +10,7 @@ BR2_ARM_INSTRUCTIONS_THUMB2=y
 # BR2_PACKAGE_ALSA_UTILS_ALSACONF is reset to default
 # BR2_PACKAGE_ALSA_UTILS_AMIXER is reset to default
 # BR2_PACKAGE_ALSA_UTILS_APLAY is reset to default
-# BR2_PACKAGE_ANDROID_TOOLS is reset to default
+# BR2_PACKAGE_ANDROID_ADBD is reset to default
 # BR2_PACKAGE_BUSYBOX_CONFIG_FRAGMENT_FILES is reset to default
 # BR2_PACKAGE_BUSYBOX_SHOW_OTHERS is reset to default
 # BR2_PACKAGE_CAMERA_ENGINE is reset to default

@@ -4,7 +4,7 @@
 #include "multimedia/audio.config"
 #include "multimedia/camera.config"
 #include "multimedia/mpp.config"
-# BR2_PACKAGE_ANDROID_TOOLS is reset to default
+# BR2_PACKAGE_ANDROID_ADBD is reset to default
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="ov5695_TongJu_CHT842-MD.xml"
 # BR2_PACKAGE_INPUT_EVENT_DAEMON is reset to default
 # BR2_PACKAGE_PM_UTILS is reset to default

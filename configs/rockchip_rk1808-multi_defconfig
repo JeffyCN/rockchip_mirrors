@@ -3,7 +3,7 @@
 BR2_aarch64=y
 BR2_cortex_a35=y
 BR2_PACKAGE_ABOOTIMG=y
-# BR2_PACKAGE_ANDROID_TOOLS is reset to default
+# BR2_PACKAGE_ANDROID_ADBD is reset to default
 # BR2_PACKAGE_E2FSPROGS is reset to default
 # BR2_PACKAGE_INPUT_EVENT_DAEMON is reset to default
 BR2_PACKAGE_LIBDRM_INSTALL_TESTS=y
