@@ -64,7 +64,7 @@ config BR2_PACKAGE_RKSCRIPT_USB_EXTRA_CONFIG
 
 config BR2_PACKAGE_RKSCRIPT_USB_ADBD
 	bool "adbd"
-	default y if BR2_PACKAGE_ANDROID_TOOLS_ADBD
+	default y if BR2_PACKAGE_ANDROID_ADBD
 	help
 	  Android adbd.
 

@@ -5,7 +5,7 @@
 #include "wifibt/bt.config"
 #include "wifibt/wireless.config"
 #include "lvgl.config"
-# BR2_PACKAGE_ANDROID_TOOLS is reset to default
+# BR2_PACKAGE_ANDROID_ADBD is reset to default
 # BR2_PACKAGE_EUDEV_ENABLE_HWDB is not set
 BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_5_10=y
 # BR2_PACKAGE_INPUT_EVENT_DAEMON is reset to default

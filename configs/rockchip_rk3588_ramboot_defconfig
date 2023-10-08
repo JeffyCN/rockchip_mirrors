@@ -1,7 +1,7 @@
 #include "base/base.config"
 #include "chips/rk3588_aarch64.config"
 #include "tee_aarch64_v2.config"
-# BR2_PACKAGE_ANDROID_TOOLS is reset to default
+# BR2_PACKAGE_ANDROID_ADBD is reset to default
 # BR2_PACKAGE_INPUT_EVENT_DAEMON is reset to default
 BR2_PACKAGE_LUKSMETA=y
 # BR2_PACKAGE_PM_UTILS is reset to default
