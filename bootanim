@@ -7,11 +7,8 @@
 # Example hook:
 # root@RK3588:/# more /etc/bootanim.d/gst-bootanim.sh
 # #!/bin/sh
-# touch ${TAG_FILE:-/dev/null}
+# [ -r /etc/bootanim.d/bootanim.mp4 ] || exit 1
 # gst-play-1.0 /etc/bootanim.d/bootanim.mp4 -q --no-interactive&
-
-export TAG_FILE=/var/run/.bootanim
-rm -f $TAG_FILE
 
 SCRIPT=/usr/bin/bootanim
 HOOK_DIR=/etc/bootanim.d/
@@ -56,13 +53,16 @@ bootanim_start()
 	bootanim_init
 
 	# Start bootanim hooks
+	unset BOOTANIM_STARTED
 	for hook in $(find $HOOK_DIR -maxdepth 1 -name "*.sh"); do
 		echo "Starting hook: $hook..."
-		$hook
+		if $hook; then
+			BOOTANIM_STARTED=1
+		fi
 		echo "Started hook: $hook..."
 	done
 
-	if [ ! -e "$TAG_FILE" ]; then
+	if [ -z "$BOOTANIM_STARTED" ]; then
 		echo "No animation started..."
 		bootanim_deinit
 		return
