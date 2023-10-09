@@ -2,7 +2,7 @@
 
 VIDEO=$(ls /etc/bootanim.d/*.mp4 2>/dev/null)
 
-[ -z "$VIDEO" ] && exit
+[ -z "$VIDEO" ] && exit 1
 
 VSINK_ARGS=kmssink
 
@@ -14,6 +14,3 @@ VSINK_ARGS="$VSINK_ARGS force-modesetting=true"
 
 gst-play-1.0 $VIDEO -q --no-interactive --audiosink=fakesink \
 	--videosink="$VSINK_ARGS"&
-
-# Let the caller know that we are started
-touch ${TAG_FILE:-/dev/null}
