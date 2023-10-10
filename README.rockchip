@@ -14,8 +14,10 @@ Quick Start
 
 4. Flash "output/latest/images/rootfs.<fstype>" to your device
 
-5. Run "make <pkg>-dirclean <pkg>" to perform a clean-rebuild for a package
+5. Run "make <pkg>-recreate" to perform a clean-rebuild for a package
 
-6. Run "bdeploy <pkg>" to deploy a package to the device through adb
+6. Run "BR2_GEN_GIT=1 make <pkg>-recreate" to create git repository for a package
 
-7. Run "breconfig <pkg>" to perform an inplace reconfigure, build, install and deploy for a package
+7. Run "bdeploy <pkg>" to deploy a package to the device through adb
+
+8. Run "breconfig <pkg>" to perform an inplace reconfigure, build, install and deploy for a package
