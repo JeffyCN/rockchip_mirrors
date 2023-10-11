@@ -27,6 +27,13 @@ define ANDROID_ADBD_DEBIAN_PATCH
 endef
 ANDROID_ADBD_PRE_PATCH_HOOKS += ANDROID_ADBD_DEBIAN_PATCH
 
+define ANDROID_ADBD_INSTALL_TARGET_LOGCAT
+	echo -e "#!/bin/sh\ntail -f \$${@:--n 99999999} /var/log/messages" > \
+		$(TARGET_DIR)/usr/bin/logcat
+	chmod 755 $(TARGET_DIR)/usr/bin/logcat
+endef
+ANDROID_ADBD_POST_INSTALL_TARGET_HOOKS += ANDROID_ADBD_INSTALL_TARGET_LOGCAT
+
 define ANDROID_ADBD_INSTALL_TARGET_SHELL
 	mkdir -p $(TARGET_DIR)/etc/profile.d
 	echo "[ -x /bin/bash ] && export ADBD_SHELL=/bin/bash" > \
