@@ -66,7 +66,7 @@ find ${builddir}/ '(' -name '*.rej' -o -name '.*.rej' ')' -print0 | \
     xargs -0 -r rm -f
 
 function generate_git {
-    [ "$BR2_GEN_GIT" ] || return
+    [ "$BR2_GEN_GIT" ] || return 0
 
     APPLIED_PATCH="$1"
 
