@@ -43,9 +43,9 @@ ifneq ($(DEFCONFIG),)
 # Set O=output/<board> for defconfig
 O := $(patsubst %_defconfig,$(CURDIR)/output/%,$(DEFCONFIG))
 else
-# Prefer BUILDROOT_OUTPUT_DIR env and $(CURDIR)/output/latest symlink
+# Prefer BUILDROOT_OUTPUT_DIR env and latest symlink
 O := $(BUILDROOT_OUTPUT_DIR)
-O := $(if $(O),$(O),$(realpath $(CURDIR)/output/latest))
+O := $(if $(O),$(O),$(realpath $(O_LATEST)))
 endif
 # Fallback to $(CURDIR)/output
 O := $(if $(O),$(O),$(CURDIR)/output)
@@ -61,6 +61,10 @@ endif
 endif
 
 ifneq ($(DEFCONFIG),)
+ifeq ($(patsubst %_recovery_defconfig,,$(DEFCONFIG)),)
+O_LATEST := $(CURDIR)/output/recovery_latest
+endif
+
 $(shell rm -rf $(O_LATEST); mkdir -p $(CURDIR)/output)
 $(shell ln -rsf $(O) $(O_LATEST))
 endif
