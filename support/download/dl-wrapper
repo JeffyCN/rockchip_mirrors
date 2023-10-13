@@ -19,33 +19,9 @@ set -e
 
 export BR_BACKEND_DL_GETOPTS=":hc:d:o:n:N:H:ru:qf:e"
 
-check_kgithub() {
-    if wget -q --delete-after \
-        https://raw.kgithub.com/git/git/master/README.md; then
-        if git ls-remote https://kgithub.com/git/git &>/dev/null; then
-            return 0
-        fi
-    fi
-
-    if grep -q kgithub /etc/hosts; then
-        echo -e "\e[31m"
-        echo "Oops! The kgithub is down!"
-        echo -e "\e[0m"
-        return 1
-    fi
-
-    echo -e "\e[31m"
-    echo "Your DNS doesn't support kgithub.com"
-    echo "Please modify it:"
-    echo "sudo sed -i '\$a 43.154.68.204\tkgithub.com' /etc/hosts"
-    echo "sudo sed -i '\$a 43.155.83.75\traw.kgithub.com objects.githubusercontent.kgithub.com' /etc/hosts"
-    echo -e "\e[0m"
-    return 1
-}
-
 main() {
     local OPT OPTARG
-    local backend output hfile recurse quiet rc use_kgithub
+    local backend output hfile recurse quiet rc
     local -a uris
 
     # Parse our options; anything after '--' is for the backend
@@ -104,22 +80,6 @@ main() {
         warn "Re-downloading '%s'...\n" "${output##*/}"
     fi
 
-    if [ -z "$BR2_NO_KGITHUB" ] && echo "${uris[@]}" | grep -wq github.com; then
-        if ! git ls-remote https://github.com/git/git &>/dev/null; then
-            echo -e "\e[35m"
-
-            echo "Unable to access github.com! Trying kgithub now..."
-            if check_kgithub; then
-                echo "Using kgithub instead..."
-                echo "Setup a VPN or export BR2_NO_KGITHUB=1 to disable this."
-
-                use_kgithub=1
-            fi
-
-            echo -e "\e[0m"
-        fi
-    fi
-
     # Look through all the uris that we were given to download the package
     # source
     download_and_check=0
@@ -136,11 +96,6 @@ main() {
         urlencode=${backend_urlencode#*|}
         # urlencode must be "urlencode"
         [ "${urlencode}" != "urlencode" ] && urlencode=""
-
-        if [ "$use_kgithub" ]; then
-            uri=${uri/\/\/github.com\//\/\/kgithub.com\/}
-            uri=${uri/\/\/raw.githubusercontent.com\//\/\/raw.kgithub.com\/}
-        fi
 
         # tmpd is a temporary directory in which backends may store
         # intermediate by-products of the download.
