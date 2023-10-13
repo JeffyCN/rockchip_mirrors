@@ -16,6 +16,10 @@ for dir in $(ls "$OVERLAYS"); do
 		"$OVERLAY_DIR/" "$TARGET_DIR/"
 done
 
+if [ -z "$RK_SESSION" ]; then
+        echo -e "\e[35mBuilding buildroot directly for Rockchip is dangerous!\e[0m"
+fi
+
 POST_SCRIPT="../device/rockchip/common/post-build.sh"
 if [ -x "$POST_SCRIPT" ]; then
 	export $(grep "^BR2_DEFCONFIG=" "${BR2_CONFIG:-"$TARGET_DIR/../.config"}")
