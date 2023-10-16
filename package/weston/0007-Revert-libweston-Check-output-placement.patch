@@ -1,7 +1,7 @@
-From 6b3abf00b657ea44c4499dade1ef9c0b559a020b Mon Sep 17 00:00:00 2001
+From d5f65ed75305f913ec0b8c21ac20fb13e2f7a894 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 3 Nov 2022 11:57:59 +0800
-Subject: [PATCH 07/90] Revert "libweston: Check output placement"
+Subject: [PATCH 07/97] Revert "libweston: Check output placement"
 
 This reverts commit 7e7198bd881859b20f74cbdae46b5700ff1cc5d4.
 
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 55 deletions(-)
 
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 379cf391..69e46734 100644
+index b806a0a..ae70d16 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -6507,18 +6507,6 @@ WL_EXPORT void
@@ -35,7 +35,7 @@ index 379cf391..69e46734 100644
  	output->compositor->output_flow_dirty = true;
  	weston_output_set_position(output, pos);
  }
-@@ -7139,45 +7127,6 @@ weston_output_create_heads_string(struct weston_output *output)
+@@ -7178,45 +7166,6 @@ weston_output_create_heads_string(struct weston_output *output)
  	return str;
  }
  
@@ -81,7 +81,7 @@ index 379cf391..69e46734 100644
  /** Constructs a weston_output object that can be used by the compositor.
   *
   * \param output The weston_output object that needs to be enabled. Must not
-@@ -7257,10 +7206,6 @@ weston_output_enable(struct weston_output *output)
+@@ -7296,10 +7245,6 @@ weston_output_enable(struct weston_output *output)
  
  	weston_output_init_geometry(output, output->x, output->y);
  
