@@ -1,4 +1,4 @@
-From 956f87ef21753f493098048366805c5c4568b84a Mon Sep 17 00:00:00 2001
+From 10c2d87013dffe6c2960615e67fb6573a8ef74be Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Aug 2023 18:18:58 +0800
 Subject: [PATCH 98/98] backend-drm: Support increasing buffers
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  libweston/backend-drm/drm-gbm.c      | 160 ++++++++++++++++++++-------
  libweston/backend-drm/drm-internal.h |  16 ++-
- libweston/backend-drm/drm.c          |  29 +++--
+ libweston/backend-drm/drm.c          |  33 ++++--
  libweston/renderer-gl/gl-renderer.c  |  96 +++++++++++++++-
  libweston/renderer-gl/gl-renderer.h  |   3 +
- 5 files changed, 247 insertions(+), 57 deletions(-)
+ 5 files changed, 251 insertions(+), 57 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-gbm.c b/libweston/backend-drm/drm-gbm.c
 index 13842b4..6bf4b2c 100644
@@ -310,7 +310,7 @@ index 79f42d3..925c3b1 100644
  
  	struct vaapi_recorder *recorder;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index f4a029c..d9d83de 100644
+index 794b25a..5c8625d 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -552,13 +552,14 @@ drm_output_render_pixman(struct drm_output_state *state,
@@ -382,11 +382,22 @@ index f4a029c..d9d83de 100644
 +
 +	output->num_images = MIN(MAX(output->num_images, 2), DRM_MAX_BUFFERS);
 +	output->num_surfaces = (output->num_images + 1) / 2;
-+	weston_log("%s using at least %d buffers\n", name);
++	weston_log("%s using at least %d buffers\n", name, output->num_images);
 +
  	weston_output_init(&output->base, b->compositor, name);
  
  	output->base.enable = drm_output_enable;
+@@ -4673,6 +4686,10 @@ drm_dummy_output_create(struct drm_device *device)
+ 	output->format = pixel_format_get_info(DRM_FORMAT_XRGB8888),
+ #endif
+ 
++	/* Single buffer for dummy output */
++	output->num_images = 1;
++	output->num_surfaces = 1;
++
+ 	weston_output_init(&output->base, b->compositor, "DUMMY");
+ 
+ 	output->base.enable = drm_dummy_output_enable;
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
 index 1b4b72f..0ea0de4 100644
 --- a/libweston/renderer-gl/gl-renderer.c
