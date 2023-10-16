@@ -1,7 +1,7 @@
-From 09505a04a50d70be6f51e5ca43e6e11532509726 Mon Sep 17 00:00:00 2001
+From db622c27923d018afac4397aabfd2b777dfffc08 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 22:59:32 +0800
-Subject: [PATCH 06/90] Revert "gl-renderer: require GL_EXT_unpack_subimage"
+Subject: [PATCH 06/97] Revert "gl-renderer: require GL_EXT_unpack_subimage"
 
 This reverts commit 593d5af43a8e2c2a3371088fa7ae430d0517c82d.
 
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 29 insertions(+), 5 deletions(-)
 
 diff --git a/libweston/renderer-gl/gl-renderer-internal.h b/libweston/renderer-gl/gl-renderer-internal.h
-index 888df847..cabf1ed0 100644
+index 888df84..cabf1ed 100644
 --- a/libweston/renderer-gl/gl-renderer-internal.h
 +++ b/libweston/renderer-gl/gl-renderer-internal.h
 @@ -153,6 +153,8 @@ struct gl_renderer {
@@ -27,7 +27,7 @@ index 888df847..cabf1ed0 100644
  	PFNEGLUNBINDWAYLANDDISPLAYWL unbind_display;
  	PFNEGLQUERYWAYLANDBUFFERWL query_buffer;
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 7f5d35d5..5a0cd4c7 100644
+index 7f5d35d..5a0cd4c 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -1970,6 +1970,7 @@ gl_renderer_flush_damage(struct weston_surface *surface,
