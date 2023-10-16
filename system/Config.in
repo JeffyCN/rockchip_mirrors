@@ -332,7 +332,6 @@ config BR2_SYSTEM_BIN_SH
 
 choice
 	prompt "Run a shell on serial console after boot"
-	default BR2_TARGET_SERIAL_SHELL_SH if BR2_PACKAGE_ROCKCHIP
 	help
 	  Select a shell to use.
 
