@@ -1,4 +1,4 @@
-From 37a14578392500230e5f83bf13c86aa874fa469a Mon Sep 17 00:00:00 2001
+From 9e9fe9fcd8e873ff4504a1e7af9c3caafcbfe015 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
 Subject: [PATCH 38/98] backend-drm: Add dummy output when no screens connected
@@ -10,10 +10,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  compositor/main.c                    |   3 +
  desktop-shell/shell.c                |   8 +-
  libweston/backend-drm/drm-internal.h |   6 +
- libweston/backend-drm/drm.c          | 211 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 213 ++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          |   2 +-
  libweston/compositor.c               |   3 +
- 6 files changed, 225 insertions(+), 8 deletions(-)
+ 6 files changed, 227 insertions(+), 8 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 715a3b9..8c0077d 100644
@@ -87,7 +87,7 @@ index 88c4a2c..6c817c9 100644
  		return NULL;
  	return container_of(base, struct drm_output, base);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 2f3d27c..e359df4 100644
+index 2f3d27c..0e342e0 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -216,8 +216,14 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -175,7 +175,7 @@ index 2f3d27c..e359df4 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->config_timer);
-@@ -4493,6 +4518,183 @@ config_timer_handler(void *data)
+@@ -4493,6 +4518,185 @@ config_timer_handler(void *data)
  	return 0;
  }
  
@@ -284,6 +284,8 @@ index 2f3d27c..e359df4 100644
 +	output->base.repaint = drm_dummy_output_repaint;
 +	output->base.unavailable = true;
 +
++	output->backend = b;
++
 +	weston_compositor_add_pending_output(&output->base, b->compositor);
 +
 +	plane = zalloc(sizeof(*plane));
@@ -359,7 +361,7 @@ index 2f3d27c..e359df4 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4750,6 +4952,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4750,6 +4954,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_sprite;
  	}
  
