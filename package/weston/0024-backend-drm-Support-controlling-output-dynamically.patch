@@ -1,4 +1,4 @@
-From 05682523c8c1eba82d3936cf2425b539b66ef67c Mon Sep 17 00:00:00 2001
+From c24a3d0f7bbb813db1ec5126e5293282f376c3c5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 24/97] backend-drm: Support controlling output dynamically
@@ -601,10 +601,10 @@ index b13715d..93fb68e 100644
  
  err_udev_monitor:
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 20eb4d2..47ce323 100644
+index 51ab0d2..9d9d6e8 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
-@@ -1700,6 +1700,15 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
+@@ -1702,6 +1702,15 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
  		struct drm_output *output = output_state->output;
  		int ret;
  

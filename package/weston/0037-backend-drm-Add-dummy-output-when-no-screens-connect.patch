@@ -1,4 +1,4 @@
-From 4ec99de7c56944247414ac1a93edda68bc700894 Mon Sep 17 00:00:00 2001
+From 977dd569ae62e73171ec209fcce339c0200055d1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
 Subject: [PATCH 37/97] backend-drm: Add dummy output when no screens connected
@@ -374,10 +374,10 @@ index b29e950..c5b901c 100644
  	if (drm_backend_update_connectors(b->drm, drm_device) < 0) {
  		weston_log("Failed to create heads for %s\n", b->drm->drm.filename);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 47ce323..4b29863 100644
+index 9d9d6e8..a4546c4 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
-@@ -1475,7 +1475,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
+@@ -1477,7 +1477,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
  				 &b->compositor->head_list, compositor_link) {
  			struct drm_property_info *info;
  			head = to_drm_head(head_base);

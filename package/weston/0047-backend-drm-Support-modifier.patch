@@ -1,4 +1,4 @@
-From 56d4d395c629f988e1d304319f47457f37f6e7c2 Mon Sep 17 00:00:00 2001
+From 41b4563454967634518f6f0b7db41a8bbcf98688 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
 Subject: [PATCH 47/97] backend-drm: Support modifier
@@ -194,7 +194,7 @@ index 6830694..6754d7e 100644
  			    compositor, b->udev, seat_id,
  			    config->configure_device) < 0) {
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 7e59634..a36fdac 100644
+index 1f8764e..7e69320 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -38,6 +38,7 @@
@@ -205,7 +205,7 @@ index 7e59634..a36fdac 100644
  #include "shared/helpers.h"
  #include "shared/weston-drm-fourcc.h"
  #include "drm-internal.h"
-@@ -1952,7 +1953,7 @@ init_kms_caps(struct drm_device *device)
+@@ -1954,7 +1955,7 @@ init_kms_caps(struct drm_device *device)
  	weston_log("DRM: %s atomic modesetting\n",
  		   device->atomic_modeset ? "supports" : "does not support");
  
