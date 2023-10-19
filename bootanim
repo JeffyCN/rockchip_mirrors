@@ -38,6 +38,10 @@ bootanim_init()
 
 bootanim_deinit()
 {
+	# Kick display service
+	echo "compositor:state:on" >> ${WESTON_DRM_CONFIG:-/tmp/.weston_drm.conf}
+	xrefresh >/dev/null 2>/dev/null
+
 	# Unfreeze display service
 	rm -rf $XSERVER_FREEZE_DISPLAY $WESTON_FREEZE_DISPLAY
 
@@ -99,7 +103,7 @@ bootanim_stop()
 		# Pause animation -> unfreeze display -> kill animation
 		kill -STOP $CPID >/dev/null 2>/dev/null || true
 		bootanim_deinit
-		sleep .1
+		sleep 1
 		kill -9 $CPID >/dev/null 2>/dev/null || true
 	}&
 	wait
