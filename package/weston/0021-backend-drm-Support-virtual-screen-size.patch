@@ -1,7 +1,7 @@
-From 4af3f94e5d5b17eb8d9da20b7f279b08e087f659 Mon Sep 17 00:00:00 2001
+From 221a169f630b547f9a3985839620ccea0078874b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 24 Jun 2020 11:59:42 +0800
-Subject: [PATCH 21/97] backend-drm: Support virtual screen size
+Subject: [PATCH 21/98] backend-drm: Support virtual screen size
 
 Support setting virtual screen size, for example:
 export WESTON_DRM_VIRTUAL_SIZE=1024x768
@@ -153,7 +153,7 @@ index b623bc0..5fba0a3 100644
  	if (buf)
  		b->resize_freeze_ms = atoi(buf);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 51e9581..51ab0d2 100644
+index 51e9581..516058a 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -77,6 +77,15 @@ struct drm_property_enum_info plane_rotation_enums[] = {
@@ -270,8 +270,8 @@ index 51e9581..51ab0d2 100644
 +		    scanout_state->dest_w != mode->mode_info.hdisplay ||
 +		    scanout_state->dest_h != mode->mode_info.vdisplay ||
 +		    scanout_state->src_x || scanout_state->src_y ||
-+		    scanout_state->src_w != scanout_state->dest_w ||
-+		    scanout_state->src_h != scanout_state->dest_h) {
++		    (scanout_state->src_w >> 16) != scanout_state->dest_w ||
++		    (scanout_state->src_h >> 16) != scanout_state->dest_h) {
 +			/* Use a dummy fb for initial mode setting */
 +			if (output->fb_dummy)
 +				drm_fb_unref(output->fb_dummy);

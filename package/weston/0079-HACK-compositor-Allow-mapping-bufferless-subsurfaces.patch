@@ -1,7 +1,7 @@
-From a57e200a320f3b740f2d16d0b597aaef640170f5 Mon Sep 17 00:00:00 2001
+From adc9f5246824387080bd848aeaf6219bbce34864 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 8 Aug 2022 15:46:35 +0800
-Subject: [PATCH 79/97] HACK: compositor: Allow mapping bufferless subsurfaces
+Subject: [PATCH 79/98] HACK: compositor: Allow mapping bufferless subsurfaces
 
 The current qtwayland needs it.
 
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 7 insertions(+)
 
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 4c0238f..2ca3273 100644
+index 8f1309c..63a62a1 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -4727,6 +4727,13 @@ subsurface_committed(struct weston_surface *surface,
+@@ -4740,6 +4740,13 @@ subsurface_committed(struct weston_surface *surface,
  		weston_surface_map(surface);
  	}
  

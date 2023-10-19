@@ -1,19 +1,19 @@
-From ee2fa636ab57aca7af849541018d2d6ef791c90c Mon Sep 17 00:00:00 2001
+From 914a3f63384c2c077050d83aa6ea35d366528181 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 10:20:40 +0800
-Subject: [PATCH 32/97] Support holding display for the first app
+Subject: [PATCH 32/98] Support holding display for the first app
 
 Use '-w' or '--warm-up' to enable it.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- compositor/main.c             |  5 +++++
+ compositor/main.c             |  8 ++++++++
  include/libweston/libweston.h |  2 ++
  libweston/compositor.c        | 30 ++++++++++++++++++++++++++++++
- 3 files changed, 37 insertions(+)
+ 3 files changed, 40 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index d8183df..af391e1 100644
+index d8183df..84aeac0 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -711,6 +711,7 @@ usage(int error_code)
@@ -41,7 +41,13 @@ index d8183df..af391e1 100644
  	};
  
  	wl_list_init(&wet.layoutput_list);
-@@ -4158,6 +4162,7 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -4155,9 +4159,13 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+ 	if (idle_time < 0)
+ 		idle_time = 300; /* default idle timeout, in seconds */
+ 
++	if (!warm_up)
++		weston_config_section_get_bool(section, "warm-up", &warm_up, false);
++
  	wet.compositor->idle_time = idle_time;
  	wet.compositor->default_pointer_grab = NULL;
  	wet.compositor->exit = handle_exit;

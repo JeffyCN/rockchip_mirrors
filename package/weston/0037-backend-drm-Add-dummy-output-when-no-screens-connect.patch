@@ -1,7 +1,7 @@
-From 977dd569ae62e73171ec209fcce339c0200055d1 Mon Sep 17 00:00:00 2001
+From 86efcfa7e99905b153266bf0a69b70e09177282b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 37/97] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 37/98] backend-drm: Add dummy output when no screens connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -16,7 +16,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  6 files changed, 227 insertions(+), 8 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 715a3b9..8c0077d 100644
+index 38ac703..3176e3e 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -2633,6 +2633,9 @@ drm_heads_changed(struct wl_listener *listener, void *arg)
@@ -30,10 +30,10 @@ index 715a3b9..8c0077d 100644
  
  		connected = weston_head_is_connected(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 57998c8..a24e1d0 100644
+index bc1665d..de1865b 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4715,11 +4715,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
+@@ -4705,11 +4705,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
  		    shsurf->state.fullscreen)
  			return;
  	}
@@ -45,7 +45,7 @@ index 57998c8..a24e1d0 100644
  }
  
  void
-@@ -4846,6 +4841,9 @@ handle_output_resized(struct wl_listener *listener, void *data)
+@@ -4836,6 +4831,9 @@ handle_output_resized(struct wl_listener *listener, void *data)
  	struct weston_output *output = (struct weston_output *)data;
  	struct shell_output *sh_output = find_shell_output_from_weston_output(shell, output);
  
@@ -374,7 +374,7 @@ index b29e950..c5b901c 100644
  	if (drm_backend_update_connectors(b->drm, drm_device) < 0) {
  		weston_log("Failed to create heads for %s\n", b->drm->drm.filename);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 9d9d6e8..a4546c4 100644
+index 5d77025..dff7021 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1477,7 +1477,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,

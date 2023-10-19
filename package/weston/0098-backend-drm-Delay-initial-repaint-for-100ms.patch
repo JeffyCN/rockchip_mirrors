@@ -1,0 +1,71 @@
+From 0ab63440dc7e594f17066e332dd9d8ed937aaf43 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 19 Oct 2023 11:41:06 +0800
+Subject: [PATCH 98/98] backend-drm: Delay initial repaint for 100ms
+
+To avoid initial black screen.
+
+Set env "WESTON_DRM_INITIAL_FREEZE_MS" to change the freeze timeout.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/drm-internal.h |  4 ++++
+ libweston/backend-drm/drm.c          | 13 ++++++++++++-
+ 2 files changed, 16 insertions(+), 1 deletion(-)
+
+diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
+index 925c3b1..8502a5f 100644
+--- a/libweston/backend-drm/drm-internal.h
++++ b/libweston/backend-drm/drm-internal.h
+@@ -119,6 +119,7 @@
+ #define DRM_MIN_UPDATE_MS	1000
+ 
+ #define DRM_RESIZE_FREEZE_MS    600
++#define DRM_INITIAL_FREEZE_MS   100
+ 
+ #define WESTON_DRM_CONFIG_FILE	"/tmp/.weston_drm.conf"
+ #define DRM_CONFIG_UPDATE_MS	100
+@@ -408,6 +409,9 @@ struct drm_backend {
+ 	int64_t last_resize_ms;
+ 	int64_t resize_freeze_ms;
+ 
++	int64_t initial_repaint_ms;
++	int64_t initial_freeze_ms;
++
+ 	bool master;
+ 	bool single_head;
+ 	bool head_fallback;
+diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
+index 344fb02..e128ee8 100644
+--- a/libweston/backend-drm/drm.c
++++ b/libweston/backend-drm/drm.c
+@@ -1002,7 +1002,12 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+ 
+ 	weston_compositor_read_presentation_clock(b->compositor, &now);
+ 	now_ms = timespec_to_msec(&now);
+-	if (now_ms < b->last_resize_ms + b->resize_freeze_ms ||
++
++	if (!b->initial_repaint_ms)
++		b->initial_repaint_ms = now_ms;
++
++	if (now_ms < b->initial_repaint_ms + b->initial_freeze_ms ||
++	    now_ms < b->last_resize_ms + b->resize_freeze_ms ||
+ 	    now_ms < output->last_resize_ms + b->resize_freeze_ms) {
+ 		/* Resize fullscreen/maxmium views(not always success) */
+ 		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
+@@ -4923,6 +4928,12 @@ drm_backend_create(struct weston_compositor *compositor,
+ 		weston_log("Entering mirror mode.\n");
+ 	}
+ 
++	buf = getenv("WESTON_DRM_INITIAL_FREEZE_MS");
++	if (buf)
++		b->initial_freeze_ms = atoi(buf);
++	else
++		b->initial_freeze_ms = DRM_INITIAL_FREEZE_MS;
++
+ 	device = zalloc(sizeof *device);
+ 	if (device == NULL)
+ 		return NULL;
+-- 
+2.20.1
+

@@ -1,7 +1,7 @@
-From fca00cc95dfa6cc677907bb0c3d4728aa0317534 Mon Sep 17 00:00:00 2001
+From d8526fa3009faa436ef623cf943464221fd09b79 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 28 Oct 2021 12:47:09 +0800
-Subject: [PATCH 59/97] HACK: Use negative value for dynamic repaint window
+Subject: [PATCH 59/98] HACK: Use negative value for dynamic repaint window
 
 Support using negative value for a vblank based dynamic repaint window:
 When negative, repaint-window = vblank-duration - abs(repaint-window)
@@ -26,10 +26,10 @@ index ac8560e..f8de039 100644
  			   repaint_msec);
  	} else {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 179a98f..827c63b 100644
+index 5066035..744389f 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -3502,10 +3502,17 @@ weston_output_finish_frame(struct weston_output *output,
+@@ -3515,10 +3515,17 @@ weston_output_finish_frame(struct weston_output *output,
  		goto out;
  	}
  
