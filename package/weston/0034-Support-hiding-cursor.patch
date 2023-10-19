@@ -1,7 +1,7 @@
-From 344edaca967e15ecc07f1ac8223af3debc283fae Mon Sep 17 00:00:00 2001
+From cb2b8e9a7b9c980502ee67581834afc6ccd3f5f2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 19 Sep 2023 11:05:33 +0800
-Subject: [PATCH 34/97] Support hiding cursor
+Subject: [PATCH 34/98] Support hiding cursor
 
 Add below to weston.ini:
 [shell]
@@ -15,10 +15,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 9 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index af391e1..715a3b9 100644
+index 84aeac0..38ac703 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
-@@ -4231,6 +4231,10 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -4234,6 +4234,10 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  		}
  	}
  

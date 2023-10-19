@@ -1,7 +1,7 @@
-From 7527939c8625477944ab6afaf328ac37a7914f11 Mon Sep 17 00:00:00 2001
+From 616280920a1e0377aa7dd9a96e00793233c48911 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Jul 2023 09:42:32 +0800
-Subject: [PATCH 88/97] compositor: Delay DPMS-ON to finsih_frame()
+Subject: [PATCH 88/98] compositor: Delay DPMS-ON to finsih_frame()
 
 To make sure that the new frame is ready when turning on outputs.
 
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 27 insertions(+), 5 deletions(-)
 
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index d6d9ea9..01e4f96 100644
+index b1c96a8..85ab735 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -595,6 +595,7 @@ struct weston_output {
@@ -54,10 +54,10 @@ index 9e893d5..022e2d4 100644
  		} else if (!strncmp(config, "down-scale=",
  				    strlen("down-scale="))) {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 9e4f88b..cb3d37e 100644
+index 911d13d..9f7ac3c 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -3470,6 +3470,13 @@ weston_output_finish_frame(struct weston_output *output,
+@@ -3483,6 +3483,13 @@ weston_output_finish_frame(struct weston_output *output,
  	struct timespec vblank_monotonic;
  	int64_t msec_rel;
  
@@ -71,7 +71,7 @@ index 9e4f88b..cb3d37e 100644
  	/*
  	 * If timestamp of latest vblank is given, it must always go forwards.
  	 * If not given, INVALID flag must be set.
-@@ -5369,6 +5376,18 @@ weston_compositor_dpms(struct weston_compositor *compositor,
+@@ -5382,6 +5389,18 @@ weston_compositor_dpms(struct weston_compositor *compositor,
  
  	wl_list_for_each(output, &compositor->output_list, link) {
  		dpms = output->power_state == WESTON_OUTPUT_POWER_FORCED_OFF ? WESTON_DPMS_OFF : state;
@@ -90,7 +90,7 @@ index 9e4f88b..cb3d37e 100644
  		if (output->set_dpms)
  			output->set_dpms(output, dpms);
  	}
-@@ -6747,6 +6766,7 @@ weston_compositor_add_output(struct weston_compositor *compositor,
+@@ -6760,6 +6779,7 @@ weston_compositor_add_output(struct weston_compositor *compositor,
  	wl_list_remove(&output->link);
  	wl_list_insert(compositor->output_list.prev, &output->link);
  	output->enabled = true;

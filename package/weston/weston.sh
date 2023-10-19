@@ -16,8 +16,15 @@ export WESTON_DRM_MIN_BUFFERS=2
 # Enable black background for fullscreen views
 # export WESTON_FULLSCREEN_BLACK_BACKGROUND=1
 
+# Set default layer for the first APP
+# export WESTON_FIRST_APP_LAYER=top
+# export WESTON_FIRST_APP_LAYER=bottom
+
 # Allow disabling unused CRTCs
 # WESTON_DRM_MASTER=1
+
+# Override initial freezing time
+# export WESTON_DRM_INITIAL_FREEZE_MS=0
 
 # Override output's freezing time
 # export WESTON_DRM_RESIZE_FREEZE_MS=1000

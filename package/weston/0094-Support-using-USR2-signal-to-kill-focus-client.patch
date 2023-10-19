@@ -1,7 +1,7 @@
-From 51077b32eedf575d42c7b4275c35e7b5c718e03a Mon Sep 17 00:00:00 2001
+From 9b86ff3112578ed49df7eb23fb83cb913039c6c1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 10:48:36 +0800
-Subject: [PATCH 94/97] Support using USR2 signal to kill focus client
+Subject: [PATCH 94/98] Support using USR2 signal to kill focus client
 
 Tested with:
 1/ weston-terminal&
@@ -63,10 +63,10 @@ index fb64325..41ce56c 100644
  	wl_list_init(&wet.child_process_list);
  	signals[2] = wl_event_loop_add_signal(loop, SIGCHLD, sigchld_handler,
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index f3481f2..c8f588b 100644
+index 7f8cf46..b81afb5 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -5058,6 +5058,8 @@ shell_destroy(struct wl_listener *listener, void *data)
+@@ -5048,6 +5048,8 @@ shell_destroy(struct wl_listener *listener, void *data)
  	text_backend_destroy(shell->text_backend);
  	input_panel_destroy(shell);
  
@@ -75,7 +75,7 @@ index f3481f2..c8f588b 100644
  	wl_list_for_each_safe(shell_output, tmp, &shell->output_list, link)
  		shell_output_destroy(shell_output);
  
-@@ -5170,6 +5172,22 @@ handle_seat_created(struct wl_listener *listener, void *data)
+@@ -5160,6 +5162,22 @@ handle_seat_created(struct wl_listener *listener, void *data)
  	create_shell_seat(shell, seat);
  }
  
@@ -98,7 +98,7 @@ index f3481f2..c8f588b 100644
  WL_EXPORT int
  wet_shell_init(struct weston_compositor *ec,
  	       int *argc, char *argv[])
-@@ -5245,6 +5263,9 @@ wet_shell_init(struct weston_compositor *ec,
+@@ -5235,6 +5253,9 @@ wet_shell_init(struct weston_compositor *ec,
  
  	setup_output_destroy_handler(ec, shell);
  
@@ -122,7 +122,7 @@ index 3372679..221274f 100644
  
  	char *client;
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 01e4f96..2226604 100644
+index 85ab735..4d1f2e9 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1401,6 +1401,7 @@ struct weston_compositor {
@@ -134,10 +134,10 @@ index 01e4f96..2226604 100644
  	struct wl_signal show_input_panel_signal;
  	struct wl_signal hide_input_panel_signal;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 2b292d1..5625d02 100644
+index 48dcb3e..4b98574 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -8701,6 +8701,7 @@ weston_compositor_create(struct wl_display *display,
+@@ -8714,6 +8714,7 @@ weston_compositor_create(struct wl_display *display,
  	wl_signal_init(&ec->kill_signal);
  	wl_signal_init(&ec->idle_signal);
  	wl_signal_init(&ec->wake_signal);
