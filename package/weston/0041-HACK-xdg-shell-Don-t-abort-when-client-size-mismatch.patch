@@ -1,7 +1,7 @@
-From cdd4d7ac76ad66c5242098913b59a915a0a6d159 Mon Sep 17 00:00:00 2001
+From 419798ac01c3548568aad60f90fef17b0d3277d9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 19 Oct 2020 18:13:23 +0800
-Subject: [PATCH 41/97] HACK: xdg-shell: Don't abort when client size
+Subject: [PATCH 041/100] HACK: xdg-shell: Don't abort when client size
  mismatched
 
 There's a race in qtwayland might causing size mismatch, let's

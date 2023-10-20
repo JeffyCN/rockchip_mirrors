@@ -1,8 +1,8 @@
-From b621e896511d90513fd56e43e2c5012ee4d01f79 Mon Sep 17 00:00:00 2001
+From 179556b001ed66f7a28abcffec1b447549a0a55b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
-Subject: [PATCH 36/97] HACK: backend-drm: Consider linear and invalid modifier
- are the same
+Subject: [PATCH 036/100] HACK: backend-drm: Consider linear and invalid
+ modifier are the same
 
 That is true with Rockchip BSP drivers and packages.
 

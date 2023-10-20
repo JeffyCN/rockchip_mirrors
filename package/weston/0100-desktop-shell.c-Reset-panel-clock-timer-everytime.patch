@@ -1,4 +1,4 @@
-From ab4276d99d1679d09cda647b267663d92f523ff8 Mon Sep 17 00:00:00 2001
+From c1f68559c9f61b54cbb3d3a35dab0e6330c6f14f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Oct 2023 17:33:19 +0800
 Subject: [PATCH 100/100] desktop-shell.c: Reset panel clock timer everytime

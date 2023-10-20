@@ -1,7 +1,8 @@
-From 55322202c895d46f545f312c56d670d3240da10b Mon Sep 17 00:00:00 2001
+From 7cd6078aee4a810016788d7321994360aab91b52 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 20 Mar 2022 00:32:14 +0800
-Subject: [PATCH 66/97] backend-drm: Ignore case when populating drm properties
+Subject: [PATCH 066/100] backend-drm: Ignore case when populating drm
+ properties
 
 For BSP kernel 4.4.
 
@@ -11,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+), 2 deletions(-)
 
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 5707c0b..4c773fc 100644
+index 77b3a6a..2aed63b 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -478,7 +478,7 @@ drm_property_info_populate(struct drm_device *device,

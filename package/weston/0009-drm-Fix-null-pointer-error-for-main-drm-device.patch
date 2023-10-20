@@ -1,7 +1,7 @@
 From 6476b3f3105141483721a5281d60b828a6317790 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 19 Jul 2023 16:06:30 +0800
-Subject: [PATCH 09/97] drm: Fix null pointer error for main drm device
+Subject: [PATCH 009/100] drm: Fix null pointer error for main drm device
 
 By adding the missing gem_handle_refcnt creation.
 

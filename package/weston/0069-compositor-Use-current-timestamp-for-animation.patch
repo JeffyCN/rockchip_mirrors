@@ -1,7 +1,7 @@
-From af012f319cc6f29c43be4fd8f2a5d138197804bd Mon Sep 17 00:00:00 2001
+From fbdeb83bcdc733ccd7912a482d6f740001d15ec7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 27 May 2022 15:39:10 +0800
-Subject: [PATCH 69/98] compositor: Use current timestamp for animation
+Subject: [PATCH 069/100] compositor: Use current timestamp for animation
 
 Avoid "unexpectedly large timestamp jump" warning for the first frame of
 animation.

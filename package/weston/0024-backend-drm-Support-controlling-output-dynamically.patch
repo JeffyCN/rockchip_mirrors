@@ -1,7 +1,7 @@
-From c24a3d0f7bbb813db1ec5126e5293282f376c3c5 Mon Sep 17 00:00:00 2001
+From 6e0f8a409adbba15442f8462c598ea2a3f93bf5c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 24/97] backend-drm: Support controlling output dynamically
+Subject: [PATCH 024/100] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -601,7 +601,7 @@ index b13715d..93fb68e 100644
  
  err_udev_monitor:
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 51ab0d2..9d9d6e8 100644
+index 516058a..5d77025 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1702,6 +1702,15 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)

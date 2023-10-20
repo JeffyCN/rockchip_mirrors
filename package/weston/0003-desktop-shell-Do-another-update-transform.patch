@@ -1,7 +1,7 @@
 From de3b371e4e6dd61b7c21469ee755e0149a156594 Mon Sep 17 00:00:00 2001
 From: Marius Vlad <marius.vlad@collabora.com>
 Date: Wed, 19 Apr 2023 12:02:08 +0300
-Subject: [PATCH 03/97] desktop-shell: Do another update transform
+Subject: [PATCH 003/100] desktop-shell: Do another update transform
 
 This is similar to commit 'libweston: Update view transforms more often', where
 we update the view's transform when getting the panel dimensions.
