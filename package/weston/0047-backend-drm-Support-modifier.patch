@@ -1,7 +1,7 @@
-From 41b4563454967634518f6f0b7db41a8bbcf98688 Mon Sep 17 00:00:00 2001
+From 23adbb5d6ac88e34e5831385f2ffacde9dc906e5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
-Subject: [PATCH 47/97] backend-drm: Support modifier
+Subject: [PATCH 047/100] backend-drm: Support modifier
 
 Tested on rk356x with ARM AFBC modifier.
 
@@ -194,7 +194,7 @@ index 6830694..6754d7e 100644
  			    compositor, b->udev, seat_id,
  			    config->configure_device) < 0) {
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 1f8764e..7e69320 100644
+index 921b54c..85445f7 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -38,6 +38,7 @@

@@ -1,7 +1,7 @@
-From 0877934e073cf6d1a4df849f25e0e0b5a7f32614 Mon Sep 17 00:00:00 2001
+From 289201c72af5b54d8ec03d4f4e2320a4628c7ecd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 21 Aug 2023 11:40:52 +0800
-Subject: [PATCH 96/97] libweston: Add launcher-direct back
+Subject: [PATCH 096/100] libweston: Add launcher-direct back
 
 Based on weston 10.0.0 without VT support.
 

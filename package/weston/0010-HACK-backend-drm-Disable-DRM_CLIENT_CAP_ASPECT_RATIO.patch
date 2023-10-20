@@ -1,8 +1,8 @@
 From f7beec98dfb84f9fb744c9c2cb5419879bef8c2d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 17:17:13 +0800
-Subject: [PATCH 10/97] HACK: backend-drm: Disable DRM_CLIENT_CAP_ASPECT_RATIO
- for kernel < 4.19
+Subject: [PATCH 010/100] HACK: backend-drm: Disable
+ DRM_CLIENT_CAP_ASPECT_RATIO for kernel < 4.19
 
 This conflicts with custom cap in Rockchip BSP 4.4 kernel.
 

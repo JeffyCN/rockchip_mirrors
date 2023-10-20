@@ -1,8 +1,8 @@
-From 819e326b237999131bd987b175fbe4d177a3dd5d Mon Sep 17 00:00:00 2001
+From 5b28253abf57863857cb666fa62d7dd8b27d0597 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 24 Jun 2022 16:25:11 +0800
-Subject: [PATCH 75/98] desktop-shell: Avoid lowering the requested fullscreen
- surface
+Subject: [PATCH 075/100] desktop-shell: Avoid lowering the requested
+ fullscreen surface
 
 Don't lower itself.
 

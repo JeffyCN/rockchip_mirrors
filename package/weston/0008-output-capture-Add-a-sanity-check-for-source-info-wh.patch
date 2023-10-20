@@ -1,8 +1,8 @@
 From 3a47f9300df05a2bbad6b07a438eff528ce31da6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 19 Jul 2023 15:49:56 +0800
-Subject: [PATCH 08/97] output-capture: Add a sanity check for source info when
- pulling task
+Subject: [PATCH 008/100] output-capture: Add a sanity check for source info
+ when pulling task
 
 Fix error when atomic_modeset disabled:
 ../libweston/output-capture.c:399: weston_output_pull_capture_task: Assertion `csi->width == width' failed.

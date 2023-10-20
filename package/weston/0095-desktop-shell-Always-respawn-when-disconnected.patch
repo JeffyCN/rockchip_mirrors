@@ -1,7 +1,7 @@
-From f14847f10624aa7220e2f7d52ce3622822d36e25 Mon Sep 17 00:00:00 2001
+From d4e0fa4fbbf1cac93c80f9e35b25a13353989743 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 11:25:25 +0800
-Subject: [PATCH 95/98] desktop-shell: Always respawn when disconnected
+Subject: [PATCH 095/100] desktop-shell: Always respawn when disconnected
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

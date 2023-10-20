@@ -1,7 +1,7 @@
-From b48cc752f9076b34729e9788119bbef15a81a58a Mon Sep 17 00:00:00 2001
+From 4a07b213d1f8032104a5ef852f8f53dc26f404e5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
-Subject: [PATCH 80/97] HACK: Honour cursor-size config
+Subject: [PATCH 080/100] HACK: Honour cursor-size config
 
 By scaling the cursor surface.
 
@@ -29,7 +29,7 @@ index f8de039..fb64325 100644
  	for (i = 1; i < argc; i++)
  		weston_log("fatal: unhandled option: %s\n", argv[i]);
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index b8b0332..d6d9ea9 100644
+index a09e2e1..b1c96a8 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -796,6 +796,8 @@ struct weston_pointer {
@@ -76,7 +76,7 @@ index 700d8f1..9e893d5 100644
  	if (!res) {
  		weston_log("Failed to get drmModeRes\n");
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 2ca3273..fa053a9 100644
+index 63a62a1..bfa7286 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1970,7 +1970,7 @@ WESTON_EXPORT_FOR_TESTS void

@@ -1,7 +1,7 @@
 From 42b549dff9503a414e2e2b7832881969679e1fed Mon Sep 17 00:00:00 2001
 From: Derek Foreman <derek.foreman@collabora.com>
 Date: Mon, 26 Jun 2023 11:19:23 -0500
-Subject: [PATCH 02/97] toy-toolkit: Fix rotations
+Subject: [PATCH 002/100] toy-toolkit: Fix rotations
 
 Ever since commit 3012934 some rotations have been broken. This is because
 I transposed xy and yx in the cairo_matrix_init() call.

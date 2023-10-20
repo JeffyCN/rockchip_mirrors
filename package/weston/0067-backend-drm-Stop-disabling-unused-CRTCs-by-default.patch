@@ -1,7 +1,7 @@
-From e577d8e6406523953de952d3afa1eb9f8e7bae98 Mon Sep 17 00:00:00 2001
+From ee7996ed39da6329a51126c577a8f567b7ddbe9b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 15:17:39 +0800
-Subject: [PATCH 67/97] backend-drm: Stop disabling unused CRTCs by default
+Subject: [PATCH 067/100] backend-drm: Stop disabling unused CRTCs by default
 
 So that we can launch multiple weston instances for different monitors.
 
@@ -53,7 +53,7 @@ index 99cb7eb..700d8f1 100644
  	if (buf && buf[0] == '1')
  		b->single_head = true;
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 5c01125..bb020a1 100644
+index 2aed63b..7089e74 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -1498,7 +1498,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,

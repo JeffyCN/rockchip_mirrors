@@ -1,7 +1,7 @@
-From f09112be8604cdcef4f3d455319e6fb285c7f906 Mon Sep 17 00:00:00 2001
+From 24fe31979f9b601af89ecab2003118ea9f7db427 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 8 Jun 2022 09:53:19 +0800
-Subject: [PATCH 73/97] desktop-shell: Fix crash when destroying uncommited
+Subject: [PATCH 073/100] desktop-shell: Fix crash when destroying uncommited
  surface
 
 By adding a sanity check for it's wsurface_anim_fade.
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 3 insertions(+), 1 deletion(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 8b25e08..f64da14 100644
+index 515c051..8ed3976 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -294,7 +294,9 @@ desktop_shell_destroy_surface(struct shell_surface *shsurf)

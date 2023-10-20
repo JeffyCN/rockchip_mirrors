@@ -1,7 +1,7 @@
-From 9b86ff3112578ed49df7eb23fb83cb913039c6c1 Mon Sep 17 00:00:00 2001
+From e64b0c60b786aef87450bf57fd15742cb83e508e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 10:48:36 +0800
-Subject: [PATCH 94/98] Support using USR2 signal to kill focus client
+Subject: [PATCH 094/100] Support using USR2 signal to kill focus client
 
 Tested with:
 1/ weston-terminal&

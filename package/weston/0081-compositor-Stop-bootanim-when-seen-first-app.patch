@@ -1,7 +1,7 @@
-From a9ba8d1838d7b5d72a0f6d9d68949734b99cfecf Mon Sep 17 00:00:00 2001
+From feef7902a390a7e83fb43f1134acec06fcd3190b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 28 Sep 2022 10:44:07 +0800
-Subject: [PATCH 81/98] compositor: Stop bootanim when seen first app
+Subject: [PATCH 081/100] compositor: Stop bootanim when seen first app
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

@@ -1,22 +1,20 @@
-From f081d9e3de95c2df6cc9bd5139fdd5fd8d4320dd Mon Sep 17 00:00:00 2001
+From 65701a6605381c98a1850718c61060a4768e7117 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 4 Aug 2020 14:30:33 +0800
-Subject: [PATCH 33/97] Support setting touch calibration through environment
+Subject: [PATCH 033/100] Support setting touch calibration through environment
 
-For example:
-1/ Use weston-calibrator tool to get calibration data
-[root@rk3399:/]# weston-calibrator
-Final calibration values: -0.846961 0.122487 0.864176 -0.110204 -0.685913 0.958219
-
-2/ Export calibration data through environment:
-export WESTON_TOUCH_CALIBRATION="-0.846961 0.122487 0.864176 -0.110204 -0.685913 0.958219"
+Tested on RK3588 EVB with:
+1/ killall weston
+2/ WESTON_TOUCH_CALIBRATION="1 0 0 0 0.5 0" /usr/bin/weston
+3/ WESTON_TOUCH_CALIBRATION="event7:1 0 0 0 0.5 0" /usr/bin/weston
+4/ WESTON_TOUCH_CALIBRATION="1 0 0 0 0.5 0,event7:0.5 0 0 0 1 0" /usr/bin/weston
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  clients/calibrator.c        |  9 +++++++++
  clients/touch-calibrator.c  | 12 ++++++++----
- libweston/libinput-device.c | 13 +++++++++++++
- 3 files changed, 30 insertions(+), 4 deletions(-)
+ libweston/libinput-device.c | 23 +++++++++++++++++++++++
+ 3 files changed, 40 insertions(+), 4 deletions(-)
 
 diff --git a/clients/calibrator.c b/clients/calibrator.c
 index be65d9b..20fc1e7 100644
@@ -74,24 +72,34 @@ index 49dd920..04a966b 100644
  
  struct weston_touch_calibration_listener touch_calibration_listener = {
 diff --git a/libweston/libinput-device.c b/libweston/libinput-device.c
-index 31b88ac..1ef52be 100644
+index 31b88ac..30422d6 100644
 --- a/libweston/libinput-device.c
 +++ b/libweston/libinput-device.c
-@@ -887,6 +887,19 @@ evdev_device_set_calibration(struct evdev_device *device)
+@@ -887,6 +887,29 @@ evdev_device_set_calibration(struct evdev_device *device)
  		return;
  	}
  
 +	calibration_values = getenv("WESTON_TOUCH_CALIBRATION");
-+	if (calibration_values && sscanf(calibration_values,
-+					 "%f %f %f %f %f %f",
-+					 &calibration.m[0],
-+					 &calibration.m[1],
-+					 &calibration.m[2],
-+					 &calibration.m[3],
-+					 &calibration.m[4],
-+					 &calibration.m[5]) == 6) {
-+		do_set_calibration(device, &calibration);
-+		return;
++	if (calibration_values) {
++		const char *values;
++		char prefix[256];
++
++		snprintf(prefix, sizeof(prefix), "%s:", sysname);
++		if ((values = strstr(calibration_values, prefix)))
++			values += strlen(prefix);
++		else
++			values = calibration_values;
++
++		if ((sscanf(values, "%f %f %f %f %f %f",
++			    &calibration.m[0],
++			    &calibration.m[1],
++			    &calibration.m[2],
++			    &calibration.m[3],
++			    &calibration.m[4],
++			    &calibration.m[5]) == 6)) {
++			do_set_calibration(device, &calibration);
++			return;
++		}
 +	}
 +
  	width = device->output->width;

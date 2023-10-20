@@ -1,7 +1,7 @@
-From 4930f94984592f7c338ed5d81c106ba4d98551b3 Mon Sep 17 00:00:00 2001
+From 69fa5df01eb367e14029624e327bf27573bf8d10 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 1 Jun 2022 11:28:24 +0800
-Subject: [PATCH 71/98] desktop-shell: Delay locking when having pending
+Subject: [PATCH 071/100] desktop-shell: Delay locking when having pending
  fade-out animations
 
 Avoid "unexpectedly large timestamp jump" warning when resuming with
