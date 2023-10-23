@@ -56,4 +56,10 @@ config BR2_PACKAGE_COMMON_ALGORITHM_OCCLUSION_DETECT
 	default n
 	help
 	  Occlusion detection algorithm
+
+config BR2_PACKAGE_COMMON_ALGORITHM_ROCKAA
+	bool "RockAA"
+	default n
+	help
+	  Rockchip Audio Algorithm Utils
 endif
