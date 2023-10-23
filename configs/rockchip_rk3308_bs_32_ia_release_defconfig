@@ -15,5 +15,5 @@ BR2_PACKAGE_RK_DEMO=y
 # BR2_PACKAGE_RKSCRIPT is reset to default
 # BR2_PACKAGE_ROCKCHIP_ALSA_CONFIG is reset to default
 # BR2_PACKAGE_USBMOUNT is reset to default
-BR2_STRIP_EXCLUDE_FILES="libgraphic_lsf.so rockit.so librkaudio.so librkdemuxer.so librkmuxer.so"
+BR2_STRIP_EXCLUDE_FILES="rk_demo librkadk.so libgraphic_lsf.so librockit.so librkaudio.so librkdemuxer.so librkmuxer.so"
 BR2_TARGET_GENERIC_HOSTNAME="rk3308_32"
