@@ -16,13 +16,12 @@ set +e
 
 LOGFILE=/var/log/mount-all.log
 
+BASIC_FSTYPE="proc devtmpfs devpts tmpfs sysfs configfs debugfs pstore"
+
 do_part()
 {
 	# Not enough args
 	[ $# -lt 6 ] && return
-
-	# Ignore comments
-	echo $1 | grep -q "^#" && return
 
 	DEV=${1##*=}
 	MOUNT_POINT=$2
@@ -33,22 +32,11 @@ do_part()
 	# Setup check/mount tools and do some prepare
 	prepare_part || return
 
-	# Parse ro/rw opt
-	MOUNT_RO_RW=rw
-	if echo $OPTS | grep -o "[^,]*ro\>" | grep "^ro$"; then
-		MOUNT_RO_RW=ro
-	fi
-
-	if mountpoint -q $MOUNT_POINT && ! is_rootfs; then
-		# Make sure other partitions are unmounted.
-		umount $MOUNT_POINT >/dev/null 2>/dev/null || return
-	fi
-
-	# Check and repair
+	# Check and repair partition
 	check_part
 
 	# Mount partition
-	is_rootfs || mount_part || return
+	mount_part || return
 
 	# Resize partition if needed
 	resize_part
@@ -59,8 +47,6 @@ do_part()
 
 mount_all()
 {
-	echo "Will now mount all partitions in /etc/fstab"
-
 	AUTO_MKFS="/.auto_mkfs"
 	if [ -f $AUTO_MKFS ];then
 		echo "Note: Will auto format partitons, remove $AUTO_MKFS to disable"
@@ -77,18 +63,24 @@ mount_all()
 		unset SKIP_FSCK
 	fi
 
-	while read LINE;do
-		do_part $LINE
-	done < /etc/fstab
+	# Ignore basic file systems
+	ID=0
+	grep -vwE "^#|${BASIC_FSTYPE// /|}" /etc/fstab | while read LINE;do
+	do_part $LINE&
+	ID=$(( $ID + 1 ))
+done
+wait
 }
 
 case "$1" in
 	start|"")
+		echo "Start mounting all internal partitions in /etc/fstab"
+		echo "Log saved to $LOGFILE"
+
 		# Mount basic file systems firstly
-		mount -a -t "proc,devpts,tmpfs,sysfs,debugfs,pstore"
+		mount -a -t "$(echo "${BASIC_FSTYPE// /,}")"
 
 		mount_all 2>&1 | tee $LOGFILE
-		echo "Log saved to $LOGFILE"
 		;;
 	*)
 		echo "Usage: mount-helper start" >&2
