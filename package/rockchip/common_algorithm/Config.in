@@ -23,7 +23,7 @@ endchoice
 
 config BR2_PACKAGE_COMMON_ALGORITHM_AEC_ANR_AGC
 	bool "RKAP-3A"
-	default y
+	default n
 	help
 	  Echo cancellation algorithm, applied to voice call scenarios
 
@@ -35,7 +35,7 @@ config BR2_PACKAGE_COMMON_ALGORITHM_ANR
 
 config BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS
 	bool "RKAP-PLUS"
-	default n
+	default y
 	help
 	  Audio 3A Algorithm Plus by Rockchip, applied talking scene
 
