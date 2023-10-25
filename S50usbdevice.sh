@@ -10,7 +10,7 @@
 
 case "$1" in
 	start|stop|restart)
-		/usr/bin/usbdevice $1
+		/usr/bin/usbdevice $1&
 		;;
 	*)
 		echo "Usage: [start|stop|restart]" >&2
