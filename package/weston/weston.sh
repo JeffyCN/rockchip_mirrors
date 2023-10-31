@@ -24,7 +24,7 @@ export WESTON_DRM_MIN_BUFFERS=2
 # WESTON_DRM_MASTER=1
 
 # Override initial freezing time
-# export WESTON_DRM_INITIAL_FREEZE_MS=0
+# export WESTON_DRM_INITIAL_FREEZE_MS=100
 
 # Override output's freezing time
 # export WESTON_DRM_RESIZE_FREEZE_MS=1000
