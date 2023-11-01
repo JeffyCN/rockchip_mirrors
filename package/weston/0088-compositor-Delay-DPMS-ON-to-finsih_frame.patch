@@ -1,7 +1,7 @@
-From 7ba1eb4cf87a0086ca04796ef3eeacb2575e24fa Mon Sep 17 00:00:00 2001
+From 9cad9d626f8d2e5641526934db2ff22f34c67edc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 18 Jul 2023 09:42:32 +0800
-Subject: [PATCH 088/100] compositor: Delay DPMS-ON to finsih_frame()
+Subject: [PATCH 088/101] compositor: Delay DPMS-ON to finsih_frame()
 
 To make sure that the new frame is ready when turning on outputs.
 
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 27 insertions(+), 5 deletions(-)
 
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index b1c96a8..85ab735 100644
+index b1c96a8a..85ab7359 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -595,6 +595,7 @@ struct weston_output {
@@ -25,7 +25,7 @@ index b1c96a8..85ab735 100644
  	bool freezing;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 9e893d5..022e2d4 100644
+index ea322db1..3d406ce9 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1022,7 +1022,11 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
@@ -41,7 +41,7 @@ index 9e893d5..022e2d4 100644
  
  	if (output_base->allow_protection)
  		state->protection = output_base->desired_protection;
-@@ -4429,10 +4433,7 @@ config_handle_output(struct drm_backend *b, const char *name,
+@@ -4424,10 +4428,7 @@ config_handle_output(struct drm_backend *b, const char *name,
  		} else if (!strcmp(config, "unfreeze") ||
  			   !strcmp(config, "on")) {
  			output->base.freezing = false;
@@ -54,7 +54,7 @@ index 9e893d5..022e2d4 100644
  		} else if (!strncmp(config, "down-scale=",
  				    strlen("down-scale="))) {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 911d13d..9f7ac3c 100644
+index 911d13d0..9f7ac3c6 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3483,6 +3483,13 @@ weston_output_finish_frame(struct weston_output *output,
