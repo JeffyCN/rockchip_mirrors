@@ -7,23 +7,29 @@ for dir in $(ls "$OVERLAYS"); do
 	OVERLAY_DIR="$OVERLAYS/$dir"
 	if [ -x "$OVERLAY_DIR/prepare.sh" ] && \
 		! "$OVERLAY_DIR/prepare.sh" "$TARGET_DIR"; then
-		echo "Ignored $OVERLAY_DIR"
+		echo ">>> Ignored $OVERLAY_DIR"
 		continue
 	fi
 
-	echo "Copying $OVERLAY_DIR"
+	echo ">>> Copying $OVERLAY_DIR"
 	rsync -av --chmod=u=rwX,go=rX --exclude .empty --exclude /prepare.sh \
 		"$OVERLAY_DIR/" "$TARGET_DIR/"
 done
 
 if [ -z "$RK_SESSION" ]; then
-        echo -e "\e[35mBuilding buildroot directly for Rockchip is dangerous!\e[0m"
+        echo -e "\e[35m>>> Building buildroot directly for Rockchip is dangerous!\e[0m"
 fi
 
 POST_SCRIPT="../device/rockchip/common/post-build.sh"
-if [ -x "$POST_SCRIPT" ]; then
-	export $(grep "^BR2_DEFCONFIG=" "${BR2_CONFIG:-"$TARGET_DIR/../.config"}")
-	$POST_SCRIPT "$(realpath "$TARGET_DIR")" "$(basename "$BR2_DEFCONFIG")"
-fi
+[ -x "$POST_SCRIPT" ] || exit 0
 
-exit 0
+export $(grep "^BR2_DEFCONFIG=" "${BR2_CONFIG:-"$TARGET_DIR/../.config"}")
+
+$POST_SCRIPT "$(realpath "$TARGET_DIR")" "$(basename "$BR2_DEFCONFIG")" 2>&1 | \
+	while read line; do
+		if echo "$line" | \
+			grep -iqE "building|running|handling|installing"; then
+			echo -n ">>> "
+		fi
+		echo -e "$line"
+	done
