@@ -6,25 +6,24 @@ config BR2_PACKAGE_LV_DRIVERS
 
 if BR2_PACKAGE_LV_DRIVERS
 	config BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
-		bool "sdl"
-		default n
-		select BR2_PACKAGE_SDL2
+		bool
+		default y if BR2_PACKAGE_LVGL_USE_SDL
 		help
 		  Enbale sdl renderer
 
 	config BR2_PACKAGE_LV_DRIVERS_USE_DRM
-		bool "drm"
-		default n
+		bool
+		default y if BR2_PACKAGE_LVGL_USE_DRM
 		select BR2_PACKAGE_LIBDRM
 		help
 		  Enbale drm renderer
 
 	config BR2_PACKAGE_LV_DRIVERS_USE_RGA
-		bool "rga"
+		bool "Use RGA in DRM rendering"
 		default n
 		depends on BR2_PACKAGE_ROCKCHIP_RGA
 		depends on BR2_PACKAGE_LV_DRIVERS_USE_DRM
 		help
-		  Enbale rga
+		  Enbale RGA to copy image
 
 endif

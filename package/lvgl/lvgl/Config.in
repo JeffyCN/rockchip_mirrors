@@ -26,13 +26,26 @@ if BR2_PACKAGE_LVGL
 		  Useful if the display has an 8-bit interface.
 		  (e.g. SPI)
 
-	config BR2_PACKAGE_LVGL_USE_SDL
-		bool "Use SDL"
-		default n
-		depends on BR2_PACKAGE_LVGL
-		select BR2_PACKAGE_SDL2
-		select BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
+	config BR2_PACKAGE_LVGL_DEMOS
+		bool
+		default y
 		help
-		  LVGL use SDL for graphic acceleration
+		  Enable lvgl official demos
+
+	choice
+		prompt "LVGL backport select"
+		config BR2_PACKAGE_LVGL_USE_SDL
+			bool "sdl"
+			select BR2_PACKAGE_SDL2
+			help
+			  Use SDL to draw and render
+
+		config BR2_PACKAGE_LVGL_USE_DRM
+			bool "drm"
+			select BR2_PACKAGE_LIBDRM
+			help
+			  Use CPU to draw and DRM to render
+
+	endchoice
 
 endif
