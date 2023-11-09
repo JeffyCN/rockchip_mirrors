@@ -15,13 +15,11 @@ RECOVERY_CFLAGS = $(TARGET_CFLAGS) -I. \
 	-fPIC \
 	-lpthread \
 	-lcurl \
-	-lssl \
-	-lcrypto \
 	-lbz2
 
 RECOVERY_MAKE_ENV = $(TARGET_MAKE_ENV)
 
-RECOVERY_DEPENDENCIES += libpthread-stubs util-linux libcurl openssl
+RECOVERY_DEPENDENCIES += libpthread-stubs util-linux libcurl
 
 ifeq ($(BR2_PACKAGE_RECOVERY_NO_UI),y)
 RECOVERY_MAKE_ENV += RecoveryNoUi=true
