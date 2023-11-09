@@ -3,7 +3,7 @@
 # MGBA
 #
 ################################################################################
-LIBRETRO_MGBA_VERSION = b03412aa38b39190f475cb89d5c8a2a5e97bc32d
+LIBRETRO_MGBA_VERSION = 0.10.2
 LIBRETRO_MGBA_SITE = $(call github,mgba-emu,mgba,$(LIBRETRO_MGBA_VERSION))
 
 # Configs for libretro
