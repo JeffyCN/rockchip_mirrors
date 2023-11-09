@@ -1,0 +1,29 @@
+From 5090d546249d289124046753ba4d4e9bb07d03fa Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 9 Nov 2023 11:34:44 +0800
+Subject: [PATCH 1/2] Buildfixes
+
+(cherry picked from commit af74ba90db44df3f53f76717a9f19d484f446d17)
+
+Only contain changes in managers/cheat_manager.c
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ managers/cheat_manager.c | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/managers/cheat_manager.c b/managers/cheat_manager.c
+index df087cab82..892e88eed6 100644
+--- a/managers/cheat_manager.c
++++ b/managers/cheat_manager.c
+@@ -51,6 +51,7 @@
+ #include "../input/input_driver.h"
+ #include "../configuration.h"
+ 
++cheat_manager_t cheat_manager_state;
+ 
+ unsigned cheat_manager_get_buf_size(void)
+ {
+-- 
+2.20.1
+
