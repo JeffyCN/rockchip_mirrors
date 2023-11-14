@@ -1,7 +1,9 @@
 [Unit]
 Description=Boot time animation
 DefaultDependencies=no
-After=local-fs.target
+After=local-fs.target systemd-udev-trigger.service systemd-udevd.service
+Before=systemd-user-sessions.service
+ConditionKernelCommandLine=!nosplash
 
 [Service]
 ExecStart=/usr/bin/bootanim
@@ -10,4 +12,4 @@ KillMode=mixed
 SendSIGKILL=no
 
 [Install]
-WantedBy=graphical.target
+WantedBy=sysinit.target

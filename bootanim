@@ -10,15 +10,22 @@
 # [ -r /etc/bootanim.d/bootanim.mp4 ] || exit 1
 # gst-play-1.0 /etc/bootanim.d/bootanim.mp4 -q --no-interactive&
 
+# Load default env variables from profiles
+. /etc/profile
+
 SCRIPT=/usr/bin/bootanim
 HOOK_DIR=/etc/bootanim.d/
 PID_FILE=/var/run/bootanim.pid
-LOG_FILE=/var/log/bootanim.log
-TIMEOUT=${2:-${BOOTANIM_DEFAULT_TIMEOUT:-5}}
+TIMEOUT=${2:-${BOOTANIM_DEFAULT_TIMEOUT:-10}}
+
+log()
+{
+	logger -s -t bootanim $@
+}
 
 pid_by_sid()
 {
-	sed "s/(.*)//" /proc/*/stat | cut -d' ' -f1,6 | grep -w "$1$" |
+	sed "s/(.*)//" /proc/*/stat 2>/dev/null | cut -d' ' -f1,6 | grep -w "$1$" |
 		cut -d' ' -f1 || true
 }
 
@@ -52,29 +59,31 @@ bootanim_start()
 {
 	[ -d $HOOK_DIR ] || return
 
-	echo "Starting bootanim..."
+	log "Starting bootanim..."
 
 	bootanim_init
 
 	# Start bootanim hooks
 	unset BOOTANIM_STARTED
 	for hook in $(find $HOOK_DIR -maxdepth 1 -name "*.sh"); do
-		echo "Starting hook: $hook..."
+		log "Starting hook: $hook..."
 		if $hook; then
 			BOOTANIM_STARTED=1
 		fi
-		echo "Started hook: $hook..."
+		log "Started hook: $hook..."
 	done
 
 	if [ -z "$BOOTANIM_STARTED" ]; then
-		echo "No animation started..."
+		log "No animation started..."
 		bootanim_deinit
 		return
 	fi
 
 	# Timeout killer
-	sleep $TIMEOUT
-	bootanim_stop
+	{
+		sleep $TIMEOUT
+		bootanim_stop
+	}&
 }
 
 children_pid()
@@ -89,7 +98,7 @@ children_pid()
 
 bootanim_stop()
 {
-	echo "Stopping bootanim..."
+	log "Stopping bootanim..."
 
 	# Parse children pid
 	CPID=$(children_pid)
@@ -116,14 +125,12 @@ case "$1" in
 			[ $(realpath "$0") != $SCRIPT ] ; then
 			setsid $SCRIPT $@
 		else
-			{
-				bootanim_stop || true
-				bootanim_start
-			} 2>&1 | tee -a $LOG_FILE&
+			bootanim_stop || true
+			bootanim_start
 		fi
 		;;
 	stop)
-		bootanim_stop 2>&1 | tee -a $LOG_FILE
+		bootanim_stop
 		;;
 	*)
 		echo "Usage: $0 [start|stop]"

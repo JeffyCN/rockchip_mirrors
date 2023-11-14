@@ -12,9 +12,6 @@
 
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
-# Load default env variables from profiles
-. /etc/profile
-
 type bootanim >/dev/null && \
 case "$1" in
 	start|restart|reload)
