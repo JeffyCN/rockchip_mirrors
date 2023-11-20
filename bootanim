@@ -10,9 +10,6 @@
 # [ -r /etc/bootanim.d/bootanim.mp4 ] || exit 1
 # gst-play-1.0 /etc/bootanim.d/bootanim.mp4 -q --no-interactive&
 
-# Load default env variables from profiles
-. /etc/profile
-
 SCRIPT=/usr/bin/bootanim
 HOOK_DIR=/etc/bootanim.d/
 PID_FILE=/var/run/bootanim.pid
