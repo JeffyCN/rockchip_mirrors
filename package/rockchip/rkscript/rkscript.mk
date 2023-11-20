@@ -86,7 +86,7 @@ RKSCRIPT_POST_INSTALL_TARGET_HOOKS += RKSCRIPT_INSTALL_TARGET_USB_UDEV_RULES
 endif
 
 define RKSCRIPT_INSTALL_INIT_SYSV_USB
-	$(INSTALL) -m 0755 -D $(@D)/S*usbdevice $(TARGET_DIR)/etc/init.d/
+	$(INSTALL) -m 0755 -D $(@D)/S*usbdevice.sh $(TARGET_DIR)/etc/init.d/
 endef
 RKSCRIPT_INSTALL_INIT_SYSV_HOOKS += RKSCRIPT_INSTALL_INIT_SYSV_USB
 
@@ -159,6 +159,8 @@ endef
 RKSCRIPT_INSTALL_INIT_SYSV_HOOKS += RKSCRIPT_INSTALL_INIT_SYSV_BOOTANIM
 
 define RKSCRIPT_INSTALL_INIT_SYSTEMD_BOOTANIM
+	$(INSTALL) -m 0755 -D $(@D)/S*bootanim.sh \
+		$(TARGET_DIR)/etc/init.d/bootanim
 	$(INSTALL) -D -m 644 $(@D)/bootanim.service \
 		$(TARGET_DIR)/usr/lib/systemd/system/
 endef
