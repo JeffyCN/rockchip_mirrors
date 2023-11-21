@@ -1,0 +1,62 @@
+From 97df0007803a4b2cd0c81a98cd7efbc46210f4eb Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 8 Mar 2024 17:36:40 +0800
+Subject: [PATCH 2/3] workround avrcp
+
+---
+ profiles/audio/avrcp.c | 17 ++++++++++-------
+ 1 file changed, 10 insertions(+), 7 deletions(-)
+
+diff --git a/profiles/audio/avrcp.c b/profiles/audio/avrcp.c
+index dda9a30..fa3be73 100644
+--- a/profiles/audio/avrcp.c
++++ b/profiles/audio/avrcp.c
+@@ -1621,9 +1621,11 @@ static uint8_t avrcp_handle_register_notification(struct avrcp *session,
+ 	if (len != 5)
+ 		goto err;
+ 
++	DBG("supported_events: 0x%x, event: 0x%x(0x%x)\n", session->supported_events, 1 << pdu->params[0], pdu->params[0]);
++
+ 	/* Check if event is supported otherwise reject */
+-	if (!(session->supported_events & (1 << pdu->params[0])))
+-		goto err;
++	//if (!(session->supported_events & (1 << pdu->params[0])))
++	//	goto err;
+ 
+ 	switch (pdu->params[0]) {
+ 	case AVRCP_EVENT_STATUS_CHANGED:
+@@ -3977,7 +3979,7 @@ static gboolean avrcp_get_capabilities_resp(struct avctp *conn, uint8_t code,
+ 		uint8_t event = pdu->params[1 + count];
+ 
+ 		events |= (1 << event);
+-
++		DBG("count: %d, event: 0x%x\n", count, event);
+ 		switch (event) {
+ 		case AVRCP_EVENT_STATUS_CHANGED:
+ 		case AVRCP_EVENT_TRACK_CHANGED:
+@@ -4516,8 +4518,9 @@ static int avrcp_event(struct avrcp *session, uint8_t id, const void *data)
+ 	int err;
+ 
+ 	/* Verify that the event is registered */
+-	if (!(session->registered_events & (1 << id)))
+-		return -ENOENT;
++	//if (!(session->registered_events & (1 << id)))
++	//	return -ENOENT;
++	DBG("registered_events = 0x%x:0x%x", session->registered_events, 1 << id);
+ 
+ 	memset(buf, 0, sizeof(buf));
+ 
+@@ -4577,8 +4580,8 @@ int avrcp_set_volume(struct btd_device *dev, int8_t volume, bool notify)
+ 		return -ENOTCONN;
+ 
+ 	if (notify) {
+-		if (!session->target)
+-			return -ENOTSUP;
++		//if (!session->target)
++		//	return -ENOTSUP;
+ 		return avrcp_event(session, AVRCP_EVENT_VOLUME_CHANGED,
+ 								&volume);
+ 	}
+-- 
+2.20.1
+
