@@ -80,6 +80,7 @@ config BR2_PACKAGE_HOSTAPD_WPA3
 	bool "Enable WPA3 support"
 	select BR2_PACKAGE_OPENSSL
 	select BR2_PACKAGE_OPENSSL_FORCE_LIBOPENSSL
+	default y
 	help
 	  Enable WPA3 support including OWE, SAE, DPP
 
