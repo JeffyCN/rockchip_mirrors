@@ -119,6 +119,7 @@ config BR2_PACKAGE_WPA_SUPPLICANT_HOTSPOT
 
 config BR2_PACKAGE_WPA_SUPPLICANT_DEBUG_SYSLOG
 	bool "Enable syslog support"
+	default y
 	help
 	  Enable support for sending debug messages to syslog.
 
@@ -131,18 +132,21 @@ config BR2_PACKAGE_WPA_SUPPLICANT_WPA3
 	bool "Enable WPA3 support"
 	select BR2_PACKAGE_OPENSSL
 	select BR2_PACKAGE_OPENSSL_FORCE_LIBOPENSSL
+	default y
 	help
 	  Enable WPA3 support including OWE, SAE, DPP
 
 config BR2_PACKAGE_WPA_SUPPLICANT_CLI
 	bool "Install wpa_cli binary"
 	select BR2_PACKAGE_WPA_SUPPLICANT_CTRL_IFACE
+	default y
 	help
 	  Install wpa_cli command line utility
 
 config BR2_PACKAGE_WPA_SUPPLICANT_WPA_CLIENT_SO
 	bool "Install wpa_client shared library"
 	depends on !BR2_STATIC_LIBS
+	default y
 	help
 	  Install libwpa_client.so.
 
@@ -156,6 +160,7 @@ config BR2_PACKAGE_WPA_SUPPLICANT_PASSPHRASE
 
 config BR2_PACKAGE_WPA_SUPPLICANT_CTRL_IFACE
 	bool "Enable the Unix-socket control interface"
+	default y
 	help
 	  Enable support for the Unix-socket-based API.
 
