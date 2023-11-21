@@ -23,7 +23,11 @@ fi
 POST_SCRIPT="../device/rockchip/common/post-build.sh"
 [ -x "$POST_SCRIPT" ] || exit 0
 
+# Export configs to environment
 export $(grep "^BR2_DEFCONFIG=" "${BR2_CONFIG:-"$TARGET_DIR/../.config"}")
+
+# Filter out host pathes
+export PATH="$(echo $PATH | xargs -d':' -n 1 | grep -v "^$O" | paste -sd':')"
 
 $POST_SCRIPT "$(realpath "$TARGET_DIR")" "$(basename "$BR2_DEFCONFIG")" 2>&1 | \
 	while read line; do
