@@ -1,0 +1,41 @@
+From beae0356158a792c0e28990fd9dc8f0f7ed5edf3 Mon Sep 17 00:00:00 2001
+From: Yao Xiao <xiaoyao@rock-chips.com>
+Date: Tue, 21 Nov 2023 14:40:09 +0800
+Subject: [PATCH 1/1] 0004 fixed avdtp Transaction Label Number
+
+---
+ profiles/audio/avdtp.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/profiles/audio/avdtp.c b/profiles/audio/avdtp.c
+index 10ef380..c7e1559 100644
+--- a/profiles/audio/avdtp.c
++++ b/profiles/audio/avdtp.c
+@@ -286,6 +286,7 @@ struct in_buf {
+ 	gboolean active;
+ 	int no_of_packets;
+ 	uint8_t transaction;
++	uint8_t received_cmd_transaction;
+ 	uint8_t message_type;
+ 	uint8_t signal_id;
+ 	uint8_t buf[1024];
+@@ -1469,7 +1470,7 @@ static void setconf_cb(struct avdtp *session, struct avdtp_stream *stream,
+ 		return;
+ 	}
+ 
+-	if (!avdtp_send(session, session->in.transaction, AVDTP_MSG_TYPE_ACCEPT,
++	if (!avdtp_send(session, session->in.received_cmd_transaction, AVDTP_MSG_TYPE_ACCEPT,
+ 					AVDTP_SET_CONFIGURATION, NULL, 0)) {
+ 		stream_free(stream);
+ 		return;
+@@ -2247,6 +2248,7 @@ static gboolean session_cb(GIOChannel *chan, GIOCondition cond,
+ 	}
+ 
+ 	if (session->in.message_type == AVDTP_MSG_TYPE_COMMAND) {
++		session->in.received_cmd_transaction = session->in.transaction;
+ 		if (!avdtp_parse_cmd(session, session->in.transaction,
+ 					session->in.signal_id,
+ 					session->in.buf,
+-- 
+2.17.1
+
