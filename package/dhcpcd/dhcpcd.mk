@@ -15,7 +15,9 @@ DHCPCD_CPE_ID_VALID = YES
 DHCPCD_CONFIG_OPTS = \
 	--libexecdir=/lib/dhcpcd \
 	--os=linux \
-	--privsepuser=dhcpcd
+	--privsepuser=dhcpcd \
+	--disable-privsep \
+	--enable-debug
 
 DHCPCD_MAKE_OPTS = \
 	BINMODE=755
