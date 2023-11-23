@@ -15,7 +15,9 @@ DHCPCD_CPE_ID_VENDOR = dhcpcd_project
 DHCPCD_CONFIG_OPTS = \
 	--libexecdir=/lib/dhcpcd \
 	--os=linux \
-	--privsepuser=dhcpcd
+	--privsepuser=dhcpcd \
+	--disable-privsep \
+	--enable-debug
 
 # AUDIT_ARCH_{OPENRISC,SH,SHEL,SH64,SHEL64} are only available with kernel >= 3.7
 ifeq ($(BR2_or1k)$(BR2_sh):$(BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_7),y:)
