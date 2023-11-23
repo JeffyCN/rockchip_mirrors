@@ -15,7 +15,9 @@ DHCPCD_CPE_ID_VENDOR = dhcpcd_project
 DHCPCD_CONFIG_OPTS = \
 	--libexecdir=/lib/dhcpcd \
 	--os=linux \
-	--privsepuser=dhcpcd
+	--privsepuser=dhcpcd \
+	--disable-privsep \
+	--enable-debug
 
 ifeq ($(BR2_PACKAGE_DHCPCD_ENABLE_PRIVSEP),y)
 DHCPCD_CONFIG_OPTS += --enable-privsep
