@@ -1,0 +1,45 @@
+From 670f0d0f618d3f122e6d95c34de53f59a343a15f Mon Sep 17 00:00:00 2001
+From: Luiz Augusto von Dentz <luiz.von.dentz@intel.com>
+Date: Mon, 28 Aug 2023 10:53:55 -0700
+Subject: [PATCH 1/1] shared/gatt-client: Fix not sending confirmations
+
+Commit fde32ff9c9c0 ("shared/gatt-client: Allow registering with NULL
+callback") added an early return to the notify_cb function when the
+current client's notify_list is empty which prevents sending
+confirmations to indications.
+
+Reported-by: Javier de San Pedro <dev.git@javispedro.com>
+---
+ src/shared/gatt-client.c | 7 ++++---
+ 1 file changed, 4 insertions(+), 3 deletions(-)
+
+diff --git a/src/shared/gatt-client.c b/src/shared/gatt-client.c
+index efc013a20..5de679c9b 100644
+--- a/src/shared/gatt-client.c
++++ b/src/shared/gatt-client.c
+@@ -2232,11 +2232,11 @@ static void notify_cb(struct bt_att_chan *chan, uint8_t opcode,
+ 	struct bt_gatt_client *client = user_data;
+ 	struct value_data data;
+ 
+-	if (queue_isempty(client->notify_list))
+-		return;
+-
+ 	bt_gatt_client_ref(client);
+ 
++	if (queue_isempty(client->notify_list))
++		goto done;
++
+ 	memset(&data, 0, sizeof(data));
+ 
+ 	if (opcode == BT_ATT_OP_HANDLE_NFY_MULT) {
+@@ -2271,6 +2271,7 @@ static void notify_cb(struct bt_att_chan *chan, uint8_t opcode,
+ 		queue_foreach(client->notify_list, notify_handler, &data);
+ 	}
+ 
++done:
+ 	if (opcode == BT_ATT_OP_HANDLE_IND && !client->parent)
+ 		bt_att_chan_send(chan, BT_ATT_OP_HANDLE_CONF, NULL, 0,
+ 							NULL, NULL, NULL);
+-- 
+2.17.1
+
