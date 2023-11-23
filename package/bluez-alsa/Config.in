@@ -33,6 +33,7 @@ config BR2_PACKAGE_BLUEZ_ALSA_HCITOP
 
 config BR2_PACKAGE_BLUEZ_ALSA_RFCOMM
 	bool "rfcomm"
+	default y
 	select BR2_PACKAGE_READLINE
 	help
 	  Simple tool for sending RFCOMM commands.
