@@ -61,6 +61,7 @@ comment "OpenGL ES support needs an OpenGL ES provider"
 config BR2_PACKAGE_SDL2_WAYLAND
 	bool "Wayland video driver"
 	depends on BR2_PACKAGE_WAYLAND
+	select BR2_PACKAGE_LIBXKBCOMMON
 
 comment "Wayland video driver needs wayland"
 	depends on !BR2_PACKAGE_WAYLAND
