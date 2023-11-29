@@ -1,0 +1,7 @@
+# LVGL - Light and Versatile Graphics Library
+source "package/lvgl/lvgl/Config.in"
+
+if BR2_PACKAGE_LVGL
+source "package/lvgl/lv_drivers/Config.in"
+source "package/lvgl/lvgl_demo/Config.in"
+endif

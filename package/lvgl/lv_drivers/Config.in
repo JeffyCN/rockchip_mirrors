@@ -1,0 +1,29 @@
+config BR2_PACKAGE_LV_DRIVERS
+	bool "lv-drivers"
+	default n
+	help
+	  The concrete implementation of hardware
+
+if BR2_PACKAGE_LV_DRIVERS
+	config BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
+		bool
+		default y if BR2_PACKAGE_LVGL_USE_SDL
+		help
+		  Enbale sdl renderer
+
+	config BR2_PACKAGE_LV_DRIVERS_USE_DRM
+		bool
+		default y if BR2_PACKAGE_LVGL_USE_DRM
+		select BR2_PACKAGE_LIBDRM
+		help
+		  Enbale drm renderer
+
+	config BR2_PACKAGE_LV_DRIVERS_USE_RGA
+		bool "Use RGA in DRM rendering"
+		default n
+		depends on BR2_PACKAGE_ROCKCHIP_RGA
+		depends on BR2_PACKAGE_LV_DRIVERS_USE_DRM
+		help
+		  Enbale RGA to copy image
+
+endif

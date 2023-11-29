@@ -1,0 +1,40 @@
+From 1c5cfe18e26103b7ffa33d8a534e1857020f7a06 Mon Sep 17 00:00:00 2001
+From: ZiHan Huang <zack.huang@rock-chips.com>
+Date: Mon, 5 Feb 2024 09:09:24 +0800
+Subject: [PATCH] sdl: sdl and sdl_gpu: Enable SDL_INIT_JOYSTICK
+
+Signed-off-by: ZiHan Huang <zack.huang@rock-chips.com>
+---
+ sdl/sdl.c     | 2 +-
+ sdl/sdl_gpu.c | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/sdl/sdl.c b/sdl/sdl.c
+index ecac56d..37d9882 100644
+--- a/sdl/sdl.c
++++ b/sdl/sdl.c
+@@ -108,7 +108,7 @@ monitor_t monitor2;
+ void sdl_init(void)
+ {
+     /*Initialize the SDL*/
+-    SDL_Init(SDL_INIT_VIDEO);
++    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+ 
+     SDL_SetEventFilter(quit_filter, NULL);
+ 
+diff --git a/sdl/sdl_gpu.c b/sdl/sdl_gpu.c
+index d372903..721d040 100644
+--- a/sdl/sdl_gpu.c
++++ b/sdl/sdl_gpu.c
+@@ -78,7 +78,7 @@ static volatile bool sdl_inited = false;
+ void sdl_init(void)
+ {
+     /*Initialize the SDL*/
+-    SDL_Init(SDL_INIT_VIDEO);
++    SDL_Init(SDL_INIT_VIDEO | SDL_INIT_JOYSTICK);
+ 
+     SDL_SetEventFilter(quit_filter, NULL);
+ 
+-- 
+2.17.1
+
