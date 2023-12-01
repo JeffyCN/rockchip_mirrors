@@ -11,6 +11,12 @@ if BR2_PACKAGE_LV_DRIVERS
 		help
 		  Enbale sdl renderer
 
+	config BR2_PACKAGE_LV_DRIVERS_USE_OPENGL
+		bool "Enable OpenGLES"
+		depends on BR2_PACKAGE_LV_DRIVERS_USE_SDL_GPU
+		help
+		  Enbale OpenGLES
+
 	config BR2_PACKAGE_LV_DRIVERS_USE_DRM
 		bool
 		default y if BR2_PACKAGE_LVGL_USE_DRM
