@@ -1,10 +1,13 @@
-From cfa9259205db747c4289158620c5bac40b55117a Mon Sep 17 00:00:00 2001
+From 50d7798f46bf9911263080b8fa731c6b56b38747 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 8 Nov 2023 17:46:30 +0800
-Subject: [PATCH 7/7] adb: daemon: Fix build issue with old g++
+Subject: [PATCH 6/8] adb: daemon: Fix build issue with old g++
+MIME-Version: 1.0
+Content-Type: text/plain; charset=UTF-8
+Content-Transfer-Encoding: 8bit
 
 The old g++ (< 11) would report error:
-error: too many initializers for 'usb_os_desc_header'
+error: too many initializers for ‘usb_os_desc_header’
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

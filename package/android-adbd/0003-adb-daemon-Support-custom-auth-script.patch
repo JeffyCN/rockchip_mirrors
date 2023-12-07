@@ -1,7 +1,7 @@
-From dcdf95e6b9eb37b4f0ac9616037e75785a57a181 Mon Sep 17 00:00:00 2001
+From 060fb10d5c08ce3fbe5a4176943915780f89ed56 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 8 Oct 2023 12:07:33 +0800
-Subject: [PATCH 4/6] adb: daemon: Support custom auth script
+Subject: [PATCH 3/8] adb: daemon: Support custom auth script
 
 Run "adb shell auth" to trigger /usr/bin/adbd-auth for custom
 authentication.
@@ -120,7 +120,7 @@ index a6f224f..6ee480e 100644
  
  void adbd_auth_init(void);
 diff --git a/adb/adbd_auth.cpp b/adb/adbd_auth.cpp
-index c78c9cb..29b7a0d 100644
+index 3488ad1..da64a0c 100644
 --- a/adb/adbd_auth.cpp
 +++ b/adb/adbd_auth.cpp
 @@ -129,6 +129,14 @@ void adbd_auth_confirm_key(const char* key, size_t len, atransport* t) {

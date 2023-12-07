@@ -1,7 +1,7 @@
-From 7b8268442d9f8730ddfe65212873c02a972bc402 Mon Sep 17 00:00:00 2001
+From 4fb277884f6125516fd907f05e9343b91626cef3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 27 Nov 2023 09:32:23 +0800
-Subject: [PATCH 8/8] adb: daemon: Handle SIGINT
+Subject: [PATCH 7/8] adb: daemon: Handle SIGINT
 
 The SIGINT would be ignored by default when running as systemd service.
 
