@@ -1,7 +1,7 @@
-From 599f1b5714204e61bcf7d6ad1c8140708c1b41ed Mon Sep 17 00:00:00 2001
+From 96daedba520179a69f3741e4c77922c19988998b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 28 Sep 2023 15:10:54 +0800
-Subject: [PATCH 3/6] adb: daemon: Support linux
+Subject: [PATCH 2/8] adb: daemon: Support linux
 
 Tested with:
 1/ meson setup build

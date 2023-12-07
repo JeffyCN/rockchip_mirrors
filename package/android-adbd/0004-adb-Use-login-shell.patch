@@ -1,7 +1,7 @@
-From 90e2144ba6ac23574b3a04d6e4d90e09a175e658 Mon Sep 17 00:00:00 2001
+From 504ca4f3cc4a3b72ead7404160f74794fa0f77e2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 8 Oct 2023 17:49:35 +0800
-Subject: [PATCH 5/6] adb: Use login shell
+Subject: [PATCH 4/8] adb: Use login shell
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

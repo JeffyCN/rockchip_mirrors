@@ -1,7 +1,6 @@
 config BR2_PACKAGE_ANDROID_ADBD
 	bool "android-adbd"
 	depends on !BR2_PACKAGE_ANDROID_TOOLS_ADBD
-	depends on BR2_TOOLCHAIN_USES_GLIBC
 	select BR2_PACKAGE_OPENSSL
 	help
 	  Daemon for Android Debug Bridge.

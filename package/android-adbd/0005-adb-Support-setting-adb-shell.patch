@@ -1,7 +1,7 @@
-From 935fc6045960f671e3fb6b849f8b9f776c63943f Mon Sep 17 00:00:00 2001
+From ebf67b0a4b8c6da91dcec51f2a8598f35e204146 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 8 Oct 2023 18:03:25 +0800
-Subject: [PATCH 6/6] adb: Support setting adb shell
+Subject: [PATCH 5/8] adb: Support setting adb shell
 
 Tested on RK3588 EVB with:
 1/ echo ADBD_SHELL=/bin/bash > /etc/profile.d/adbd.sh
