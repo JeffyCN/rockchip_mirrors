@@ -1,0 +1,6 @@
+#include "base/base.config"
+#include "base/recovery.config"
+#include "chips/rk3308_arm.config"
+BR2_PACKAGE_LUKSMETA=y
+BR2_ROOTFS_OVERLAY+="board/rockchip/common/security-ramdisk-overlay/"
+
