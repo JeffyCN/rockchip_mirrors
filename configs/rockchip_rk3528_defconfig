@@ -12,10 +12,10 @@
 #include "multimedia/mpp.config"
 #include "wifibt/bt.config"
 #include "wifibt/wireless.config"
-#include "benchmark.config"
+#include "tools/benchmark.config"
+#include "tools/common.config"
+#include "tools/test.config"
 #include "chromium.config"
-#include "debug.config"
 #include "powermanager.config"
-#include "test.config"
 #include "weston.config"
 # BR2_PACKAGE_ROCKCHIP_RGA is not set

@@ -10,6 +10,6 @@
 #include "npu2.config"
 #include "wifibt/bt.config"
 #include "wifibt/wireless.config"
-#include "debug.config"
+#include "tools/common.config"
+#include "tools/test.config"
 #include "powermanager.config"
-#include "test.config"

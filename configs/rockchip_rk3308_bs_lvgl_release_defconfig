@@ -4,7 +4,7 @@
 #include "multimedia/audio.config"
 #include "wifibt/bt.config"
 #include "wifibt/wireless.config"
-#include "test.config"
+#include "tools/test.config"
 BR2_PACKAGE_COREUTILS=y
 BR2_PACKAGE_EVTEST=y
 BR2_PACKAGE_I2C_TOOLS=y
