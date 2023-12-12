@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-WESTON_VERSION = 12.0.2
+WESTON_VERSION = 13.0.0
 WESTON_SITE = https://gitlab.freedesktop.org/wayland/weston/-/releases/$(WESTON_VERSION)/downloads
 WESTON_SOURCE = weston-$(WESTON_VERSION).tar.xz
 WESTON_LICENSE = MIT
@@ -20,12 +20,23 @@ WESTON_CONF_OPTS = \
 	-Dremoting=false \
 	-Dtools=calibrator,debug,info,terminal,touch-calibrator
 
-ifeq ($(BR2_PACKAGE_SEATD_DAEMON),y)
-WESTON_DEPENDENCIES += seatd
-WESTON_CONF_OPTS += -Dlauncher-libseat=true
-else
-WESTON_CONF_OPTS += -Dlauncher-libseat=false
+ifeq ($(BR2_PACKAGE_WESTON_SIMPLE_CLIENTS),y)
+WESTON_SIMPLE_CLIENTS = \
+	damage \
+	dmabuf-egl \
+	dmabuf-feedback \
+	egl \
+	im \
+	shm \
+	touch
+
+ifeq ($(BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_8),y)
+# dmabuf-v4l uses VIDIOC_EXPBUF, only available from 3.8+
+WESTON_SIMPLE_CLIENTS += dmabuf-v4l
 endif
+endif # BR2_PACKAGE_WESTON_SIMPLE_CLIENTS
+
+WESTON_CONF_OPTS += -Dsimple-clients=$(subst $(space),$(comma),$(strip $(WESTON_SIMPLE_CLIENTS)))
 
 ifeq ($(BR2_PACKAGE_JPEG),y)
 WESTON_CONF_OPTS += -Dimage-jpeg=true
@@ -183,12 +194,6 @@ endif
 
 ifeq ($(BR2_PACKAGE_ROCKCHIP_RGA),y)
 WESTON_DEPENDENCIES += rockchip-rga
-endif
-
-ifeq ($(BR2_PACKAGE_HAS_LIBEGL_WAYLAND)$(BR2_PACKAGE_HAS_LIBGLES),yy)
-WESTON_CONF_OPTS += -Dsimple-clients=all
-else
-WESTON_CONF_OPTS += -Dsimple-clients=
 endif
 
 ifeq ($(BR2_PACKAGE_WESTON_DEFAULT_PIXMAN),y)

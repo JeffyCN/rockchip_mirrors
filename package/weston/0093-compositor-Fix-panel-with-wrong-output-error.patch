@@ -1,0 +1,34 @@
+From a20e4037b1bed6f25c413bb919b87ac6aa3f3906 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 19 Oct 2023 15:50:59 +0800
+Subject: [PATCH 93/97] compositor: Fix panel with wrong output error
+
+Caused by:
+d611ab24f "libweston: Update view transforms more often".
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/compositor.c | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index 020d77d..39e9b8d 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -1435,6 +1435,13 @@ weston_view_assign_output(struct weston_view *ev)
+ 	uint32_t new_output_area, area, mask;
+ 	pixman_box32_t *e;
+ 
++	/**
++	 * FIXME: For early assign from:
++	 * d611ab24f "libweston: Update view transforms more often"
++	 */
++	if (!get_view_layer(ev))
++		return;
++
+ 	/* The static views should bind to the specific output */
+ 	if (weston_compositor_is_static_layer(get_view_layer(ev))) {
+ 		struct weston_view *view = ev;
+-- 
+2.20.1
+
