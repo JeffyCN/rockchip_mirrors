@@ -9,6 +9,15 @@
 #include "ta_keybox.h"
 #include <tee_api.h>
 #include "../rk_public_api/rk_trng_api.h"
+#include "../rk_public_api/rk_crypto_api.h"
+#include "../rk_public_api/rk_derive_key_api.h"
+#include <string.h>
+
+#ifdef TA_DEBUG
+#define ta_info(fmt, ...) IMSG("[TA] "fmt, ##__VA_ARGS__)
+#else
+#define ta_info(fmt, ...)
+#endif
 
 /*
  * Called when the instance of the TA is created. This is the first call in
@@ -78,6 +87,23 @@ static uint32_t js_hash(uint32_t hash, uint8_t *buf, int len)
 	return hash;
 }
 
+static uint32_t ta_get_rng(void *buf, int size)
+{
+	TEE_Result res = TEE_SUCCESS;
+	TEE_Time time;
+
+	res = rk_get_trng(buf, size);
+	if (res == TEE_SUCCESS)
+		return res;
+
+
+	ta_info("HW can't support TRNG!!!");
+	/* No support trng */
+	TEE_GetSystemTime(&time);
+	return rk_derive_ta_unique_key((uint8_t *)&time, sizeof(TEE_Time),
+			(uint8_t *)buf, size);
+}
+
 /*
  * Called when a TA is invoked. sess_ctx hold that value that was
  * assigned by TA_OpenSessionEntryPoint(). The rest of the parameters
@@ -113,14 +139,16 @@ TEE_Result TA_InvokeCommandEntryPoint(void *sess_ctx, uint32_t cmd_id,
 		if (param_types != exp_param_types)
 			return TEE_ERROR_BAD_PARAMETERS;
 
-		res = rk_get_trng(buf, params[0].memref.size);
+		res = ta_get_rng(buf, params[0].memref.size);
 		if (res != TEE_SUCCESS) {
-			EMSG("rk_get_trng failed with code 0x%x", res);
+			EMSG("Can't get RNG, failed with code 0x%x", res);
 			goto out;
 		}
 
 		g_hash = js_hash(0x47c6a7e6, buf, params[0].memref.size);
 		TEE_MemMove(params[0].memref.buffer, buf, params[0].memref.size);
+		ta_info("TA: %s %d (g_hash = 0x%x)\n", __func__, __LINE__, g_hash);
+
 		break;
 	case TA_KEY_VER:
 		exp_param_types = TEE_PARAM_TYPES(TEE_PARAM_TYPE_VALUE_INPUT,
@@ -131,10 +159,10 @@ TEE_Result TA_InvokeCommandEntryPoint(void *sess_ctx, uint32_t cmd_id,
 			return TEE_ERROR_BAD_PARAMETERS;
 
 		if (g_hash && (g_hash == params[0].value.a)) {
-			//IMSG("******** PASS");
+			ta_info("******** PASS");
 			g_ver = 1;
 		} else {
-			//IMSG("******** failed (g_hash = %x)", g_hash);
+			ta_info("******** failed (g_hash = %x)", g_hash);
 			g_ver = 0;
 		}
 
@@ -151,9 +179,9 @@ TEE_Result TA_InvokeCommandEntryPoint(void *sess_ctx, uint32_t cmd_id,
 			return TEE_ERROR_BAD_PARAMETERS;
 
 		if (!g_ver) {
-			res = rk_get_trng(buf, params[0].memref.size);
+			res = ta_get_rng(buf, params[0].memref.size);
 			if (res != TEE_SUCCESS)
-				EMSG("rk_get_trng failed with code 0x%x", res);
+				EMSG("Can't get RNG, failed with code 0x%x", res);
 		} else {
 			res = TEE_OpenPersistentObject(params[1].value.a,
 						       id, sizeof(id), flags,
