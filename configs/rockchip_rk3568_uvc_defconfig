@@ -9,9 +9,9 @@
 #include "multimedia/mpp.config"
 #include "wifibt/bt.config"
 #include "wifibt/wireless.config"
-#include "debug2.config"
-#include "debug.config"
-#include "test.config"
+#include "tools/extra.config"
+#include "tools/common.config"
+#include "tools/test.config"
 BR2_PACKAGE_AISERVER=y
 BR2_PACKAGE_AISERVER_RKVO=y
 BR2_PACKAGE_AISERVER_SHM_SERVER=y

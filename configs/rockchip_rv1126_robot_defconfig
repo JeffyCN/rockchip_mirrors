@@ -4,7 +4,7 @@
 #include "multimedia/camera.config"
 #include "multimedia/mpp.config"
 #include "wifibt/wireless.config"
-#include "debug.config"
+#include "tools/common.config"
 #include "update_engine.config"
 BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_IQFILE="os04a10_CMK-OT1607-FV1_M12-40IRC-4MP-F16.xml"
 BR2_PACKAGE_ISP2_IPC=y

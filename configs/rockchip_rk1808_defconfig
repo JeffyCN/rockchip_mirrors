@@ -11,7 +11,7 @@
 #include "multimedia/mpp.config"
 #include "wifibt/bt.config"
 #include "wifibt/wireless.config"
-#include "debug.config"
+#include "tools/common.config"
 #include "weston.config"
 BR2_PACKAGE_MESA3D=y
 BR2_PACKAGE_MESA3D_GALLIUM_DRIVER_SWRAST=y

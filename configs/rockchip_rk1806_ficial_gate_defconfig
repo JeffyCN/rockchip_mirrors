@@ -5,7 +5,7 @@
 #include "multimedia/camera.config"
 #include "multimedia/mpp.config"
 #include "wifibt/wireless.config"
-#include "debug.config"
+#include "tools/common.config"
 #include "webserver.config"
 # BR2_PACKAGE_CAMERA_ENGINE_RKISP_3A_SERVICE is not set
 BR2_PACKAGE_FICIAL_GATE=y

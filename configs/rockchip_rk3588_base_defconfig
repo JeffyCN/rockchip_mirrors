@@ -3,8 +3,8 @@
 #include "fs/vfat.config"
 #include "gpu/dummy.config"
 #include "multimedia/mpp.config"
-#include "debug2.config"
-#include "debug.config"
-#include "test.config"
+#include "tools/extra.config"
+#include "tools/common.config"
+#include "tools/test.config"
 BR2_PACKAGE_RKNPU=y
 BR2_PACKAGE_RKNPU_USE_RKNN_API=y

@@ -1,6 +1,6 @@
 #include "base/base.config"
 #include "chips/rk1808_aarch64.config"
 #include "fs/vfat.config"
-#include "debug.config"
+#include "tools/common.config"
 BR2_PACKAGE_RKNPU=y
 BR2_PACKAGE_RKNPU_NTB=y

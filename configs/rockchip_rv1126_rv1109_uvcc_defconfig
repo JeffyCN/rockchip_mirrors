@@ -3,7 +3,7 @@
 #include "multimedia/audio.config"
 #include "multimedia/camera.config"
 #include "multimedia/mpp.config"
-#include "debug.config"
+#include "tools/common.config"
 BR2_PACKAGE_AISERVER=y
 BR2_PACKAGE_AISERVER_SHM_SERVER=y
 BR2_PACKAGE_AISERVER_USE_ROCKX=y

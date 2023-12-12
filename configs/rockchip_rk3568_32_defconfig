@@ -14,9 +14,9 @@
 #include "multimedia/mpp.config"
 #include "wifibt/bt.config"
 #include "wifibt/wireless.config"
-#include "benchmark.config"
-#include "debug2.config"
-#include "debug.config"
-#include "test.config"
+#include "tools/benchmark.config"
+#include "tools/extra.config"
+#include "tools/common.config"
+#include "tools/test.config"
 #include "weston.config"
 BR2_PACKAGE_RKNPU2=y

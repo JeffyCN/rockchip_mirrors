@@ -4,7 +4,7 @@
 #include "multimedia/camera.config"
 #include "multimedia/mpp.config"
 #include "wifibt/wireless.config"
-#include "debug.config"
+#include "tools/common.config"
 #include "update_engine.config"
 # BR2_PACKAGE_ALSA_LIB_ALISP is not set
 # BR2_PACKAGE_ALSA_LIB_ALOAD is not set
