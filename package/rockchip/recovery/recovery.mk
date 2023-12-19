@@ -19,19 +19,13 @@ RECOVERY_CFLAGS = $(TARGET_CFLAGS) -I. \
 
 RECOVERY_MAKE_ENV = $(TARGET_MAKE_ENV)
 
-RECOVERY_DEPENDENCIES += libpthread-stubs util-linux libcurl
+RECOVERY_DEPENDENCIES += libpthread-stubs util-linux libcurl bzip2
 
 ifeq ($(BR2_PACKAGE_RECOVERY_NO_UI),y)
 RECOVERY_MAKE_ENV += RecoveryNoUi=true
 else
 RECOVERY_CFLAGS += -lpng -ldrm -lz -lm -I$(STAGING_DIR)/usr/include/libdrm
 RECOVERY_DEPENDENCIES += libpng libdrm libzlib
-endif
-
-# For static link with libcurl
-ifeq ($(BR2_PACKAGE_RTMPDUMP)$(BR2_PACKAGE_RECOVERY_STATIC),yy)
-RECOVERY_CFLAGS += -lrtmp
-RECOVERY_DEPENDENCIES += rtmpdump
 endif
 
 ifeq ($(BR2_PACKAGE_RECOVERY_USE_RKUPDATE),y)
@@ -52,6 +46,16 @@ endif
 
 ifeq ($(BR2_PACKAGE_RECOVERY_STATIC),y)
 RECOVERY_CFLAGS += -static
+
+# For static link with libcurl
+ifeq ($(BR2_PACKAGE_OPENSSL),y)
+RECOVERY_CFLAGS += -lssl -lcrypto
+RECOVERY_DEPENDENCIES += openssl
+endif
+ifeq ($(BR2_PACKAGE_RTMPDUMP),y)
+RECOVERY_CFLAGS += -lrtmp
+RECOVERY_DEPENDENCIES += rtmpdump
+endif
 endif
 
 define RECOVERY_BUILD_CMDS
