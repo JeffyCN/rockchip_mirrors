@@ -1,0 +1,61 @@
+From a51de3fdb0b1fd88ce565c4d3ad778259f6de39a Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Tue, 23 Mar 2021 22:34:54 +0800
+Subject: [PATCH 43/98] desktop-shell: Disable fullscreen black background by
+ default
+
+There's a force black background for fullscreen views.
+
+Let's disable it by default, set this env to enable:
+"WESTON_FULLSCREEN_BLACK_BACKGROUND"
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ desktop-shell/shell.c | 23 ++++++++++++++---------
+ 1 file changed, 14 insertions(+), 9 deletions(-)
+
+diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
+index ab4ef9a..36fb921 100644
+--- a/desktop-shell/shell.c
++++ b/desktop-shell/shell.c
+@@ -1892,15 +1892,18 @@ shell_set_view_fullscreen(struct shell_surface *shsurf)
+ 
+ 	weston_shell_utils_center_on_output(shsurf->view, shsurf->fullscreen_output);
+ 
+-	if (!shsurf->fullscreen.black_view) {
+-		shsurf->fullscreen.black_view =
+-			weston_shell_utils_curtain_create(ec, &curtain_params);
+-	}
++	if (getenv("WESTON_FULLSCREEN_BLACK_BACKGROUND")) {
++		if (!shsurf->fullscreen.black_view) {
++			shsurf->fullscreen.black_view =
++				weston_shell_utils_curtain_create(ec,
++								  &curtain_params);
++		}
+ 
+-	weston_view_set_output(shsurf->fullscreen.black_view->view,
+-			       shsurf->fullscreen_output);
+-	weston_view_move_to_layer(shsurf->fullscreen.black_view->view,
+-				  &shsurf->view->layer_link);
++		weston_view_set_output(shsurf->fullscreen.black_view->view,
++				       shsurf->fullscreen_output);
++		weston_view_move_to_layer(shsurf->fullscreen.black_view->view,
++					  &shsurf->view->layer_link);
++	}
+ }
+ 
+ static void
+@@ -4338,7 +4341,9 @@ switcher_next(struct switcher *switcher)
+ 		weston_view_set_alpha(view, 1.0);
+ 
+ 	shsurf = get_shell_surface(switcher->current->surface);
+-	if (shsurf && weston_desktop_surface_get_fullscreen(shsurf->desktop_surface))
++	if (shsurf &&
++	    weston_desktop_surface_get_fullscreen(shsurf->desktop_surface) &&
++	    shsurf->fullscreen.black_view)
+ 		weston_view_set_alpha(shsurf->fullscreen.black_view->view, 1.0);
+ }
+ 
+-- 
+2.20.1
+
