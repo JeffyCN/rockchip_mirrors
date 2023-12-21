@@ -33,7 +33,7 @@ index 9cec6e3..17af072 100644
 +#define DEBUG
 +#ifdef DEBUG
 +#define DRM_DEBUG(fmt, ...) \
-+    if (getenv("MJPG_DRM_DEBUG")) \
++    if (getenv("LVGL_DRM_DEBUG")) \
 +        printf("DRM_DEBUG: %s(%d) " fmt, __func__, __LINE__, ##__VA_ARGS__)
 +#else
 +#define DRM_DEBUG(fmt, ...)
@@ -849,7 +849,7 @@ index 9cec6e3..17af072 100644
  
 -	drm_dev.width = conn->modes[0].hdisplay;
 -	drm_dev.height = conn->modes[0].vdisplay;
-+    buf = getenv("MINIGUI_DRM_FB_MODE");
++    buf = getenv("LVGL_DRM_FB_MODE");
 +    if (!buf)
 +        return -1;
  
