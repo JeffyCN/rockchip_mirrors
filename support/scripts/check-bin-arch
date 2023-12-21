@@ -87,6 +87,13 @@ while read f; do
 		continue
 	fi
 
+	# Aarch32(ARM) is available on aarch64 devices.
+	if test "${arch}" = "ARM" && "${arch_name}" = "AArch64"; then
+		printf 'WARN: architecture for "%s" is "%s"(expect "%s")\n' \
+			"${f}" "${arch}" "${arch_name}"
+		continue
+	fi
+
 	printf 'ERROR: architecture for "%s" is "%s", should be "%s"\n' \
 	       "${f}" "${arch}" "${arch_name}"
 
