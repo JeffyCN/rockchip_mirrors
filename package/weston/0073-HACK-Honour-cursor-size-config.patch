@@ -1,4 +1,4 @@
-From e19f36d4398c3416072b137345c5e7a6c689584a Mon Sep 17 00:00:00 2001
+From 05603920a0f61d5eae6db56e0f4a733974155e61 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
 Subject: [PATCH 73/98] HACK: Honour cursor-size config
@@ -89,7 +89,7 @@ index e70621c..3ad8e72 100644
  	assert(scale > 0);
  
 diff --git a/libweston/input.c b/libweston/input.c
-index 439b194..f266e4e 100644
+index 439b194..21ff4d4 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
 @@ -2185,6 +2185,8 @@ weston_pointer_move_to(struct weston_pointer *pointer,
@@ -131,7 +131,12 @@ index 439b194..f266e4e 100644
  static void
  pointer_cursor_surface_committed(struct weston_surface *es,
  				 struct weston_coord_surface new_origin)
-@@ -3520,6 +3545,8 @@ pointer_cursor_surface_committed(struct weston_surface *es,
+@@ -3517,9 +3542,13 @@ pointer_cursor_surface_committed(struct weston_surface *es,
+ 
+ 	assert(es == pointer->sprite->surface);
+ 
++	pointer_cursor_scale(pointer, es);
++
  	pointer->hotspot = weston_coord_surface_sub(pointer->hotspot,
  						    new_origin);
  	hotspot_inv = weston_coord_surface_invert(pointer->hotspot);
@@ -140,15 +145,6 @@ index 439b194..f266e4e 100644
  	weston_view_set_position_with_offset(pointer->sprite,
  					     pointer->pos, hotspot_inv);
  
-@@ -3590,6 +3617,8 @@ pointer_set_cursor(struct wl_client *client, struct wl_resource *resource,
- 		pointer->sprite = weston_view_create(surface);
- 	}
- 
-+	pointer_cursor_scale(pointer, surface);
-+
- 	pointer->hotspot = weston_coord_surface(x, y, surface);
- 
- 	if (surface->width != 0) {
 @@ -4203,6 +4232,8 @@ weston_seat_init_pointer(struct weston_seat *seat)
  
  	seat_send_updated_caps(seat);
