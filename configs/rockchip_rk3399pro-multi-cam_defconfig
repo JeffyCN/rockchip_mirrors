@@ -17,7 +17,6 @@
 #include "tools/benchmark.config"
 #include "tools/common.config"
 #include "tools/test.config"
-#include "rknn_demo.conf"
 #include "weston.config"
 BR2_PACKAGE_NPU_POWERCTRL=y
 BR2_PACKAGE_RKNPU_FW=y
