@@ -1,7 +1,7 @@
-From b811be40f5b5728354bc7744ce0088133140ca8e Mon Sep 17 00:00:00 2001
+From 1db54f90449f5601ce465549ec05bbf74ee85cf4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 9 Oct 2020 18:00:11 +0800
-Subject: [PATCH 31/98] libweston: animation: Fix double-destroy
+Subject: [PATCH 31/99] libweston: animation: Fix double-destroy
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -47,10 +47,10 @@ index 22a2e1c..f4dff27 100644
  
  	return animation;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 06d603c..214335c 100644
+index 9665622..d025aa6 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -5255,7 +5255,6 @@ err_udev_monitor:
+@@ -5268,7 +5268,6 @@ err_udev_monitor:
  	udev_monitor_unref(b->udev_monitor);
  err_drm_source:
  	wl_event_source_remove(b->drm_source);

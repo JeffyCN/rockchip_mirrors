@@ -1,7 +1,7 @@
-From d1dc806daf4d8377c5973faf070c4319e2116c96 Mon Sep 17 00:00:00 2001
+From f604740166b139d725f599bb60322a9f13f5c759 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Oct 2023 11:41:06 +0800
-Subject: [PATCH 91/98] backend-drm: Support delaying initial repaint
+Subject: [PATCH 91/99] backend-drm: Support delaying initial repaint
 
 Set env "WESTON_DRM_INITIAL_FREEZE_MS" for the initial freezing.
 
@@ -26,10 +26,10 @@ index 2e5300b..ce1601a 100644
  	bool single_head;
  	bool head_fallback;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c747cd2..c674820 100644
+index 6c3f134..8df2c39 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1049,7 +1049,12 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -1055,7 +1055,12 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
  	now_ms = timespec_to_msec(&now);
@@ -43,7 +43,7 @@ index c747cd2..c674820 100644
  	    now_ms < output->last_resize_ms + b->resize_freeze_ms) {
  		/* Resize fullscreen/maxmium views(not always success) */
  		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
-@@ -5097,6 +5102,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -5110,6 +5115,10 @@ drm_backend_create(struct weston_compositor *compositor,
  		weston_log("Entering mirror mode.\n");
  	}
  

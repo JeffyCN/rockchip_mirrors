@@ -1,7 +1,7 @@
-From 3631f5ce87fa11ee79d50122b34a923e6ae77f0e Mon Sep 17 00:00:00 2001
+From ebe6fd0d5cef6f3856866cf6206a6d2b48d139b5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 24 Jun 2020 11:59:42 +0800
-Subject: [PATCH 15/98] backend-drm: Support virtual screen size
+Subject: [PATCH 15/99] backend-drm: Support virtual screen size
 
 Support setting virtual screen size, for example:
 export WESTON_DRM_VIRTUAL_SIZE=1024x768
@@ -83,7 +83,7 @@ index 3569b76..5e9a8d1 100644
  drm_property_get_range_values(struct drm_property_info *info,
  			      const drmModeObjectProperties *props);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 6e0abb5..26f59d0 100644
+index 09691d1..57bfc46 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -334,6 +334,11 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
@@ -141,7 +141,7 @@ index 6e0abb5..26f59d0 100644
  	zpos_range_values =
  		drm_property_get_range_values(&plane->props[WDRM_PLANE_ZPOS],
  					      props);
-@@ -4162,6 +4174,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4167,6 +4179,10 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	b->head_matches = drm_head_matches[head_mode];
  
