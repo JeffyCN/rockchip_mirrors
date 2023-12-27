@@ -1,7 +1,7 @@
-From c032509df6ac45077a7da01647657a61e76552e0 Mon Sep 17 00:00:00 2001
+From 7c361c7c577c891b178c3896d81e897b2706ac3f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
-Subject: [PATCH 40/98] backend-drm: Support modifier
+Subject: [PATCH 40/99] backend-drm: Support modifier
 
 Tested on rk356x with ARM AFBC modifier.
 
@@ -26,10 +26,10 @@ index 38bd40a..cf50330 100644
  
  struct drm_connector {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 8206670..a956a24 100644
+index b6d96d4..e706253 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1562,6 +1562,42 @@ err:
+@@ -1568,6 +1568,42 @@ err:
  	return NULL;
  }
  
@@ -72,7 +72,7 @@ index 8206670..a956a24 100644
  /**
   * Find, or create, a special-purpose plane
   *
-@@ -1576,7 +1612,10 @@ drm_output_find_special_plane(struct drm_device *device,
+@@ -1582,7 +1618,10 @@ drm_output_find_special_plane(struct drm_device *device,
  {
  	struct drm_backend *b = device->backend;
  	struct drm_plane *plane;
@@ -83,7 +83,7 @@ index 8206670..a956a24 100644
  	wl_list_for_each(plane, &device->plane_list, link) {
  		struct weston_output *base;
  		bool found_elsewhere = false;
-@@ -1616,10 +1655,19 @@ drm_output_find_special_plane(struct drm_device *device,
+@@ -1622,10 +1661,19 @@ drm_output_find_special_plane(struct drm_device *device,
  		    (plane->crtc_id != output->crtc->crtc_id))
  			continue;
  
@@ -103,7 +103,7 @@ index 8206670..a956a24 100644
  	return NULL;
  }
  
-@@ -5045,11 +5093,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -5058,11 +5106,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	wl_list_insert(&compositor->backend_list, &b->base.link);
  
@@ -115,7 +115,7 @@ index 8206670..a956a24 100644
  	/* Check if we run drm-backend using a compatible launcher */
  	compositor->launcher = weston_launcher_connect(compositor, seat_id, true);
  	if (compositor->launcher == NULL) {
-@@ -5082,6 +5125,33 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -5095,6 +5138,33 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
@@ -149,7 +149,7 @@ index 8206670..a956a24 100644
  	if (config->additional_devices)
  		open_additional_devices(b, config->additional_devices);
  
-@@ -5097,18 +5167,18 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -5110,18 +5180,18 @@ drm_backend_create(struct weston_compositor *compositor,
  	case WESTON_RENDERER_PIXMAN:
  		if (init_pixman(b) < 0) {
  			weston_log("failed to initialize pixman renderer\n");
@@ -171,7 +171,7 @@ index 8206670..a956a24 100644
  	}
  
  	b->base.shutdown = drm_shutdown;
-@@ -5122,21 +5192,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -5135,21 +5205,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	weston_setup_vt_switch_bindings(compositor);
  

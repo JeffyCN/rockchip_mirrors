@@ -1,7 +1,7 @@
-From 4ac96df5c31c5a9481d6b57ec13586fe72829045 Mon Sep 17 00:00:00 2001
+From a04935d9f31e8d14acf5f669d1e23ceea88c99c7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 13 Jul 2021 10:56:56 +0800
-Subject: [PATCH 48/98] Support sw-cursor config
+Subject: [PATCH 48/99] Support sw-cursor config
 
 Tested with:
 [core]
@@ -41,10 +41,10 @@ index d47955c..cd71747 100644
  
  #ifdef  __cplusplus
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index a956a24..9a04f52 100644
+index e706253..1c71fcd 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -5206,6 +5206,8 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -5219,6 +5219,8 @@ drm_backend_create(struct weston_compositor *compositor,
  	/* 'compute' faked zpos values in case HW doesn't expose any */
  	drm_backend_create_faked_zpos(b->drm);
  

@@ -1,7 +1,7 @@
-From 1f0f619903cec0fe9f41d651e45b863e20854a2c Mon Sep 17 00:00:00 2001
+From fb1e5b4f832a34269b1c09b3e9eb2a8e9f1262cd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 18/98] backend-drm: Support controlling output dynamically
+Subject: [PATCH 18/99] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -34,7 +34,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                |  24 ++-
  include/libweston/libweston.h        |   7 +
  libweston/backend-drm/drm-internal.h |  16 ++
- libweston/backend-drm/drm.c          | 269 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 271 ++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          |   9 +
  libweston/backend-drm/modes.c        |  20 +-
  libweston/compositor.c               |  29 ++-
@@ -42,7 +42,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/libweston-internal.h       |   3 +
  libweston/pixman-renderer.c          |  29 +++
  libweston/renderer-gl/gl-renderer.c  |   3 +
- 12 files changed, 441 insertions(+), 25 deletions(-)
+ 12 files changed, 443 insertions(+), 25 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 319fc30..146bbf8 100644
@@ -205,7 +205,7 @@ index 92b9676..6ab37ed 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index ee60f21..8d506f0 100644
+index bcc7b3d..7b96e61 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -41,6 +41,7 @@
@@ -238,7 +238,7 @@ index ee60f21..8d506f0 100644
  	if (output->state_cur->tear)
  		flags |= WESTON_FINISH_FRAME_TEARING;
  
-@@ -688,8 +697,8 @@ out:
+@@ -690,8 +699,8 @@ out:
  		return;
  	}
  
@@ -249,7 +249,7 @@ index ee60f21..8d506f0 100644
  
  	dx = output->plane_bounds.x1;
  	dy = output->plane_bounds.y1;
-@@ -1033,7 +1042,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -1035,7 +1044,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
  	now_ms = timespec_to_msec(&now);
@@ -259,7 +259,7 @@ index ee60f21..8d506f0 100644
  		/* Resize fullscreen/maxmium views(not always success) */
  		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
  			wl_signal_emit(&b->compositor->output_resized_signal,
-@@ -1042,7 +1052,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -1044,7 +1054,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  		weston_output_damage(output_base);
  		weston_output_finish_frame(output_base, NULL,
  					   WP_PRESENTATION_FEEDBACK_INVALID);
@@ -268,7 +268,7 @@ index ee60f21..8d506f0 100644
  	}
  
  	/* If planes have been disabled in the core, we might not have
-@@ -1102,7 +1112,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -1104,7 +1114,8 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  err:
  	drm_output_state_free(state);
@@ -278,7 +278,7 @@ index ee60f21..8d506f0 100644
  }
  
  /* Determine the type of vblank synchronization to use for the output.
-@@ -2655,6 +2666,8 @@ drm_output_enable(struct weston_output *base)
+@@ -2657,6 +2668,8 @@ drm_output_enable(struct weston_output *base)
  	output->base.switch_mode = drm_output_switch_mode;
  	output->base.set_gamma = drm_output_set_gamma;
  
@@ -287,7 +287,7 @@ index ee60f21..8d506f0 100644
  	output->state_invalid = true;
  
  	if (device->atomic_modeset)
-@@ -3801,6 +3814,7 @@ drm_shutdown(struct weston_backend *backend)
+@@ -3807,6 +3820,7 @@ drm_shutdown(struct weston_backend *backend)
  
  	udev_input_destroy(&b->input);
  
@@ -295,7 +295,7 @@ index ee60f21..8d506f0 100644
  	wl_event_source_remove(b->hotplug_timer);
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
-@@ -4348,6 +4362,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -4355,6 +4369,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -306,7 +306,7 @@ index ee60f21..8d506f0 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -4358,6 +4376,243 @@ static const struct weston_drm_output_api api = {
+@@ -4365,6 +4383,245 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_content_type,
  };
  
@@ -410,50 +410,52 @@ index ee60f21..8d506f0 100644
 +config_handle_output(struct drm_backend *b, const char *name,
 +		     const char *config)
 +{
-+	struct drm_output *output;
++	struct weston_output *base_output;
 +	bool is_all = !strcmp(name, "all");
 +
-+	wl_list_for_each(output, &b->compositor->output_list, base.link) {
-+		if (!is_all && strcmp(name, output->base.name))
++	wl_list_for_each(base_output, &b->compositor->output_list, link) {
++		struct drm_output *output = to_drm_output(base_output);
++
++		if (!output || (!is_all && strcmp(name, base_output->name)))
 +			continue;
 +
 +		if (!strcmp(config, "primary")) {
 +			setenv("WESTON_DRM_PRIMARY", name, 1);
 +			hotplug_timer_handler(b->drm);
 +		} else if (!strcmp(config, "prefer")) {
-+			b->compositor->prefer_output = &output->base;
++			b->compositor->prefer_output = base_output;
 +		} else if (!strncmp(config, "rotate", strlen("rotate"))) {
 +			int rotate = atoi(config + strlen("rotate")) / 90;
 +			drm_output_rotate(output, rotate);
 +		} else if (!strncmp(config, "mode=", strlen("mode="))) {
 +			drm_output_modeset(output, config + strlen("mode="));
 +		} else if (!strcmp(config, "freeze")) {
-+			output->base.freezing = true;
++			base_output->freezing = true;
 +		} else if (!strcmp(config, "offscreen")) {
 +			if (!output->virtual)
-+				drm_set_dpms(&output->base, WESTON_DPMS_OFF);
++				drm_set_dpms(base_output, WESTON_DPMS_OFF);
 +		} else if (!strcmp(config, "off")) {
-+			output->base.freezing = true;
++			base_output->freezing = true;
 +			if (!output->virtual)
-+				drm_set_dpms(&output->base, WESTON_DPMS_OFF);
++				drm_set_dpms(base_output, WESTON_DPMS_OFF);
 +		} else if (!strcmp(config, "unfreeze") ||
 +			   !strcmp(config, "on")) {
-+			output->base.freezing = false;
++			base_output->freezing = false;
 +
 +			if (!output->virtual)
-+				drm_set_dpms(&output->base, WESTON_DPMS_ON);
++				drm_set_dpms(base_output, WESTON_DPMS_ON);
 +
-+			weston_output_damage(&output->base);
++			weston_output_damage(base_output);
 +		} else if (!strncmp(config, "down-scale=",
 +				    strlen("down-scale="))) {
 +			double down_scale =
 +				atof(config + strlen("down-scale="));
-+			if (down_scale == output->base.down_scale ||
++			if (down_scale == base_output->down_scale ||
 +			    down_scale < 0.125 || down_scale > 1)
 +				continue;
 +
-+			output->base.down_scale = down_scale;
-+			weston_output_damage(&output->base);
++			base_output->down_scale = down_scale;
++			weston_output_damage(base_output);
 +		} else if (!strncmp(config, "size=", strlen("size="))) {
 +			int w, h;
 +
@@ -469,8 +471,8 @@ index ee60f21..8d506f0 100644
 +				continue;
 +
 +			pos.c = weston_coord(x, y);
-+			weston_output_move(&output->base, pos);
-+			output->base.fixed_position = true;
++			weston_output_move(base_output, pos);
++			base_output->fixed_position = true;
 +
 +			weston_compositor_reflow_outputs(b->compositor);
 +		} else if (!strncmp(config, "rect=", strlen("rect="))) {
@@ -485,9 +487,9 @@ index ee60f21..8d506f0 100644
 +			output->plane_bounds.y1 = y1;
 +			output->plane_bounds.x2 = x2;
 +			output->plane_bounds.y2 = y2;
-+			weston_output_schedule_repaint(&output->base);
++			weston_output_schedule_repaint(base_output);
 +		} else if (!strncmp(config, "input=", strlen("input="))) {
-+			weston_output_bind_input(&output->base,
++			weston_output_bind_input(base_output,
 +						 config + strlen("input="));
 +		}
 +	}
@@ -550,7 +552,7 @@ index ee60f21..8d506f0 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4722,6 +4977,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4729,6 +4986,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b->drm);
  
