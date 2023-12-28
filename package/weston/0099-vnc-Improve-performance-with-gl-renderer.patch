@@ -1,4 +1,4 @@
-From 7718a61ee7bf48e6e8dd03fa1c7941eff3f6308d Mon Sep 17 00:00:00 2001
+From 6a3e269104afed6afe2a4e6fd757bc4fa0796b3f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 25 Dec 2023 16:58:31 +0800
 Subject: [PATCH 99/99] vnc: Improve performance with gl-renderer
@@ -8,7 +8,7 @@ Major changes:
 2/ Support increasing buffers
 
 Tested on RK3588 EVB with:
-1/ Run "weston -B vnc-backend.so"
+1/ Run "weston -B vnc" or "weston -B drm,vnc"
 2/ Launch vncviewer on remote PC
 3/ Run "weston-simple-egl -f"
 
@@ -551,14 +551,14 @@ index b6f8f51..a807348 100644
  
  static inline struct gl_renderer *
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 4d8d563..a27a9c9 100644
+index 4d8d563..a20aa8e 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -812,6 +812,13 @@ gl_renderer_create_fbo(struct weston_output *output,
  	return &renderbuffer->base;
  }
  
-+static struct gl_renderer_display_options *
++static const struct gl_renderer_display_options *
 +gl_renderer_get_display_options(struct weston_compositor *ec)
 +{
 +	struct gl_renderer *gr = get_renderer(ec);
