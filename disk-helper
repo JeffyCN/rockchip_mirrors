@@ -208,6 +208,10 @@ format_part()
 			check_tool mkfs.vfat BR2_PACKAGE_DOSFSTOOLS_MKFS_FAT && \
 			mkfs.vfat -I -F 32 -n $PART_NAME $DEV
 			;;
+		exfat)
+			check_tool mkexfatfs BR2_PACKAGE_EXFAT_UTILS && \
+			mkexfatfs -n $PART_NAME $DEV
+			;;
 		ntfs)
 			# Enable compression
 			check_tool mkntfs BR2_PACKAGE_NTFS_3G_NTFSPROGS && \
@@ -374,6 +378,12 @@ prepare_part()
 			FSCK="fsck.vfat -y"
 			FSCK_CONFIG=BR2_PACKAGE_DOSFSTOOLS_FSCK_FAT
 			FSRESIZE=resize_vfat
+			;;
+		exfat)
+			FSGROUP=exfat
+			FSCK="exfatfsck -y"
+			FSCK_CONFIG=BR2_PACKAGE_EXFAT_UTILS
+			unset FSRESIZE
 			;;
 		ntfs)
 			FSGROUP=ntfs
