@@ -1,0 +1,94 @@
+From d08bba494b6ba0c304a333c2c64ba08a37c0f82c Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 13 Aug 2021 10:10:01 +0800
+Subject: [PATCH 90/91] backend-drm: Handle -ERESTARTSYS error
+
+The newer kernel's drm_atomic_helper_swap_state() might return
+-ERESTARTSYS when getting interrupted. Let's retry it!
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/kms.c | 32 +++++++++++++++++++++++++-------
+ 1 file changed, 25 insertions(+), 7 deletions(-)
+
+diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
+index e89f093de..3c9bd2660 100644
+--- a/libweston/backend-drm/kms.c
++++ b/libweston/backend-drm/kms.c
+@@ -45,6 +45,10 @@
+ #include "pixel-formats.h"
+ #include "presentation-time-server-protocol.h"
+ 
++#ifndef ERESTARTSYS
++#define ERESTARTSYS  512
++#endif
++
+ struct drm_property_enum_info plane_type_enums[] = {
+ 	[WDRM_PLANE_TYPE_PRIMARY] = {
+ 		.name = "Primary",
+@@ -973,7 +977,8 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+ 			      scanout_state->src_x, scanout_state->src_y,
+ 			      scanout_state->src_w, scanout_state->src_h);
+ 	if (ret) {
+-		weston_log("set plane failed: %s\n", strerror(errno));
++		if (ret != -ERESTARTSYS)
++			weston_log("set plane failed: %s\n", strerror(errno));
+ 		goto err;
+ 	}
+ 
+@@ -982,10 +987,13 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+ 			   crtc->crtc_id, scanout_state->plane->plane_id,
+ 			   pinfo ? pinfo->drm_format_name : "UNKNOWN");
+ 
+-	if (drmModePageFlip(device->drm.fd, crtc->crtc_id,
+-			    scanout_state->fb->fb_id,
+-			    DRM_MODE_PAGE_FLIP_EVENT, output) < 0) {
+-		weston_log("queueing pageflip failed: %s\n", strerror(errno));
++	ret = drmModePageFlip(device->drm.fd, crtc->crtc_id,
++			      scanout_state->fb->fb_id,
++			      DRM_MODE_PAGE_FLIP_EVENT, output);
++	if (ret) {
++		if (ret != -ERESTARTSYS)
++			weston_log("queueing pageflip failed: %s\n",
++				   strerror(errno));
+ 		goto err;
+ 	}
+ 
+@@ -1019,6 +1027,10 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+ 	return 0;
+ 
+ err:
++	/* Retry when getting interrupted */
++	if (ret == -ERESTARTSYS)
++		return drm_output_apply_state_legacy(state);
++
+ 	drm_output_set_cursor_view(output, NULL);
+ 	drm_output_state_free(state);
+ 	return -1;
+@@ -1613,8 +1625,9 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
+ 			if (drm_output_get_writeback_state(output_state->output) != DRM_OUTPUT_WB_SCREENSHOT_OFF)
+ 				drm_writeback_fail_screenshot(output_state->output->wb_state,
+ 							      "drm: atomic commit failed");
+-		weston_log("atomic: couldn't commit new state: %s\n",
+-			   strerror(errno));
++		if (ret != -ERESTARTSYS)
++			weston_log("atomic: couldn't commit new state: %s\n",
++				   strerror(errno));
+ 		goto out;
+ 	}
+ 
+@@ -1629,6 +1642,11 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
+ 
+ out:
+ 	drmModeAtomicFree(req);
++
++	/* Retry when getting interrupted */
++	if (ret == -ERESTARTSYS)
++		return drm_pending_state_apply_atomic(pending_state, mode);
++
+ 	drm_pending_state_free(pending_state);
+ 	return ret;
+ }
+-- 
+2.20.1
+
