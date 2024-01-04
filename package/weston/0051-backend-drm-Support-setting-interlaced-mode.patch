@@ -1,7 +1,7 @@
-From b5acae41a5ad55dccd4c33237fe190f8af6520d2 Mon Sep 17 00:00:00 2001
+From a85b6c763f4eb5ac1234ba00fac8791c983ed832 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 21 Oct 2020 15:27:38 +0800
-Subject: [PATCH 51/93] backend-drm: Support setting interlaced mode
+Subject: [PATCH 51/94] backend-drm: Support setting interlaced mode
 
 Tested with:
 echo "output:HDMI-A-1:mode=1920x1080i" > /tmp/.weston_drm.conf
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 17 insertions(+), 12 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index d16ed46216..71a510f071 100644
+index 58afca50fa..e2b14d23c0 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -4447,9 +4447,9 @@ drm_output_modeset(struct drm_output *output, const char *modeline)
+@@ -4474,9 +4474,9 @@ drm_output_modeset(struct drm_output *output, const char *modeline)
  
  	mode = to_drm_mode(output->base.current_mode);
  

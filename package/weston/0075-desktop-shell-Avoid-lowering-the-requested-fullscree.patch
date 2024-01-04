@@ -1,7 +1,7 @@
-From 1005775e69ec6ee9284a6ac4f7a5261a7928576e Mon Sep 17 00:00:00 2001
+From 3abfa918010a630a698add98c132d1527a02e192 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 24 Jun 2022 16:25:11 +0800
-Subject: [PATCH 75/93] desktop-shell: Avoid lowering the requested fullscreen
+Subject: [PATCH 75/94] desktop-shell: Avoid lowering the requested fullscreen
  surface
 
 Don't lower itself.
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 7 insertions(+), 5 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index e9fb755bb0..90ff299071 100644
+index 3f5a1bd845..49a4f4f64a 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -3597,7 +3597,8 @@ rotate_binding(struct weston_pointer *pointer, const struct timespec *time,
@@ -44,7 +44,7 @@ index e9fb755bb0..90ff299071 100644
  
  	if (view->surface->flags & SURFACE_NO_FOCUS)
  		goto no_focus;
-@@ -4468,7 +4469,7 @@ switcher_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+@@ -4465,7 +4466,7 @@ switcher_binding(struct weston_keyboard *keyboard, const struct timespec *time,
  	wl_list_init(&switcher->listener.link);
  	wl_array_init(&switcher->minimized_array);
  

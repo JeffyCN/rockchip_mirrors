@@ -1,7 +1,7 @@
-From 7d8c59d71895a899adc7c88d7ab662f5989eed6a Mon Sep 17 00:00:00 2001
+From ce4c64f734f938d132b38d69131827128f2d7515 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
-Subject: [PATCH 35/93] backend-drm: Support selecting monitors
+Subject: [PATCH 35/94] backend-drm: Support selecting monitors
 
 Using these environments:
 
@@ -28,14 +28,14 @@ WESTON_DRM_HEAD_MODE:
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  compositor/main.c                    |  22 +-
- desktop-shell/shell.c                |  34 ++-
+ desktop-shell/shell.c                |  31 ++-
  include/libweston/config-parser.h    |   1 +
  include/libweston/libweston.h        |   2 +
  libweston/backend-drm/drm-internal.h |  24 ++
  libweston/backend-drm/drm.c          | 390 +++++++++++++++++++++++----
  libweston/backend-drm/kms.c          |  22 +-
  libweston/compositor.c               |  60 ++++-
- 8 files changed, 488 insertions(+), 67 deletions(-)
+ 8 files changed, 485 insertions(+), 67 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 04908e1380..319fc30801 100644
@@ -95,7 +95,7 @@ index 04908e1380..319fc30801 100644
  		enabled = weston_head_is_enabled(head);
  		changed = weston_head_is_device_changed(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 413542d7af..734aa8f843 100644
+index 413542d7af..8a1789ec67 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -2785,6 +2785,7 @@ background_committed(struct weston_surface *es,
@@ -124,18 +124,15 @@ index 413542d7af..734aa8f843 100644
  	shell->fade.animation = NULL;
  	switch (shell->fade.type) {
  	case FADE_IN:
-@@ -3877,6 +3882,10 @@ shell_fade_create_view(struct desktop_shell *shell)
+@@ -3877,6 +3882,7 @@ shell_fade_create_view(struct desktop_shell *shell)
  		x2 = MAX(x2, op->pos.c.x + op->width);
  		y2 = MAX(y2, op->pos.c.y + op->height);
  	}
 +
-+	if (first)
-+		return NULL;
-+
  	curtain_params.pos.c.x = x1;
  	curtain_params.pos.c.y = y1;
  	curtain_params.width = x2 - x1;
-@@ -4689,12 +4698,28 @@ handle_output_move_layer(struct desktop_shell *shell,
+@@ -4689,12 +4695,28 @@ handle_output_move_layer(struct desktop_shell *shell,
  static void
  handle_output_move(struct wl_listener *listener, void *data)
  {
@@ -165,7 +162,7 @@ index 413542d7af..734aa8f843 100644
  }
  
  static void
-@@ -4787,8 +4812,11 @@ shell_destroy(struct wl_listener *listener, void *data)
+@@ -4787,8 +4809,11 @@ shell_destroy(struct wl_listener *listener, void *data)
  		shell->fade.animation = NULL;
  	}
  

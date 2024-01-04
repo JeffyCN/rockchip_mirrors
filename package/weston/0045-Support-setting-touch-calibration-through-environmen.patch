@@ -1,7 +1,7 @@
-From 1d2dccb2b6f6e541d96c7ba99c068ede1b3f1349 Mon Sep 17 00:00:00 2001
+From 3a66f76fb468d77f81a17fe0bb4757b3e2ca97e6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 4 Aug 2020 14:30:33 +0800
-Subject: [PATCH 45/93] Support setting touch calibration through environment
+Subject: [PATCH 45/94] Support setting touch calibration through environment
 
 Tested on RK3588 EVB with:
 1/ killall weston

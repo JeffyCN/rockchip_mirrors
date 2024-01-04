@@ -1,7 +1,7 @@
 From a8442fdcb81bbd62ac3f1be1467d4e1433832121 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 25 Jul 2023 11:15:16 +0800
-Subject: [PATCH 13/93] drm-gbm: Fix format_count error when configless context
+Subject: [PATCH 13/94] drm-gbm: Fix format_count error when configless context
  not supported
 
 Tested on RK3288 EVB, no more:

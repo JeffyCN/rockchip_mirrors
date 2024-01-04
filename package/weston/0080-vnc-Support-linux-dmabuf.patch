@@ -1,7 +1,7 @@
-From 733bf5ea2bd29c227b11bdcb7af221c791ea8366 Mon Sep 17 00:00:00 2001
+From 9d895b387730e1d4aa73285a2c141836fae1e05f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 13 Dec 2022 16:12:30 +0800
-Subject: [PATCH 80/93] vnc: Support linux-dmabuf
+Subject: [PATCH 80/94] vnc: Support linux-dmabuf
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

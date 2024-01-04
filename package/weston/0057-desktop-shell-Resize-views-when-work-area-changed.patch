@@ -1,7 +1,7 @@
-From 930dc967e7727bc72e6cb987257fda5ffccedf48 Mon Sep 17 00:00:00 2001
+From f88b9b0520ec4cb8d11deb9ce35868bd9f35f4cf Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 01:50:22 +0800
-Subject: [PATCH 57/93] desktop-shell: Resize views when work area changed
+Subject: [PATCH 57/94] desktop-shell: Resize views when work area changed
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 11 insertions(+)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 127ea815c7..544de6d276 100644
+index de924ed156..3b33f1cf63 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -48,6 +48,9 @@

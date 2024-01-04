@@ -1,7 +1,7 @@
-From c705ec579207e1db487062776bb57e31be23a38e Mon Sep 17 00:00:00 2001
+From 8e5a176d0dcacc5c84f51792ed6f84274cd2faf6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Oct 2023 15:50:59 +0800
-Subject: [PATCH 89/93] compositor: Fix panel with wrong output error
+Subject: [PATCH 89/94] compositor: Fix panel with wrong output error
 
 Caused by:
 d611ab24f "libweston: Update view transforms more often".

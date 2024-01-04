@@ -1,7 +1,7 @@
-From 497147ca703cc390024b9be1ae630cc4ca29eb2e Mon Sep 17 00:00:00 2001
+From 6933d5c7becd56d26f7d1f6ab283ada1bc19a40c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Oct 2020 12:43:00 +0800
-Subject: [PATCH 50/93] compositor: Support setting default layer for the first
+Subject: [PATCH 50/94] compositor: Support setting default layer for the first
  app
 
 Set env "WESTON_FIRST_APP_LAYER" to "top" or "bottom".

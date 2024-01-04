@@ -1,7 +1,7 @@
 From d70afbce13509be673cb54ae82a830d5ada36180 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 22 Mar 2021 22:54:28 +0800
-Subject: [PATCH 19/93] desktop-shell: Use real size for non-image background
+Subject: [PATCH 19/94] desktop-shell: Use real size for non-image background
 
 Currently we are faking 1x1 size for non-image background, which would
 causing incorrect opaque region.

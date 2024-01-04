@@ -1,7 +1,7 @@
-From f32376860be4f88fb5ec69490ab1412ba2fe96c1 Mon Sep 17 00:00:00 2001
+From 0894866cf21386592430676ad3f793abaa826507 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 10:48:36 +0800
-Subject: [PATCH 85/93] Support using USR2 signal to kill focus client
+Subject: [PATCH 85/94] Support using USR2 signal to kill focus client
 
 Tested with:
 1/ weston-terminal&
@@ -63,10 +63,10 @@ index 7459ef1a1b..777e42ff71 100644
  	wl_list_init(&wet.child_process_list);
  	signals[2] = wl_event_loop_add_signal(loop, SIGCHLD, sigchld_handler,
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index f0232baf18..d0566026a6 100644
+index 5d60e627bf..abf0e307a8 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4870,6 +4870,8 @@ shell_destroy(struct wl_listener *listener, void *data)
+@@ -4867,6 +4867,8 @@ shell_destroy(struct wl_listener *listener, void *data)
  	text_backend_destroy(shell->text_backend);
  	input_panel_destroy(shell);
  
@@ -75,7 +75,7 @@ index f0232baf18..d0566026a6 100644
  	if (shell->fade.animation) {
  		weston_view_animation_destroy(shell->fade.animation);
  		shell->fade.animation = NULL;
-@@ -4999,6 +5001,22 @@ handle_seat_created(struct wl_listener *listener, void *data)
+@@ -4996,6 +4998,22 @@ handle_seat_created(struct wl_listener *listener, void *data)
  	create_shell_seat(shell, seat);
  }
  
@@ -98,7 +98,7 @@ index f0232baf18..d0566026a6 100644
  WL_EXPORT int
  wet_shell_init(struct weston_compositor *ec,
  	       int *argc, char *argv[])
-@@ -5084,6 +5102,9 @@ wet_shell_init(struct weston_compositor *ec,
+@@ -5081,6 +5099,9 @@ wet_shell_init(struct weston_compositor *ec,
  
  	setup_output_destroy_handler(ec, shell);
  
