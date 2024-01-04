@@ -1,7 +1,7 @@
-From c2059f07fb4863562ef01b39b3db4df3f59aef65 Mon Sep 17 00:00:00 2001
+From fcfd2d05506cb9ab77ea37830c176e8f5f01f471 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 7 Mar 2022 17:20:59 +0800
-Subject: [PATCH 69/93] backend-drm: Allow overriding plane type when using
+Subject: [PATCH 69/94] backend-drm: Allow overriding plane type when using
  atomic
 
 Set env DRM_PLANE_TYPE_<plane id> to primary|overlay|cursor.
@@ -28,10 +28,10 @@ index 6f8056c294..af00d24475 100644
  extern const struct drm_property_info plane_props[];
  extern struct drm_property_enum_info dpms_state_enums[];
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 4e6ccbc81c..6ad2ea77b7 100644
+index 289e580e7a..decead007f 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1486,10 +1486,8 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
+@@ -1513,10 +1513,8 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
  
  	drm_property_info_populate(device, plane_props, plane->props,
  				   WDRM_PLANE__COUNT, props);
@@ -45,7 +45,7 @@ index 4e6ccbc81c..6ad2ea77b7 100644
  	plane->can_scale =
  		drm_property_has_feature(plane->props,
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index e74363f86e..1af25feae8 100644
+index be7f167201..d97186f198 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -581,6 +581,35 @@ drm_property_info_free(struct drm_property_info *info, int num_props)

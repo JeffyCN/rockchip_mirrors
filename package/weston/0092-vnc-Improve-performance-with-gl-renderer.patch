@@ -1,7 +1,7 @@
-From d7bbc51c994b4d06f98b5e8994b09a6821be66a4 Mon Sep 17 00:00:00 2001
+From 4598a2962172e2443cd4b81346c1e306369f3f93 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 25 Dec 2023 16:58:31 +0800
-Subject: [PATCH 92/93] vnc: Improve performance with gl-renderer
+Subject: [PATCH 92/94] vnc: Improve performance with gl-renderer
 
 Major changes:
 1/ Use GBM instead of FBO

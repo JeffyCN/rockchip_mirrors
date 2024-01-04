@@ -1,7 +1,7 @@
-From 03568af8935f5c2a25af0efe642774279fe8a036 Mon Sep 17 00:00:00 2001
+From 1b832099ef6ef451b7ec9be89b079b533d403afe Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 1 Jun 2022 11:28:24 +0800
-Subject: [PATCH 72/93] desktop-shell: Delay locking when having pending
+Subject: [PATCH 72/94] desktop-shell: Delay locking when having pending
  fade-out animations
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 544de6d276..e9fb755bb0 100644
+index 3b33f1cf63..3f5a1bd845 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -3854,6 +3854,10 @@ static void
@@ -35,7 +35,7 @@ index 544de6d276..e9fb755bb0 100644
  		break;
  	default:
  		break;
-@@ -3958,6 +3963,9 @@ shell_fade(struct desktop_shell *shell, enum fade_type type)
+@@ -3955,6 +3960,9 @@ shell_fade(struct desktop_shell *shell, enum fade_type type)
  	if (shell->fade.animation) {
  		weston_fade_update(shell->fade.animation, tint);
  	} else {
@@ -45,7 +45,7 @@ index 544de6d276..e9fb755bb0 100644
  		shell->fade.animation =
  			weston_fade_run(shell->fade.curtain->view,
  					1.0 - tint, tint, 300.0,
-@@ -4857,6 +4865,9 @@ shell_destroy(struct wl_listener *listener, void *data)
+@@ -4854,6 +4862,9 @@ shell_destroy(struct wl_listener *listener, void *data)
  	if (shell->fade.animation) {
  		weston_view_animation_destroy(shell->fade.animation);
  		shell->fade.animation = NULL;

@@ -1,7 +1,7 @@
-From 0ac0c416fe95e303f7f6b08e0f83c5a7be96b799 Mon Sep 17 00:00:00 2001
+From 28c22c31923a3db73d05ad1ddbf1545dc192111a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Aug 2023 18:18:58 +0800
-Subject: [PATCH 87/93] backend-drm: Support increasing buffers
+Subject: [PATCH 87/94] backend-drm: Support increasing buffers
 
 Default is 2 buffers, set env "WESTON_DRM_MIN_BUFFERS" to increase it.
 
@@ -305,10 +305,10 @@ index 919259ae2c..e112463eb4 100644
  
  	struct vaapi_recorder *recorder;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 33f3a2575f..e1553d8f57 100644
+index cee7f645a1..9998bb9503 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -547,13 +547,14 @@ drm_output_render_pixman(struct drm_output_state *state,
+@@ -574,13 +574,14 @@ drm_output_render_pixman(struct drm_output_state *state,
  {
  	struct drm_output *output = state->output;
  	struct weston_compositor *ec = output->base.compositor;
@@ -327,7 +327,7 @@ index 33f3a2575f..e1553d8f57 100644
  }
  
  static struct drm_fb *
-@@ -613,7 +614,7 @@ drm_output_get_wrap_fb(struct drm_backend *b, struct drm_output *output,
+@@ -640,7 +641,7 @@ drm_output_get_wrap_fb(struct drm_backend *b, struct drm_output *output,
  
  	output->wrap[output->next_wrap] = fb;
  out:
@@ -336,7 +336,7 @@ index 33f3a2575f..e1553d8f57 100644
  	return drm_fb_ref(fb);
  }
  
-@@ -1979,7 +1980,7 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
+@@ -2006,7 +2007,7 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
  		goto err;
  
  	/* FIXME error checking */
@@ -345,7 +345,7 @@ index 33f3a2575f..e1553d8f57 100644
  		output->dumb[i] = drm_fb_create_dumb(device, w, h,
  						     options.format->format);
  		if (!output->dumb[i])
-@@ -2037,8 +2038,11 @@ drm_output_fini_pixman(struct drm_output *output)
+@@ -2064,8 +2065,11 @@ drm_output_fini_pixman(struct drm_output *output)
  	}
  
  	for (i = 0; i < ARRAY_LENGTH(output->dumb); i++) {
@@ -359,7 +359,7 @@ index 33f3a2575f..e1553d8f57 100644
  		output->dumb[i] = NULL;
  		output->renderbuffer[i] = NULL;
  	}
-@@ -3188,6 +3192,7 @@ drm_output_create(struct weston_backend *backend, const char *name)
+@@ -3215,6 +3219,7 @@ drm_output_create(struct weston_backend *backend, const char *name)
  	struct drm_backend *b = container_of(backend, struct drm_backend, base);
  	struct drm_device *device;
  	struct drm_output *output;
@@ -367,7 +367,7 @@ index 33f3a2575f..e1553d8f57 100644
  
  	device = drm_device_find_by_output(b->compositor, name);
  	if (!device)
-@@ -3207,6 +3212,14 @@ drm_output_create(struct weston_backend *backend, const char *name)
+@@ -3234,6 +3239,14 @@ drm_output_create(struct weston_backend *backend, const char *name)
  	output->gbm_bo_flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING;
  #endif
  
@@ -382,7 +382,7 @@ index 33f3a2575f..e1553d8f57 100644
  	weston_output_init(&output->base, b->compositor, name);
  
  	output->base.enable = drm_output_enable;
-@@ -4839,6 +4852,10 @@ drm_dummy_output_create(struct drm_device *device)
+@@ -4868,6 +4881,10 @@ drm_dummy_output_create(struct drm_device *device)
  	output->format = pixel_format_get_info(DRM_FORMAT_XRGB8888),
  #endif
  

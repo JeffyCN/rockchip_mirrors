@@ -1,7 +1,7 @@
 From 721eace9e691e63c32ea706bca1aa7b03f7fb0b9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Aug 2022 11:27:54 +0800
-Subject: [PATCH 12/93] renderer-gl: Clear RGB when alpha is zero in fast path
+Subject: [PATCH 12/94] renderer-gl: Clear RGB when alpha is zero in fast path
 
 There might be dirty data in other channels.
 

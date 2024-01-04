@@ -1,7 +1,7 @@
 From faa970eef2603f26c3f4847b7b568ca4be966770 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Oct 2023 17:33:19 +0800
-Subject: [PATCH 14/93] desktop-shell.c: Reset panel clock timer everytime
+Subject: [PATCH 14/94] desktop-shell.c: Reset panel clock timer everytime
 
 In case of the system time been changed.
 
