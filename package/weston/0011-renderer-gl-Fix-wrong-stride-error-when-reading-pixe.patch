@@ -1,0 +1,29 @@
+From 7ebe5258dd0a2f5013904167ac246ea874d1ac36 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 28 Dec 2023 16:40:30 +0800
+Subject: [PATCH 11/93] renderer-gl: Fix wrong stride error when reading pixels
+
+The gl_renderer_do_read_pixels() is expecting stride in bytes.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/renderer-gl/gl-renderer.c | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
+index c1d4fef41e..1cd6045aff 100644
+--- a/libweston/renderer-gl/gl-renderer.c
++++ b/libweston/renderer-gl/gl-renderer.c
+@@ -2050,7 +2050,8 @@ gl_renderer_repaint_output(struct weston_output *output,
+ 			pixels += extents->x1 - (int)output->pos.c.x;
+ 		}
+ 
+-		gl_renderer_do_read_pixels(gr, compositor->read_format, pixels, stride, &rect);
++		gl_renderer_do_read_pixels(gr, compositor->read_format, pixels,
++					   stride * 4, &rect);
+ 
+ 		if (gr->gl_version >= gr_gl_version(3, 0))
+ 			glPixelStorei(GL_PACK_ROW_LENGTH, 0);
+-- 
+2.20.1
+
