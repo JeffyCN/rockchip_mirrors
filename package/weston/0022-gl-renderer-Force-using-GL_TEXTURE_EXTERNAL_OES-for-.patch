@@ -1,4 +1,4 @@
-From d50f38ebe1572f44d5db8adc30634eb629758e88 Mon Sep 17 00:00:00 2001
+From c0dbfcbc1b4e5cbc62cb8abc63d79b40857c5916 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Nov 2022 10:21:13 +0800
 Subject: [PATCH 22/94] gl-renderer: Force using GL_TEXTURE_EXTERNAL_OES for
@@ -8,24 +8,32 @@ Mali depends on that.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/renderer-gl/gl-renderer.c | 4 ++++
- 1 file changed, 4 insertions(+)
+ libweston/renderer-gl/gl-renderer.c | 5 +++++
+ 1 file changed, 5 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index aa8a49dcdb..397019d2d2 100644
+index aa8a49dcdb..5f124479da 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
-@@ -2882,6 +2882,10 @@ choose_texture_target(struct gl_renderer *gr,
+@@ -2880,6 +2880,10 @@ static GLenum
+ choose_texture_target(struct gl_renderer *gr,
+ 		      struct dmabuf_attributes *attributes)
  {
++	/* HACK: Mali needs GL_TEXTURE_EXTERNAL_OES for all imported dmabuf */
++#if 1
++	return GL_TEXTURE_EXTERNAL_OES;
++#else
  	struct dmabuf_format *tmp, *format = NULL;
  
-+	/* HACK: Mali needs GL_TEXTURE_EXTERNAL_OES for all imported dmabuf */
-+	if (gr->is_mali_egl)
-+		return GL_TEXTURE_EXTERNAL_OES;
-+
  	wl_list_for_each(tmp, &gr->dmabuf_formats, link) {
- 		if (tmp->format == attributes->format) {
- 			format = tmp;
+@@ -2916,6 +2920,7 @@ choose_texture_target(struct gl_renderer *gr,
+ 	default:
+ 		return GL_TEXTURE_2D;
+ 	}
++#endif
+ }
+ 
+ static struct gl_buffer_state *
 -- 
 2.20.1
 

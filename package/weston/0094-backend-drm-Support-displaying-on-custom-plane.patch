@@ -1,4 +1,4 @@
-From c826607eb1de493d9bbf2018b9529ac6691039f1 Mon Sep 17 00:00:00 2001
+From 4a3382f32d83bc95de6e5e10fdc498ba55477580 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 4 Jan 2024 10:50:02 +0800
 Subject: [PATCH 94/94] backend-drm: Support displaying on custom plane
@@ -15,15 +15,15 @@ plane-id=159
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  libweston/backend-drm/drm-internal.h |  1 +
- libweston/backend-drm/drm.c          | 46 +++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 45 +++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          | 36 +++++++++++++++++-----
- 3 files changed, 75 insertions(+), 8 deletions(-)
+ 3 files changed, 74 insertions(+), 8 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index de33a8dc38..f6a070747e 100644
+index 5638ba657d..7b28f39087 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -727,6 +727,7 @@ struct drm_output {
+@@ -728,6 +728,7 @@ struct drm_output {
  
  	/* Plane being displayed directly on the CRTC */
  	struct drm_plane *scanout_plane;
@@ -32,10 +32,10 @@ index de33a8dc38..f6a070747e 100644
  	/* The last state submitted to the kernel for this CRTC. */
  	struct drm_output_state *state_cur;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 59b13e5fc3..c48bba29c4 100644
+index 251177af91..b35e3d57f8 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -512,7 +512,7 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
+@@ -517,7 +517,7 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
  	drm_output_state_free(output->state_last);
  	output->state_last = NULL;
  
@@ -44,7 +44,7 @@ index 59b13e5fc3..c48bba29c4 100644
  		drm_fb_unref(output->fb_dummy);
  		output->fb_dummy = NULL;
  	}
-@@ -1649,6 +1649,15 @@ retry:
+@@ -1654,6 +1654,15 @@ retry:
  		if (!plane->plane_id)
  			continue;
  
@@ -60,25 +60,17 @@ index 59b13e5fc3..c48bba29c4 100644
  		if (plane->type != type)
  			continue;
  		if (!drm_plane_is_available(plane, output))
-@@ -1740,6 +1749,7 @@ create_sprites(struct drm_device *device, drmModeRes *resources)
- 	uint32_t i;
- 	uint32_t next_plane_idx = 0;
- 	int crtc_pipe = -1;
+@@ -1783,6 +1792,9 @@ create_sprites(struct drm_device *device, drmModeRes *resources)
+ 			assert(drm_crtc);
+ 			drm_crtc->cursor_plane_id = drm_plane->plane_id;
+ 		} else if (drm_plane->type == WDRM_PLANE_TYPE_OVERLAY) {
++			if (device->sprites_are_broken)
++				continue;
 +
- 	kplane_res = drmModeGetPlaneResources(device->drm.fd);
- 
- 	if (!kplane_res) {
-@@ -1772,6 +1782,9 @@ create_sprites(struct drm_device *device, drmModeRes *resources)
- 			drm_crtc->primary_plane_id = drm_plane->plane_id;
- 		}
- 
-+		if (device->sprites_are_broken)
-+			continue;
-+
- 		if (drm_plane->type == WDRM_PLANE_TYPE_OVERLAY)
  			weston_compositor_stack_plane(b->compositor,
  						      &drm_plane->base,
-@@ -2501,6 +2514,22 @@ drm_output_init_planes(struct drm_output *output)
+ 						      NULL);
+@@ -2512,6 +2524,22 @@ drm_output_init_planes(struct drm_output *output)
  {
  	struct drm_backend *b = output->backend;
  	struct drm_device *device = output->device;
@@ -101,7 +93,7 @@ index 59b13e5fc3..c48bba29c4 100644
  
  	output->scanout_plane =
  		drm_output_find_special_plane(device, output,
-@@ -2515,6 +2544,13 @@ drm_output_init_planes(struct drm_output *output)
+@@ -2526,6 +2554,13 @@ drm_output_init_planes(struct drm_output *output)
  				      &output->scanout_plane->base,
  				      &output->base.primary_plane);
  
@@ -115,7 +107,7 @@ index 59b13e5fc3..c48bba29c4 100644
  	/* Failing to find a cursor plane is not fatal, as we'll fall back
  	 * to software cursor. */
  	output->cursor_plane =
-@@ -2665,6 +2701,14 @@ drm_output_detach_crtc(struct drm_output *output)
+@@ -2676,6 +2711,14 @@ drm_output_detach_crtc(struct drm_output *output)
  	crtc->output = NULL;
  	output->crtc = NULL;
  

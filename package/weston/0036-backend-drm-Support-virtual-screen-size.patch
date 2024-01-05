@@ -1,4 +1,4 @@
-From 78fe4395d0a70898793b5a214998e4df4ec87985 Mon Sep 17 00:00:00 2001
+From f8730d3951d5aa8927f30d40065c9fedb4e22bb5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 24 Jun 2020 11:59:42 +0800
 Subject: [PATCH 36/94] backend-drm: Support virtual screen size
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 155 insertions(+), 23 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 3569b768c8..5e9a8d142d 100644
+index 241a209c4d..7b1d456789 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -173,6 +173,7 @@ enum wdrm_plane_property {
@@ -61,7 +61,7 @@ index 3569b768c8..5e9a8d142d 100644
  };
  
  struct drm_connector {
-@@ -721,6 +736,9 @@ struct drm_output {
+@@ -722,6 +737,9 @@ struct drm_output {
  	enum wdrm_content_type content_type;
  
  	bool state_invalid;
@@ -71,7 +71,7 @@ index 3569b768c8..5e9a8d142d 100644
  };
  
  void
-@@ -851,6 +869,10 @@ uint64_t
+@@ -852,6 +870,10 @@ uint64_t
  drm_property_get_value(struct drm_property_info *info,
  		       const drmModeObjectProperties *props,
  		       uint64_t def);
@@ -83,10 +83,10 @@ index 3569b768c8..5e9a8d142d 100644
  drm_property_get_range_values(struct drm_property_info *info,
  			      const drmModeObjectProperties *props);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 165abae782..79850d4024 100644
+index 64afc3ba88..aabbca3f02 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -331,6 +331,11 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
+@@ -336,6 +336,11 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
  	drm_output_state_free(output->state_last);
  	output->state_last = NULL;
  
@@ -98,7 +98,7 @@ index 165abae782..79850d4024 100644
  	if (output->destroy_pending) {
  		output->destroy_pending = false;
  		output->disable_pending = false;
-@@ -407,6 +412,7 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -412,6 +417,7 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  	struct drm_plane *scanout_plane = output->scanout_plane;
  	struct drm_property_info *damage_info =
  		&scanout_plane->props[WDRM_PLANE_FB_DAMAGE_CLIPS];
@@ -106,7 +106,7 @@ index 165abae782..79850d4024 100644
  	struct drm_fb *fb;
  	pixman_region32_t scanout_damage;
  	pixman_box32_t *rects;
-@@ -451,10 +457,11 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -456,10 +462,11 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  	scanout_state->src_w = fb->width << 16;
  	scanout_state->src_h = fb->height << 16;
  
@@ -120,7 +120,7 @@ index 165abae782..79850d4024 100644
  
  	scanout_state->zpos = scanout_plane->zpos_min;
  
-@@ -720,7 +727,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
+@@ -725,7 +732,7 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
  
  	weston_compositor_read_presentation_clock(b->compositor, &now);
  	now_ms = timespec_to_msec(&now);
@@ -129,7 +129,7 @@ index 165abae782..79850d4024 100644
  		/* Resize fullscreen/maxmium views(not always success) */
  		if (now_ms < b->last_resize_ms + DRM_RESIZE_FREEZE_MS)
  			wl_signal_emit(&b->compositor->output_resized_signal,
-@@ -1164,6 +1171,11 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
+@@ -1169,6 +1176,11 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
  				       props,
  				       WDRM_PLANE_TYPE__COUNT);
  
@@ -141,7 +141,7 @@ index 165abae782..79850d4024 100644
  	zpos_range_values =
  		drm_property_get_range_values(&plane->props[WDRM_PLANE_ZPOS],
  					      props);
-@@ -4169,6 +4181,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4180,6 +4192,10 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	b->head_matches = drm_head_matches[head_mode];
  
