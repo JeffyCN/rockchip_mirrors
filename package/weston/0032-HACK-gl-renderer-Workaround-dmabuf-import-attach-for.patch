@@ -1,4 +1,4 @@
-From da22294cc8feafa5d42cad3ea1f8266b7b4290d2 Mon Sep 17 00:00:00 2001
+From ec619e187ac71e24b16ab2f3a4b2be393ab2f6d3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 6 Dec 2018 18:53:05 +0800
 Subject: [PATCH 32/94] HACK: gl-renderer: Workaround dmabuf import/attach for
@@ -27,7 +27,7 @@ index 9557d994b1..bb14946421 100644
  
  static inline struct gl_renderer *
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 397019d2d2..ea9d909634 100644
+index 5f124479da..57911360f4 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2668,6 +2668,14 @@ import_simple_dmabuf(struct gl_renderer *gr,
@@ -45,7 +45,7 @@ index 397019d2d2..ea9d909634 100644
  	if (attributes->modifier[0] != DRM_FORMAT_MOD_INVALID) {
  		if (!gr->has_dmabuf_import_modifiers)
  			return NULL;
-@@ -2990,7 +2998,7 @@ gl_renderer_query_dmabuf_formats(struct weston_compositor *wc,
+@@ -2991,7 +2999,7 @@ gl_renderer_query_dmabuf_formats(struct weston_compositor *wc,
  
  	if (!gr->has_dmabuf_import_modifiers ||
  	    !gr->query_dmabuf_formats(gr->egl_display, 0, NULL, &num)) {
@@ -54,7 +54,7 @@ index 397019d2d2..ea9d909634 100644
  		fallback = true;
  	}
  
-@@ -3608,6 +3616,9 @@ log_egl_info(struct gl_renderer *gr, EGLDisplay egldpy)
+@@ -3609,6 +3617,9 @@ log_egl_info(struct gl_renderer *gr, EGLDisplay egldpy)
  	str = eglQueryString(egldpy, EGL_VENDOR);
  	weston_log("EGL vendor: %s\n", str ? str : "(null)");
  

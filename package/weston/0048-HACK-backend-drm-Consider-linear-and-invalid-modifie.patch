@@ -1,4 +1,4 @@
-From d4bc591def629fd7a00f73c0809261c07a288628 Mon Sep 17 00:00:00 2001
+From 333b26847335b38f3cda51314b48c0d2c2d81621 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
 Subject: [PATCH 48/94] HACK: backend-drm: Consider linear and invalid modifier
@@ -149,7 +149,7 @@ index 073896abfc..468f47efd6 100644
  	}
  
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 413c9feecf..069aa35d5e 100644
+index c18af07d40..f63ac80192 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2679,7 +2679,7 @@ import_simple_dmabuf(struct gl_renderer *gr,
@@ -161,7 +161,7 @@ index 413c9feecf..069aa35d5e 100644
  		if (!gr->has_dmabuf_import_modifiers)
  			return NULL;
  		has_modifier = true;
-@@ -3093,7 +3093,7 @@ gl_renderer_import_dmabuf(struct weston_compositor *ec,
+@@ -3094,7 +3094,7 @@ gl_renderer_import_dmabuf(struct weston_compositor *ec,
  
  	for (i = 0; i < dmabuf->attributes.n_planes; i++) {
  		/* return if EGL doesn't support import modifiers */
@@ -170,7 +170,7 @@ index 413c9feecf..069aa35d5e 100644
  			if (!gr->has_dmabuf_import_modifiers)
  				return false;
  
-@@ -3257,7 +3257,7 @@ populate_supported_formats(struct weston_compositor *ec,
+@@ -3258,7 +3258,7 @@ populate_supported_formats(struct weston_compositor *ec,
  
  		for (j = 0; j < num_modifiers; j++) {
  			/* Skip MOD_INVALID, as it has already been added. */

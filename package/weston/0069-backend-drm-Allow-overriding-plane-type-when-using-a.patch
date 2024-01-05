@@ -1,4 +1,4 @@
-From fcfd2d05506cb9ab77ea37830c176e8f5f01f471 Mon Sep 17 00:00:00 2001
+From 82fc97efac3803cb995749edf5f3b474d533c7f1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 7 Mar 2022 17:20:59 +0800
 Subject: [PATCH 69/94] backend-drm: Allow overriding plane type when using
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 34 insertions(+), 4 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 6f8056c294..af00d24475 100644
+index c056c5765e..568e83ec2d 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -920,6 +920,9 @@ drm_plane_populate_formats(struct drm_plane *plane, const drmModePlane *kplane,
+@@ -921,6 +921,9 @@ drm_plane_populate_formats(struct drm_plane *plane, const drmModePlane *kplane,
  void
  drm_property_info_free(struct drm_property_info *info, int num_props);
  
@@ -28,10 +28,10 @@ index 6f8056c294..af00d24475 100644
  extern const struct drm_property_info plane_props[];
  extern struct drm_property_enum_info dpms_state_enums[];
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 289e580e7a..decead007f 100644
+index 3a2f96cda5..b19613f5d3 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1513,10 +1513,8 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
+@@ -1518,10 +1518,8 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
  
  	drm_property_info_populate(device, plane_props, plane->props,
  				   WDRM_PLANE__COUNT, props);
