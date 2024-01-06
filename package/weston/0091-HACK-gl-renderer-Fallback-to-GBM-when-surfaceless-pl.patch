@@ -1,7 +1,7 @@
-From ab6d34f831427ec9b5770eee04d7f840b2536828 Mon Sep 17 00:00:00 2001
+From 96f040d27efb3052b4285bc45f22a6d73c46b427 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 20 Dec 2023 09:24:31 +0800
-Subject: [PATCH 91/94] HACK: gl-renderer: Fallback to GBM when surfaceless
+Subject: [PATCH 91/95] HACK: gl-renderer: Fallback to GBM when surfaceless
  platform not supported
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
@@ -9,7 +9,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/renderer-gl/egl-glue.c             |  8 ++++
  libweston/renderer-gl/gl-renderer-internal.h |  4 ++
  libweston/renderer-gl/gl-renderer.c          | 42 ++++++++++++++++++--
- 3 files changed, 51 insertions(+), 3 deletions(-)
+ libweston/renderer-gl/meson.build            |  3 +-
+ 4 files changed, 53 insertions(+), 4 deletions(-)
 
 diff --git a/libweston/renderer-gl/egl-glue.c b/libweston/renderer-gl/egl-glue.c
 index f6d7c48707..b89e1ca15d 100644
@@ -154,6 +155,21 @@ index 7dc9a070cb..b3a57f16fc 100644
  	weston_log_scope_destroy(gr->shader_scope);
  	weston_log_scope_destroy(gr->renderer_scope);
  	free(gr);
+diff --git a/libweston/renderer-gl/meson.build b/libweston/renderer-gl/meson.build
+index efe04497f1..66dddf7f21 100644
+--- a/libweston/renderer-gl/meson.build
++++ b/libweston/renderer-gl/meson.build
+@@ -32,8 +32,9 @@ srcs_renderer_gl = [
+ deps_renderer_gl = [
+ 	dep_libm,
+ 	dep_pixman,
++	dep_gbm,
++	dep_libdrm,
+ 	dep_libweston_private,
+-	dep_libdrm_headers,
+ 	dep_vertex_clipping
+ ]
+ 
 -- 
 2.20.1
 
