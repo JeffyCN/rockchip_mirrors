@@ -74,8 +74,8 @@ do
 done
 
 # check a/b system
-if [ ! -z "$(cat /proc/cmdline | grep android_slotsufix)" ]; then
-	SLOT_SUFIX=$(cat /proc/cmdline | sed "s#.*android_slotsufix=##" | cut -d ' ' -f 1)
+if [ ! -z "$(cat /proc/cmdline | grep "androidboot.slot_suffix")" ]; then
+	SLOT_SUFIX=$(cat /proc/cmdline | sed "s#.*androidboot.slot_suffix=##" | cut -d ' ' -f 1)
 	SYSTEM_NAME=system
 fi
 
