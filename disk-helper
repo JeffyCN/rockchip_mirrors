@@ -316,6 +316,7 @@ resize_part()
 	remount_part rw
 	if eval $FSRESIZE; then
 		touch $MOUNT_POINT/.resized
+		sync
 		return
 	fi
 
@@ -324,7 +325,10 @@ resize_part()
 
 	message "Fallback to format resize"
 	TEMP_BACKUP=$(mktemp -d)
-	format_resize $TEMP_BACKUP && touch $MOUNT_POINT/.resized
+	if format_resize $TEMP_BACKUP; then
+		touch $MOUNT_POINT/.resized
+		sync
+	fi
 	rm -rf $TEMP_BACKUP
 }
 
