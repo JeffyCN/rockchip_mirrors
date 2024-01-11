@@ -57,7 +57,7 @@ link_all_partitions_byname() {
 check_block_ready() {
 	for i in $1
 	do
-		[ -f "/dev/block/by-name/$i" ] || return -1
+		[ -b "/dev/block/by-name/$i" ] || echo fail
 	done
 	return 0
 }
@@ -87,8 +87,8 @@ mkdir -p /dev/block/by-name
 # link all partitions by name
 while true
 do
-	link_all_partitions_byname "$BLOCK_NECESSARY"
-	[ "$(check_block_ready)" ] || break;
+	link_all_partitions_byname
+	[ "$(check_block_ready "$BLOCK_NECESSARY")" ] || break;
 done
 
 OFFSET=
