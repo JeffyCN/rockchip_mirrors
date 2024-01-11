@@ -316,7 +316,7 @@ index 1601b56..57690f4 100644
    gst_object_replace ((GstObject **) & self->pool, NULL);
 @@ -2578,6 +2719,12 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
      case PROP_FULLSCREEN:
- 			sink->fullscreen = g_value_get_boolean (value);
+       sink->fullscreen = g_value_get_boolean (value);
        break;
 +    case PROP_HDR_EN:
 +      sink->hdr_en = g_value_get_boolean (value);

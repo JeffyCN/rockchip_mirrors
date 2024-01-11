@@ -42,7 +42,7 @@ index 9ba26e1..60097dd 100644
        sink->sync_mode = g_value_get_enum (value);
        break;
 +    case PROP_FULLSCREEN:
-+			sink->fullscreen = g_value_get_boolean (value);
++      sink->fullscreen = g_value_get_boolean (value);
 +      break;
      default:
        if (!gst_video_overlay_set_property (object, PROP_N, prop_id, value))
