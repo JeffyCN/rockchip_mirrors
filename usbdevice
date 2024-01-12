@@ -414,7 +414,7 @@ UMS_INSTANCES=${UMS_INSTANCES:-mass_storage.0}
 
 ums_prepare()
 {
-	if [ ! -f "$UMS_FILE" ]; then
+	if ! stat "$UMS_FILE" >/dev/null 2>/dev/null; then
 		usb_msg "Formating $UMS_FILE($UMS_SIZE) to $UMS_FSTYPE"
 		truncate -s $UMS_SIZE "$UMS_FILE"
 		mkfs.$UMS_FSTYPE "$UMS_FILE" || \
