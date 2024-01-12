@@ -1,7 +1,7 @@
 From e7e70aaa1ab9d6f18c17632c8d4bf9caffba6c5d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 13 Aug 2021 10:10:01 +0800
-Subject: [PATCH 06/94] backend-drm: Handle -ERESTARTSYS error
+Subject: [PATCH 06/97] backend-drm: Handle -ERESTARTSYS error
 
 The newer kernel's drm_atomic_helper_swap_state() might return
 -ERESTARTSYS when getting interrupted. Let's retry it!

@@ -1,7 +1,7 @@
-From 901fc348ac9690d3e0c027a4caf4eadcd8939e56 Mon Sep 17 00:00:00 2001
+From eafbb1e46f41bbcb0f0810c1798de841d4442366 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
-Subject: [PATCH 77/94] HACK: Honour cursor-size config
+Subject: [PATCH 77/97] HACK: Honour cursor-size config
 
 By scaling the cursor surface.
 
@@ -60,10 +60,10 @@ index fd04c32144..fe5da1327c 100644
  		/*
  		 * If src_width != wl_fixed_from_int(-1),
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 8637bbd34b..bfbd448d0a 100644
+index 03bea4faa8..a617d412ce 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -5170,6 +5170,11 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -5169,6 +5169,11 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
@@ -89,10 +89,10 @@ index 41701189db..b1793bf935 100644
  	assert(scale > 0);
  
 diff --git a/libweston/input.c b/libweston/input.c
-index 439b194e84..21ff4d465e 100644
+index 2934f698f1..4752e4bbc6 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
-@@ -2185,6 +2185,8 @@ weston_pointer_move_to(struct weston_pointer *pointer,
+@@ -2189,6 +2189,8 @@ weston_pointer_move_to(struct weston_pointer *pointer,
  		struct weston_coord_surface hotspot_inv;
  
  		hotspot_inv = weston_coord_surface_invert(pointer->hotspot);
@@ -101,7 +101,7 @@ index 439b194e84..21ff4d465e 100644
  		weston_view_set_position_with_offset(pointer->sprite,
  						     pos, hotspot_inv);
  	}
-@@ -3505,6 +3507,29 @@ notify_tablet_tool_frame(struct weston_tablet_tool *tool,
+@@ -3509,6 +3511,29 @@ notify_tablet_tool_frame(struct weston_tablet_tool *tool,
  }
  
  
@@ -131,7 +131,7 @@ index 439b194e84..21ff4d465e 100644
  static void
  pointer_cursor_surface_committed(struct weston_surface *es,
  				 struct weston_coord_surface new_origin)
-@@ -3517,9 +3542,13 @@ pointer_cursor_surface_committed(struct weston_surface *es,
+@@ -3521,9 +3546,13 @@ pointer_cursor_surface_committed(struct weston_surface *es,
  
  	assert(es == pointer->sprite->surface);
  
@@ -145,7 +145,7 @@ index 439b194e84..21ff4d465e 100644
  	weston_view_set_position_with_offset(pointer->sprite,
  					     pointer->pos, hotspot_inv);
  
-@@ -4203,6 +4232,8 @@ weston_seat_init_pointer(struct weston_seat *seat)
+@@ -4207,6 +4236,8 @@ weston_seat_init_pointer(struct weston_seat *seat)
  
  	seat_send_updated_caps(seat);
  

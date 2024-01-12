@@ -1,7 +1,7 @@
-From 4a3382f32d83bc95de6e5e10fdc498ba55477580 Mon Sep 17 00:00:00 2001
+From 832dae72d88c43518cb61ef56be06ba59ce859ab Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 4 Jan 2024 10:50:02 +0800
-Subject: [PATCH 94/94] backend-drm: Support displaying on custom plane
+Subject: [PATCH 94/97] backend-drm: Support displaying on custom plane
 
 Tested on RK3588 EVB with:
 1/ gst-launch-1.0 videotestsrc ! kmssink force-modesetting=1
@@ -32,10 +32,10 @@ index 5638ba657d..7b28f39087 100644
  	/* The last state submitted to the kernel for this CRTC. */
  	struct drm_output_state *state_cur;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 251177af91..b35e3d57f8 100644
+index 85f54ec6cc..aca96b4920 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -517,7 +517,7 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
+@@ -513,7 +513,7 @@ drm_output_update_complete(struct drm_output *output, uint32_t flags,
  	drm_output_state_free(output->state_last);
  	output->state_last = NULL;
  
@@ -44,7 +44,7 @@ index 251177af91..b35e3d57f8 100644
  		drm_fb_unref(output->fb_dummy);
  		output->fb_dummy = NULL;
  	}
-@@ -1654,6 +1654,15 @@ retry:
+@@ -1650,6 +1650,15 @@ retry:
  		if (!plane->plane_id)
  			continue;
  
@@ -60,7 +60,7 @@ index 251177af91..b35e3d57f8 100644
  		if (plane->type != type)
  			continue;
  		if (!drm_plane_is_available(plane, output))
-@@ -1783,6 +1792,9 @@ create_sprites(struct drm_device *device, drmModeRes *resources)
+@@ -1779,6 +1788,9 @@ create_sprites(struct drm_device *device, drmModeRes *resources)
  			assert(drm_crtc);
  			drm_crtc->cursor_plane_id = drm_plane->plane_id;
  		} else if (drm_plane->type == WDRM_PLANE_TYPE_OVERLAY) {
@@ -70,7 +70,7 @@ index 251177af91..b35e3d57f8 100644
  			weston_compositor_stack_plane(b->compositor,
  						      &drm_plane->base,
  						      NULL);
-@@ -2512,6 +2524,22 @@ drm_output_init_planes(struct drm_output *output)
+@@ -2508,6 +2520,22 @@ drm_output_init_planes(struct drm_output *output)
  {
  	struct drm_backend *b = output->backend;
  	struct drm_device *device = output->device;
@@ -93,7 +93,7 @@ index 251177af91..b35e3d57f8 100644
  
  	output->scanout_plane =
  		drm_output_find_special_plane(device, output,
-@@ -2526,6 +2554,13 @@ drm_output_init_planes(struct drm_output *output)
+@@ -2522,6 +2550,13 @@ drm_output_init_planes(struct drm_output *output)
  				      &output->scanout_plane->base,
  				      &output->base.primary_plane);
  
@@ -107,7 +107,7 @@ index 251177af91..b35e3d57f8 100644
  	/* Failing to find a cursor plane is not fatal, as we'll fall back
  	 * to software cursor. */
  	output->cursor_plane =
-@@ -2676,6 +2711,14 @@ drm_output_detach_crtc(struct drm_output *output)
+@@ -2672,6 +2707,14 @@ drm_output_detach_crtc(struct drm_output *output)
  	crtc->output = NULL;
  	output->crtc = NULL;
  

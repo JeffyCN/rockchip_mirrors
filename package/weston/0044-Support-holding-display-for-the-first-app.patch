@@ -1,7 +1,7 @@
-From 7886e4237b7c82ef0f3dacf2046489bcb4e21b66 Mon Sep 17 00:00:00 2001
+From 940c367afa527da29f4ac04fa837d5d7bec3381d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 10:20:40 +0800
-Subject: [PATCH 44/94] Support holding display for the first app
+Subject: [PATCH 44/97] Support holding display for the first app
 
 Use '-w' or '--warm-up' to enable it.
 

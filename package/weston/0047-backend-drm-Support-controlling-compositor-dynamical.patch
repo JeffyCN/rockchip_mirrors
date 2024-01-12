@@ -1,7 +1,7 @@
-From 2f1dcca6d3e4658bb4c1ee049641e3e5ddf78430 Mon Sep 17 00:00:00 2001
+From 4fc8905e6b2421500da0fdc37ff45d8d191a5387 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 47/94] backend-drm: Support controlling compositor dynamically
+Subject: [PATCH 47/97] backend-drm: Support controlling compositor dynamically
 
 Use config file to control compositor's state.
 
@@ -24,15 +24,60 @@ echo "compositor:cursor:show" > /tmp/.weston_drm.conf
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- libweston/backend-drm/drm.c | 55 ++++++++++++++++++++++++++++++++++++-
- libweston/compositor.c      |  7 ++++-
- 2 files changed, 60 insertions(+), 2 deletions(-)
+ libweston/backend-drm/drm.c | 86 +++++++++++++++++++++++++++++--------
+ libweston/compositor.c      |  7 ++-
+ 2 files changed, 75 insertions(+), 18 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c87ae3eb40..ddea8268f2 100644
+index 121fc9f1ac..193a05acee 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -4567,6 +4567,55 @@ config_handle_output(struct drm_backend *b, const char *name,
+@@ -213,32 +213,28 @@ close_src:
+ static void
+ drm_backend_update_outputs(struct drm_backend *b)
+ {
+-	struct weston_output *primary;
++	struct weston_output *base, *primary;
+ 
+ 	if (!b->primary_head)
+ 		return;
+ 
+ 	primary = b->primary_head->base.output;
+ 
+-	if (b->mirror_mode) {
+-		struct weston_output *base;
++	wl_list_for_each(base, &b->compositor->output_list, link) {
++		struct drm_output *output = to_drm_output(base);
++		bool is_mirror = b->mirror_mode && (base != primary);
+ 
+-		wl_list_for_each(base, &b->compositor->output_list, link) {
+-			struct drm_output *output = to_drm_output(base);
+-			bool is_mirror = base != primary;
+-
+-			if (!output || output->is_mirror == is_mirror)
+-				continue;
++		if (!output || output->is_mirror == is_mirror)
++			continue;
+ 
+-			/* Make mirrors unavailable for normal views */
+-			output->base.unavailable = is_mirror;
++		/* Make mirrors unavailable for normal views */
++		output->base.unavailable = is_mirror;
+ 
+-			output->is_mirror = is_mirror;
+-			output->state_invalid = true;
++		output->is_mirror = is_mirror;
++		output->state_invalid = true;
+ 
+-			weston_log("Output %s changed to %s output\n",
+-				   base->name, is_mirror ? "mirror" : "main");
+-		}
++		weston_log("Output %s changed to %s output\n",
++			   base->name, is_mirror ? "mirror" : "main");
+ 	}
+ 
+ 	if (!primary)
+@@ -4567,6 +4563,58 @@ config_handle_output(struct drm_backend *b, const char *name,
  	}
  }
  
@@ -82,13 +127,16 @@ index c87ae3eb40..ddea8268f2 100644
 +			b->compositor->hide_cursor = false;
 +
 +		weston_compositor_damage_all(b->compositor);
++	} else if (!strncmp(key, "mirror", strlen("mirror"))) {
++		b->mirror_mode = !strncmp(value, "on", strlen("on"));
++		drm_backend_update_outputs(b);
 +	}
 +}
 +
  static int
  config_timer_handler(void *data)
  {
-@@ -4607,7 +4656,9 @@ config_timer_handler(void *data)
+@@ -4606,7 +4654,9 @@ config_timer_handler(void *data)
  
  	/**
  	 * Parse configs, formated with <type>:<key>:<value>
@@ -99,7 +147,7 @@ index c87ae3eb40..ddea8268f2 100644
  	 */
  	while (3 == fscanf(conf_fp,
  			   "%" STR(MAX_CONF_LEN) "[^:]:"
-@@ -4615,6 +4666,8 @@ config_timer_handler(void *data)
+@@ -4614,6 +4664,8 @@ config_timer_handler(void *data)
  			   "%" STR(MAX_CONF_LEN) "[^\n]%*c", type, key, value)) {
  		if (!strcmp(type, "output"))
  			config_handle_output(b, key, value);
@@ -107,7 +155,7 @@ index c87ae3eb40..ddea8268f2 100644
 +			config_handle_compositor(b, key, value);
  	}
  
- 	fclose(conf_fp);
+ 	*old_st = st;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
 index 010c632081..2e80e525d2 100644
 --- a/libweston/compositor.c

@@ -1,7 +1,7 @@
-From c21e149c3a2efd7ae44d46de8efce776c7289c3c Mon Sep 17 00:00:00 2001
+From ecdbed34ebca1bb93dadffdebcc71f1b1861213b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 20 Mar 2022 00:32:14 +0800
-Subject: [PATCH 70/94] HACK: backend-drm: Ignore case when populating drm
+Subject: [PATCH 70/97] HACK: backend-drm: Ignore case when populating drm
  properties
 
 For BSP kernel 4.4 only.

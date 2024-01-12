@@ -1,7 +1,7 @@
-From 8ac3d595394efb0aace42fc4beb09f28f9f969b2 Mon Sep 17 00:00:00 2001
+From 5c4b8476e21b9254b28a80148ac7b64e191c3d8d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 08:55:42 +0800
-Subject: [PATCH 42/94] HACK: Support setting surface flags activate and alpha
+Subject: [PATCH 42/97] HACK: Support setting surface flags activate and alpha
 
 Support setting surface flags activate and alpha through app_id or
 title, for example:

@@ -1,7 +1,7 @@
 From 7bf51407a287735882ce54c23ac392de1bfe38e0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 11:23:36 +0800
-Subject: [PATCH 28/94] backend-drm: Bind the Nth primary and cursor plane to
+Subject: [PATCH 28/97] backend-drm: Bind the Nth primary and cursor plane to
  the Nth CRTC
 
 Some hardwares, e.g. Rockchip RK3588, allows planes to bind with other

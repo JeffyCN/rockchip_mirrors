@@ -1,7 +1,7 @@
-From 65f481fa3a3458d680092b2b2c7de0eca699aa8a Mon Sep 17 00:00:00 2001
+From 8bd91f1babcd00e4088dff85088046cbbc14c9d7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 16 May 2022 15:54:21 +0800
-Subject: [PATCH 25/94] HACK: clients: Drop dmabuf-feedback
+Subject: [PATCH 25/97] HACK: clients: Drop dmabuf-feedback
 
 We don't need it.
 

@@ -1,7 +1,7 @@
-From e6f11be7162ea960bb28180ce55d2235499190f8 Mon Sep 17 00:00:00 2001
+From 16b9e4ceb8e5481c5960b91a48a2866d47917f4f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Nov 2021 15:12:54 +0800
-Subject: [PATCH 66/94] gl-renderer: dmabuf: Support NV12(AFBC) and
+Subject: [PATCH 66/97] gl-renderer: dmabuf: Support NV12(AFBC) and
  NV12_10(AFBC)
 
 Support importing DRM_FORMAT_YUV420_(8|10)BIT dmabuf.
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 5190459dee..478b6fa3c1 100644
+index e84534c799..f593ae6f84 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2933,6 +2933,8 @@ choose_texture_target(struct gl_renderer *gr,

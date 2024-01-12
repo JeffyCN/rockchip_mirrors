@@ -1,7 +1,7 @@
-From 4edf28880ab8093dbb743fa484ed3c1c5419384e Mon Sep 17 00:00:00 2001
+From 586c793d30266ca57d96232eb4ed76f095a963c8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 26 Jul 2023 10:01:33 +0800
-Subject: [PATCH 82/94] HACK: compositor: Allow lowering wl_output version
+Subject: [PATCH 82/97] HACK: compositor: Allow lowering wl_output version
 
 This is for old chromium, see:
 https://bugs.chromium.org/p/chromium/issues/detail?id=1279574

@@ -1,7 +1,7 @@
 From 8340885dbe2fee30d86084a24cbc78705d40bce0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 9 Oct 2020 18:00:11 +0800
-Subject: [PATCH 07/94] libweston: Avoid double-destroy of animations
+Subject: [PATCH 07/97] libweston: Avoid double-destroy of animations
 
 The idle_animation_destroy task should be removed when destroying
 animations by the other callers such as handle_animation_view_destroy().
