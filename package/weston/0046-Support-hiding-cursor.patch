@@ -1,7 +1,7 @@
-From 63b85f89a6d24d31a771ee209622d14e4b95da6c Mon Sep 17 00:00:00 2001
+From 52ab790c066a57b9fa3fd854f93f80c23a34b9b5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 19 Sep 2023 11:05:33 +0800
-Subject: [PATCH 46/94] Support hiding cursor
+Subject: [PATCH 46/97] Support hiding cursor
 
 Add below to weston.ini:
 [shell]

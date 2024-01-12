@@ -1,7 +1,7 @@
 From 2ac2a7d3f095033a20d93556492e5351023e4b89 Mon Sep 17 00:00:00 2001
 From: Arnaud Vrac <avrac@freebox.fr>
 Date: Wed, 22 Nov 2023 19:53:56 +0100
-Subject: [PATCH 01/94] clients/desktop-shell: fix crash on init when panel is
+Subject: [PATCH 01/97] clients/desktop-shell: fix crash on init when panel is
  disabled
 
 The same output might be inited twice on init when the shell panel is disabled,

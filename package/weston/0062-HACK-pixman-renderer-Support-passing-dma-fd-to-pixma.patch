@@ -1,7 +1,7 @@
-From 6aabe3131313d2442a83b832838a13b3a9313285 Mon Sep 17 00:00:00 2001
+From 90a9ac8c12673b3d762a00a9b9246f99356dc2bb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
-Subject: [PATCH 62/94] HACK: pixman-renderer: Support passing dma fd to pixman
+Subject: [PATCH 62/97] HACK: pixman-renderer: Support passing dma fd to pixman
 
 Usage:
 pixman_image_set_destroy_function(image, NULL, (void *)(ptrdiff_t)dma_fd)
@@ -28,10 +28,10 @@ index b38b43b352..c056c5765e 100644
  	uint32_t plane_mask;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 2aa77967c2..8a7452ae18 100644
+index 129ba7a371..2710d83421 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -2026,9 +2026,10 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
+@@ -2022,9 +2022,10 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
  			goto err;
  
  		output->renderbuffer[i] =

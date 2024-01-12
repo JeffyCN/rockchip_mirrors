@@ -1,7 +1,7 @@
-From 288e1f54c21f172ac167d750fbfad2b309d8e73f Mon Sep 17 00:00:00 2001
+From a238e4c76b0691c12821cd83aeb4894a22bc1c6b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 22 Feb 2022 09:51:29 +0800
-Subject: [PATCH 67/94] HACK: compositor: Re-build view list when committing an
+Subject: [PATCH 67/97] HACK: compositor: Re-build view list when committing an
  unassigned surface
 
 To avoid skipping repaint for unassigned surface.

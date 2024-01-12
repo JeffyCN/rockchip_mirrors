@@ -1,7 +1,7 @@
-From 3e10005a99ebb2cc5e6043e7f636a62fd494a6b9 Mon Sep 17 00:00:00 2001
+From 7acb7562a591bede5d985cb426f6bca9d4c7a341 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 39/94] backend-drm: Support controlling output dynamically
+Subject: [PATCH 39/97] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -207,7 +207,7 @@ index ebf1408162..d6a44e6a80 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 24d14896c5..c87ae3eb40 100644
+index 24d14896c5..121fc9f1ac 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -497,7 +497,8 @@ index 24d14896c5..c87ae3eb40 100644
 +	if (stat(config_file, &st) < 0)
 +		return 0;
 +
-+	if (st.st_mtime && st.st_mtime == old_st->st_mtime) {
++	if (st.st_size == old_st->st_size && st.st_ino == old_st->st_ino &&
++	    st.st_mtime && st.st_mtime == old_st->st_mtime) {
 +#ifdef __USE_XOPEN2K8
 +		if (st.st_mtim.tv_nsec == old_st->st_mtim.tv_nsec)
 +			return 0;
@@ -506,8 +507,6 @@ index 24d14896c5..c87ae3eb40 100644
 +			return 0;
 +#endif
 +	}
-+
-+	*old_st = st;
 +
 +	conf_fp = fopen(config_file, "r");
 +	if (!conf_fp)
@@ -525,6 +524,7 @@ index 24d14896c5..c87ae3eb40 100644
 +			config_handle_output(b, key, value);
 +	}
 +
++	*old_st = st;
 +	fclose(conf_fp);
 +	return 0;
 +}

@@ -1,7 +1,7 @@
-From e221481cf32910a14265bf69db5d7fe1a03fda3c Mon Sep 17 00:00:00 2001
+From 980fb58b560576675f52a6cf18a730c62c2e0810 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Oct 2020 17:37:04 +0800
-Subject: [PATCH 52/94] backend-drm: Support using ARGB8888 gbm_format
+Subject: [PATCH 52/97] backend-drm: Support using ARGB8888 gbm_format
 
 Tested with:
 /etc/xdg/weston/weston.ini:
