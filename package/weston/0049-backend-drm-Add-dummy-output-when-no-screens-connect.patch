@@ -1,4 +1,4 @@
-From 566f4de894a949d2070920167a71f6ac5ea395a1 Mon Sep 17 00:00:00 2001
+From 52cb72d868b3572bee2ac485a721732bc98cbcc4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
 Subject: [PATCH 49/97] backend-drm: Add dummy output when no screens connected
@@ -10,10 +10,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  compositor/main.c                    |   3 +
  desktop-shell/shell.c                |   8 +-
  libweston/backend-drm/drm-internal.h |   6 +
- libweston/backend-drm/drm.c          | 244 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 245 ++++++++++++++++++++++++++-
  libweston/backend-drm/kms.c          |   2 +-
  libweston/input.c                    |   6 +-
- 6 files changed, 259 insertions(+), 10 deletions(-)
+ 6 files changed, 260 insertions(+), 10 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index bb582ec1a2..4e22757540 100644
@@ -87,7 +87,7 @@ index d6a44e6a80..5d763c6bcb 100644
  		return NULL;
  	return container_of(base, struct drm_output, base);
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 193a05acee..1b74a89037 100644
+index 193a05acee..3fc6ecc7dc 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -215,9 +215,19 @@ drm_backend_update_outputs(struct drm_backend *b)
@@ -231,15 +231,16 @@ index 193a05acee..1b74a89037 100644
  	udev_input_destroy(&b->input);
  
  	wl_event_source_remove(b->config_timer);
-@@ -4673,6 +4730,184 @@ config_timer_handler(void *data)
+@@ -4673,6 +4730,185 @@ config_timer_handler(void *data)
  	return 0;
  }
  
 +static int
 +drm_dummy_output_start_repaint_loop(struct weston_output *output_base)
 +{
-+	struct drm_output *output = to_drm_output(output_base);
-+	drm_output_update_complete(output, 0, 0, 0);
++	weston_output_finish_frame(output_base, NULL,
++				   WP_PRESENTATION_FEEDBACK_INVALID);
++
 +	return 0;
 +}
 +
@@ -416,7 +417,7 @@ index 193a05acee..1b74a89037 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4735,6 +4970,9 @@ drm_backend_late_init(void *data)
+@@ -4735,6 +4971,9 @@ drm_backend_late_init(void *data)
  {
  	struct drm_backend *b = data;
  

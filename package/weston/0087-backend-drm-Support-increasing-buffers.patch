@@ -1,4 +1,4 @@
-From 62732afe21c1efc6f2f70d843e62937679f38296 Mon Sep 17 00:00:00 2001
+From fdad2a0ab54d3d868e795bf6011a167f0cc6a937 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Aug 2023 18:18:58 +0800
 Subject: [PATCH 87/97] backend-drm: Support increasing buffers
@@ -305,7 +305,7 @@ index 5c7d7ddca1..8898995a99 100644
  
  	struct vaapi_recorder *recorder;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index a617d412ce..67c3822599 100644
+index 9a667ac7f0..0bfd9ce2c9 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -575,13 +575,14 @@ drm_output_render_pixman(struct drm_output_state *state,
@@ -382,7 +382,7 @@ index a617d412ce..67c3822599 100644
  	weston_output_init(&output->base, b->compositor, name);
  
  	output->base.enable = drm_output_enable;
-@@ -4878,6 +4891,10 @@ drm_dummy_output_create(struct drm_device *device)
+@@ -4879,6 +4892,10 @@ drm_dummy_output_create(struct drm_device *device)
  	output->format = pixel_format_get_info(DRM_FORMAT_XRGB8888),
  #endif
  
