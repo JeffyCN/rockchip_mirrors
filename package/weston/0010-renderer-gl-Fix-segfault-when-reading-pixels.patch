@@ -1,7 +1,7 @@
 From 17179c66c8d1f5931a8700be5ee17e07a58757c0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 20 Dec 2023 10:48:18 +0800
-Subject: [PATCH 10/97] renderer-gl: Fix segfault when reading pixels
+Subject: [PATCH 10/98] renderer-gl: Fix segfault when reading pixels
 
 We should use the actual stride to create tmp pixmap.
 
