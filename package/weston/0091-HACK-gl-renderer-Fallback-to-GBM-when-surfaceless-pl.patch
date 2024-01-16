@@ -1,4 +1,4 @@
-From e7a25a2398e33daf964c4387412e25eec7b54f19 Mon Sep 17 00:00:00 2001
+From fc5bfdf99046bac5c58b8c44fd672c44ac33dfa1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 20 Dec 2023 09:24:31 +0800
 Subject: [PATCH 91/97] HACK: gl-renderer: Fallback to GBM when surfaceless
@@ -54,7 +54,7 @@ index bb14946421..b6f8f51cff 100644
  
  static inline struct gl_renderer *
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 7dc9a070cb..b3a57f16fc 100644
+index e6bf3659ea..de00118bae 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -31,6 +31,7 @@
@@ -74,7 +74,7 @@ index 7dc9a070cb..b3a57f16fc 100644
  #include "linux-sync-file.h"
  #include "timeline.h"
  
-@@ -4008,6 +4011,11 @@ gl_renderer_destroy(struct weston_compositor *ec)
+@@ -4009,6 +4012,11 @@ gl_renderer_destroy(struct weston_compositor *ec)
  	if (gr->fan_binding)
  		weston_binding_destroy(gr->fan_binding);
  
@@ -86,7 +86,7 @@ index 7dc9a070cb..b3a57f16fc 100644
  	weston_log_scope_destroy(gr->shader_scope);
  	weston_log_scope_destroy(gr->renderer_scope);
  	free(gr);
-@@ -4051,6 +4059,8 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -4052,6 +4060,8 @@ gl_renderer_display_create(struct weston_compositor *ec,
  			   const struct gl_renderer_display_options *options)
  {
  	struct gl_renderer *gr;
@@ -95,7 +95,7 @@ index 7dc9a070cb..b3a57f16fc 100644
  	int ret;
  
  	gr = zalloc(sizeof *gr);
-@@ -4073,6 +4083,29 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -4074,6 +4084,29 @@ gl_renderer_display_create(struct weston_compositor *ec,
  	if (gl_renderer_setup_egl_client_extensions(gr) < 0)
  		goto fail;
  
@@ -125,7 +125,7 @@ index 7dc9a070cb..b3a57f16fc 100644
  	gr->base.read_pixels = gl_renderer_read_pixels;
  	gr->base.repaint_output = gl_renderer_repaint_output;
  	gr->base.resize_output = gl_renderer_resize_output;
-@@ -4083,7 +4116,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -4084,7 +4117,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
  	gr->base.fill_buffer_info = gl_renderer_fill_buffer_info;
  	gr->base.type = WESTON_RENDERER_GL;
  
@@ -134,7 +134,7 @@ index 7dc9a070cb..b3a57f16fc 100644
  		goto fail;
  
  	weston_drm_format_array_init(&gr->supported_formats);
-@@ -4099,8 +4132,6 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -4100,8 +4133,6 @@ gl_renderer_display_create(struct weston_compositor *ec,
  		goto fail_terminate;
  
  	if (!gr->has_configless_context) {
@@ -143,7 +143,7 @@ index 7dc9a070cb..b3a57f16fc 100644
  		if (!gr->has_surfaceless_context)
  			egl_surface_type |= EGL_PBUFFER_BIT;
  
-@@ -4197,6 +4228,11 @@ fail_terminate:
+@@ -4198,6 +4229,11 @@ fail_terminate:
  	weston_drm_format_array_fini(&gr->supported_formats);
  	eglTerminate(gr->egl_display);
  fail:

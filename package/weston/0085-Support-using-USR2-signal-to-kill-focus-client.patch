@@ -1,4 +1,4 @@
-From 9dc67c95af5cec7bbb00fffc64f2db0df85ff970 Mon Sep 17 00:00:00 2001
+From fc79ff675e53ef8d314b30047c302579ea189c3f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 10:48:36 +0800
 Subject: [PATCH 85/97] Support using USR2 signal to kill focus client
@@ -18,7 +18,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 42 insertions(+), 3 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 7459ef1a1b..777e42ff71 100644
+index 165fdacfd4..6d7fd79d4d 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -810,6 +810,19 @@ static int on_term_signal(int signal_number, void *data)
@@ -41,7 +41,7 @@ index 7459ef1a1b..777e42ff71 100644
  static const char *
  clock_name(clockid_t clk_id)
  {
-@@ -4047,7 +4060,7 @@ screenshot_allow_all(struct wl_listener *l,
+@@ -4044,7 +4057,7 @@ screenshot_allow_all(struct wl_listener *l,
  static void
  sigint_helper(int sig)
  {
@@ -50,7 +50,7 @@ index 7459ef1a1b..777e42ff71 100644
  }
  
  WL_EXPORT int
-@@ -4188,8 +4201,9 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -4185,8 +4198,9 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  	loop = wl_display_get_event_loop(display);
  	signals[0] = wl_event_loop_add_signal(loop, SIGTERM, on_term_signal,
  					      display);

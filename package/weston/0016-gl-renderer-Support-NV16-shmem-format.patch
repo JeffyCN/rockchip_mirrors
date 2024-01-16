@@ -1,4 +1,4 @@
-From 64ccf677f3c8cd9eb764fafd5632e34d33878cbc Mon Sep 17 00:00:00 2001
+From 965aea1713869e8ba38d8403387c16bad5892249 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 22 Nov 2019 12:06:35 +0800
 Subject: [PATCH 16/97] gl-renderer: Support NV16 shmem format
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 12 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 1cd6045aff..7b62133474 100644
+index 7c0f296f0b..8b1081d62b 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -281,6 +281,17 @@ struct yuv_format_descriptor yuv_formats[] = {
@@ -30,7 +30,7 @@ index 1cd6045aff..7b62133474 100644
  	}, {
  		.format = DRM_FORMAT_P010,
  		.output_planes = 2,
-@@ -4015,6 +4026,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -4016,6 +4027,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
  	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_YUV420);
  	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_YUV444);
  	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_NV12);

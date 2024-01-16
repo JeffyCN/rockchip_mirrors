@@ -1,4 +1,4 @@
-From fdad2a0ab54d3d868e795bf6011a167f0cc6a937 Mon Sep 17 00:00:00 2001
+From 07831c9d9f9175df5e602bfebacbfb53899b4b22 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Aug 2023 18:18:58 +0800
 Subject: [PATCH 87/97] backend-drm: Support increasing buffers
@@ -394,7 +394,7 @@ index 9a667ac7f0..0bfd9ce2c9 100644
  
  	output->base.enable = drm_dummy_output_enable;
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index f593ae6f84..7dc9a070cb 100644
+index 5e057ddff7..e6bf3659ea 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -97,6 +97,9 @@ struct gl_renderbuffer {
@@ -454,7 +454,7 @@ index f593ae6f84..7dc9a070cb 100644
  	if (use_output(output) < 0)
  		return;
  
-@@ -3783,6 +3803,7 @@ gl_renderer_output_create(struct weston_output *output,
+@@ -3784,6 +3804,7 @@ gl_renderer_output_create(struct weston_output *output,
  	if (go == NULL)
  		return -1;
  
@@ -462,7 +462,7 @@ index f593ae6f84..7dc9a070cb 100644
  	go->egl_surface = surface;
  
  	if (gr->has_disjoint_timer_query)
-@@ -3821,6 +3842,42 @@ gl_renderer_output_create(struct weston_output *output,
+@@ -3822,6 +3843,42 @@ gl_renderer_output_create(struct weston_output *output,
  	return 0;
  }
  
@@ -505,7 +505,7 @@ index f593ae6f84..7dc9a070cb 100644
  static int
  gl_renderer_output_window_create(struct weston_output *output,
  				 const struct gl_renderer_output_options *options)
-@@ -3830,6 +3887,9 @@ gl_renderer_output_window_create(struct weston_output *output,
+@@ -3831,6 +3888,9 @@ gl_renderer_output_window_create(struct weston_output *output,
  	EGLSurface egl_surface = EGL_NO_SURFACE;
  	int ret;
  
@@ -515,7 +515,7 @@ index f593ae6f84..7dc9a070cb 100644
  	egl_surface = gl_renderer_create_window_surface(gr,
  							options->window_for_legacy,
  							options->window_for_platform,
-@@ -3840,9 +3900,10 @@ gl_renderer_output_window_create(struct weston_output *output,
+@@ -3841,9 +3901,10 @@ gl_renderer_output_window_create(struct weston_output *output,
  		return -1;
  	}
  
@@ -527,7 +527,7 @@ index f593ae6f84..7dc9a070cb 100644
  		weston_platform_destroy_egl_surface(gr->egl_display, egl_surface);
  
  	return ret;
-@@ -3863,13 +3924,18 @@ gl_renderer_output_destroy(struct weston_output *output)
+@@ -3864,13 +3925,18 @@ gl_renderer_output_destroy(struct weston_output *output)
  	struct gl_output_state *go = get_output_state(output);
  	struct timeline_render_point *trp, *tmp;
  
@@ -547,7 +547,7 @@ index f593ae6f84..7dc9a070cb 100644
  
  	if (!wl_list_empty(&go->timeline_render_point_list))
  		weston_log("warning: discarding pending timeline render"
-@@ -4393,6 +4459,7 @@ gl_renderer_setup(struct weston_compositor *ec)
+@@ -4394,6 +4460,7 @@ gl_renderer_setup(struct weston_compositor *ec)
  
  WL_EXPORT struct gl_renderer_interface gl_renderer_interface = {
  	.display_create = gl_renderer_display_create,
