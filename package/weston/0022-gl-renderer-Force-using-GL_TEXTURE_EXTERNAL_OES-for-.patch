@@ -1,4 +1,4 @@
-From c0dbfcbc1b4e5cbc62cb8abc63d79b40857c5916 Mon Sep 17 00:00:00 2001
+From 22f008159254ccee44ab0945b7daf688011c8717 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Nov 2022 10:21:13 +0800
 Subject: [PATCH 22/97] gl-renderer: Force using GL_TEXTURE_EXTERNAL_OES for
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+)
 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index aa8a49dcdb..5f124479da 100644
+index 305ba92e86..9a4629ed68 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
-@@ -2880,6 +2880,10 @@ static GLenum
+@@ -2881,6 +2881,10 @@ static GLenum
  choose_texture_target(struct gl_renderer *gr,
  		      struct dmabuf_attributes *attributes)
  {
@@ -26,7 +26,7 @@ index aa8a49dcdb..5f124479da 100644
  	struct dmabuf_format *tmp, *format = NULL;
  
  	wl_list_for_each(tmp, &gr->dmabuf_formats, link) {
-@@ -2916,6 +2920,7 @@ choose_texture_target(struct gl_renderer *gr,
+@@ -2917,6 +2921,7 @@ choose_texture_target(struct gl_renderer *gr,
  	default:
  		return GL_TEXTURE_2D;
  	}

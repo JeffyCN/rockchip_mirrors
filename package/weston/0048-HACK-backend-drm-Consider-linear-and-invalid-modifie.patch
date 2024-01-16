@@ -1,4 +1,4 @@
-From 5fc65a9486fe84dc81e0f19a9a8b629971269eee Mon Sep 17 00:00:00 2001
+From 484593ef2a38b3c3406e6cbe34c8656b35f98a3c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
 Subject: [PATCH 48/97] HACK: backend-drm: Consider linear and invalid modifier
@@ -149,10 +149,10 @@ index 073896abfc..468f47efd6 100644
  	}
  
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index c18af07d40..f63ac80192 100644
+index 18cae0e392..0817dc065c 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
-@@ -2679,7 +2679,7 @@ import_simple_dmabuf(struct gl_renderer *gr,
+@@ -2680,7 +2680,7 @@ import_simple_dmabuf(struct gl_renderer *gr,
  		attribs[atti++] = EGL_YUV_NARROW_RANGE_EXT;
  	}
  
@@ -161,7 +161,7 @@ index c18af07d40..f63ac80192 100644
  		if (!gr->has_dmabuf_import_modifiers)
  			return NULL;
  		has_modifier = true;
-@@ -3094,7 +3094,7 @@ gl_renderer_import_dmabuf(struct weston_compositor *ec,
+@@ -3095,7 +3095,7 @@ gl_renderer_import_dmabuf(struct weston_compositor *ec,
  
  	for (i = 0; i < dmabuf->attributes.n_planes; i++) {
  		/* return if EGL doesn't support import modifiers */
@@ -170,7 +170,7 @@ index c18af07d40..f63ac80192 100644
  			if (!gr->has_dmabuf_import_modifiers)
  				return false;
  
-@@ -3258,7 +3258,7 @@ populate_supported_formats(struct weston_compositor *ec,
+@@ -3259,7 +3259,7 @@ populate_supported_formats(struct weston_compositor *ec,
  
  		for (j = 0; j < num_modifiers; j++) {
  			/* Skip MOD_INVALID, as it has already been added. */

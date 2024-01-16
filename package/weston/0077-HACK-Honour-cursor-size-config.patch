@@ -1,4 +1,4 @@
-From 179bd1d4a03f03590a677d6397bd2cb923e5f773 Mon Sep 17 00:00:00 2001
+From 09c88354ea999928080f830b491c898d0ac77f7e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
 Subject: [PATCH 77/97] HACK: Honour cursor-size config
@@ -16,10 +16,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  6 files changed, 45 insertions(+), 3 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 37cdaf9e43..7459ef1a1b 100644
+index 70bd3d331d..165fdacfd4 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
-@@ -4411,6 +4411,8 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
+@@ -4408,6 +4408,8 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
  	section = weston_config_get_section(config, "shell", NULL, NULL);
  	weston_config_section_get_bool(section, "hide-cursor",
  				       &wet.compositor->hide_cursor, false);
