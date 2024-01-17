@@ -7,9 +7,40 @@ DEBOUNCE=2 # s
 PIDFILE="/tmp/$(basename $0).pid"
 LOCKFILE=/tmp/.power_key
 
+log()
+{
+	logger -t $(basename $0) "[$$]: $@"
+}
+
+parse_wake_time()
+{
+	RK_SUSPEND_STATE=/sys/kernel/wakeup_reasons/last_suspend_time
+	if ! [ -f "$RK_SUSPEND_STATE" ]; then
+		return -1
+	fi
+
+	SLEEP_TIME=$(sed 's/ /+/' "$RK_SUSPEND_STATE" | bc)
+	if [ "$SLEEP_TIME" = "0" ]; then
+		log "We have not slept before..."
+		return -1
+	fi
+
+	LAST_SUSPEND="$(stat -c "%Y" /sys/power/state)"
+	LAST_RESUME="$(echo "$LAST_SUSPEND+$SLEEP_TIME" | bc | cut -d'.' -f1)"
+	NOW="$(date "+%s")"
+	WAKE_TIME="$(( "$NOW" - "$LAST_RESUME" ))"
+
+	if [ "$WAKE_TIME" -lt 0 ]; then
+		log "Something is wrong, time changed?"
+		return -1
+	fi
+
+	log "Last resume: $(date -d "@$LAST_RESUME" "+%D %T")..."
+}
+
 short_press()
 {
-	logger -t $(basename $0) "[$$]: Power key short press..."
+	log "Power key short press..."
 
 	if which systemctl >/dev/null; then
 		SUSPEND_CMD="systemctl suspend"
@@ -19,25 +50,36 @@ short_press()
 		SUSPEND_CMD="echo -n mem > /sys/power/state"
 	fi
 
-	if [ ! -f $LOCKFILE ]; then
-		logger -t $(basename $0) "[$$]: Prepare to suspend..."
-
-		touch $LOCKFILE
-		sh -c "$SUSPEND_CMD"
-		{ sleep $DEBOUNCE && rm $LOCKFILE; }&
+	# Debounce
+	if [ -f $LOCKFILE ]; then
+		log "Too close to the latest request..."
+		return 0
 	fi
+
+	if parse_wake_time; then
+		if [ "$WAKE_TIME" -le $DEBOUNCE ]; then
+			log "We are just resumed!"
+			return 0
+		fi
+	fi
+
+	log "Prepare to suspend..."
+
+	touch $LOCKFILE
+	sh -c "$SUSPEND_CMD"
+	{ sleep $DEBOUNCE && rm $LOCKFILE; }&
 }
 
 long_press()
 {
-	logger -t $(basename $0) "[$$]: Power key long press (${LONG_PRESS_TIMEOUT}s)..."
+	log "Power key long press (${LONG_PRESS_TIMEOUT}s)..."
 
-	logger -t $(basename $0) "[$$]: Prepare to power off..."
+	log "Prepare to power off..."
 
 	poweroff
 }
 
-logger -t $(basename $0) "[$$]: Received power key event: $@..."
+log "Received power key event: $@..."
 
 case "$EVENT" in
 	press)
