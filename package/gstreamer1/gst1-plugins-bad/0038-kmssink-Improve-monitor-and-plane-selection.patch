@@ -1,7 +1,7 @@
-From 7fa6e80cf1ff51dfcb0fab743abe2200fc715b6e Mon Sep 17 00:00:00 2001
+From fdc9ef245b322222c2f6053181e9ed00b5f4256e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 17:56:40 +0800
-Subject: [PATCH 38/42] kmssink: Improve monitor and plane selection
+Subject: [PATCH 38/45] kmssink: Improve monitor and plane selection
 
 Major changes:
 1/ Filter out disconnected monitors.
@@ -11,17 +11,21 @@ Major changes:
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmssink.c | 74 ++++++++++++++++++++++++++++++++++++++++++--
- 1 file changed, 71 insertions(+), 3 deletions(-)
+ sys/kms/gstkmssink.c | 144 +++++++++++++++++++++++++++++++++----------
+ sys/kms/gstkmssink.h |   1 +
+ 2 files changed, 112 insertions(+), 33 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index bab6ba8..0f0c2e5 100644
+index 1c3ecb8..4c921c7 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -515,13 +515,38 @@ kms_open (gchar ** driver)
+@@ -512,32 +512,89 @@ kms_open (gchar ** driver)
    return fd;
  }
  
+-static drmModePlane *
+-find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
+-    int crtc_id)
 +static int
 +drm_plane_get_type (int fd, drmModePlane * plane)
 +{
@@ -45,49 +49,81 @@ index bab6ba8..0f0c2e5 100644
 +  return type;
 +}
 +
- static drmModePlane *
- find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
-     int crtc_id)
++static gint32
++find_primary_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
++    guint32 pipe)
  {
    drmModePlane *plane;
 -  int i, pipe;
-+  int i, pipe, plane_type, num_primary, fallback;
++  gint32 i, plane_type, plane_id, num_primary = 0;
  
-+  num_primary = 0;
+-  plane = NULL;
+-  pipe = -1;
+-  for (i = 0; i < res->count_crtcs; i++) {
+-    if (crtc_id == res->crtcs[i]) {
+-      pipe = i;
+-      break;
++  for (i = 0; i < pres->count_planes; i++) {
++    plane = drmModeGetPlane (fd, pres->planes[i]);
++    plane_type = drm_plane_get_type (fd, plane);
++    num_primary += plane_type == DRM_PLANE_TYPE_PRIMARY;
++
++    /**
++     * HACK: Assuming Nth primary plane is the primary plane for the Nth crtc.
++     * See:
++     * https://lore.kernel.org/dri-devel/20200807090706.GA2352366@phenom.ffwll.local/
++     */
++    if (plane->possible_crtcs & (1 << pipe) &&
++        plane_type == DRM_PLANE_TYPE_PRIMARY && pipe == num_primary - 1) {
++      plane_id = plane->plane_id;
++      drmModeFreePlane (plane);
++      return plane_id;
+     }
++
++    drmModeFreePlane (plane);
+   }
+ 
+-  if (pipe == -1)
+-    return NULL;
++  return 0;
++}
++
++static drmModePlane *
++find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
++    guint32 pipe, guint32 preferred)
++{
++  drmModePlane *plane;
++  gint32 i, plane_type, fallback;
++
 +  fallback = 0;
-   plane = NULL;
-   pipe = -1;
-   for (i = 0; i < res->count_crtcs; i++) {
-@@ -536,11 +561,26 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
++  plane = NULL;
  
    for (i = 0; i < pres->count_planes; i++) {
      plane = drmModeGetPlane (fd, pres->planes[i]);
 -    if (plane->possible_crtcs & (1 << pipe))
 -      return plane;
 +    plane_type = drm_plane_get_type (fd, plane);
-+    num_primary += plane_type == DRM_PLANE_TYPE_PRIMARY;
 +
 +    /* Check unused possible planes */
 +    if (plane->possible_crtcs & (1 << pipe) && !plane->fb_id) {
-+      if (pipe == num_primary - 1 && plane_type == DRM_PLANE_TYPE_PRIMARY) {
-+        /* Prefer the Nth primary plane */
++      if (plane->plane_id == preferred)
 +        return plane;
-+      } else if (!fallback && plane_type == DRM_PLANE_TYPE_OVERLAY) {
-+        /* Use first overlay plane as fallback */
++
++      if (!fallback && plane_type == DRM_PLANE_TYPE_OVERLAY) {
++        /* Fallback to the first unused overlay plane */
 +        fallback = plane->plane_id;
 +      }
 +    }
      drmModeFreePlane (plane);
    }
  
-+  /* Fallback to the first overlay plane */
 +  if (fallback)
 +    return drmModeGetPlane (fd, fallback);
 +
    return NULL;
  }
  
-@@ -651,6 +691,25 @@ find_first_used_connector (int fd, drmModeRes * res)
+@@ -648,6 +705,25 @@ find_first_used_connector (int fd, drmModeRes * res)
    return NULL;
  }
  
@@ -113,7 +149,7 @@ index bab6ba8..0f0c2e5 100644
  static drmModeConnector *
  find_main_monitor (int fd, drmModeRes * res)
  {
-@@ -669,6 +728,10 @@ find_main_monitor (int fd, drmModeRes * res)
+@@ -666,6 +742,10 @@ find_main_monitor (int fd, drmModeRes * res)
    if (!conn)
      conn = find_first_used_connector (fd, res);
  
@@ -124,19 +160,106 @@ index bab6ba8..0f0c2e5 100644
    /* if no connector is used, grab the first one */
    if (!conn)
      conn = drmModeGetConnector (fd, res->connectors[0]);
-@@ -1215,7 +1278,12 @@ gst_kms_sink_start (GstBaseSink * bsink)
+@@ -1208,11 +1288,9 @@ gst_kms_sink_start (GstBaseSink * bsink)
+   drmModeCrtc *crtc;
+   drmModePlaneRes *pres;
+   drmModePlane *plane;
+-  gboolean universal_planes;
    gboolean ret;
  
    self = GST_KMS_SINK (bsink);
-+#if 0
-   universal_planes = FALSE;
-+#else
-+  /* Force checking every planes */
-+  universal_planes = TRUE;
-+#endif
+-  universal_planes = FALSE;
    ret = FALSE;
    res = NULL;
    conn = NULL;
+@@ -1249,43 +1327,48 @@ gst_kms_sink_start (GstBaseSink * bsink)
+   if (!conn)
+     goto connector_failed;
+ 
++  self->conn_id = conn->connector_id;
++
+   crtc = find_crtc_for_connector (self->fd, res, conn, &self->pipe);
+   if (!crtc)
+     goto crtc_failed;
+ 
++  self->crtc_id = crtc->crtc_id;
++
+   if (!crtc->mode_valid || self->modesetting_enabled) {
+     GST_DEBUG_OBJECT (self, "enabling modesetting");
+     self->modesetting_enabled = TRUE;
+-    universal_planes = TRUE;
+   }
+ 
+   if (crtc->mode_valid && self->modesetting_enabled && self->restore_crtc) {
+     self->saved_crtc = (drmModeCrtc *) crtc;
+   }
+ 
+-retry_find_plane:
+-  if (universal_planes &&
+-      drmSetClientCap (self->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1))
++  if (drmSetClientCap (self->fd, DRM_CLIENT_CAP_UNIVERSAL_PLANES, 1))
+     goto set_cap_failed;
+ 
+   pres = drmModeGetPlaneResources (self->fd);
+   if (!pres)
+     goto plane_resources_failed;
+ 
++  self->primary_plane_id =
++      find_primary_plane_for_crtc (self->fd, res, pres, self->pipe);
++  if (self->primary_plane_id <= 0)
++    goto plane_failed;
++
+   if (self->plane_id == -1)
+-    plane = find_plane_for_crtc (self->fd, res, pres, crtc->crtc_id);
++    plane = find_plane_for_crtc (self->fd, res, pres, self->pipe,
++        self->modesetting_enabled ? self->primary_plane_id : 0);
+   else
+     plane = drmModeGetPlane (self->fd, self->plane_id);
+   if (!plane)
+     goto plane_failed;
+ 
++  self->plane_id = plane->plane_id;
++
+   if (!ensure_allowed_caps (self, conn, plane, res))
+     goto allowed_caps_failed;
+ 
+-  self->conn_id = conn->connector_id;
+-  self->crtc_id = crtc->crtc_id;
+-  self->plane_id = plane->plane_id;
+-
+   gst_kms_sink_configure_plane_zpos (self, FALSE);
+ 
+   GST_INFO_OBJECT (self, "connector id = %d / crtc id = %d / plane id = %d",
+@@ -1393,14 +1476,9 @@ plane_resources_failed:
+ 
+ plane_failed:
+   {
+-    if (universal_planes) {
+-      GST_ELEMENT_ERROR (self, RESOURCE, SETTINGS,
+-          ("Could not find a plane for crtc"), (NULL));
+-      goto bail;
+-    } else {
+-      universal_planes = TRUE;
+-      goto retry_find_plane;
+-    }
++    GST_ELEMENT_ERROR (self, RESOURCE, SETTINGS,
++        ("Could not find a plane for crtc"), (NULL));
++    goto bail;
+   }
+ 
+ allowed_caps_failed:
+diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
+index 5fb712d..4ecfb82 100644
+--- a/sys/kms/gstkmssink.h
++++ b/sys/kms/gstkmssink.h
+@@ -53,6 +53,7 @@ struct _GstKMSSink {
+   gint conn_id;
+   gint crtc_id;
+   gint plane_id;
++  gint primary_plane_id;
+   guint pipe;
+   guint saved_zpos;
+ 
 -- 
 2.20.1
 

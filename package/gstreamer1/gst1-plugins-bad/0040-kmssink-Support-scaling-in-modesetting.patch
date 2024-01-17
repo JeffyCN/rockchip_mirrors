@@ -1,0 +1,184 @@
+From a26e0a2372e51d87edab1f3c99e6365d73ae6c56 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 15 Sep 2022 18:01:12 +0800
+Subject: [PATCH 40/45] kmssink: Support scaling in modesetting
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ sys/kms/gstkmssink.c | 67 +++++++++++++++++++++++++++++---------------
+ sys/kms/gstkmssink.h |  1 +
+ 2 files changed, 46 insertions(+), 22 deletions(-)
+
+diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
+index aed50df..8f077b6 100644
+--- a/sys/kms/gstkmssink.c
++++ b/sys/kms/gstkmssink.c
+@@ -833,13 +833,15 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+   drmModeConnector *conn;
+   int err;
+   gint i;
+-  drmModeModeInfo *mode;
++  drmModeModeInfo *mode, *preferred;
+   guint32 fb_id;
+   GstKMSMemory *kmsmem;
++  GstVideoInfo *info;
+ 
+   ret = FALSE;
+   conn = NULL;
+   mode = NULL;
++  preferred = NULL;
+   kmsmem = NULL;
+ 
+   if (self->conn_id < 0)
+@@ -847,26 +849,40 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+ 
+   GST_INFO_OBJECT (self, "configuring mode setting");
+ 
+-  ensure_kms_allocator (self);
+-  kmsmem = (GstKMSMemory *) gst_kms_allocator_bo_alloc (self->allocator, vinfo);
+-  if (!kmsmem)
+-    goto bo_failed;
+-  fb_id = kmsmem->fb_id;
+-
+   conn = drmModeGetConnector (self->fd, self->conn_id);
+   if (!conn)
+     goto connector_failed;
+ 
+   for (i = 0; i < conn->count_modes; i++) {
+-    if (conn->modes[i].vdisplay == GST_VIDEO_INFO_HEIGHT (vinfo) &&
+-        conn->modes[i].hdisplay == GST_VIDEO_INFO_WIDTH (vinfo)) {
++    if (!preferred && (conn->modes[i].type & DRM_MODE_TYPE_PREFERRED))
++      preferred = &conn->modes[i];
++
++    if (!mode && conn->modes[i].vdisplay == GST_VIDEO_INFO_HEIGHT (vinfo) &&
++        conn->modes[i].hdisplay == GST_VIDEO_INFO_WIDTH (vinfo))
+       mode = &conn->modes[i];
+-      break;
+-    }
+   }
++
++  if (preferred && (self->can_scale || !mode))
++    mode = preferred;
++
++  /* Fallback to the latest mode */
++  if (!mode && conn->count_modes)
++    mode = &conn->modes[conn->count_modes - 1];
++
+   if (!mode)
+     goto mode_failed;
+ 
++  info = gst_video_info_new ();
++  gst_video_info_set_format (info, GST_VIDEO_FORMAT_BGRx,
++      mode->hdisplay, mode->vdisplay);
++  ensure_kms_allocator (self);
++  kmsmem = (GstKMSMemory *) gst_kms_allocator_bo_alloc (self->allocator, info);
++  gst_video_info_free (info);
++
++  if (!kmsmem)
++    goto bo_failed;
++  fb_id = kmsmem->fb_id;
++
+   err = drmModeSetCrtc (self->fd, self->crtc_id, fb_id, 0, 0,
+       (uint32_t *) & self->conn_id, 1, mode);
+   if (err)
+@@ -884,6 +900,7 @@ bail:
+   if (conn)
+     drmModeFreeConnector (conn);
+ 
++  self->mode_valid = ret;
+   return ret;
+ 
+   /* ERRORS */
+@@ -1042,7 +1059,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+ 
+       format = gst_video_format_to_string (fmt);
+ 
+-      if (mode) {
++      if (mode && !self->can_scale) {
+         caps = gst_caps_new_simple ("video/x-raw",
+             "format", G_TYPE_STRING, format,
+             "width", G_TYPE_INT, mode->hdisplay,
+@@ -1343,6 +1360,8 @@ gst_kms_sink_start (GstBaseSink * bsink)
+     self->modesetting_enabled = TRUE;
+   }
+ 
++  self->mode_valid = !self->modesetting_enabled;
++
+   if (crtc->mode_valid && self->modesetting_enabled && self->restore_crtc) {
+     self->saved_crtc = (drmModeCrtc *) crtc;
+   }
+@@ -1761,9 +1780,6 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+     self->pool = NULL;
+   }
+ 
+-  if (self->modesetting_enabled && !configure_mode_setting (self, &vinfo))
+-    goto modesetting_failed;
+-
+   GST_OBJECT_LOCK (self);
+   if (self->reconfigure) {
+     self->reconfigure = FALSE;
+@@ -1798,13 +1814,6 @@ no_disp_ratio:
+     return FALSE;
+   }
+ 
+-modesetting_failed:
+-  {
+-    GST_ELEMENT_ERROR (self, CORE, NEGOTIATION, (NULL),
+-        ("failed to configure video mode"));
+-    return FALSE;
+-  }
+-
+ }
+ 
+ static gboolean
+@@ -2261,6 +2270,10 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+   GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
+ 
+   GST_OBJECT_LOCK (self);
++  if (self->modesetting_enabled && !self->mode_valid &&
++      !configure_mode_setting (self, vinfo))
++    goto modesetting_failed;
++
+   if ((crop = gst_buffer_get_video_crop_meta (buffer))) {
+     GstVideoInfo cropped_vinfo = *vinfo;
+ 
+@@ -2331,7 +2344,12 @@ retry_set_plane:
+       src.x << 16, src.y << 16, src.w << 16, src.h << 16);
+   if (ret) {
+     if (self->can_scale) {
++      GST_WARNING_OBJECT (self, "unable to scale on plane %d", self->plane_id);
+       self->can_scale = FALSE;
++
++      if (self->modesetting_enabled && !configure_mode_setting (self, vinfo))
++        goto modesetting_failed;
++
+       goto retry_set_plane;
+     }
+     goto set_plane_failed;
+@@ -2369,6 +2387,11 @@ buffer_invalid:
+     GST_ERROR_OBJECT (self, "invalid buffer: it doesn't have a fb id");
+     goto bail;
+   }
++modesetting_failed:
++  {
++    GST_ERROR_OBJECT (self, "failed to configure video mode");
++    goto bail;
++  }
+ set_plane_failed:
+   {
+     GST_OBJECT_UNLOCK (self);
+diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
+index 99d54b1..4561876 100644
+--- a/sys/kms/gstkmssink.h
++++ b/sys/kms/gstkmssink.h
+@@ -76,6 +76,7 @@ struct _GstKMSSink {
+   gboolean can_scale;
+ 
+   gboolean modesetting_enabled;
++  gboolean mode_valid;
+   gboolean restore_crtc;
+   GstStructure *connector_props;
+   GstStructure *plane_props;
+-- 
+2.20.1
+

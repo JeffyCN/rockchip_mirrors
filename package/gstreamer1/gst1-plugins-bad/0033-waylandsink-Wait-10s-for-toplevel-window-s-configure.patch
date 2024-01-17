@@ -1,7 +1,7 @@
-From a625b9d0bb1ddf6ccef42add498ba69a1b2f48cc Mon Sep 17 00:00:00 2001
+From 015381ba47dcc8587eac649e2ee96c4624b554cc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 Jul 2022 14:43:31 +0800
-Subject: [PATCH 34/42] waylandsink: Wait 10s for toplevel window's configure
+Subject: [PATCH 33/45] waylandsink: Wait 10s for toplevel window's configure
  event
 
 The original 100ms is racy when system is under heavy load.
