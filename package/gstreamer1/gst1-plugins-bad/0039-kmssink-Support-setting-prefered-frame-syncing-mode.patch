@@ -1,7 +1,7 @@
-From cdd40c3b221193022fafd1c1e51c027ec216e49c Mon Sep 17 00:00:00 2001
+From a09e8133e9443dd636ba3ed577cdb404ae2bdcf9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 25 Feb 2022 17:48:58 +0800
-Subject: [PATCH 31/42] kmssink: Support setting prefered frame syncing mode
+Subject: [PATCH 39/45] kmssink: Support setting prefered frame syncing mode
 
 Tested with:
 gst-launch-1.0 videotestsrc ! kmssink sync-mode=vblank
@@ -9,12 +9,12 @@ gst-launch-1.0 videotestsrc ! kmssink sync-mode=none
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmssink.c | 55 +++++++++++++++++++++++++++++++++++++++++---
- sys/kms/gstkmssink.h | 10 ++++++++
- 2 files changed, 62 insertions(+), 3 deletions(-)
+ sys/kms/gstkmssink.c | 88 +++++++++++++++++++++++++++++++++++---------
+ sys/kms/gstkmssink.h | 10 +++++
+ 2 files changed, 80 insertions(+), 18 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 3740e57..bab6ba8 100644
+index 4c921c7..aed50df 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -107,11 +107,14 @@ enum
@@ -32,7 +32,16 @@ index 3740e57..bab6ba8 100644
  #ifdef HAVE_DRM_HDR
  enum hdmi_metadata_type
  {
-@@ -1805,7 +1808,7 @@ static gboolean
+@@ -1388,8 +1391,6 @@ gst_kms_sink_start (GstBaseSink * bsink)
+   self->pending_rect = self->render_rect;
+   GST_OBJECT_UNLOCK (self);
+ 
+-  self->buffer_id = crtc->buffer_id;
+-
+   self->mm_width = conn->mmWidth;
+   self->mm_height = conn->mmHeight;
+ 
+@@ -1895,7 +1896,7 @@ static gboolean
  gst_kms_sink_sync (GstKMSSink * self)
  {
    gint ret;
@@ -41,7 +50,7 @@ index 3740e57..bab6ba8 100644
    drmEventContext evctxt = {
      .version = DRM_EVENT_CONTEXT_VERSION,
      .page_flip_handler = sync_handler,
-@@ -1824,8 +1827,18 @@ gst_kms_sink_sync (GstKMSSink * self)
+@@ -1914,13 +1915,36 @@ gst_kms_sink_sync (GstKMSSink * self)
    else if (self->pipe > 1)
      vbl.request.type |= self->pipe << DRM_VBLANK_HIGH_CRTC_SHIFT;
  
@@ -61,8 +70,59 @@ index 3740e57..bab6ba8 100644
      ret = drmWaitVBlank (self->fd, &vbl);
      if (ret)
        goto vblank_failed;
-@@ -2235,7 +2248,8 @@ retry_set_plane:
+   } else {
+-    ret = drmModePageFlip (self->fd, self->crtc_id, self->buffer_id,
++    guint32 buffer_id;
++
++    if (self->plane_id == self->primary_plane_id) {
++      buffer_id = self->buffer_id;
++    } else {
++      drmModeCrtc *crtc = drmModeGetCrtc (self->fd, self->crtc_id);
++      if (!crtc)
++        goto pageflip_failed;
++
++      buffer_id = crtc->buffer_id;
++      drmModeFreeCrtc (crtc);
++    }
++
++    ret = drmModePageFlip (self->fd, self->crtc_id, buffer_id,
+         DRM_MODE_PAGE_FLIP_EVENT, &waiting);
+     if (ret)
+       goto pageflip_failed;
+@@ -2211,6 +2235,8 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
  
+   res = GST_FLOW_ERROR;
+ 
++  self->buffer_id = 0;
++
+   if (buf) {
+     buffer = gst_kms_sink_get_input_buffer (self, buf);
+     vinfo = &self->vinfo;
+@@ -2235,18 +2261,6 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+   GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
+ 
+   GST_OBJECT_LOCK (self);
+-  if (self->modesetting_enabled) {
+-    self->buffer_id = fb_id;
+-
+-    if (!self->render_rect.w || !self->render_rect.h)
+-      goto sync_frame;
+-
+-    if (!self->render_rect.x && !self->render_rect.y &&
+-        self->render_rect.w == self->hdisplay &&
+-        self->render_rect.h == self->vdisplay)
+-      goto sync_frame;
+-  }
+-
+   if ((crop = gst_buffer_get_video_crop_meta (buffer))) {
+     GstVideoInfo cropped_vinfo = *vinfo;
+ 
+@@ -2323,9 +2337,12 @@ retry_set_plane:
+     goto set_plane_failed;
+   }
+ 
++  self->buffer_id = fb_id;
++
  sync_frame:
    /* Wait for the previous frame to complete redraw */
 -  if (!self->skip_vsync && !gst_kms_sink_sync (self)) {
@@ -71,7 +131,7 @@ index 3740e57..bab6ba8 100644
      GST_OBJECT_UNLOCK (self);
      goto bail;
    }
-@@ -2445,6 +2459,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
+@@ -2535,6 +2552,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
      case PROP_FORCE_ASPECT_RATIO:
        sink->keep_aspect = g_value_get_boolean (value);
        break;
@@ -81,7 +141,7 @@ index 3740e57..bab6ba8 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_N, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -2507,6 +2524,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
+@@ -2597,6 +2617,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
      case PROP_FORCE_ASPECT_RATIO:
        g_value_set_boolean (value, sink->keep_aspect);
        break;
@@ -91,7 +151,7 @@ index 3740e57..bab6ba8 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -2539,11 +2559,15 @@ gst_kms_sink_init (GstKMSSink * sink)
+@@ -2629,11 +2652,15 @@ gst_kms_sink_init (GstKMSSink * sink)
    sink->saved_zpos = -1;
    sink->can_scale = TRUE;
    sink->keep_aspect = TRUE;
@@ -107,7 +167,7 @@ index 3740e57..bab6ba8 100644
  #ifdef HAVE_DRM_HDR
    sink->no_infoframe = FALSE;
    sink->has_hdr_info = FALSE;
-@@ -2556,6 +2580,25 @@ gst_kms_sink_init (GstKMSSink * sink)
+@@ -2646,6 +2673,25 @@ gst_kms_sink_init (GstKMSSink * sink)
  #endif
  }
  
@@ -133,13 +193,13 @@ index 3740e57..bab6ba8 100644
  static void
  gst_kms_sink_class_init (GstKMSSinkClass * klass)
  {
-@@ -2752,6 +2795,12 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+@@ -2842,6 +2888,12 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
        "When enabled, scaling will respect original aspect ratio", TRUE,
        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  
 +  g_properties[PROP_SYNC_MODE] =
 +      g_param_spec_enum ("sync-mode", "Sync mode",
-+      "Prefered frame syncing mode",
++      "Preferred frame syncing mode",
 +      GST_TYPE_KMS_SYNC_MODE, DEFAULT_SYNC_MODE,
 +      G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
 +
@@ -147,7 +207,7 @@ index 3740e57..bab6ba8 100644
  
    gst_video_overlay_install_properties (gobject_class, PROP_N);
 diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
-index 5fb712d..3e25665 100644
+index 4ecfb82..99d54b1 100644
 --- a/sys/kms/gstkmssink.h
 +++ b/sys/kms/gstkmssink.h
 @@ -45,6 +45,14 @@ G_BEGIN_DECLS
@@ -165,7 +225,7 @@ index 5fb712d..3e25665 100644
  struct _GstKMSSink {
    GstVideoSink videosink;
  
-@@ -114,6 +122,8 @@ struct _GstKMSSink {
+@@ -115,6 +123,8 @@ struct _GstKMSSink {
    guintptr window_handle;
  
    gboolean keep_aspect;

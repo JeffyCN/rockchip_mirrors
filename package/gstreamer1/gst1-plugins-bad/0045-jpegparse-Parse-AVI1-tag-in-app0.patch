@@ -1,8 +1,8 @@
-From 43832ca9e246cbfcddf1e04bb5b59a01503aa869 Mon Sep 17 00:00:00 2001
+From ebf7d95f8834af147c9132c8f41015f8b1bd9507 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?V=C3=ADctor=20Manuel=20J=C3=A1quez=20Leal?=
  <vjaquez@igalia.com>
 Date: Wed, 15 Feb 2023 19:02:35 +0100
-Subject: [PATCH 44/45] jpegparse: Parse AVI1 tag in app0.
+Subject: [PATCH 45/45] jpegparse: Parse AVI1 tag in app0.
 
 ---
  gst/jpegformat/gstjpegparse.c | 13 +++++++++++++
