@@ -1,4 +1,4 @@
-From fdc9ef245b322222c2f6053181e9ed00b5f4256e Mon Sep 17 00:00:00 2001
+From e82a2218e4144d8c168f4f7938d89761ca779963 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 17:56:40 +0800
 Subject: [PATCH 38/45] kmssink: Improve monitor and plane selection
@@ -249,7 +249,7 @@ index 1c3ecb8..4c921c7 100644
  
  allowed_caps_failed:
 diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
-index 5fb712d..4ecfb82 100644
+index ef00f23..1d5bd58 100644
 --- a/sys/kms/gstkmssink.h
 +++ b/sys/kms/gstkmssink.h
 @@ -53,6 +53,7 @@ struct _GstKMSSink {
@@ -258,7 +258,7 @@ index 5fb712d..4ecfb82 100644
    gint plane_id;
 +  gint primary_plane_id;
    guint pipe;
-   guint saved_zpos;
+   gint saved_zpos;
  
 -- 
 2.20.1

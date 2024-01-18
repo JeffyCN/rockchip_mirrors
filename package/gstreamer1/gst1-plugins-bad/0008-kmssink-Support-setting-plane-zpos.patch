@@ -1,4 +1,4 @@
-From 4f9bf70be13f3bbd649ce8e026bca3f6cf1ba986 Mon Sep 17 00:00:00 2001
+From dac860a268b704c21336ea62862561fbeddd1ac7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Jun 2020 10:03:01 +0800
 Subject: [PATCH 08/45] kmssink: Support setting plane zpos
@@ -126,14 +126,14 @@ index e20740f..3941251 100644
    gst_poll_fd_init (&sink->pollfd);
    sink->poll = gst_poll_new (TRUE);
 diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
-index a769d9b..f221eb6 100644
+index a769d9b..3b9eb7f 100644
 --- a/sys/kms/gstkmssink.h
 +++ b/sys/kms/gstkmssink.h
 @@ -54,6 +54,7 @@ struct _GstKMSSink {
    gint crtc_id;
    gint plane_id;
    guint pipe;
-+  guint saved_zpos;
++  gint saved_zpos;
  
    /* crtc data */
    guint16 hdisplay, vdisplay;

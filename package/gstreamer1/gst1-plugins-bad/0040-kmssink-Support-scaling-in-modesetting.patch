@@ -1,19 +1,45 @@
-From a26e0a2372e51d87edab1f3c99e6365d73ae6c56 Mon Sep 17 00:00:00 2001
+From 329c9e418ab1898d496c176cbdcbaa18293afe0e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:01:12 +0800
 Subject: [PATCH 40/45] kmssink: Support scaling in modesetting
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmssink.c | 67 +++++++++++++++++++++++++++++---------------
+ sys/kms/gstkmssink.c | 76 +++++++++++++++++++++++++++++---------------
  sys/kms/gstkmssink.h |  1 +
- 2 files changed, 46 insertions(+), 22 deletions(-)
+ 2 files changed, 51 insertions(+), 26 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index aed50df..8f077b6 100644
+index aed50df..5589745 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -833,13 +833,15 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+@@ -582,12 +582,13 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
+     plane = drmModeGetPlane (fd, pres->planes[i]);
+     plane_type = drm_plane_get_type (fd, plane);
+ 
+-    /* Check unused possible planes */
+-    if (plane->possible_crtcs & (1 << pipe) && !plane->fb_id) {
++    /* Check possible planes */
++    if (plane->possible_crtcs & (1 << pipe)) {
+       if (plane->plane_id == preferred)
+         return plane;
+ 
+-      if (!fallback && plane_type == DRM_PLANE_TYPE_OVERLAY) {
++      if (!fallback && !plane->fb_id &&
++          plane_type == DRM_PLANE_TYPE_OVERLAY) {
+         /* Fallback to the first unused overlay plane */
+         fallback = plane->plane_id;
+       }
+@@ -595,7 +596,7 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
+     drmModeFreePlane (plane);
+   }
+ 
+-  if (fallback)
++  if (!preferred && fallback)
+     return drmModeGetPlane (fd, fallback);
+ 
+   return NULL;
+@@ -833,13 +834,15 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
    drmModeConnector *conn;
    int err;
    gint i;
@@ -30,7 +56,7 @@ index aed50df..8f077b6 100644
    kmsmem = NULL;
  
    if (self->conn_id < 0)
-@@ -847,26 +849,40 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+@@ -847,26 +850,40 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
  
    GST_INFO_OBJECT (self, "configuring mode setting");
  
@@ -81,7 +107,7 @@ index aed50df..8f077b6 100644
    err = drmModeSetCrtc (self->fd, self->crtc_id, fb_id, 0, 0,
        (uint32_t *) & self->conn_id, 1, mode);
    if (err)
-@@ -884,6 +900,7 @@ bail:
+@@ -884,6 +901,7 @@ bail:
    if (conn)
      drmModeFreeConnector (conn);
  
@@ -89,7 +115,7 @@ index aed50df..8f077b6 100644
    return ret;
  
    /* ERRORS */
-@@ -1042,7 +1059,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -1042,7 +1060,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
  
        format = gst_video_format_to_string (fmt);
  
@@ -98,7 +124,7 @@ index aed50df..8f077b6 100644
          caps = gst_caps_new_simple ("video/x-raw",
              "format", G_TYPE_STRING, format,
              "width", G_TYPE_INT, mode->hdisplay,
-@@ -1343,6 +1360,8 @@ gst_kms_sink_start (GstBaseSink * bsink)
+@@ -1343,6 +1361,8 @@ gst_kms_sink_start (GstBaseSink * bsink)
      self->modesetting_enabled = TRUE;
    }
  
@@ -107,7 +133,7 @@ index aed50df..8f077b6 100644
    if (crtc->mode_valid && self->modesetting_enabled && self->restore_crtc) {
      self->saved_crtc = (drmModeCrtc *) crtc;
    }
-@@ -1761,9 +1780,6 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -1761,9 +1781,6 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
      self->pool = NULL;
    }
  
@@ -117,7 +143,7 @@ index aed50df..8f077b6 100644
    GST_OBJECT_LOCK (self);
    if (self->reconfigure) {
      self->reconfigure = FALSE;
-@@ -1798,13 +1814,6 @@ no_disp_ratio:
+@@ -1798,13 +1815,6 @@ no_disp_ratio:
      return FALSE;
    }
  
@@ -131,7 +157,7 @@ index aed50df..8f077b6 100644
  }
  
  static gboolean
-@@ -2261,6 +2270,10 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2261,6 +2271,10 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
    GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
  
    GST_OBJECT_LOCK (self);
@@ -142,7 +168,7 @@ index aed50df..8f077b6 100644
    if ((crop = gst_buffer_get_video_crop_meta (buffer))) {
      GstVideoInfo cropped_vinfo = *vinfo;
  
-@@ -2331,7 +2344,12 @@ retry_set_plane:
+@@ -2331,7 +2345,12 @@ retry_set_plane:
        src.x << 16, src.y << 16, src.w << 16, src.h << 16);
    if (ret) {
      if (self->can_scale) {
@@ -155,7 +181,7 @@ index aed50df..8f077b6 100644
        goto retry_set_plane;
      }
      goto set_plane_failed;
-@@ -2369,6 +2387,11 @@ buffer_invalid:
+@@ -2369,6 +2388,11 @@ buffer_invalid:
      GST_ERROR_OBJECT (self, "invalid buffer: it doesn't have a fb id");
      goto bail;
    }
@@ -168,7 +194,7 @@ index aed50df..8f077b6 100644
    {
      GST_OBJECT_UNLOCK (self);
 diff --git a/sys/kms/gstkmssink.h b/sys/kms/gstkmssink.h
-index 99d54b1..4561876 100644
+index 5ce1e55..0d3374d 100644
 --- a/sys/kms/gstkmssink.h
 +++ b/sys/kms/gstkmssink.h
 @@ -76,6 +76,7 @@ struct _GstKMSSink {
