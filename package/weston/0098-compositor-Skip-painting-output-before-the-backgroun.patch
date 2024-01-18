@@ -1,4 +1,4 @@
-From dc76116f834bf8a93756ab8876508719befe3b09 Mon Sep 17 00:00:00 2001
+From 61518e7c62564f441249cef988e943220415d128 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 16 Jan 2024 16:44:14 +0800
 Subject: [PATCH 98/98] compositor: Skip painting output before the background
@@ -10,7 +10,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 9 insertions(+)
 
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 0b3827d4ed..ce81491b29 100644
+index 0b3827d4ed..f233a14a67 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3491,6 +3491,7 @@ weston_output_repaint(struct weston_output *output)
@@ -34,8 +34,8 @@ index 0b3827d4ed..ce81491b29 100644
  		assert(pnode->output == output);
  	}
  
-+	if (!has_background)
-+		return -1;
++	if (!output->unavailable && !has_background)
++		return 1;
 +
  	/* Find the highest protection desired for an output */
  	wl_list_for_each(pnode, &output->paint_node_z_order_list,
