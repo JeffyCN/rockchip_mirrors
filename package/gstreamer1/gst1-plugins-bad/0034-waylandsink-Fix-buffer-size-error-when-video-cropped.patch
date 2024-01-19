@@ -1,7 +1,7 @@
-From 107c20b3c022cc1ba7f03a969ecbd723799dc470 Mon Sep 17 00:00:00 2001
+From 91f79da2d3efa3600bc967201fcd51cc8f8cb607 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 15 Jul 2022 12:14:44 +0800
-Subject: [PATCH 34/45] waylandsink: Fix buffer size error when video cropped
+Subject: [PATCH 34/44] waylandsink: Fix buffer size error when video cropped
 
 Prefer video meta's size instead of the cropped size from caps.
 
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 4 insertions(+)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 0cb79dc..591f8e4 100644
+index 4622648..ab4cef1 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
-@@ -1040,6 +1040,10 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -1038,6 +1038,10 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
    if (vmeta) {
      gint i;
  

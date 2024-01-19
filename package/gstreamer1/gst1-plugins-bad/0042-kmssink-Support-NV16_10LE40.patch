@@ -1,7 +1,7 @@
-From 3fcdbdc18f71d68d3eeed2876fda7e370bdf4ad7 Mon Sep 17 00:00:00 2001
+From b1d27399e577ce7296591afa394c9b3b016d7496 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 13 Jun 2023 14:13:49 +0800
-Subject: [PATCH 43/45] kmssink: Support NV16_10LE40
+Subject: [PATCH 42/44] kmssink: Support NV16_10LE40
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
  3 files changed, 9 insertions(+)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 38aa0ed..b810319 100644
+index 66de3ec..2687df7 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -1062,6 +1062,8 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
