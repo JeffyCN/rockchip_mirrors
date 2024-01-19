@@ -1,4 +1,4 @@
-From bed9ba7912a9f4b84d371cf9181941785a087411 Mon Sep 17 00:00:00 2001
+From 3fcdbdc18f71d68d3eeed2876fda7e370bdf4ad7 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 13 Jun 2023 14:13:49 +0800
 Subject: [PATCH 43/45] kmssink: Support NV16_10LE40
@@ -11,10 +11,10 @@ Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
  3 files changed, 9 insertions(+)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index eb4fe65..21fda21 100644
+index 38aa0ed..b810319 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -1048,6 +1048,8 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -1062,6 +1062,8 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
          fmt = GST_VIDEO_FORMAT_NV12;
        else if (plane->formats[j] == DRM_FORMAT_YUV420_10BIT)
          fmt = GST_VIDEO_FORMAT_NV12_10LE40;
