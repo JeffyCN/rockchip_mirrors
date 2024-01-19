@@ -1,7 +1,7 @@
-From 4176e37c139dcc6e9ae447b745895289332e803b Mon Sep 17 00:00:00 2001
+From 29ba4c4d1fd5e343d2b8a222d37d573543f3a33d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Mar 2021 10:15:51 +0800
-Subject: [PATCH 19/42] waylandsink: Support window layer property
+Subject: [PATCH 19/44] waylandsink: Support window layer property
 
 Support setting top|normal|bottom window layer.
 
@@ -17,7 +17,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 103 insertions(+), 5 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 071bc5a..f492d72 100644
+index 71d53a1..648b5ff 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -61,6 +61,7 @@ enum
@@ -117,7 +117,7 @@ index 071bc5a..f492d72 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_LAST, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -773,8 +821,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -771,8 +819,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
      if (!self->window) {
        /* if we were not provided a window, create one ourselves */
        self->window = gst_wl_window_new_toplevel (self->display,

@@ -1,7 +1,7 @@
-From 7f4cd5662fb29e411c0a7ada9741c47ea71f994c Mon Sep 17 00:00:00 2001
+From 186df743ada82610dfbde93e3e4afc9ecddb447f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 25 Dec 2018 16:20:35 +0800
-Subject: [PATCH 07/42] waylandsink: Enable changing window handle
+Subject: [PATCH 07/44] waylandsink: Enable changing window handle
 
 Changing window handle is dangerous, but we need this feature for:
 https://redmine.rockchip.com.cn/issues/184629
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 18 insertions(+), 6 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 0e6421f..5d2721c 100644
+index 2f116bf..87262ad 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
-@@ -718,9 +718,10 @@ render_last_buffer (GstWaylandSink * self, gboolean redraw)
+@@ -716,9 +716,10 @@ render_last_buffer (GstWaylandSink * self, gboolean redraw)
    self->callback = callback;
    wl_callback_add_listener (callback, &frame_callback_listener, self);
  
@@ -28,7 +28,7 @@ index 0e6421f..5d2721c 100644
    }
    gst_wl_window_render (self->window, wlbuffer, info);
  }
-@@ -992,18 +993,21 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
+@@ -990,18 +991,21 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
  
    g_return_if_fail (self != NULL);
  
@@ -55,7 +55,7 @@ index 0e6421f..5d2721c 100644
    if (handle) {
      if (G_LIKELY (gst_wayland_sink_find_display (self))) {
        /* we cannot use our own display with an external window handle */
-@@ -1018,6 +1022,12 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
+@@ -1016,6 +1020,12 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
              &self->render_lock);
          gst_wl_window_set_rotate_method (self->window,
              self->current_rotate_method);

@@ -1,7 +1,7 @@
-From 681d9e4e9f076b232a6ba0c5e528538005cbc5c0 Mon Sep 17 00:00:00 2001
+From c8fc45ca89a08167e7855ec9c4716bcd614d18c3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 14 Jun 2023 10:04:42 +0800
-Subject: [PATCH 42/42] waylandsink: Support force trying dmabuf
+Subject: [PATCH 41/44] waylandsink: Support force trying dmabuf
 
 Not all source plugins would provide dma feature for dmabuf.
 
@@ -19,7 +19,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 24 insertions(+), 12 deletions(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 591f8e4..be74c95 100644
+index ab4cef1..5af5f3d 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -252,6 +252,8 @@ gst_wayland_sink_class_init (GstWaylandSinkClass * klass)
@@ -42,7 +42,7 @@ index 591f8e4..be74c95 100644
  }
  
  static void
-@@ -655,9 +661,10 @@ gst_wayland_sink_fixup_caps (GstWaylandSink * self, GstCaps * caps)
+@@ -653,9 +659,10 @@ gst_wayland_sink_fixup_caps (GstWaylandSink * self, GstCaps * caps)
    /* HACK: Allow nv12-10le40 and arm-afbc in main caps */
  
    if (gst_wl_display_support_nv12_10le40 (self->display)) {
@@ -56,7 +56,7 @@ index 591f8e4..be74c95 100644
  
      /* NV15(AFBC) */
      if (gst_wl_display_support_afbc (self->display)) {
-@@ -674,18 +681,22 @@ gst_wayland_sink_fixup_caps (GstWaylandSink * self, GstCaps * caps)
+@@ -672,18 +679,22 @@ gst_wayland_sink_fixup_caps (GstWaylandSink * self, GstCaps * caps)
    if (gst_wl_display_support_afbc (self->display)) {
      if (gst_wl_display_check_format_for_dmabuf (self->display,
              GST_VIDEO_FORMAT_NV12)) {
@@ -85,7 +85,7 @@ index 591f8e4..be74c95 100644
        gst_caps_set_simple (tmp_caps, "arm-afbc", G_TYPE_INT, 1, NULL);
        gst_caps_append (caps, tmp_caps);
      }
-@@ -823,6 +834,9 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -821,6 +832,9 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
    use_dmabuf = gst_caps_features_contains (gst_caps_get_features (caps, 0),
        GST_CAPS_FEATURE_MEMORY_DMABUF);
  
@@ -95,7 +95,7 @@ index 591f8e4..be74c95 100644
    /* validate the format base on the memory type. */
    if (use_dmabuf) {
      if (!gst_wl_display_check_format_for_dmabuf (self->display, format))
-@@ -831,8 +845,6 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -829,8 +843,6 @@ gst_wayland_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
      goto unsupported_format;
    }
  

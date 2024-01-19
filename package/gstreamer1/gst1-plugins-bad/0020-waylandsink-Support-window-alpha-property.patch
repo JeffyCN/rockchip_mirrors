@@ -1,7 +1,7 @@
-From c32162cf31d1cc4d2f70395755dd72ed1a54fc0d Mon Sep 17 00:00:00 2001
+From 8117433b2d53837f3e05aa7573c139e301985d5f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 28 Dec 2021 14:06:19 +0800
-Subject: [PATCH 20/42] waylandsink: Support window alpha property
+Subject: [PATCH 20/44] waylandsink: Support window alpha property
 
 Tested with:
 gst-launch-1.0 videotestsrc ! waylandsink alpha=0.5
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 45 insertions(+)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index f492d72..9af23ec 100644
+index 648b5ff..71b1c1c 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -62,6 +62,7 @@ enum
@@ -89,7 +89,7 @@ index f492d72..9af23ec 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_LAST, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -827,6 +856,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -825,6 +854,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
            G_CALLBACK (on_window_closed), self, 0);
        gst_wl_window_set_rotate_method (self->window,
            self->current_rotate_method);
@@ -97,7 +97,7 @@ index f492d72..9af23ec 100644
      }
    }
  
-@@ -1085,6 +1115,7 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
+@@ -1083,6 +1113,7 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
              &self->render_lock);
          gst_wl_window_set_rotate_method (self->window,
              self->current_rotate_method);

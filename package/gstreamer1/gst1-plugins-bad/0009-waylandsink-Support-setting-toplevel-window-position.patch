@@ -1,7 +1,7 @@
-From b95c53708028dd365742b65e91ba1c62541a5780 Mon Sep 17 00:00:00 2001
+From 8609526173516aac7edbe8386a4924ec54399ffc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Jun 2020 10:11:42 +0800
-Subject: [PATCH 09/42] waylandsink: Support setting toplevel window position
+Subject: [PATCH 09/44] waylandsink: Support setting toplevel window position
 
 Needs hacked wayland server, tested with:
 gst-launch-1.0 videotestsrc ! waylandsink render-rectangle="<100,200,300,400>"
@@ -47,7 +47,7 @@ index d47b801..54f025a 100644
    /* Make subsurfaces syncronous during resizes.
     * Unfortunately GTK/GDK does not provide easier to use signals.
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 5d2721c..5ee0b9f 100644
+index 87262ad..7e146fe 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -294,7 +294,8 @@ gst_wayland_sink_set_property (GObject * object,
@@ -60,7 +60,7 @@ index 5d2721c..5ee0b9f 100644
        break;
    }
  }
-@@ -764,7 +765,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -762,7 +763,8 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
      if (!self->window) {
        /* if we were not provided a window, create one ourselves */
        self->window = gst_wl_window_new_toplevel (self->display,
@@ -70,7 +70,7 @@ index 5d2721c..5ee0b9f 100644
        g_signal_connect_object (self->window, "closed",
            G_CALLBACK (on_window_closed), self, 0);
        gst_wl_window_set_rotate_method (self->window,
-@@ -1047,16 +1049,19 @@ gst_wayland_sink_set_render_rectangle (GstVideoOverlay * overlay,
+@@ -1045,16 +1047,19 @@ gst_wayland_sink_set_render_rectangle (GstVideoOverlay * overlay,
    g_return_if_fail (self != NULL);
  
    g_mutex_lock (&self->render_lock);

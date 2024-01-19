@@ -1,7 +1,7 @@
-From 77ce8987a69bfbdb18f75c5bdef3ed5e6e72de4c Mon Sep 17 00:00:00 2001
+From 390e7755acbab98d9307db5f201b42dbc2b2c78a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 30 Mar 2021 07:08:06 +0800
-Subject: [PATCH 21/42] waylandsink: Support window fill-mode property
+Subject: [PATCH 21/44] waylandsink: Support window fill-mode property
 
 Tested with:
 gst-launch-1.0 videotestsrc ! waylandsink fullscreen=1 fill-mode=crop
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  4 files changed, 110 insertions(+), 1 deletion(-)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index 9af23ec..c818dd2 100644
+index 71b1c1c..f8032fc 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -63,9 +63,12 @@ enum
@@ -124,7 +124,7 @@ index 9af23ec..c818dd2 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_LAST, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -857,6 +911,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
+@@ -855,6 +909,7 @@ gst_wayland_sink_show_frame (GstVideoSink * vsink, GstBuffer * buffer)
        gst_wl_window_set_rotate_method (self->window,
            self->current_rotate_method);
        gst_wl_window_ensure_alpha (self->window, self->alpha);
@@ -132,7 +132,7 @@ index 9af23ec..c818dd2 100644
      }
    }
  
-@@ -1116,6 +1171,7 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
+@@ -1114,6 +1169,7 @@ gst_wayland_sink_set_window_handle (GstVideoOverlay * overlay, guintptr handle)
          gst_wl_window_set_rotate_method (self->window,
              self->current_rotate_method);
          gst_wl_window_ensure_alpha (self->window, self->alpha);

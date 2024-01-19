@@ -1,7 +1,7 @@
-From 435848238d13ba3b7c23a0fd2d96f913ef5311e2 Mon Sep 17 00:00:00 2001
+From 29e689e7e474966ca61f4f22c6885e4bd570fa8c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 8 Nov 2021 18:45:00 +0800
-Subject: [PATCH 24/42] waylandsink: Support frame-sync mode
+Subject: [PATCH 24/44] waylandsink: Support frame-sync mode
 
 Set env "WAYLANDSINK_SYNC_FRAME" to enable frame syncing.
 
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 10 insertions(+)
 
 diff --git a/ext/wayland/gstwaylandsink.c b/ext/wayland/gstwaylandsink.c
-index c818dd2..a64957f 100644
+index f8032fc..e6b6f15 100644
 --- a/ext/wayland/gstwaylandsink.c
 +++ b/ext/wayland/gstwaylandsink.c
 @@ -254,6 +254,7 @@ gst_wayland_sink_init (GstWaylandSink * self)
@@ -23,7 +23,7 @@ index c818dd2..a64957f 100644
  
    self->window_handle = 1;
    self->layer = GST_WL_WINDOW_LAYER_NORMAL;
-@@ -455,6 +456,7 @@ gst_wayland_sink_finalize (GObject * object)
+@@ -453,6 +454,7 @@ gst_wayland_sink_finalize (GObject * object)
  
    g_mutex_clear (&self->display_lock);
    g_mutex_clear (&self->render_lock);
@@ -31,7 +31,7 @@ index c818dd2..a64957f 100644
  
    G_OBJECT_CLASS (parent_class)->finalize (object);
  }
-@@ -823,6 +825,7 @@ frame_redraw_callback (void *data, struct wl_callback *callback, uint32_t time)
+@@ -821,6 +823,7 @@ frame_redraw_callback (void *data, struct wl_callback *callback, uint32_t time)
  
    g_mutex_lock (&self->render_lock);
    self->redraw_pending = FALSE;
@@ -39,7 +39,7 @@ index c818dd2..a64957f 100644
  
    if (self->callback) {
      wl_callback_destroy (callback);
-@@ -858,6 +861,11 @@ render_last_buffer (GstWaylandSink * self, gboolean redraw)
+@@ -856,6 +859,11 @@ render_last_buffer (GstWaylandSink * self, gboolean redraw)
      self->resend_info = FALSE;
    }
    gst_wl_window_render (self->window, wlbuffer, info);
@@ -51,7 +51,7 @@ index c818dd2..a64957f 100644
  }
  
  static void
-@@ -1065,6 +1073,7 @@ render:
+@@ -1063,6 +1071,7 @@ render:
  
    if (buffer != to_render)
      gst_buffer_unref (to_render);
