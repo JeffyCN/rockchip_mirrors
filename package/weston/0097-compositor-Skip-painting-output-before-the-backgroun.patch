@@ -1,4 +1,4 @@
-From 1a410c0d89bf2955886bd4a121a7f83f6a9a8e5a Mon Sep 17 00:00:00 2001
+From 4677bb8450129934de1ec68ab19554c740874c55 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 16 Jan 2024 16:44:14 +0800
 Subject: [PATCH 97/97] compositor: Skip painting output before the background
