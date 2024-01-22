@@ -1,7 +1,7 @@
-From 4b55bf0b2c7e389609f97a659de523f668c975d6 Mon Sep 17 00:00:00 2001
+From f2676fef028b58b558586b3cc6d24fb07e8abe5b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 4 Aug 2023 11:00:11 +0800
-Subject: [PATCH 83/98] HACK: meson_options: Disable backend-vnc by default
+Subject: [PATCH 83/97] HACK: meson_options: Disable backend-vnc by default
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

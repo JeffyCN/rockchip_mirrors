@@ -1,7 +1,7 @@
-From 932819d525f67b0b3a40539d31a1281bb8d952e7 Mon Sep 17 00:00:00 2001
+From fb8c4cbfae881a5ce2a8a9875266c48289145fc2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Oct 2023 11:41:06 +0800
-Subject: [PATCH 87/98] backend-drm: Support delaying initial repaint
+Subject: [PATCH 87/97] backend-drm: Support delaying initial repaint
 
 Set env "WESTON_DRM_INITIAL_FREEZE_MS" for the initial freezing.
 
