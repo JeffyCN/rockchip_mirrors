@@ -1,4 +1,4 @@
-From 97d58997b2e6389adf169bf7017cbec0639cc37d Mon Sep 17 00:00:00 2001
+From df56026bd3f96a46a664b2522ccd8aa0d937840b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 4 Aug 2020 14:30:33 +0800
 Subject: [PATCH 45/97] Support setting touch calibration through environment
@@ -13,8 +13,8 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  clients/calibrator.c        |  9 +++++++++
  clients/touch-calibrator.c  | 12 ++++++++----
- libweston/libinput-device.c | 23 +++++++++++++++++++++++
- 3 files changed, 40 insertions(+), 4 deletions(-)
+ libweston/libinput-device.c | 29 +++++++++++++++++++++++++++++
+ 3 files changed, 46 insertions(+), 4 deletions(-)
 
 diff --git a/clients/calibrator.c b/clients/calibrator.c
 index be65d9bdc7..20fc1e792a 100644
@@ -72,10 +72,10 @@ index a15b941966..815b89a544 100644
  
  struct weston_touch_calibration_listener touch_calibration_listener = {
 diff --git a/libweston/libinput-device.c b/libweston/libinput-device.c
-index 31b88ac43c..30422d64ce 100644
+index 31b88ac43c..0d9ba2e3b2 100644
 --- a/libweston/libinput-device.c
 +++ b/libweston/libinput-device.c
-@@ -887,6 +887,29 @@ evdev_device_set_calibration(struct evdev_device *device)
+@@ -887,6 +887,35 @@ evdev_device_set_calibration(struct evdev_device *device)
  		return;
  	}
  
@@ -84,11 +84,17 @@ index 31b88ac43c..30422d64ce 100644
 +		const char *values;
 +		char prefix[256];
 +
-+		snprintf(prefix, sizeof(prefix), "%s:", sysname);
-+		if ((values = strstr(calibration_values, prefix)))
++		snprintf(prefix, sizeof(prefix), "%s:",
++			 libinput_device_get_name(device->device));
++		if ((values = strstr(calibration_values, prefix))) {
 +			values += strlen(prefix);
-+		else
-+			values = calibration_values;
++		} else {
++			snprintf(prefix, sizeof(prefix), "%s:", sysname);
++			if ((values = strstr(calibration_values, prefix)))
++				values += strlen(prefix);
++			else
++				values = calibration_values;
++		}
 +
 +		if ((sscanf(values, "%f %f %f %f %f %f",
 +			    &calibration.m[0],
