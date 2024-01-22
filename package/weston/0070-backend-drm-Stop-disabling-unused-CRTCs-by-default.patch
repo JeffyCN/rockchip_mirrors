@@ -1,7 +1,7 @@
-From ee69ea963ef80c09464460aad4aa1b034d42e5c5 Mon Sep 17 00:00:00 2001
+From af12b93bc481053a80f4b234421b92466dbe45e7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 15:17:39 +0800
-Subject: [PATCH 70/98] backend-drm: Stop disabling unused CRTCs by default
+Subject: [PATCH 70/97] backend-drm: Stop disabling unused CRTCs by default
 
 So that we can launch multiple weston instances for different monitors.
 

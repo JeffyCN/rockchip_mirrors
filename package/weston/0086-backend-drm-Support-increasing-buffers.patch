@@ -1,7 +1,7 @@
-From 6d19408adc30f37c879461ec1bf0764bfdd32570 Mon Sep 17 00:00:00 2001
+From 4f9fae20805e79cb5393129d0aca0504bc53d2f7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Aug 2023 18:18:58 +0800
-Subject: [PATCH 86/98] backend-drm: Support increasing buffers
+Subject: [PATCH 86/97] backend-drm: Support increasing buffers
 
 Default is 2 buffers, set env "WESTON_DRM_MIN_BUFFERS" to increase it.
 

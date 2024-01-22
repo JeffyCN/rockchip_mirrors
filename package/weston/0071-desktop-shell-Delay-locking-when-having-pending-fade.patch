@@ -1,7 +1,7 @@
-From 37e968b7f7dbfdc920d18bc4c22fbe3770f857e8 Mon Sep 17 00:00:00 2001
+From ab65a86af259d7877706b087f23110ecc7d18e36 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 1 Jun 2022 11:28:24 +0800
-Subject: [PATCH 71/98] desktop-shell: Delay locking when having pending
+Subject: [PATCH 71/97] desktop-shell: Delay locking when having pending
  fade-out animations
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>

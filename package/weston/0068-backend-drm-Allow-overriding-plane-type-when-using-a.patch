@@ -1,7 +1,7 @@
-From 9e477fe2948b9033d4cc8272828aaf834bcd034f Mon Sep 17 00:00:00 2001
+From 451b6b17dead57d43a52810aada88296545e9d5c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 7 Mar 2022 17:20:59 +0800
-Subject: [PATCH 68/98] backend-drm: Allow overriding plane type when using
+Subject: [PATCH 68/97] backend-drm: Allow overriding plane type when using
  atomic
 
 Set env DRM_PLANE_TYPE_<plane id> to primary|overlay|cursor.
