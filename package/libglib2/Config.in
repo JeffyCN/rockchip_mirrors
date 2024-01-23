@@ -15,3 +15,12 @@ config BR2_PACKAGE_LIBGLIB2
 comment "libglib2 needs a toolchain w/ wchar, threads"
 	depends on BR2_USE_MMU
 	depends on !BR2_USE_WCHAR || !BR2_TOOLCHAIN_HAS_THREADS
+
+if BR2_PACKAGE_LIBGLIB2
+
+config BR2_PACKAGE_LIBGLIB2_STATIC
+	bool "Enable static"
+	select BR2_PACKAGE_PCRE2_STATIC
+	default y if BR2_STATIC_LIBS
+
+endif

@@ -108,6 +108,11 @@ endef
 
 LIBGLIB2_POST_INSTALL_TARGET_HOOKS += LIBGLIB2_REMOVE_DEV_FILES
 
+define LIBGLIB2_TARGET_INSTALL_REMOVE_TOOLS
+	rm -f $(addprefix $(TARGET_DIR)/usr/bin/,gapplication gdbus gio gio-querymodules gsettings gresource)
+endef
+LIBGLIB2_POST_INSTALL_TARGET_HOOKS += LIBGLIB2_TARGET_INSTALL_REMOVE_TOOLS
+
 # Newer versions of libglib2 prefix glib-genmarshal, gobject-query,
 # glib-mkenums, glib_compile_schemas, glib_compile_resources and gdbus-codegen
 # with ${bindir}. Unfortunately, this will resolve to the host systems /bin/
