@@ -31,5 +31,10 @@ endif
 # needed for qt6base
 HOST_PCRE2_CONF_OPTS = --enable-pcre2-16
 
+define PCRE2_TARGET_INSTALL_REMOVE_TOOLS
+	rm -f $(TARGET_DIR)/usr/bin/pcre2*
+endef
+PCRE2_POST_INSTALL_TARGET_HOOKS += PCRE2_TARGET_INSTALL_REMOVE_TOOLS
+
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))
