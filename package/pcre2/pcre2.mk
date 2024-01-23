@@ -35,5 +35,10 @@ ifeq ($(BR2_PACKAGE_PCRE2_STATIC),y)
 PCRE2_CONF_OPTS += --enable-static
 endif
 
+define PCRE2_TARGET_INSTALL_REMOVE_TOOLS
+	rm -f $(TARGET_DIR)/usr/bin/pcre2*
+endef
+PCRE2_POST_INSTALL_TARGET_HOOKS += PCRE2_TARGET_INSTALL_REMOVE_TOOLS
+
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))
