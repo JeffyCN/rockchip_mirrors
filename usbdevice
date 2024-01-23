@@ -180,7 +180,7 @@ usb_start_daemon()
 	{
 		exec 3<&-
 
-		cd /
+		cd /; cd /
 		while usb_is_enabled; do
 			# Don't spawn after stopped
 			[ ! -f $TAG_FILE ] ||
