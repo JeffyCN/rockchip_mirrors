@@ -1,9 +1,8 @@
 #!/bin/bash -e
 
-[ -x "$TARGET_DIR/usr/sbin/wpa_supplicant" ]
-[ -x "$TARGET_DIR/sbin/dhcpcd" ]
-[ -r "$TARGET_DIR/etc/network/interfaces" ]
-[ -r "$TARGET_DIR/etc/wpa_supplicant.conf" ]
+[ "$BR2_PACKAGE_DHCPCD" ]
+[ "$BR2_PACKAGE_WPA_SUPPLICANT" ]
+[ "$BR2_PACKAGE_IFUPDOWN_SCRIPTS" ]
 
 if ! grep -wq "interfaces.d" "$TARGET_DIR/etc/network/interfaces"; then
 	echo -e "\nsource-directory /etc/network/interfaces.d" >> \
