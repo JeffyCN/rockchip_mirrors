@@ -2,6 +2,10 @@
 
 TARGET_DIR="${TARGET_DIR:-"$@"}"
 
+# Export configs to environment
+export $(grep -E "^BR2_.*=y|^BR2_DEFCONFIG=" \
+	"${BR2_CONFIG:-"$TARGET_DIR/../.config"}")
+
 OVERLAYS="$(dirname "$0")/overlays"
 for dir in $(ls "$OVERLAYS"); do
 	OVERLAY_DIR="$OVERLAYS/$dir"
@@ -22,9 +26,6 @@ fi
 
 POST_SCRIPT="../device/rockchip/common/post-build.sh"
 [ -x "$POST_SCRIPT" ] || exit 0
-
-# Export configs to environment
-export $(grep "^BR2_DEFCONFIG=" "${BR2_CONFIG:-"$TARGET_DIR/../.config"}")
 
 # Filter out host pathes
 export PATH="$(echo $PATH | xargs -d':' -n 1 | grep -v "^$O" | paste -sd':')"

@@ -1,3 +1,3 @@
 #!/bin/bash -e
 
-[ -x "$TARGET_DIR/usr/bin/weston" ]
+[ "$BR2_PACKAGE_WESTON" ]
