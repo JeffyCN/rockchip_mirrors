@@ -1,19 +1,19 @@
-From c42392c80a7e145999d0a86ae775068451b7963f Mon Sep 17 00:00:00 2001
+From 433a1c31d3c21a9a44bcd5aadaead928bad26ed0 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Wed, 26 Apr 2023 22:05:53 +0800
 Subject: [PATCH] sdl: sdl_gpu: support screen rotation
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---
- sdl/sdl_common.c | 43 +++++++++++++++++++++++++++--------
- sdl/sdl_gpu.c    | 59 ++++++++++++++++++++++++++++++++++++++++++------
- 2 files changed, 85 insertions(+), 17 deletions(-)
+ sdl/sdl_common.c | 59 ++++++++++++++++++++++++++++++++++++++--------
+ sdl/sdl_gpu.c    | 61 +++++++++++++++++++++++++++++++++++++++++-------
+ 2 files changed, 102 insertions(+), 18 deletions(-)
 
 diff --git a/sdl/sdl_common.c b/sdl/sdl_common.c
-index b34c7fee..b35bd83b 100644
+index 64f739d7..802ee133 100644
 --- a/sdl/sdl_common.c
 +++ b/sdl/sdl_common.c
-@@ -38,6 +38,7 @@ static char buf[KEYBOARD_BUFFER_SIZE];
+@@ -36,6 +36,7 @@ static char buf[KEYBOARD_BUFFER_SIZE];
  /**********************
   *   GLOBAL FUNCTIONS
   **********************/
@@ -21,16 +21,29 @@ index b34c7fee..b35bd83b 100644
  /**
   * Get the current position and state of the mouse
   * @param indev_drv pointer to the related input device driver
-@@ -113,6 +114,8 @@ int quit_filter(void * userdata, SDL_Event * event)
+@@ -111,6 +112,21 @@ int quit_filter(void * userdata, SDL_Event * event)
  
  void mouse_handler(SDL_Event * event)
  {
 +    int rotated = monitor_rotated();
-+    int16_t x, y;
++    int16_t x = -1, y = -1;
++    int16_t hor_res, ver_res;
++
++    if (rotated == LV_DISP_ROT_90 ||
++        rotated == LV_DISP_ROT_270)
++    {
++        hor_res = LV_VER_RES;
++        ver_res = LV_HOR_RES;
++    }
++    else
++    {
++        hor_res = LV_HOR_RES;
++        ver_res = LV_VER_RES;
++    }
      switch(event->type) {
          case SDL_MOUSEBUTTONUP:
              if(event->button.button == SDL_BUTTON_LEFT)
-@@ -121,31 +124,51 @@ void mouse_handler(SDL_Event * event)
+@@ -119,31 +135,54 @@ void mouse_handler(SDL_Event * event)
          case SDL_MOUSEBUTTONDOWN:
              if(event->button.button == SDL_BUTTON_LEFT) {
                  left_button_down = true;
@@ -51,24 +64,27 @@ index b34c7fee..b35bd83b 100644
              left_button_down = false;
 -            last_x = LV_HOR_RES * event->tfinger.x / SDL_ZOOM;
 -            last_y = LV_VER_RES * event->tfinger.y / SDL_ZOOM;
-+            x = LV_HOR_RES * event->tfinger.x / SDL_ZOOM;
-+            y = LV_VER_RES * event->tfinger.y / SDL_ZOOM;
++            x = hor_res * event->tfinger.x / SDL_ZOOM;
++            y = ver_res * event->tfinger.y / SDL_ZOOM;
              break;
          case SDL_FINGERDOWN:
              left_button_down = true;
 -            last_x = LV_HOR_RES * event->tfinger.x / SDL_ZOOM;
 -            last_y = LV_VER_RES * event->tfinger.y / SDL_ZOOM;
-+            x = LV_HOR_RES * event->tfinger.x / SDL_ZOOM;
-+            y = LV_VER_RES * event->tfinger.y / SDL_ZOOM;
++            x = hor_res * event->tfinger.x / SDL_ZOOM;
++            y = ver_res * event->tfinger.y / SDL_ZOOM;
              break;
          case SDL_FINGERMOTION:
 -            last_x = LV_HOR_RES * event->tfinger.x / SDL_ZOOM;
 -            last_y = LV_VER_RES * event->tfinger.y / SDL_ZOOM;
-+            x = LV_HOR_RES * event->tfinger.x / SDL_ZOOM;
-+            y = LV_VER_RES * event->tfinger.y / SDL_ZOOM;
++            x = hor_res * event->tfinger.x / SDL_ZOOM;
++            y = ver_res * event->tfinger.y / SDL_ZOOM;
              break;
      }
  
++    if ((x == -1) && (y == -1))
++        return;
++
 +    switch (rotated)
 +    {
 +    case LV_DISP_ROT_NONE:
@@ -93,10 +109,10 @@ index b34c7fee..b35bd83b 100644
  
  
 diff --git a/sdl/sdl_gpu.c b/sdl/sdl_gpu.c
-index 51ce536c..f7960bec 100644
+index 4dbe1dc8..93a3218d 100644
 --- a/sdl/sdl_gpu.c
 +++ b/sdl/sdl_gpu.c
-@@ -50,8 +50,11 @@ typedef struct {
+@@ -49,8 +49,11 @@ typedef struct {
      lv_draw_sdl_drv_param_t drv_param;
      lv_coord_t hor_res;
      lv_coord_t ver_res;
@@ -108,7 +124,7 @@ index 51ce536c..f7960bec 100644
  }monitor_t;
  
  /**********************
-@@ -93,17 +96,20 @@ void sdl_init(void)
+@@ -92,17 +95,20 @@ void sdl_init(void)
  
  void sdl_disp_drv_init(lv_disp_drv_t * disp_drv, lv_coord_t hor_res, lv_coord_t ver_res)
  {
@@ -131,7 +147,7 @@ index 51ce536c..f7960bec 100644
      lv_disp_draw_buf_t *disp_buf = lv_mem_alloc(sizeof(lv_disp_draw_buf_t));
      lv_disp_draw_buf_init(disp_buf, m->texture, NULL, hor_res * ver_res);
      disp_drv->draw_buf = disp_buf;
-@@ -144,14 +150,25 @@ void sdl_display_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
+@@ -143,14 +149,25 @@ void sdl_display_flush(lv_disp_drv_t * disp_drv, const lv_area_t * area, lv_colo
  void sdl_display_resize(lv_disp_t *disp, int width, int height)
  {
      lv_disp_drv_t *driver = disp->driver;
@@ -160,7 +176,7 @@ index 51ce536c..f7960bec 100644
      SDL_RendererInfo renderer_info;
      SDL_GetRendererInfo(renderer, &renderer_info);
      SDL_assert(renderer_info.flags & SDL_RENDERER_TARGETTEXTURE);
-@@ -233,6 +250,20 @@ static void sdl_event_handler(lv_timer_t * t)
+@@ -232,6 +249,20 @@ static void sdl_event_handler(lv_timer_t * t)
      }
  }
  
@@ -181,7 +197,7 @@ index 51ce536c..f7960bec 100644
  static void monitor_sdl_clean_up(void)
  {
      for (lv_disp_t *cur = lv_disp_get_next(NULL); cur; ) {
-@@ -258,6 +289,15 @@ static void window_create(monitor_t * m)
+@@ -257,14 +288,23 @@ static void window_create(monitor_t * m)
          m->ver_res = rect.h;
      }
  
@@ -197,7 +213,8 @@ index 51ce536c..f7960bec 100644
      m->window = SDL_CreateWindow("TFT Simulator",
                                SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED,
                                m->hor_res * SDL_ZOOM, m->ver_res * SDL_ZOOM,
-@@ -265,7 +305,7 @@ static void window_create(monitor_t * m)
+-                              SDL_WINDOW_RESIZABLE);
++                              SDL_WINDOW_FULLSCREEN);
  
      m->drv_param.renderer = SDL_CreateRenderer(m->window, -1, SDL_RENDERER_ACCELERATED);
  
@@ -206,7 +223,7 @@ index 51ce536c..f7960bec 100644
      /* For first frame */
      SDL_SetRenderTarget(m->drv_param.renderer, m->texture);
  }
-@@ -275,6 +315,7 @@ static void window_update(lv_disp_drv_t *disp_drv, void * buf)
+@@ -274,6 +314,7 @@ static void window_update(lv_disp_drv_t *disp_drv, void * buf)
      SDL_Renderer *renderer = ((lv_draw_sdl_drv_param_t *) disp_drv->user_data)->renderer;
      monitor_t *m = (monitor_t *)disp_drv->user_data;
      SDL_Texture *texture = buf;
@@ -214,7 +231,7 @@ index 51ce536c..f7960bec 100644
      SDL_SetRenderTarget(renderer, NULL);
      SDL_RenderClear(renderer);
  #if LV_COLOR_SCREEN_TRANSP
-@@ -284,10 +325,14 @@ static void window_update(lv_disp_drv_t *disp_drv, void * buf)
+@@ -283,10 +324,14 @@ static void window_update(lv_disp_drv_t *disp_drv, void * buf)
      SDL_RenderDrawRect(renderer, &r);
  #endif
  
