@@ -17,6 +17,6 @@
 #include "tools/benchmark.config"
 #include "tools/common.config"
 #include "tools/test.config"
-#include "chromium.config"
+#include "network/chromium.config"
 #include "powermanager.config"
 #include "weston.config"
