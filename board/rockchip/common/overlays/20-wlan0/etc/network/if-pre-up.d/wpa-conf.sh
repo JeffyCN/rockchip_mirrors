@@ -4,7 +4,7 @@
 # post-down phases of network interface configuration.
 
 # run this script only for interfaces which have wpa-conf option
-[ -r "$IF_WPA_CONF" ] && exit 0
+[ -z "$IF_WPA_CONF" ] && exit 0
 
 # Check for original conf
 WPA_CONF="${WPA_CONF:-/etc/wpa_supplicant.conf}"
