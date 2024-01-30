@@ -5,7 +5,7 @@
 
 DAEMON=/sbin/dhcpcd
 CONFIG=/etc/dhcpcd.conf
-PIDFILE=/var/run/dhcpcd.pid
+PIDFILE=/var/run/dhcpcd/pid
 
 DHCPCD_ARGS="-AL"
 
