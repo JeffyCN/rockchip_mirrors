@@ -15,7 +15,7 @@ case "$1" in
   start)
 	echo "Starting dhcpcd..."
 	start-stop-daemon -S -x "$DAEMON" -p "$PIDFILE" -- -f "$CONFIG" \
-		DHCPCD_ARGS
+		$DHCPCD_ARGS
 	;;
   stop)
 	echo "Stopping dhcpcd..."
