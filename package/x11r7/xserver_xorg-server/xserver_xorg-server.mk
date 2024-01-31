@@ -4,14 +4,17 @@
 #
 ################################################################################
 
-XSERVER_XORG_SERVER_VERSION = 21.1.8_2023_10_26
+XSERVER_XORG_SERVER_VERSION = 21.1.11_2024_01_31
 XSERVER_XORG_SERVER_SITE = $(call github,JeffyCN,xorg-xserver,$(XSERVER_XORG_SERVER_VERSION))
 XSERVER_XORG_SERVER_LICENSE = MIT
 XSERVER_XORG_SERVER_LICENSE_FILES = COPYING
+XSERVER_XORG_SERVER_CPE_ID_VENDOR = x.org
+XSERVER_XORG_SERVER_CPE_ID_PRODUCT = xorg-server
 XSERVER_XORG_SERVER_SELINUX_MODULES = xdg xserver
 XSERVER_XORG_SERVER_INSTALL_STAGING = YES
 # xfont_font-util is needed only for autoreconf
 XSERVER_XORG_SERVER_AUTORECONF = YES
+
 XSERVER_XORG_SERVER_DEPENDENCIES = \
 	xfont_font-util \
 	xutil_util-macros \
@@ -56,8 +59,7 @@ XSERVER_XORG_SERVER_CONF_OPTS = \
 	CFLAGS="$(TARGET_CFLAGS) -I$(STAGING_DIR)/usr/include/pixman-1 -O2" \
 	--with-fontrootdir=/usr/share/fonts/X11/ \
 	--$(if $(BR2_PACKAGE_XSERVER_XORG_SERVER_XEPHYR),en,dis)able-xephyr \
-	--$(if $(BR2_PACKAGE_XSERVER_XORG_SERVER_XVFB),en,dis)able-xvfb \
-	--disable-xwayland
+	--$(if $(BR2_PACKAGE_XSERVER_XORG_SERVER_XVFB),en,dis)able-xvfb
 
 ifeq ($(BR2_PACKAGE_SYSTEMD),y)
 XSERVER_XORG_SERVER_CONF_OPTS += \
@@ -182,13 +184,18 @@ XSERVER_XORG_SERVER_CONF_OPTS += --with-sha1=libsha1
 XSERVER_XORG_SERVER_DEPENDENCIES += libsha1
 endif
 
+# Install the systemd unit only when nodm nor xdm aren't enabled, as
+# they would be responsible for starting the server.
+ifeq ($(BR2_PACKAGE_NODM)$(BR2_PACKAGE_XAPP_XDM),)
 define XSERVER_XORG_SERVER_INSTALL_INIT_SYSTEMD
 	$(INSTALL) -D -m 0644 package/x11r7/xserver_xorg-server/xorg.service \
 		$(TARGET_DIR)/usr/lib/systemd/system/xorg.service
 endef
+endif
 
-# init script conflicts with S90nodm
-ifneq ($(BR2_PACKAGE_NODM),y)
+# Install the init script only when neither nodm nor xdm are enabled, as
+# they would be responsible for starting the server.
+ifeq ($(BR2_PACKAGE_NODM)$(BR2_PACKAGE_XAPP_XDM),)
 define XSERVER_XORG_SERVER_INSTALL_INIT_SYSV
 	$(INSTALL) -D -m 755 package/x11r7/xserver_xorg-server/S40xorg \
 		$(TARGET_DIR)/etc/init.d/S40xorg
@@ -202,8 +209,8 @@ endef
 XSERVER_XORG_SERVER_POST_INSTALL_TARGET_HOOKS += XSERVER_XORG_SERVER_INSTALL_TARGET_ENV
 
 define XSERVER_XORG_SERVER_INSTALL_MODESETTING_CONFIG
-	$(INSTALL) -D -m 0644 $(XSERVER_XORG_SERVER_PKGDIR)/20-modesetting.conf \
-		$(TARGET_DIR)/usr/share/X11/xorg.conf.d/20-modesetting.conf
+       $(INSTALL) -D -m 0644 $(XSERVER_XORG_SERVER_PKGDIR)/20-modesetting.conf \
+               $(TARGET_DIR)/usr/share/X11/xorg.conf.d/20-modesetting.conf
 endef
 XSERVER_XORG_SERVER_POST_INSTALL_TARGET_HOOKS += XSERVER_XORG_SERVER_INSTALL_MODESETTING_CONFIG
 
