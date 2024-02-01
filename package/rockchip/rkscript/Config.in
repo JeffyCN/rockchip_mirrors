@@ -1,6 +1,5 @@
 config BR2_PACKAGE_RKSCRIPT
 	bool "rockchip script"
-	depends on BR2_PACKAGE_HAS_UDEV
 	help
 	  Rockchip helper scripts.
 
