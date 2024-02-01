@@ -1,7 +1,7 @@
-From d97dfcf1661b3b63d3d9f26b8e73feb91eee27ec Mon Sep 17 00:00:00 2001
+From 5b34124b8fac3e22454b344db40b3290e4ccf79c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 47/97] backend-drm: Support controlling compositor dynamically
+Subject: [PATCH 47/98] backend-drm: Support controlling compositor dynamically
 
 Use config file to control compositor's state.
 
@@ -29,7 +29,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 75 insertions(+), 18 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 121fc9f1ac..193a05acee 100644
+index 121fc9f1ac..053ac02f1f 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -213,32 +213,28 @@ close_src:
@@ -85,20 +85,20 @@ index 121fc9f1ac..193a05acee 100644
 +config_handle_compositor(struct drm_backend *b, const char *key,
 +			 const char *value)
 +{
-+	if (!strncmp(key, "state", strlen("state"))) {
-+		if (!strncmp(value, "sleep", strlen("sleep"))) {
++	if (!strcmp(key, "state")) {
++		if (!strcmp(value, "sleep")) {
 +			weston_compositor_sleep(b->compositor);
-+		} else if (!strncmp(value, "block", strlen("block"))) {
++		} else if (!strcmp(value, "block")) {
 +			udev_input_disable(&b->input);
-+		} else if (!strncmp(value, "freeze", strlen("freeze"))) {
++		} else if (!strcmp(value, "freeze")) {
 +			udev_input_disable(&b->input);
 +			weston_compositor_offscreen(b->compositor);
-+		} else if (!strncmp(value, "offscreen", strlen("offscreen"))) {
++		} else if (!strcmp(value, "offscreen")) {
 +			/* HACK: offscreen + DPMS off */
 +			weston_compositor_sleep(b->compositor);
 +			weston_compositor_offscreen(b->compositor);
 +			udev_input_enable(&b->input);
-+		} else if (!strncmp(value, "off", strlen("off"))) {
++		} else if (!strcmp(value, "off")) {
 +			udev_input_disable(&b->input);
 +			weston_compositor_sleep(b->compositor);
 +		} else {
@@ -112,23 +112,23 @@ index 121fc9f1ac..193a05acee 100644
 +			if (b->input.suspended)
 +				udev_input_enable(&b->input);
 +		}
-+	} else if (!strncmp(key, "hotplug", strlen("hotplug"))) {
-+		if (!strncmp(value, "off", strlen("off")))
++	} else if (!strcmp(key, "hotplug")) {
++		if (!strcmp(value, "off"))
 +			wl_event_source_fd_update(b->udev_drm_source, 0);
-+		else if (!strncmp(value, "on", strlen("on")))
++		else if (!strcmp(value, "on"))
 +			wl_event_source_fd_update(b->udev_drm_source,
 +						  WL_EVENT_READABLE);
-+		else if (!strncmp(value, "force", strlen("force")))
++		else if (!strcmp(value, "force"))
 +			hotplug_timer_handler(b->drm);
-+	} else if (!strncmp(key, "cursor", strlen("cursor"))) {
-+		if (!strncmp(value, "hide", strlen("hide")))
++	} else if (!strcmp(key, "cursor")) {
++		if (!strcmp(value, "hide"))
 +			b->compositor->hide_cursor = true;
-+		else if (!strncmp(value, "show", strlen("show")))
++		else if (!strcmp(value, "show"))
 +			b->compositor->hide_cursor = false;
 +
 +		weston_compositor_damage_all(b->compositor);
-+	} else if (!strncmp(key, "mirror", strlen("mirror"))) {
-+		b->mirror_mode = !strncmp(value, "on", strlen("on"));
++	} else if (!strcmp(key, "mirror")) {
++		b->mirror_mode = !strcmp(value, "on");
 +		drm_backend_update_outputs(b);
 +	}
 +}
