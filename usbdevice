@@ -31,10 +31,26 @@ TAG_DIR=/var/run/
 LOG_FILE=/var/log/usbdevice.log
 USB_FUNCS_FILE=/var/run/.usbdevice
 
-alias usb_enable='touch $USB_FUNCS_FILE'
-alias usb_disable='rm -f $USB_FUNCS_FILE'
-alias usb_is_enabled='[ -f $USB_FUNCS_FILE ]'
-alias usb_set_started='echo $USB_FUNCS > $USB_FUNCS_FILE'
+usb_enable()
+{
+	touch $USB_FUNCS_FILE
+}
+
+usb_disable()
+{
+	rm -f $USB_FUNCS_FILE
+}
+
+usb_is_enabled()
+{
+	[ -f $USB_FUNCS_FILE ]
+}
+
+usb_set_started()
+{
+	echo $USB_FUNCS > $USB_FUNCS_FILE
+}
+
 usb_get_started()
 {
 	usb_is_enabled || return 0
