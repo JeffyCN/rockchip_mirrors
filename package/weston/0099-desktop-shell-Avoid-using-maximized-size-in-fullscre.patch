@@ -1,8 +1,11 @@
-From c447ccbbc5fd568ae628ce7288ba1d45f641d17d Mon Sep 17 00:00:00 2001
+From 63dd8b317d740c55a85600808247e8208aed4e76 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Feb 2024 11:24:18 +0800
 Subject: [PATCH 99/99] desktop-shell: Avoid using maximized size in fullscreen
  state
+
+The fullscreen should take precedence if the client requests both
+window states at the same time.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -10,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 3 insertions(+), 4 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index bceac5f21e..1806020abf 100644
+index 9178f0c714..1a5320ced5 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -275,11 +275,10 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,

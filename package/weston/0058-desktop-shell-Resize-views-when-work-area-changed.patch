@@ -1,7 +1,7 @@
-From 73580623e9edb1a388d19db8ba87e1c5e53c58d6 Mon Sep 17 00:00:00 2001
+From d06db67c270efd6aabcb3c441e4120c18464dc33 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 01:50:22 +0800
-Subject: [PATCH 58/98] desktop-shell: Resize views when work area changed
+Subject: [PATCH 58/99] desktop-shell: Resize views when work area changed
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 11 insertions(+)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index de924ed156..3b33f1cf63 100644
+index a4f163dbd0..1194f30eb7 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -48,6 +48,9 @@
@@ -39,7 +39,7 @@ index de924ed156..3b33f1cf63 100644
  		weston_surface_map(es);
  		assert(wl_list_empty(&es->views));
  		sh_output->panel_view = weston_view_create(es);
- 		weston_view_set_output(sh_output->panel_view, es->output);
+ 		weston_view_set_output(sh_output->panel_view, output);
  	}
 +	get_output_work_area(shell, output, &new_area);
  
