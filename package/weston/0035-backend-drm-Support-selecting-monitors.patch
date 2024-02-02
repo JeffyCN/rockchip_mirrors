@@ -1,7 +1,7 @@
-From 0cfbbd0d0adf922145ad4b75accfe4f77a049dd2 Mon Sep 17 00:00:00 2001
+From 2286888eacdcaf6bc36056c96b83517c475fbef8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
-Subject: [PATCH 35/97] backend-drm: Support selecting monitors
+Subject: [PATCH 35/99] backend-drm: Support selecting monitors
 
 Using these environments:
 
@@ -95,14 +95,14 @@ index 04908e1380..319fc30801 100644
  		enabled = weston_head_is_enabled(head);
  		changed = weston_head_is_device_changed(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 413542d7af..8a1789ec67 100644
+index 413542d7af..61f123d878 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -2785,6 +2785,7 @@ background_committed(struct weston_surface *es,
  		weston_surface_map(es);
  		assert(wl_list_empty(&es->views));
  		sh_output->background_view = weston_view_create(es);
-+		weston_view_set_output(sh_output->background_view, es->output);
++		weston_view_set_output(sh_output->background_view, sh_output->output);
  	}
  
  	assert(sh_output->background_view);
@@ -110,7 +110,7 @@ index 413542d7af..8a1789ec67 100644
  		weston_surface_map(es);
  		assert(wl_list_empty(&es->views));
  		sh_output->panel_view = weston_view_create(es);
-+		weston_view_set_output(sh_output->panel_view, es->output);
++		weston_view_set_output(sh_output->panel_view, output);
  	}
  
  	assert(sh_output->panel_view);
