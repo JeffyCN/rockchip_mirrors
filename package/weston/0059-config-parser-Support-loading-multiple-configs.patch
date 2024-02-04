@@ -1,7 +1,7 @@
-From f0e36905d0f77b83c8c351a95bb5a2e47fb46985 Mon Sep 17 00:00:00 2001
+From 1fbee1904b549e8b0f8916c5d9199fec81463cdd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 7 Apr 2021 08:25:57 +0800
-Subject: [PATCH 59/98] config-parser: Support loading multiple configs
+Subject: [PATCH 059/100] config-parser: Support loading multiple configs
 
 Try loading .ini configs under "<config>.d/".
 

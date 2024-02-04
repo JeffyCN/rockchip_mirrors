@@ -1,7 +1,7 @@
-From e8aa54db5e94e0f5aece7cc65d4dc9d0cf66832d Mon Sep 17 00:00:00 2001
+From ccad9aa84fb2ec01e74ffc56ae1ec147f1bd663b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 1 Jun 2022 11:28:24 +0800
-Subject: [PATCH 72/98] desktop-shell: Delay locking when having pending
+Subject: [PATCH 072/100] desktop-shell: Delay locking when having pending
  fade-out animations
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 3b33f1cf63..3f5a1bd845 100644
+index 1194f30eb7..f3ca2b1906 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -3854,6 +3854,10 @@ static void

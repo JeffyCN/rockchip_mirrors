@@ -1,7 +1,8 @@
-From aa90fb9e03a393ad4c4a200616eb24656005c944 Mon Sep 17 00:00:00 2001
+From 8456b4a4b76eda256663031a4e4c926aa2b93874 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 12 Nov 2020 16:59:50 +0800
-Subject: [PATCH 50/98] backend-drm: Add dummy output when no screens connected
+Subject: [PATCH 050/100] backend-drm: Add dummy output when no screens
+ connected
 
 Some clients are not expecting no screens, add a dummy output for them.
 
@@ -40,7 +41,7 @@ index bb582ec1a2..77eaf4b374 100644
  
  		connected = weston_head_is_connected(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 7dd46e903e..05f6d37dea 100644
+index 2e782fc765..ef5362edd1 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4555,11 +4555,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)

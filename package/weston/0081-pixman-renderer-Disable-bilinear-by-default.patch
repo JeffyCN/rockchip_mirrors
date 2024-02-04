@@ -1,7 +1,7 @@
-From 09790a00a383cc10ba88622b54a6b3fbd89354d5 Mon Sep 17 00:00:00 2001
+From d2062df1cd932f3e53825215f9154e80860f26d8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 20 Jul 2023 18:09:50 +0800
-Subject: [PATCH 81/98] pixman-renderer: Disable bilinear by default
+Subject: [PATCH 081/100] pixman-renderer: Disable bilinear by default
 
 It's too slow.
 

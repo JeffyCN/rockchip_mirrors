@@ -1,8 +1,8 @@
 From db62ac9aaa9531ffc5013f8048bdf69a26ea9776 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 25 Jul 2023 11:15:16 +0800
-Subject: [PATCH 13/97] drm-gbm: Fix format_count error when configless context
- not supported
+Subject: [PATCH 013/100] drm-gbm: Fix format_count error when configless
+ context not supported
 
 Tested on RK3288 EVB, no more:
 gl_renderer_get_egl_config: Assertion `formats[i]' failed.

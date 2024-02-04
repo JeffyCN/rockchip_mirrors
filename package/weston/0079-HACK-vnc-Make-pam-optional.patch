@@ -1,7 +1,7 @@
-From 949952992d7b40ba0d65a8a59cea549981d47109 Mon Sep 17 00:00:00 2001
+From b19725ab3632241d7d55785ca0b9a9d959cf4d40 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 8 Dec 2022 10:26:26 +0800
-Subject: [PATCH 79/98] HACK: vnc: Make pam optional
+Subject: [PATCH 079/100] HACK: vnc: Make pam optional
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

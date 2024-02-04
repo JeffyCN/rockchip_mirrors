@@ -1,8 +1,8 @@
 From 4964ee62f83a6f74a22f47e057a4af7e8b6f7397 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 6 Dec 2018 18:53:05 +0800
-Subject: [PATCH 32/97] HACK: gl-renderer: Workaround dmabuf import/attach for
- old mali
+Subject: [PATCH 032/100] HACK: gl-renderer: Workaround dmabuf import/attach
+ for old mali
 
 Tested on px3se with libmali-utgard-400-r7p0-r3p0-wayland.so, the
 mpp + waylandsink works.

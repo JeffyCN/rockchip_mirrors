@@ -1,7 +1,7 @@
-From ccccfd806c913e0e27521c6c834bdf35cba402cb Mon Sep 17 00:00:00 2001
+From 3f031e5f9de421b32f5a18126a91262a058cede1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 28 Oct 2021 12:47:09 +0800
-Subject: [PATCH 64/98] HACK: Use negative value for dynamic repaint window
+Subject: [PATCH 064/100] HACK: Use negative value for dynamic repaint window
 
 Support using negative value for a vblank based dynamic repaint window:
 When negative, repaint-window = vblank-duration - abs(repaint-window)

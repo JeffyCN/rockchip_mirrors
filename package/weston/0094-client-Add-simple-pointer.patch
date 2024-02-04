@@ -1,7 +1,7 @@
-From ddbce79bb2e6703a1faff330314599adda4d1566 Mon Sep 17 00:00:00 2001
+From dc193dbcc49372085b6ffeb850f72579e5825c7e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 5 Jan 2024 12:29:02 +0800
-Subject: [PATCH 94/98] client: Add simple-pointer
+Subject: [PATCH 094/100] client: Add simple-pointer
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

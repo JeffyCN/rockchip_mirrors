@@ -1,7 +1,7 @@
 From 9a03b71df061c84bc6ef0e4f14832b31e64723a7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 11 Dec 2023 18:06:01 +0800
-Subject: [PATCH 24/97] HACK: Disable libseat
+Subject: [PATCH 024/100] HACK: Disable libseat
 
 We are using launcher-direct now.
 

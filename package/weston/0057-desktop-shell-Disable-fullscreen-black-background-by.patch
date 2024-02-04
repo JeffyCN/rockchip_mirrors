@@ -1,7 +1,7 @@
-From 6149a0ea9659d8d156c32cce3e8887d5e0fde4ab Mon Sep 17 00:00:00 2001
+From 7a1c2a97cf34d4c607ce791f90e80ca70ec3fd10 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Mar 2021 22:34:54 +0800
-Subject: [PATCH 57/98] desktop-shell: Disable fullscreen black background by
+Subject: [PATCH 057/100] desktop-shell: Disable fullscreen black background by
  default
 
 There's a force black background for fullscreen views.
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 14 insertions(+), 9 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 05f6d37dea..de924ed156 100644
+index ef5362edd1..a4f163dbd0 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -1892,15 +1892,18 @@ shell_set_view_fullscreen(struct shell_surface *shsurf)

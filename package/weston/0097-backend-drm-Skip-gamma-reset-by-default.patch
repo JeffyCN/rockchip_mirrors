@@ -1,7 +1,7 @@
-From 5386198ffe1043ce80781effa7884dedfdbef51f Mon Sep 17 00:00:00 2001
+From dd536c055e7db9cdd86b3e4bdabe00d995b6a5b4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 16 Jan 2024 16:30:39 +0800
-Subject: [PATCH 97/98] backend-drm: Skip gamma reset by default
+Subject: [PATCH 097/100] backend-drm: Skip gamma reset by default
 
 Set env "WESTON_DRM_RESET_GAMMA" to enable it.
 

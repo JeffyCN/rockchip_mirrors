@@ -1,7 +1,7 @@
-From 59a1956e00fb358e177bb4dfd482015bdf897636 Mon Sep 17 00:00:00 2001
+From 087364de6b7629ccf7cda0e929f0ac4f7b845e76 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 15 Nov 2021 15:12:54 +0800
-Subject: [PATCH 67/98] gl-renderer: dmabuf: Support NV12(AFBC) and
+Subject: [PATCH 067/100] gl-renderer: dmabuf: Support NV12(AFBC) and
  NV12_10(AFBC)
 
 Support importing DRM_FORMAT_YUV420_(8|10)BIT dmabuf.

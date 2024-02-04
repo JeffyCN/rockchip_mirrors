@@ -1,7 +1,7 @@
-From cab808bf3e0c11135868e0350676e6d42dea41b6 Mon Sep 17 00:00:00 2001
+From f6ed773857a1633370f17c7322f3700dac635bfd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 3 Oct 2022 21:03:04 +0800
-Subject: [PATCH 76/98] desktop-shell: Fix crash when hotplugging screens
+Subject: [PATCH 076/100] desktop-shell: Fix crash when hotplugging screens
 
 1/ Force allowing respawn.
 2/ Panel's output might not be available when committing.
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 7 insertions(+)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 49a4f4f64a..5d60e627bf 100644
+index 9e10cb4935..3073fde09b 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -2888,6 +2888,10 @@ panel_committed(struct weston_surface *es,
