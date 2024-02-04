@@ -1,7 +1,7 @@
-From 70f61ba96f9307909df93e7cb0d9cabfe00eb4f2 Mon Sep 17 00:00:00 2001
+From 781a00d69e903f053ebc9961beb85c6512da89da Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 1 Feb 2024 11:31:08 +0800
-Subject: [PATCH 48/98] backend-drm: Support changing touch calibration
+Subject: [PATCH 048/100] backend-drm: Support changing touch calibration
  dynamically
 
 Use config file to set touch device's calibration.

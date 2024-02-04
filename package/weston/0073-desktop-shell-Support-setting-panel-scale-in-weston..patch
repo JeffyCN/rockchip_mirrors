@@ -1,7 +1,7 @@
-From 927327732509e652cb3234eab4984ad606b48854 Mon Sep 17 00:00:00 2001
+From 540bd065ec9ae2f132821e3c81993d89b075108c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 2 Jun 2022 19:00:40 +0800
-Subject: [PATCH 73/98] desktop-shell: Support setting panel scale in
+Subject: [PATCH 073/100] desktop-shell: Support setting panel scale in
  weston.ini
 
 Tested with:

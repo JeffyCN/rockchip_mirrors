@@ -1,7 +1,7 @@
-From ded57d51db2f090f6d12174d2296a0196b476ce9 Mon Sep 17 00:00:00 2001
+From 1dabc401564b55e5dc75919cce3636e6cb10e027 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 10:48:36 +0800
-Subject: [PATCH 85/98] Support using USR2 signal to kill focus client
+Subject: [PATCH 085/100] Support using USR2 signal to kill focus client
 
 Tested with:
 1/ weston-terminal&
@@ -63,7 +63,7 @@ index 165fdacfd4..6d7fd79d4d 100644
  	wl_list_init(&wet.child_process_list);
  	signals[2] = wl_event_loop_add_signal(loop, SIGCHLD, sigchld_handler,
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 5d60e627bf..abf0e307a8 100644
+index 3073fde09b..a34dae00ee 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4867,6 +4867,8 @@ shell_destroy(struct wl_listener *listener, void *data)

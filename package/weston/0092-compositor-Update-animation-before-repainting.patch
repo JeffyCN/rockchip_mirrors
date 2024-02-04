@@ -1,7 +1,7 @@
-From 28c477ebf837c01a7127c06affcd28c751fd35bb Mon Sep 17 00:00:00 2001
+From 227d16aa46b4e1eb5a6150f4e7c97a89e3f3a3dc Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 27 May 2022 15:39:10 +0800
-Subject: [PATCH 92/98] compositor: Update animation before repainting
+Subject: [PATCH 092/100] compositor: Update animation before repainting
 
 Avoid showing animation after resumed.
 

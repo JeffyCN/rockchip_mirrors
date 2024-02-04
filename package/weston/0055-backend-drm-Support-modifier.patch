@@ -1,7 +1,7 @@
-From 038779728867040b9e9b74e5cf655e0160eb87b6 Mon Sep 17 00:00:00 2001
+From 92178b0631e3bb7fe049630098b806b6b1c1b9bd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
-Subject: [PATCH 55/98] backend-drm: Support modifier
+Subject: [PATCH 055/100] backend-drm: Support modifier
 
 Tested on rk356x with ARM AFBC modifier.
 

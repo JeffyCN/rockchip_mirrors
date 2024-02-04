@@ -1,7 +1,8 @@
-From 26ac6378feb47a2968d2c060b661def8ec1f2a9f Mon Sep 17 00:00:00 2001
+From e02adeea24c1fbfbbeb68a97efbe2f712ec4b6a7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
-Subject: [PATCH 63/98] HACK: pixman-renderer: Support passing dma fd to pixman
+Subject: [PATCH 063/100] HACK: pixman-renderer: Support passing dma fd to
+ pixman
 
 Usage:
 pixman_image_set_destroy_function(image, NULL, (void *)(ptrdiff_t)dma_fd)

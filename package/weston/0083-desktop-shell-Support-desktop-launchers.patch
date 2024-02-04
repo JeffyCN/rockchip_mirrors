@@ -1,7 +1,7 @@
-From c3bda6561592258c61bf4be6cf54c21e4c8e2358 Mon Sep 17 00:00:00 2001
+From c4adc15d2c1dd49ef0121d4b053f0a0c65592c7e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 28 Jul 2023 14:54:30 +0800
-Subject: [PATCH 83/98] desktop-shell: Support desktop launchers
+Subject: [PATCH 083/100] desktop-shell: Support desktop launchers
 
 Tested on RK3588 EVB with:
 1/ sed -i "s/\[\(launcher\)/[desktop-\1/" /etc/xdg/weston/weston.ini.d/*

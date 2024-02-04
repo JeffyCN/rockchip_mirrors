@@ -1,7 +1,8 @@
 From 484b08d055c1098b13f552ef8194fdf1ce8dd5d3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 28 Dec 2023 16:40:30 +0800
-Subject: [PATCH 12/97] renderer-gl: Fix wrong stride error when reading pixels
+Subject: [PATCH 012/100] renderer-gl: Fix wrong stride error when reading
+ pixels
 
 The gl_renderer_do_read_pixels() is expecting stride in bytes.
 

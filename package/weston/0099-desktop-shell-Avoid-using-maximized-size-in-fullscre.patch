@@ -1,8 +1,8 @@
 From 63dd8b317d740c55a85600808247e8208aed4e76 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Feb 2024 11:24:18 +0800
-Subject: [PATCH 99/99] desktop-shell: Avoid using maximized size in fullscreen
- state
+Subject: [PATCH 099/100] desktop-shell: Avoid using maximized size in
+ fullscreen state
 
 The fullscreen should take precedence if the client requests both
 window states at the same time.

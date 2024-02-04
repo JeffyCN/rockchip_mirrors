@@ -1,7 +1,7 @@
-From 64f38e67ca953b9bfca56d8384c1b6b3d201d7d3 Mon Sep 17 00:00:00 2001
+From 347fcfeb0d55a9e976d074fb6f5cfcebd2dafe7b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 3 Nov 2021 17:52:51 +0800
-Subject: [PATCH 65/98] compositor: Support placing subsurface above or below
+Subject: [PATCH 065/100] compositor: Support placing subsurface above or below
  all siblings
 
 By passing itself as sibling in ::place_above or ::place_below.

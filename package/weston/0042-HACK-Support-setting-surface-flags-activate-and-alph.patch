@@ -1,7 +1,8 @@
-From e7b402c7a3c4134f0979369f708aa138da55c33d Mon Sep 17 00:00:00 2001
+From 6492361b9edeac1fd53c161896b579dbb0797a38 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 08:55:42 +0800
-Subject: [PATCH 42/97] HACK: Support setting surface flags activate and alpha
+Subject: [PATCH 042/100] HACK: Support setting surface flags activate and
+ alpha
 
 Support setting surface flags activate and alpha through app_id or
 title, for example:
@@ -20,7 +21,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 257 insertions(+), 12 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index d5887186f1..7dd46e903e 100644
+index 88c534db4d..2e782fc765 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -1676,10 +1676,17 @@ static void

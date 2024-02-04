@@ -1,7 +1,7 @@
-From c39dafb209c86273907535979a99aa29bb93bc6d Mon Sep 17 00:00:00 2001
+From 064bd35560bd82b319fd2d39ddde671f7d72cc79 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 39/97] backend-drm: Support controlling output dynamically
+Subject: [PATCH 039/100] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -69,7 +69,7 @@ index 319fc30801..146bbf8f79 100644
  		weston_log("Cannot configure output \"%s\" using weston_drm_output_api.\n",
  			   output->name);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index bced330cb5..d5887186f1 100644
+index e6dbd1eca8..88c534db4d 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4066,7 +4066,7 @@ weston_view_set_initial_position(struct weston_view *view,

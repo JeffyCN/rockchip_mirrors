@@ -1,7 +1,7 @@
-From c369f36eadf810f15e5674cd3dff444b80d0a71e Mon Sep 17 00:00:00 2001
+From 36b972ec54879f442c660458fb89ec109a9ae144 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 4 Jan 2024 10:50:02 +0800
-Subject: [PATCH 93/98] backend-drm: Support displaying on custom plane
+Subject: [PATCH 093/100] backend-drm: Support displaying on custom plane
 
 Tested on RK3588 EVB with:
 1/ gst-launch-1.0 videotestsrc ! kmssink force-modesetting=1

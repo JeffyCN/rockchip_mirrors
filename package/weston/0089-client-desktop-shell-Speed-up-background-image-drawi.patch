@@ -1,7 +1,7 @@
-From fa189ac4832b78c9024dfa297b82b935ef5dc77c Mon Sep 17 00:00:00 2001
+From 664b0fc44b1ac2f4b5bf0f9666a1fc7bc8673ad6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 12 Dec 2023 10:21:42 +0800
-Subject: [PATCH 89/98] client: desktop-shell: Speed up background image
+Subject: [PATCH 089/100] client: desktop-shell: Speed up background image
  drawing
 
 Note: The background color been ignored when painting background image.

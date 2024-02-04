@@ -1,7 +1,7 @@
-From a50cc301aa3e6886e639d81346d933e0e5a69873 Mon Sep 17 00:00:00 2001
+From 7ab5d3ff2062656f303a3dd80cd48d7cef256873 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 26 Oct 2020 16:23:27 +0800
-Subject: [PATCH 54/98] backend-drm: Allow disabling plane scale
+Subject: [PATCH 054/100] backend-drm: Allow disabling plane scale
 
 Set env WESTON_DRM_DISABLE_PLANE_SCALE to disable plane scale.
 

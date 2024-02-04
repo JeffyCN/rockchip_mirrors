@@ -1,8 +1,8 @@
-From f645d8d73f93a0578610d71a6c4cfae0c9c3cbe4 Mon Sep 17 00:00:00 2001
+From 7f739f8ddbaf80af17c3811f3837978f975ff811 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 16 Jan 2024 16:44:14 +0800
-Subject: [PATCH 98/98] compositor: Skip painting output before the background
- is ready
+Subject: [PATCH 098/100] compositor: Skip painting output before the
+ background is ready
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

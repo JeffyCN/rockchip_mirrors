@@ -1,7 +1,7 @@
-From 7978f6b73984dad6adbd70913d6bac7d2c1c74ea Mon Sep 17 00:00:00 2001
+From c36e30c70bbb831cac2a4bb97f73786a89fb4800 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 37/97] backend-drm: Support mirror mode
+Subject: [PATCH 037/100] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -43,7 +43,7 @@ index f500979769..aea02d44fb 100644
  }
  
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 8a1789ec67..bced330cb5 100644
+index 61f123d878..e6dbd1eca8 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4094,6 +4094,9 @@ weston_view_set_initial_position(struct weston_view *view,
