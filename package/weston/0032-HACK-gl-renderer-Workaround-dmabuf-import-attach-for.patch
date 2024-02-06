@@ -1,8 +1,8 @@
-From 4964ee62f83a6f74a22f47e057a4af7e8b6f7397 Mon Sep 17 00:00:00 2001
+From d8eea5eda4eca0347406bad16ff736451d7a023b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 6 Dec 2018 18:53:05 +0800
-Subject: [PATCH 032/100] HACK: gl-renderer: Workaround dmabuf import/attach
- for old mali
+Subject: [PATCH 32/99] HACK: gl-renderer: Workaround dmabuf import/attach for
+ old mali
 
 Tested on px3se with libmali-utgard-400-r7p0-r3p0-wayland.so, the
 mpp + waylandsink works.
@@ -27,7 +27,7 @@ index 9557d994b1..bb14946421 100644
  
  static inline struct gl_renderer *
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 9a4629ed68..b75c3e6f30 100644
+index c5f81d210b..b2ae1c645c 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2669,6 +2669,14 @@ import_simple_dmabuf(struct gl_renderer *gr,
@@ -45,7 +45,7 @@ index 9a4629ed68..b75c3e6f30 100644
  	if (attributes->modifier[0] != DRM_FORMAT_MOD_INVALID) {
  		if (!gr->has_dmabuf_import_modifiers)
  			return NULL;
-@@ -2992,7 +3000,7 @@ gl_renderer_query_dmabuf_formats(struct weston_compositor *wc,
+@@ -2898,7 +2906,7 @@ gl_renderer_query_dmabuf_formats(struct weston_compositor *wc,
  
  	if (!gr->has_dmabuf_import_modifiers ||
  	    !gr->query_dmabuf_formats(gr->egl_display, 0, NULL, &num)) {
@@ -54,7 +54,7 @@ index 9a4629ed68..b75c3e6f30 100644
  		fallback = true;
  	}
  
-@@ -3610,6 +3618,9 @@ log_egl_info(struct gl_renderer *gr, EGLDisplay egldpy)
+@@ -3516,6 +3524,9 @@ log_egl_info(struct gl_renderer *gr, EGLDisplay egldpy)
  	str = eglQueryString(egldpy, EGL_VENDOR);
  	weston_log("EGL vendor: %s\n", str ? str : "(null)");
  

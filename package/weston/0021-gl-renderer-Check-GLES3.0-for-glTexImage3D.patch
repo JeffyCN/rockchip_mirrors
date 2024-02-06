@@ -1,7 +1,7 @@
 From 99198228d4925347676fa4dba7d1aed07a533ffb Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 14 Nov 2022 16:08:19 +0800
-Subject: [PATCH 021/100] gl-renderer: Check GLES3.0 for glTexImage3D
+Subject: [PATCH 21/99] gl-renderer: Check GLES3.0 for glTexImage3D
 
 For old mali, e.g. utgard.
 

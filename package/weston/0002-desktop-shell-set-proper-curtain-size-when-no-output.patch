@@ -1,7 +1,7 @@
 From 11889bb69b874879487be27f7859a6c419fecd56 Mon Sep 17 00:00:00 2001
 From: Arnaud Vrac <avrac@freebox.fr>
 Date: Wed, 22 Nov 2023 19:44:00 +0100
-Subject: [PATCH 002/100] desktop-shell: set proper curtain size when no output
+Subject: [PATCH 02/99] desktop-shell: set proper curtain size when no output
  is created yet
 
 In this case the curtain width and height would be calculated using

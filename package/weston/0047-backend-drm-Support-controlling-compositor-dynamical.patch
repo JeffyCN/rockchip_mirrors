@@ -1,8 +1,7 @@
-From 8d428887ad37096c8622647e3f0e3e6151e477da Mon Sep 17 00:00:00 2001
+From 43013d28b258129c0162edbfddcdc08eed319a5c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 047/100] backend-drm: Support controlling compositor
- dynamically
+Subject: [PATCH 47/99] backend-drm: Support controlling compositor dynamically
 
 Use config file to control compositor's state.
 
@@ -30,7 +29,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 75 insertions(+), 18 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 121fc9f1ac..053ac02f1f 100644
+index d2d61885db..c456bc414a 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -213,32 +213,28 @@ close_src:
@@ -78,7 +77,7 @@ index 121fc9f1ac..053ac02f1f 100644
  	}
  
  	if (!primary)
-@@ -4567,6 +4563,58 @@ config_handle_output(struct drm_backend *b, const char *name,
+@@ -4541,6 +4537,58 @@ config_handle_output(struct drm_backend *b, const char *name,
  	}
  }
  
@@ -137,7 +136,7 @@ index 121fc9f1ac..053ac02f1f 100644
  static int
  config_timer_handler(void *data)
  {
-@@ -4606,7 +4654,9 @@ config_timer_handler(void *data)
+@@ -4580,7 +4628,9 @@ config_timer_handler(void *data)
  
  	/**
  	 * Parse configs, formated with <type>:<key>:<value>
@@ -148,7 +147,7 @@ index 121fc9f1ac..053ac02f1f 100644
  	 */
  	while (3 == fscanf(conf_fp,
  			   "%" STR(MAX_CONF_LEN) "[^:]:"
-@@ -4614,6 +4664,8 @@ config_timer_handler(void *data)
+@@ -4588,6 +4638,8 @@ config_timer_handler(void *data)
  			   "%" STR(MAX_CONF_LEN) "[^\n]%*c", type, key, value)) {
  		if (!strcmp(type, "output"))
  			config_handle_output(b, key, value);
@@ -158,10 +157,10 @@ index 121fc9f1ac..053ac02f1f 100644
  
  	*old_st = st;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 6123964ecd..0eb5e60c4b 100644
+index a16a71b2ce..beaa18fc42 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -5800,6 +5800,10 @@ weston_compositor_wake(struct weston_compositor *compositor)
+@@ -5808,6 +5808,10 @@ weston_compositor_wake(struct weston_compositor *compositor)
  {
  	uint32_t old_state = compositor->state;
  
@@ -172,7 +171,7 @@ index 6123964ecd..0eb5e60c4b 100644
  	/* The state needs to be changed before emitting the wake
  	 * signal because that may try to schedule a repaint which
  	 * will not work if the compositor is still sleeping */
-@@ -5807,10 +5811,11 @@ weston_compositor_wake(struct weston_compositor *compositor)
+@@ -5815,10 +5819,11 @@ weston_compositor_wake(struct weston_compositor *compositor)
  
  	switch (old_state) {
  	case WESTON_COMPOSITOR_SLEEPING:

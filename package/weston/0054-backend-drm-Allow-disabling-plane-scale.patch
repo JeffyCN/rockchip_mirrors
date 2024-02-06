@@ -1,7 +1,7 @@
-From 7ab5d3ff2062656f303a3dd80cd48d7cef256873 Mon Sep 17 00:00:00 2001
+From 2742af83844da78a5775740b2a75ee9cf2e4a5f0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 26 Oct 2020 16:23:27 +0800
-Subject: [PATCH 054/100] backend-drm: Allow disabling plane scale
+Subject: [PATCH 54/99] backend-drm: Allow disabling plane scale
 
 Set env WESTON_DRM_DISABLE_PLANE_SCALE to disable plane scale.
 
@@ -11,10 +11,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 3 insertions(+)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index e43e5b038e..ae408b9a11 100644
+index 9f7384d8d6..f85bbc9e5a 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -1524,6 +1524,9 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
+@@ -1516,6 +1516,9 @@ drm_plane_create(struct drm_device *device, const drmModePlane *kplane)
  					 props,
  					 WDRM_PLANE_FEATURE_SCALE);
  

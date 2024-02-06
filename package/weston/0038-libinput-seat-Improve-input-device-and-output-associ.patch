@@ -1,7 +1,7 @@
-From 02c7e68822cab8199ac3c1a09fa7eeb8147615b4 Mon Sep 17 00:00:00 2001
+From f13f6be4b1ebd70a998a02b39954fb1f94c8e391 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 09:49:09 +0800
-Subject: [PATCH 038/100] libinput-seat: Improve input device and output
+Subject: [PATCH 38/99] libinput-seat: Improve input device and output
  associating
 
 An input device can associate with an output using udev rules's
@@ -26,10 +26,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 79 insertions(+), 44 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 540b040cc0..24d14896c5 100644
+index fd0ff1918c..43e729dd59 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -2002,6 +2002,7 @@ setup_output_seat_constraint(struct drm_backend *b,
+@@ -1988,6 +1988,7 @@ setup_output_seat_constraint(struct drm_backend *b,
  			return;
  
  		seat->base.output = output;

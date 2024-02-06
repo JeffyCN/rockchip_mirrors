@@ -1,7 +1,7 @@
-From c36e30c70bbb831cac2a4bb97f73786a89fb4800 Mon Sep 17 00:00:00 2001
+From b4fd8b557ede700e78625f1d18c3e4ca83d7d4ee Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 037/100] backend-drm: Support mirror mode
+Subject: [PATCH 37/99] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -43,10 +43,10 @@ index f500979769..aea02d44fb 100644
  }
  
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 61f123d878..e6dbd1eca8 100644
+index a7304487bf..aee251af0d 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4094,6 +4094,9 @@ weston_view_set_initial_position(struct weston_view *view,
+@@ -4099,6 +4099,9 @@ weston_view_set_initial_position(struct weston_view *view,
  	}
  
  	wl_list_for_each(output, &compositor->output_list, link) {
@@ -57,13 +57,13 @@ index 61f123d878..e6dbd1eca8 100644
  			target_output = output;
  			break;
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 411dc128da..3078049a79 100644
+index bb29605235..e9922532b3 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
-@@ -607,7 +607,11 @@ struct weston_output {
- 	 */
- 	void (*detach_head)(struct weston_output *output,
- 			    struct weston_head *head);
+@@ -610,7 +610,11 @@ struct weston_output {
+ 
+ 	/* Resizing maximized or fullscreen surfaces */
+ 	bool resizing;
 +
 +	bool unavailable;
  };
@@ -88,10 +88,10 @@ index 32d1b15234..62f82e3f15 100644
  	}
  
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 7b1d456789..ebf1408162 100644
+index 88be954205..4fb68fff13 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -410,6 +410,8 @@ struct drm_backend {
+@@ -409,6 +409,8 @@ struct drm_backend {
  
  	int virtual_width;
  	int virtual_height;
@@ -100,7 +100,7 @@ index 7b1d456789..ebf1408162 100644
  };
  
  struct drm_mode {
-@@ -724,6 +726,10 @@ struct drm_output {
+@@ -723,6 +725,10 @@ struct drm_output {
  	struct weston_renderbuffer *renderbuffer[2];
  	int current_image;
  
@@ -111,7 +111,7 @@ index 7b1d456789..ebf1408162 100644
  	struct vaapi_recorder *recorder;
  	struct wl_listener recorder_frame_listener;
  
-@@ -740,6 +746,10 @@ struct drm_output {
+@@ -739,6 +745,10 @@ struct drm_output {
  
  	/* The dummy framebuffer for SET_CRTC. */
  	struct drm_fb *fb_dummy;
@@ -123,7 +123,7 @@ index 7b1d456789..ebf1408162 100644
  
  void
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index aabbca3f02..540b040cc0 100644
+index 4007836351..fd0ff1918c 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -70,6 +70,11 @@
@@ -288,7 +288,7 @@ index aabbca3f02..540b040cc0 100644
  	if (!primary)
  		return;
  
-@@ -407,21 +548,86 @@ drm_output_render_pixman(struct drm_output_state *state,
+@@ -408,21 +549,86 @@ drm_output_render_pixman(struct drm_output_state *state,
  	return drm_fb_ref(output->dumb[output->current_image]);
  }
  
@@ -376,7 +376,7 @@ index aabbca3f02..540b040cc0 100644
  
  	/* If we already have a client buffer promoted to scanout, then we don't
  	 * want to render. */
-@@ -429,6 +635,37 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -430,6 +636,37 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  	if (scanout_state->fb)
  		return;
  
@@ -414,7 +414,7 @@ index aabbca3f02..540b040cc0 100644
  	/*
  	 * If we don't have any damage on the primary plane, and we already
  	 * have a renderer buffer active, we can reuse it; else we pass
-@@ -449,24 +686,86 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -450,24 +687,86 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  		fb = drm_output_render_gl(state, damage);
  	}
  
@@ -508,7 +508,7 @@ index aabbca3f02..540b040cc0 100644
  
  	scanout_state->zpos = scanout_plane->zpos_min;
  
-@@ -495,6 +794,12 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
+@@ -496,6 +795,12 @@ drm_output_render(struct drm_output_state *state, pixman_region32_t *damage)
  				  &scanout_state->damage_blob_id);
  
  	pixman_region32_fini(&scanout_damage);
@@ -521,7 +521,7 @@ index aabbca3f02..540b040cc0 100644
  }
  
  static uint32_t
-@@ -1668,8 +1973,8 @@ drm_output_fini_pixman(struct drm_output *output)
+@@ -1654,8 +1959,8 @@ drm_output_fini_pixman(struct drm_output *output)
  	/* Destroying the Pixman surface will destroy all our buffers,
  	 * regardless of refcount. Ensure we destroy them here. */
  	if (!b->compositor->shutting_down &&
@@ -532,7 +532,7 @@ index aabbca3f02..540b040cc0 100644
  		drm_plane_reset_state(output->scanout_plane);
  	}
  
-@@ -2448,6 +2753,8 @@ drm_output_destroy(struct weston_output *base)
+@@ -2434,6 +2739,8 @@ drm_output_destroy(struct weston_output *base)
  
  	assert(output->hdr_output_metadata_blob_id == 0);
  
@@ -541,7 +541,7 @@ index aabbca3f02..540b040cc0 100644
  	free(output);
  }
  
-@@ -4202,6 +4509,12 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4181,6 +4488,12 @@ drm_backend_create(struct weston_compositor *compositor,
  	else
  		b->resize_freeze_ms = DRM_RESIZE_FREEZE_MS;
  
@@ -617,7 +617,7 @@ index c55a9aa0e5..46bf98f557 100644
  		state = drm_output_propose_state(output_base, pending_state, mode);
  		if (!state) {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 22c09cede3..20aab2f968 100644
+index 7efd0c35a7..9ec7ecf168 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1435,7 +1435,7 @@ weston_view_assign_output(struct weston_view *ev)
@@ -629,7 +629,7 @@ index 22c09cede3..20aab2f968 100644
  			continue;
  
  		pixman_region32_intersect(&region, &ev->transform.boundingbox,
-@@ -5974,6 +5974,9 @@ bind_output(struct wl_client *client,
+@@ -5982,6 +5982,9 @@ bind_output(struct wl_client *client,
  static void
  weston_head_add_global(struct weston_head *head)
  {
@@ -639,7 +639,7 @@ index 22c09cede3..20aab2f968 100644
  	head->global = wl_global_create(head->compositor->wl_display,
  					&wl_output_interface, 4,
  					head, bind_output);
-@@ -6067,6 +6070,15 @@ weston_head_remove_global(struct weston_head *head)
+@@ -6075,6 +6078,15 @@ weston_head_remove_global(struct weston_head *head)
  	wl_list_init(&head->xdg_output_resource_list);
  }
  
@@ -655,7 +655,7 @@ index 22c09cede3..20aab2f968 100644
  /** Get the backing object of wl_output
   *
   * \param resource A wl_output protocol object.
-@@ -6917,6 +6929,7 @@ WL_EXPORT void
+@@ -6925,6 +6937,7 @@ WL_EXPORT void
  weston_compositor_reflow_outputs(struct weston_compositor *compositor)
  {
  	struct weston_output *output;
@@ -663,7 +663,7 @@ index 22c09cede3..20aab2f968 100644
  	int next_x, next_y;
  
  	if (compositor->output_flow_dirty)
-@@ -6926,7 +6939,10 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
+@@ -6934,7 +6947,10 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
  	wl_list_for_each(output, &compositor->output_list, link) {
  		struct weston_coord_global pos;
  
@@ -675,7 +675,7 @@ index 22c09cede3..20aab2f968 100644
  			continue;
  
  		pos.c = weston_coord(next_x, next_y);
-@@ -7122,11 +7138,11 @@ weston_compositor_add_output(struct weston_compositor *compositor,
+@@ -7130,11 +7146,11 @@ weston_compositor_add_output(struct weston_compositor *compositor,
  	wl_list_insert(compositor->output_list.prev, &output->link);
  	output->enabled = true;
  
