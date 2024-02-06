@@ -1,8 +1,7 @@
-From e02adeea24c1fbfbbeb68a97efbe2f712ec4b6a7 Mon Sep 17 00:00:00 2001
+From 3df40003281c1e84fa6a4dcd7915b4b2f6f9a7c4 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
-Subject: [PATCH 063/100] HACK: pixman-renderer: Support passing dma fd to
- pixman
+Subject: [PATCH 63/99] HACK: pixman-renderer: Support passing dma fd to pixman
 
 Usage:
 pixman_image_set_destroy_function(image, NULL, (void *)(ptrdiff_t)dma_fd)
@@ -17,10 +16,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 49 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index b38b43b352..c056c5765e 100644
+index 9d21750312..8ae6f623b0 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
-@@ -455,6 +455,7 @@ struct drm_fb {
+@@ -454,6 +454,7 @@ struct drm_fb {
  	uint64_t modifier;
  	int width, height;
  	int fd;
@@ -29,10 +28,10 @@ index b38b43b352..c056c5765e 100644
  	uint32_t plane_mask;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 9c3f963f95..74aafabaff 100644
+index 4202690460..9c8e0de2b8 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -2022,9 +2022,10 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
+@@ -2014,9 +2014,10 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
  			goto err;
  
  		output->renderbuffer[i] =

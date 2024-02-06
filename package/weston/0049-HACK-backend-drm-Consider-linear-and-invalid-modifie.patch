@@ -1,8 +1,8 @@
-From 6c4387c6981ceb90dce2c1caf32ac26f510eafa6 Mon Sep 17 00:00:00 2001
+From 90723c9d0c1867d96f9373735f879fc91b740996 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
-Subject: [PATCH 049/100] HACK: backend-drm: Consider linear and invalid
- modifier are the same
+Subject: [PATCH 49/99] HACK: backend-drm: Consider linear and invalid modifier
+ are the same
 
 That is true with Rockchip BSP drivers and packages.
 
@@ -149,7 +149,7 @@ index 073896abfc..468f47efd6 100644
  	}
  
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 18cae0e392..0817dc065c 100644
+index a5667c9782..6231455d0d 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -2680,7 +2680,7 @@ import_simple_dmabuf(struct gl_renderer *gr,
@@ -161,7 +161,7 @@ index 18cae0e392..0817dc065c 100644
  		if (!gr->has_dmabuf_import_modifiers)
  			return NULL;
  		has_modifier = true;
-@@ -3095,7 +3095,7 @@ gl_renderer_import_dmabuf(struct weston_compositor *ec,
+@@ -3001,7 +3001,7 @@ gl_renderer_import_dmabuf(struct weston_compositor *ec,
  
  	for (i = 0; i < dmabuf->attributes.n_planes; i++) {
  		/* return if EGL doesn't support import modifiers */
@@ -170,7 +170,7 @@ index 18cae0e392..0817dc065c 100644
  			if (!gr->has_dmabuf_import_modifiers)
  				return false;
  
-@@ -3259,7 +3259,7 @@ populate_supported_formats(struct weston_compositor *ec,
+@@ -3165,7 +3165,7 @@ populate_supported_formats(struct weston_compositor *ec,
  
  		for (j = 0; j < num_modifiers; j++) {
  			/* Skip MOD_INVALID, as it has already been added. */

@@ -1,8 +1,7 @@
-From 333b61b4e03573132bd5e5c21ca095cba872f661 Mon Sep 17 00:00:00 2001
+From b3a834430f177b6351f59037fe9d301c20a2a59f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 8 Aug 2022 15:46:35 +0800
-Subject: [PATCH 029/100] HACK: compositor: Allow mapping bufferless
- subsurfaces
+Subject: [PATCH 29/99] HACK: compositor: Allow mapping bufferless subsurfaces
 
 The current qtwayland needs it.
 
