@@ -1,7 +1,7 @@
-From 57195eaec916a8f3f0a5352128d1dd2cc1013a5a Mon Sep 17 00:00:00 2001
+From 600b3ebc5d9de09b71065524c4f918660fda2ae8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
-Subject: [PATCH 35/99] backend-drm: Support selecting monitors
+Subject: [PATCH 35/98] backend-drm: Support selecting monitors
 
 Using these environments:
 
@@ -28,14 +28,14 @@ WESTON_DRM_HEAD_MODE:
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  compositor/main.c                    |  22 +-
- desktop-shell/shell.c                |  40 ++-
+ desktop-shell/shell.c                |  53 +++-
  include/libweston/config-parser.h    |   1 +
  include/libweston/libweston.h        |   5 +
  libweston/backend-drm/drm-internal.h |  23 ++
  libweston/backend-drm/drm.c          | 367 +++++++++++++++++++++++----
  libweston/backend-drm/kms.c          |  22 +-
- libweston/compositor.c               |  73 +++++-
- 8 files changed, 486 insertions(+), 67 deletions(-)
+ libweston/compositor.c               |  78 +++++-
+ 8 files changed, 498 insertions(+), 73 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 04908e1380..319fc30801 100644
@@ -95,21 +95,40 @@ index 04908e1380..319fc30801 100644
  		enabled = weston_head_is_enabled(head);
  		changed = weston_head_is_device_changed(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 413542d7af..a7304487bf 100644
+index 413542d7af..72d85962c6 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -280,6 +280,10 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,
+@@ -267,6 +267,9 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,
+ {
+ 	int width = 0; int height = 0;
+ 
++	if (!weston_output_valid(shsurf->output))
++		return;
++
+ 	if (fullscreen_requested) {
+ 		if (shsurf->output) {
+ 			width = shsurf->output->width;
+@@ -280,6 +283,9 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,
  
  	/* (0, 0) means we're back from one of the maximized/fullcreen states */
  	weston_desktop_surface_set_size(shsurf->desktop_surface, width, height);
 +
-+	if (shsurf->output && shsurf->last_width != width &&
-+	    shsurf->last_height != height)
++	if (shsurf->last_width != width && shsurf->last_height != height)
 +		shsurf->output->resizing = true;
  }
  
  static void
-@@ -2785,6 +2789,8 @@ background_committed(struct weston_surface *es,
+@@ -1881,7 +1887,8 @@ shell_set_view_fullscreen(struct shell_surface *shsurf)
+ 
+ 	weston_view_move_to_layer(shsurf->view,
+ 				  &shsurf->shell->fullscreen_layer.view_list);
+-	weston_shell_utils_center_on_output(shsurf->view, shsurf->fullscreen_output);
++
++	weston_shell_utils_center_on_output(shsurf->view, shsurf->output);
+ 
+ 	if (!shsurf->fullscreen.black_view) {
+ 		shsurf->fullscreen.black_view =
+@@ -2785,6 +2792,8 @@ background_committed(struct weston_surface *es,
  		weston_surface_map(es);
  		assert(wl_list_empty(&es->views));
  		sh_output->background_view = weston_view_create(es);
@@ -118,7 +137,7 @@ index 413542d7af..a7304487bf 100644
  	}
  
  	assert(sh_output->background_view);
-@@ -2894,6 +2900,7 @@ panel_committed(struct weston_surface *es,
+@@ -2894,6 +2903,7 @@ panel_committed(struct weston_surface *es,
  		weston_surface_map(es);
  		assert(wl_list_empty(&es->views));
  		sh_output->panel_view = weston_view_create(es);
@@ -126,7 +145,7 @@ index 413542d7af..a7304487bf 100644
  	}
  
  	assert(sh_output->panel_view);
-@@ -3823,6 +3830,9 @@ shell_fade_done(struct weston_view_animation *animation, void *data)
+@@ -3823,6 +3833,9 @@ shell_fade_done(struct weston_view_animation *animation, void *data)
  {
  	struct desktop_shell *shell = data;
  
@@ -136,7 +155,7 @@ index 413542d7af..a7304487bf 100644
  	shell->fade.animation = NULL;
  	switch (shell->fade.type) {
  	case FADE_IN:
-@@ -3877,6 +3887,7 @@ shell_fade_create_view(struct desktop_shell *shell)
+@@ -3877,6 +3890,7 @@ shell_fade_create_view(struct desktop_shell *shell)
  		x2 = MAX(x2, op->pos.c.x + op->width);
  		y2 = MAX(y2, op->pos.c.y + op->height);
  	}
@@ -144,7 +163,29 @@ index 413542d7af..a7304487bf 100644
  	curtain_params.pos.c.x = x1;
  	curtain_params.pos.c.y = y1;
  	curtain_params.width = x2 - x1;
-@@ -4600,6 +4611,10 @@ static void
+@@ -4508,6 +4522,9 @@ shell_reposition_view_on_output_change(struct weston_view *view)
+ 	if (!shsurf)
+ 		return;
+ 
++	if (shsurf->fullscreen_output && shsurf->fullscreen_output->destroying)
++		shsurf->fullscreen_output = NULL;
++
+ 	if (!visible) {
+ 		struct weston_coord_global pos;
+ 
+@@ -4526,11 +4543,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
+ 		    shsurf->state.fullscreen)
+ 			return;
+ 	}
+-
+-
+-	shsurf->saved_position_valid = false;
+-	set_maximized(shsurf, false);
+-	set_fullscreen(shsurf, false, NULL);
+ }
+ 
+ void
+@@ -4600,6 +4612,10 @@ static void
  handle_output_resized_shsurfs(struct desktop_shell *shell)
  {
  	struct shell_surface *shsurf;
@@ -155,7 +196,7 @@ index 413542d7af..a7304487bf 100644
  
  	wl_list_for_each(shsurf, &shell->shsurf_list, link) {
  		struct weston_desktop_surface *dsurface =
-@@ -4689,12 +4704,28 @@ handle_output_move_layer(struct desktop_shell *shell,
+@@ -4689,12 +4705,28 @@ handle_output_move_layer(struct desktop_shell *shell,
  static void
  handle_output_move(struct wl_listener *listener, void *data)
  {
@@ -185,7 +226,7 @@ index 413542d7af..a7304487bf 100644
  }
  
  static void
-@@ -4787,8 +4818,11 @@ shell_destroy(struct wl_listener *listener, void *data)
+@@ -4787,8 +4819,11 @@ shell_destroy(struct wl_listener *listener, void *data)
  		shell->fade.animation = NULL;
  	}
  
@@ -924,7 +965,7 @@ index f2d1dce7ce..a14b1a97b9 100644
  
  	return 0;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 76d8117b89..7efd0c35a7 100644
+index 76d8117b89..4c93a6ed67 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -336,6 +336,25 @@ weston_paint_node_destroy(struct weston_paint_node *pnode)
@@ -976,7 +1017,7 @@ index 76d8117b89..7efd0c35a7 100644
  	new_output = NULL;
  	new_output_area = 0;
  	mask = 0;
-@@ -3471,12 +3506,24 @@ weston_output_repaint(struct weston_output *output)
+@@ -3471,12 +3506,29 @@ weston_output_repaint(struct weston_output *output)
  		output->full_repaint_needed = false;
  	}
  
@@ -984,8 +1025,13 @@ index 76d8117b89..7efd0c35a7 100644
 +	if (output->resizing) {
 +		/* Resize maximized or fullscreen views(not always success) */
 +		wl_signal_emit(&ec->output_resized_signal, output);
-+		timespec_add_nsec(&output->next_repaint, &output->next_repaint,
-+				  millihz_to_nsec(output->current_mode->refresh));
++	}
++
++	if (output->resizing) {
++		int64_t refresh_nsec =
++			millihz_to_nsec(output->current_mode->refresh);
++		timespec_add_nsec(&output->next_repaint,
++				  &output->next_repaint, refresh_nsec);
 +		r = 1;
 +	} else {
 +		r = output->repaint(output, &output_damage);
@@ -1003,7 +1049,7 @@ index 76d8117b89..7efd0c35a7 100644
  		output->repaint_status = REPAINT_AWAITING_COMPLETION;
  
  	weston_compositor_repick(ec);
-@@ -3503,6 +3550,11 @@ weston_output_repaint(struct weston_output *output)
+@@ -3503,6 +3555,11 @@ weston_output_repaint(struct weston_output *output)
  static void
  weston_output_schedule_repaint_reset(struct weston_output *output)
  {
@@ -1015,7 +1061,7 @@ index 76d8117b89..7efd0c35a7 100644
  	output->repaint_status = REPAINT_NOT_SCHEDULED;
  	TL_POINT(output->compositor, "core_repaint_exit_loop",
  		 TLP_OUTPUT(output), TLP_END);
-@@ -3544,11 +3596,11 @@ weston_output_maybe_repaint(struct weston_output *output, struct timespec *now)
+@@ -3544,11 +3601,11 @@ weston_output_maybe_repaint(struct weston_output *output, struct timespec *now)
  	 * output. */
  	ret = weston_output_repaint(output);
  	weston_compositor_read_presentation_clock(compositor, now);
@@ -1030,7 +1076,7 @@ index 76d8117b89..7efd0c35a7 100644
  
  err:
  	weston_output_schedule_repaint_reset(output);
-@@ -3615,7 +3667,7 @@ output_repaint_timer_handler(void *data)
+@@ -3615,7 +3672,7 @@ output_repaint_timer_handler(void *data)
  	struct weston_backend *backend;
  	struct weston_output *output;
  	struct timespec now;
@@ -1039,7 +1085,7 @@ index 76d8117b89..7efd0c35a7 100644
  
  	if (!access(getenv("WESTON_FREEZE_DISPLAY") ? : "", F_OK)) {
  		usleep(DEFAULT_REPAINT_WINDOW * 1000);
-@@ -3635,9 +3687,11 @@ output_repaint_timer_handler(void *data)
+@@ -3635,9 +3692,11 @@ output_repaint_timer_handler(void *data)
  		ret = weston_output_maybe_repaint(output, &now);
  		if (ret)
  			break;
@@ -1052,7 +1098,7 @@ index 76d8117b89..7efd0c35a7 100644
  		wl_list_for_each(backend, &compositor->backend_list, link) {
  			if (backend->repaint_flush)
  				ret = backend->repaint_flush(backend);
-@@ -6891,6 +6945,8 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
+@@ -6891,6 +6950,8 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
  		else if (compositor->output_flow == WESTON_OUTPUT_FLOW_VERTICAL)
  			next_y += output->height;
  	}
@@ -1061,7 +1107,7 @@ index 76d8117b89..7efd0c35a7 100644
  }
  
  /** Transform a region from global to output coordinates
-@@ -7087,6 +7143,9 @@ weston_compositor_add_output(struct weston_compositor *compositor,
+@@ -7087,6 +7148,9 @@ weston_compositor_add_output(struct weston_compositor *compositor,
  		weston_view_geometry_dirty_internal(view);
  
  	compositor->view_list_needs_rebuild = true;

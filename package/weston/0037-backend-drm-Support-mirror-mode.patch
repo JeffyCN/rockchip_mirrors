@@ -1,7 +1,7 @@
-From b4fd8b557ede700e78625f1d18c3e4ca83d7d4ee Mon Sep 17 00:00:00 2001
+From 0320715d16c2a6ca9acca803cd493dcfb4b1151c Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
-Subject: [PATCH 37/99] backend-drm: Support mirror mode
+Subject: [PATCH 37/98] backend-drm: Support mirror mode
 
 Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 "WESTON_DRM_KEEP_RATIO" to keep the aspect ratio.
@@ -9,7 +9,7 @@ Set env "WESTON_DRM_MIRROR" to enable mirror mode, and set env
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  clients/desktop-shell.c               |   9 +-
- desktop-shell/shell.c                 |   3 +
+ desktop-shell/shell.c                 |   5 +-
  include/libweston/libweston.h         |   4 +
  libweston/backend-drm/drm-gbm.c       |   4 +-
  libweston/backend-drm/drm-internal.h  |  10 +
@@ -17,9 +17,9 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/backend-drm/meson.build     |   3 +-
  libweston/backend-drm/state-propose.c |  23 +-
  libweston/compositor.c                |  24 +-
- libweston/input.c                     |   7 +
+ libweston/input.c                     |  13 +-
  meson.build                           |   5 +
- 11 files changed, 404 insertions(+), 21 deletions(-)
+ 11 files changed, 410 insertions(+), 23 deletions(-)
 
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
 index f500979769..aea02d44fb 100644
@@ -43,10 +43,10 @@ index f500979769..aea02d44fb 100644
  }
  
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index a7304487bf..aee251af0d 100644
+index 72d85962c6..a0a5c2bfed 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4099,6 +4099,9 @@ weston_view_set_initial_position(struct weston_view *view,
+@@ -4102,6 +4102,9 @@ weston_view_set_initial_position(struct weston_view *view,
  	}
  
  	wl_list_for_each(output, &compositor->output_list, link) {
@@ -56,6 +56,15 @@ index a7304487bf..aee251af0d 100644
  		if (weston_output_contains_coord(output, pos)) {
  			target_output = output;
  			break;
+@@ -4522,7 +4525,7 @@ shell_reposition_view_on_output_change(struct weston_view *view)
+ 	if (!shsurf)
+ 		return;
+ 
+-	if (shsurf->fullscreen_output && shsurf->fullscreen_output->destroying)
++	if (!weston_output_valid(shsurf->fullscreen_output))
+ 		shsurf->fullscreen_output = NULL;
+ 
+ 	if (!visible) {
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
 index bb29605235..e9922532b3 100644
 --- a/include/libweston/libweston.h
@@ -617,7 +626,7 @@ index c55a9aa0e5..46bf98f557 100644
  		state = drm_output_propose_state(output_base, pending_state, mode);
  		if (!state) {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 7efd0c35a7..9ec7ecf168 100644
+index 4c93a6ed67..de38c1e245 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1435,7 +1435,7 @@ weston_view_assign_output(struct weston_view *ev)
@@ -629,7 +638,7 @@ index 7efd0c35a7..9ec7ecf168 100644
  			continue;
  
  		pixman_region32_intersect(&region, &ev->transform.boundingbox,
-@@ -5982,6 +5982,9 @@ bind_output(struct wl_client *client,
+@@ -5987,6 +5987,9 @@ bind_output(struct wl_client *client,
  static void
  weston_head_add_global(struct weston_head *head)
  {
@@ -639,7 +648,7 @@ index 7efd0c35a7..9ec7ecf168 100644
  	head->global = wl_global_create(head->compositor->wl_display,
  					&wl_output_interface, 4,
  					head, bind_output);
-@@ -6075,6 +6078,15 @@ weston_head_remove_global(struct weston_head *head)
+@@ -6080,6 +6083,15 @@ weston_head_remove_global(struct weston_head *head)
  	wl_list_init(&head->xdg_output_resource_list);
  }
  
@@ -655,7 +664,7 @@ index 7efd0c35a7..9ec7ecf168 100644
  /** Get the backing object of wl_output
   *
   * \param resource A wl_output protocol object.
-@@ -6925,6 +6937,7 @@ WL_EXPORT void
+@@ -6930,6 +6942,7 @@ WL_EXPORT void
  weston_compositor_reflow_outputs(struct weston_compositor *compositor)
  {
  	struct weston_output *output;
@@ -663,7 +672,7 @@ index 7efd0c35a7..9ec7ecf168 100644
  	int next_x, next_y;
  
  	if (compositor->output_flow_dirty)
-@@ -6934,7 +6947,10 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
+@@ -6939,7 +6952,10 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
  	wl_list_for_each(output, &compositor->output_list, link) {
  		struct weston_coord_global pos;
  
@@ -675,7 +684,7 @@ index 7efd0c35a7..9ec7ecf168 100644
  			continue;
  
  		pos.c = weston_coord(next_x, next_y);
-@@ -7130,11 +7146,11 @@ weston_compositor_add_output(struct weston_compositor *compositor,
+@@ -7135,11 +7151,11 @@ weston_compositor_add_output(struct weston_compositor *compositor,
  	wl_list_insert(compositor->output_list.prev, &output->link);
  	output->enabled = true;
  
@@ -690,10 +699,17 @@ index 7efd0c35a7..9ec7ecf168 100644
  	 * Use view_list, as paint nodes have not been created for this
  	 * output yet. Any existing view might touch this new output.
 diff --git a/libweston/input.c b/libweston/input.c
-index 5681cfa582..439b194e84 100644
+index 5681cfa582..2934f698f1 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
-@@ -2154,6 +2154,10 @@ weston_pointer_clamp(struct weston_pointer *pointer, struct weston_coord_global
+@@ -2148,20 +2148,28 @@ WL_EXPORT struct weston_coord_global
+ weston_pointer_clamp(struct weston_pointer *pointer, struct weston_coord_global pos)
+ {
+ 	struct weston_compositor *ec = pointer->seat->compositor;
+-	struct weston_output *output, *prev = NULL;
++	struct weston_output *output, *prev = NULL, *fallback = NULL;
+ 	int valid = 0;
+ 
  	wl_list_for_each(output, &ec->output_list, link) {
  		if (pointer->seat->output && pointer->seat->output != output)
  			continue;
@@ -704,7 +720,19 @@ index 5681cfa582..439b194e84 100644
  		if (weston_output_contains_coord(output, pos))
  			valid = 1;
  		if (weston_output_contains_coord(output, pointer->pos))
-@@ -2220,6 +2224,9 @@ weston_pointer_handle_output_destroy(struct wl_listener *listener, void *data)
+ 			prev = output;
++		if (!fallback)
++			fallback = output;
+ 	}
+ 
+ 	if (!prev)
+ 		prev = pointer->seat->output;
++	if (!prev)
++		prev = fallback;
+ 
+ 	if (prev && !valid)
+ 		pos = weston_pointer_clamp_for_output(pointer, prev, pos);
+@@ -2220,6 +2228,9 @@ weston_pointer_handle_output_destroy(struct wl_listener *listener, void *data)
  	wl_list_for_each(output, &ec->output_list, link) {
  		int ox, oy;
  

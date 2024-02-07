@@ -1,7 +1,7 @@
-From e8761e01bc3272942d4cbc832c523e8c8d510dea Mon Sep 17 00:00:00 2001
+From aeaa5e6d2e5df67b86c2f16432283bfc9bb56331 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 39/99] backend-drm: Support controlling output dynamically
+Subject: [PATCH 39/98] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -31,7 +31,7 @@ echo "output:HDMI-A-1:input=goodix-ts" >> /tmp/.weston_drm.conf
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  compositor/main.c                    |  14 ++
- desktop-shell/shell.c                |  24 ++-
+ desktop-shell/shell.c                |  27 ++-
  include/libweston/libweston.h        |   6 +
  libweston/backend-drm/drm-internal.h |  18 ++
  libweston/backend-drm/drm.c          | 256 ++++++++++++++++++++++++++-
@@ -41,7 +41,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/libweston-internal.h       |   3 +
  libweston/pixman-renderer.c          |  29 +++
  libweston/renderer-gl/gl-renderer.c  |   3 +
- 11 files changed, 405 insertions(+), 18 deletions(-)
+ 11 files changed, 408 insertions(+), 18 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 319fc30801..146bbf8f79 100644
@@ -69,10 +69,10 @@ index 319fc30801..146bbf8f79 100644
  		weston_log("Cannot configure output \"%s\" using weston_drm_output_api.\n",
  			   output->name);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index aee251af0d..67b8f47400 100644
+index a0a5c2bfed..95f248a6ff 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4071,7 +4071,7 @@ weston_view_set_initial_position(struct weston_view *view,
+@@ -4074,7 +4074,7 @@ weston_view_set_initial_position(struct weston_view *view,
  	struct weston_compositor *compositor = shell->compositor;
  	int32_t range_x, range_y;
  	int32_t x, y;
@@ -81,7 +81,7 @@ index aee251af0d..67b8f47400 100644
  	struct weston_seat *seat;
  	pixman_rectangle32_t area;
  	struct weston_coord_global pos;
-@@ -4098,16 +4098,20 @@ weston_view_set_initial_position(struct weston_view *view,
+@@ -4101,16 +4101,20 @@ weston_view_set_initial_position(struct weston_view *view,
  		}
  	}
  
@@ -106,10 +106,13 @@ index aee251af0d..67b8f47400 100644
  	if (!target_output) {
  		pos.c = weston_coord(10 + random() % 400,
  				     10 + random() % 400);
-@@ -4647,6 +4651,12 @@ handle_output_resized(struct wl_listener *listener, void *data)
+@@ -4648,6 +4652,15 @@ handle_output_resized(struct wl_listener *listener, void *data)
  	struct weston_output *output = (struct weston_output *)data;
  	struct shell_output *sh_output = find_shell_output_from_weston_output(shell, output);
  
++	if (!sh_output)
++		return;
++
 +	if (shell->lock_surface) {
 +		struct weston_coord_surface offset =
 +			 weston_coord_surface(0, 0, shell->lock_surface);
@@ -119,7 +122,7 @@ index aee251af0d..67b8f47400 100644
  	handle_output_resized_shsurfs(shell);
  
  	shell_resize_surface_to_output(shell, sh_output->background_surface, output);
-@@ -4700,7 +4710,9 @@ handle_output_move_layer(struct desktop_shell *shell,
+@@ -4701,7 +4714,9 @@ handle_output_move_layer(struct desktop_shell *shell,
  		pos = weston_coord_global_add(
  		      weston_view_get_pos_offset_global(view),
  		      output->move);
@@ -592,10 +595,10 @@ index 980fb83abf..808a14bfae 100644
  			if (!device->aspect_ratio_supported ||
  			    aspect_ratio == drm_mode->base.aspect_ratio)
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 9ec7ecf168..d38e18410b 100644
+index de38c1e245..42ec033576 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -6950,7 +6950,7 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
+@@ -6955,7 +6955,7 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
  		wl_list_for_each(head, &output->head_list, output_link)
  			weston_head_update_global(head);
  
@@ -604,7 +607,7 @@ index 9ec7ecf168..d38e18410b 100644
  			continue;
  
  		pos.c = weston_coord(next_x, next_y);
-@@ -7444,6 +7444,9 @@ weston_output_set_transform(struct weston_output *output,
+@@ -7449,6 +7449,9 @@ weston_output_set_transform(struct weston_output *output,
  
  	weston_compositor_reflow_outputs(output->compositor);
  
@@ -614,7 +617,7 @@ index 9ec7ecf168..d38e18410b 100644
  	/* Notify clients of the change for output transform. */
  	wl_list_for_each(head, &output->head_list, output_link) {
  		wl_resource_for_each(resource, &head->resource_list) {
-@@ -7729,6 +7732,8 @@ weston_output_init(struct weston_output *output,
+@@ -7734,6 +7737,8 @@ weston_output_init(struct weston_output *output,
  	/* Can't use -1 on uint32_t and 0 is valid enum value */
  	output->transform = UINT32_MAX;
  
