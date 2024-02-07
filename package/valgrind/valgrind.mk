@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-VALGRIND_VERSION = 3.21.0
+VALGRIND_VERSION = 3.22.0
 VALGRIND_SITE = https://sourceware.org/pub/valgrind
 VALGRIND_SOURCE = valgrind-$(VALGRIND_VERSION).tar.bz2
 VALGRIND_LICENSE = GPL-2.0, GFDL-1.2
@@ -44,8 +44,8 @@ VALGRIND_CONF_ENV += ac_cv_prog_cc_c99='-std=gnu99'
 # host tuple to determine whether it's being built for ARMv7 or
 # not. Therefore, we adjust the host tuple to specify we're on
 # ARMv7. The valgrind package is guaranteed, through Config.in, to
-# only be selected on ARMv7-A/ARMv8-A platforms.
-ifeq ($(BR2_ARM_CPU_ARMV7A)$(BR2_ARM_CPU_ARMV8A):$(BR2_arm),y:y)
+# only be selected on ARMv7-A platforms.
+ifeq ($(BR2_ARM_CPU_ARMV7A),y)
 VALGRIND_CONF_OPTS += \
 	--host=$(patsubst arm-%,armv7-%,$(GNU_TARGET_NAME))
 endif
