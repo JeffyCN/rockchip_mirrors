@@ -1,7 +1,7 @@
-From 5e2ba0042bf530c7c50468eeac24f6c2b71d494a Mon Sep 17 00:00:00 2001
+From 2a2b51df1bd1e4f3d0f74cf529fcc26b80292cb9 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 30 May 2022 15:25:32 +0800
-Subject: [PATCH] arm64 front end: add support for 'ldnp', 'stnp'
+Subject: [PATCH 4/5] arm64 front end: add support for 'ldnp', 'stnp'
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,10 +9,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 11 insertions(+), 3 deletions(-)
 
 diff --git a/VEX/priv/guest_arm64_toIR.c b/VEX/priv/guest_arm64_toIR.c
-index 44a1c23..d406fcf 100644
+index 272ae48..1cc03eb 100644
 --- a/VEX/priv/guest_arm64_toIR.c
 +++ b/VEX/priv/guest_arm64_toIR.c
-@@ -5006,13 +5006,16 @@ Bool dis_ARM64_load_store(/*MB_OUT*/DisResult* dres, UInt insn,
+@@ -5035,13 +5035,16 @@ Bool dis_ARM64_load_store(/*MB_OUT*/DisResult* dres, UInt insn,
        }
     }
  
@@ -30,7 +30,7 @@ index 44a1c23..d406fcf 100644
        (at-Rn-then-Rn=EA)
        x0 101 0001 L imm7 Rt2 Rn Rt1  mmP Rt1,Rt2, [Xn|SP], #imm
     
-@@ -5023,12 +5026,13 @@ Bool dis_ARM64_load_store(/*MB_OUT*/DisResult* dres, UInt insn,
+@@ -5052,12 +5055,13 @@ Bool dis_ARM64_load_store(/*MB_OUT*/DisResult* dres, UInt insn,
        x0 101 0010 L imm7 Rt2 Rn Rt1  mmP Rt1,Rt2, [Xn|SP, #imm]
     */
     UInt insn_30_23 = INSN(30,23);
@@ -46,7 +46,7 @@ index 44a1c23..d406fcf 100644
        UInt rT1    = INSN(4,0);
        UInt rN     = INSN(9,5);
        UInt rT2    = INSN(14,10);
-@@ -5049,6 +5053,7 @@ Bool dis_ARM64_load_store(/*MB_OUT*/DisResult* dres, UInt insn,
+@@ -5078,6 +5082,7 @@ Bool dis_ARM64_load_store(/*MB_OUT*/DisResult* dres, UInt insn,
           IRTemp tTA = newTemp(Ity_I64);
           IRTemp tWA = newTemp(Ity_I64);
           switch (INSN(24,23)) {
@@ -54,7 +54,7 @@ index 44a1c23..d406fcf 100644
              case BITS2(0,1):
                 assign(tTA, mkexpr(tRN)); assign(tWA, mkexpr(tEA)); break;
              case BITS2(1,1):
-@@ -5109,6 +5114,9 @@ Bool dis_ARM64_load_store(/*MB_OUT*/DisResult* dres, UInt insn,
+@@ -5138,6 +5143,9 @@ Bool dis_ARM64_load_store(/*MB_OUT*/DisResult* dres, UInt insn,
  
           const HChar* fmt_str = NULL;
           switch (INSN(24,23)) {
