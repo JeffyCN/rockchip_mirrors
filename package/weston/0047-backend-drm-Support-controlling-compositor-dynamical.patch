@@ -1,7 +1,7 @@
-From 43013d28b258129c0162edbfddcdc08eed319a5c Mon Sep 17 00:00:00 2001
+From fc5232a71c60c656813217093f66a346720e6129 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 47/99] backend-drm: Support controlling compositor dynamically
+Subject: [PATCH 47/98] backend-drm: Support controlling compositor dynamically
 
 Use config file to control compositor's state.
 
@@ -157,10 +157,10 @@ index d2d61885db..c456bc414a 100644
  
  	*old_st = st;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index a16a71b2ce..beaa18fc42 100644
+index 9e177b1404..45f9d305be 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -5808,6 +5808,10 @@ weston_compositor_wake(struct weston_compositor *compositor)
+@@ -5813,6 +5813,10 @@ weston_compositor_wake(struct weston_compositor *compositor)
  {
  	uint32_t old_state = compositor->state;
  
@@ -171,7 +171,7 @@ index a16a71b2ce..beaa18fc42 100644
  	/* The state needs to be changed before emitting the wake
  	 * signal because that may try to schedule a repaint which
  	 * will not work if the compositor is still sleeping */
-@@ -5815,10 +5819,11 @@ weston_compositor_wake(struct weston_compositor *compositor)
+@@ -5820,10 +5824,11 @@ weston_compositor_wake(struct weston_compositor *compositor)
  
  	switch (old_state) {
  	case WESTON_COMPOSITOR_SLEEPING:
