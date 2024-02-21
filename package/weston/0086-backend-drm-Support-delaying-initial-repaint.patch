@@ -1,4 +1,4 @@
-From 63eb6791596e9f765a39a8d777c738edb113f355 Mon Sep 17 00:00:00 2001
+From cd15a12813102f28398ba2a8e8971b1436812276 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Oct 2023 11:41:06 +0800
 Subject: [PATCH 86/98] backend-drm: Support delaying initial repaint
@@ -26,7 +26,7 @@ index 7e8612481f..bf8f7761a2 100644
  	bool single_head;
  	bool head_fallback;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 2c641fa921..9fc461884b 100644
+index b13524ba23..1b7e48ba8b 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1020,18 +1020,25 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
@@ -70,7 +70,7 @@ index 2c641fa921..9fc461884b 100644
  	/* If planes have been disabled in the core, we might not have
  	 * hit assign_planes at all, so might not have valid output state
  	 * here. */
-@@ -3561,6 +3576,12 @@ drm_backend_update_connectors(struct drm_device *device,
+@@ -3568,6 +3583,12 @@ drm_backend_update_connectors(struct drm_device *device,
  	uint32_t connector_id;
  	int i, ret;
  
@@ -83,7 +83,7 @@ index 2c641fa921..9fc461884b 100644
  	resources = drmModeGetResources(device->drm.fd);
  	if (!resources) {
  		weston_log("drmModeGetResources failed\n");
-@@ -4919,6 +4940,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4927,6 +4948,10 @@ drm_backend_create(struct weston_compositor *compositor,
  		weston_log("Entering mirror mode.\n");
  	}
  
