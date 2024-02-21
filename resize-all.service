@@ -7,6 +7,7 @@ ConditionPathExists=/etc/fstab
 [Service]
 Type=oneshot
 ExecStart=/usr/bin/resize-helper
+RemainAfterExit=yes
 
 [Install]
 WantedBy=sysinit.target
