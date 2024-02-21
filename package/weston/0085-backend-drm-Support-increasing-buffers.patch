@@ -1,4 +1,4 @@
-From bb127f95475cb30da6f6941eef831ef9f1c4f5cf Mon Sep 17 00:00:00 2001
+From 2e7d6a0007f89da36b2b5d9022c03478f0d87d1f Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Aug 2023 18:18:58 +0800
 Subject: [PATCH 85/98] backend-drm: Support increasing buffers
@@ -305,7 +305,7 @@ index 2d6d62d2dc..7e8612481f 100644
  
  	struct vaapi_recorder *recorder;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 561d5c1adc..2c641fa921 100644
+index bba59d3074..b13524ba23 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -539,13 +539,14 @@ drm_output_render_pixman(struct drm_output_state *state,
@@ -359,7 +359,7 @@ index 561d5c1adc..2c641fa921 100644
  		output->dumb[i] = NULL;
  		output->renderbuffer[i] = NULL;
  	}
-@@ -3169,6 +3173,7 @@ drm_output_create(struct weston_backend *backend, const char *name)
+@@ -3176,6 +3180,7 @@ drm_output_create(struct weston_backend *backend, const char *name)
  	struct drm_backend *b = container_of(backend, struct drm_backend, base);
  	struct drm_device *device;
  	struct drm_output *output;
@@ -367,7 +367,7 @@ index 561d5c1adc..2c641fa921 100644
  
  	device = drm_device_find_by_output(b->compositor, name);
  	if (!device)
-@@ -3188,6 +3193,14 @@ drm_output_create(struct weston_backend *backend, const char *name)
+@@ -3195,6 +3200,14 @@ drm_output_create(struct weston_backend *backend, const char *name)
  	output->gbm_bo_flags = GBM_BO_USE_SCANOUT | GBM_BO_USE_RENDERING;
  #endif
  

@@ -1,4 +1,4 @@
-From aeaa5e6d2e5df67b86c2f16432283bfc9bb56331 Mon Sep 17 00:00:00 2001
+From a20ba80a71cf8cdf895ff5c7b6960aee2f0b3f26 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 39/98] backend-drm: Support controlling output dynamically
@@ -34,14 +34,14 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  desktop-shell/shell.c                |  27 ++-
  include/libweston/libweston.h        |   6 +
  libweston/backend-drm/drm-internal.h |  18 ++
- libweston/backend-drm/drm.c          | 256 ++++++++++++++++++++++++++-
+ libweston/backend-drm/drm.c          | 257 ++++++++++++++++++++++++++-
  libweston/backend-drm/modes.c        |  20 ++-
  libweston/compositor.c               |   7 +-
  libweston/libinput-seat.c            |  43 +++++
  libweston/libweston-internal.h       |   3 +
  libweston/pixman-renderer.c          |  29 +++
  libweston/renderer-gl/gl-renderer.c  |   3 +
- 11 files changed, 408 insertions(+), 18 deletions(-)
+ 11 files changed, 409 insertions(+), 18 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 319fc30801..146bbf8f79 100644
@@ -209,7 +209,7 @@ index 4fb68fff13..61ce8b98f1 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 43e729dd59..d2d61885db 100644
+index 43e729dd59..2c57a3c271 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -292,7 +292,7 @@ index 43e729dd59..d2d61885db 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -4349,6 +4367,234 @@ static const struct weston_drm_output_api api = {
+@@ -4349,6 +4367,235 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_content_type,
  };
  
@@ -507,6 +507,8 @@ index 43e729dd59..d2d61885db 100644
 +	if (!conf_fp)
 +		return 0;
 +
++	*old_st = st;
++
 +	/**
 +	 * Parse configs, formated with <type>:<key>:<value>
 +	 * For example: "output:all:rotate90"
@@ -519,7 +521,6 @@ index 43e729dd59..d2d61885db 100644
 +			config_handle_output(b, key, value);
 +	}
 +
-+	*old_st = st;
 +	fclose(conf_fp);
 +	return 0;
 +}
@@ -527,7 +528,7 @@ index 43e729dd59..d2d61885db 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4412,6 +4658,7 @@ drm_backend_late_init(void *data)
+@@ -4412,6 +4659,7 @@ drm_backend_late_init(void *data)
  	struct drm_backend *b = data;
  
  	hotplug_timer_handler(b->drm);
@@ -535,7 +536,7 @@ index 43e729dd59..d2d61885db 100644
  }
  
  static struct drm_backend *
-@@ -4717,6 +4964,9 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4717,6 +4965,9 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b->drm);
  

@@ -1,7 +1,7 @@
-From 18f860e8b58d8faa12be39a516eb9b2c1ab2dcad Mon Sep 17 00:00:00 2001
+From 30176fd1ca29fa2aedd9b38f816f85cc7e86ff80 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 1 Feb 2024 11:31:08 +0800
-Subject: [PATCH 48/99] backend-drm: Support changing touch calibration
+Subject: [PATCH 48/98] backend-drm: Support changing touch calibration
  dynamically
 
 Use config file to set touch device's calibration.
@@ -37,7 +37,7 @@ index f9134859c1..93f9f5a357 100644
  	struct weston_touch *aggregate;	/**< weston_touch this is part of */
  	struct wl_list link;		/**< in weston_touch::device_list */
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index c456bc414a..8fad466498 100644
+index fe0b96bae2..b45d1b6be5 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -4589,6 +4589,58 @@ config_handle_compositor(struct drm_backend *b, const char *key,
@@ -99,7 +99,7 @@ index c456bc414a..8fad466498 100644
  static int
  config_timer_handler(void *data)
  {
-@@ -4640,6 +4692,8 @@ config_timer_handler(void *data)
+@@ -4642,6 +4694,8 @@ config_timer_handler(void *data)
  			config_handle_output(b, key, value);
  		else if (!strcmp(type, "compositor"))
  			config_handle_compositor(b, key, value);
@@ -107,9 +107,9 @@ index c456bc414a..8fad466498 100644
 +			config_handle_calibration(b, key, value);
  	}
  
- 	*old_st = st;
+ 	fclose(conf_fp);
 diff --git a/libweston/input.c b/libweston/input.c
-index 439b194e84..9110f5bac0 100644
+index 2934f698f1..4d91f1e0c2 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
 @@ -178,6 +178,7 @@ weston_touch_device_destroy(struct weston_touch_device *device)
