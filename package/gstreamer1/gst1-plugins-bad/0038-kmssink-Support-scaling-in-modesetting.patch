@@ -1,16 +1,16 @@
-From d52d64b9f247553ccbf2883793efc50b96f9e197 Mon Sep 17 00:00:00 2001
+From 4814faa7d6903d19bff435378cf908d8168aa732 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:01:12 +0800
 Subject: [PATCH 38/43] kmssink: Support scaling in modesetting
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmssink.c | 99 ++++++++++++++++++++++++++++++++------------
- sys/kms/gstkmssink.h |  1 +
- 2 files changed, 74 insertions(+), 26 deletions(-)
+ sys/kms/gstkmssink.c | 113 +++++++++++++++++++++++++++++--------------
+ sys/kms/gstkmssink.h |   1 +
+ 2 files changed, 79 insertions(+), 35 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 4cc7057..c54ac49 100644
+index 4cc7057..f58429b 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -80,6 +80,7 @@ static GstFlowReturn gst_kms_sink_show_frame (GstVideoSink * vsink,
@@ -64,7 +64,7 @@ index 4cc7057..c54ac49 100644
    kmsmem = NULL;
  
    if (self->conn_id < 0)
-@@ -847,26 +851,40 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+@@ -847,33 +851,55 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
  
    GST_INFO_OBJECT (self, "configuring mode setting");
  
@@ -115,8 +115,11 @@ index 4cc7057..c54ac49 100644
    err = drmModeSetCrtc (self->fd, self->crtc_id, fb_id, 0, 0,
        (uint32_t *) & self->conn_id, 1, mode);
    if (err)
-@@ -874,6 +892,11 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+     goto modesetting_failed;
  
++  self->hdisplay = mode->hdisplay;
++  self->vdisplay = mode->vdisplay;
++
    g_clear_pointer (&self->tmp_kmsmem, gst_memory_unref);
    self->tmp_kmsmem = (GstMemory *) kmsmem;
 +  kmsmem = NULL;
@@ -127,7 +130,7 @@ index 4cc7057..c54ac49 100644
  
    ret = TRUE;
  
-@@ -881,6 +904,10 @@ bail:
+@@ -881,6 +907,10 @@ bail:
    if (conn)
      drmModeFreeConnector (conn);
  
@@ -138,7 +141,7 @@ index 4cc7057..c54ac49 100644
    return ret;
  
    /* ERRORS */
-@@ -905,6 +932,11 @@ modesetting_failed:
+@@ -905,6 +935,11 @@ modesetting_failed:
      GST_ERROR_OBJECT (self, "Failed to set mode: %s", g_strerror (errno));
      goto bail;
    }
@@ -150,7 +153,7 @@ index 4cc7057..c54ac49 100644
  }
  
  static void
-@@ -1039,7 +1071,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -1039,7 +1074,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
  
        format = gst_video_format_to_string (fmt);
  
@@ -159,7 +162,7 @@ index 4cc7057..c54ac49 100644
          caps = gst_caps_new_simple ("video/x-raw",
              "format", G_TYPE_STRING, format,
              "width", G_TYPE_INT, mode->hdisplay,
-@@ -1340,6 +1372,8 @@ gst_kms_sink_start (GstBaseSink * bsink)
+@@ -1340,6 +1375,8 @@ gst_kms_sink_start (GstBaseSink * bsink)
      self->modesetting_enabled = TRUE;
    }
  
@@ -168,7 +171,21 @@ index 4cc7057..c54ac49 100644
    if (crtc->mode_valid && self->modesetting_enabled && self->restore_crtc) {
      self->saved_crtc = (drmModeCrtc *) crtc;
    }
-@@ -1746,9 +1780,6 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -1378,13 +1415,6 @@ gst_kms_sink_start (GstBaseSink * bsink)
+   self->hdisplay = crtc->mode.hdisplay;
+   self->vdisplay = crtc->mode.vdisplay;
+ 
+-  if (self->render_rect.w == 0 || self->render_rect.h == 0) {
+-    self->render_rect.x = 0;
+-    self->render_rect.y = 0;
+-    self->render_rect.w = self->hdisplay;
+-    self->render_rect.h = self->vdisplay;
+-  }
+-
+   self->pending_rect = self->render_rect;
+   GST_OBJECT_UNLOCK (self);
+ 
+@@ -1746,9 +1776,6 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
      self->pool = NULL;
    }
  
@@ -178,7 +195,7 @@ index 4cc7057..c54ac49 100644
    GST_OBJECT_LOCK (self);
    if (self->reconfigure) {
      self->reconfigure = FALSE;
-@@ -1783,13 +1814,6 @@ no_disp_ratio:
+@@ -1783,13 +1810,6 @@ no_disp_ratio:
      return FALSE;
    }
  
@@ -192,7 +209,7 @@ index 4cc7057..c54ac49 100644
  }
  
  static gboolean
-@@ -2249,6 +2273,14 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2249,6 +2269,14 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
    GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
  
    GST_OBJECT_LOCK (self);
@@ -207,7 +224,18 @@ index 4cc7057..c54ac49 100644
    if ((crop = gst_buffer_get_video_crop_meta (buffer))) {
      GstVideoInfo cropped_vinfo = *vinfo;
  
-@@ -2315,7 +2347,17 @@ retry_set_plane:
+@@ -2263,8 +2291,8 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+     src.y = crop->y;
+   }
+ 
+-  dst.w = self->render_rect.w;
+-  dst.h = self->render_rect.h;
++  dst.w = self->render_rect.w ?: self->hdisplay;
++  dst.h = self->render_rect.h ?: self->vdisplay;
+ 
+ retry_set_plane:
+   gst_video_sink_center_rect (src, dst, &result, self->can_scale);
+@@ -2315,7 +2343,17 @@ retry_set_plane:
        src.x << 16, src.y << 16, src.w << 16, src.h << 16);
    if (ret) {
      if (self->can_scale) {
@@ -225,7 +253,7 @@ index 4cc7057..c54ac49 100644
        goto retry_set_plane;
      }
      goto set_plane_failed;
-@@ -2353,6 +2395,11 @@ buffer_invalid:
+@@ -2353,6 +2391,11 @@ buffer_invalid:
      GST_ERROR_OBJECT (self, "invalid buffer: it doesn't have a fb id");
      goto bail;
    }

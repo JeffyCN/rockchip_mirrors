@@ -1,4 +1,4 @@
-From 53f7a17070ce62ac8667f552be6557fa352dd537 Mon Sep 17 00:00:00 2001
+From 2021c4c3cf046e02041e0d341e00150ff8784b44 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:18:07 +0800
 Subject: [PATCH 39/43] kmssink: Support fullscreen prop
@@ -10,7 +10,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 26 insertions(+)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index c54ac49..0a7e8d5 100644
+index f58429b..43509a4 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -109,6 +109,7 @@ enum
@@ -21,7 +21,7 @@ index c54ac49..0a7e8d5 100644
    PROP_N,
  };
  
-@@ -2311,6 +2312,19 @@ retry_set_plane:
+@@ -2307,6 +2308,19 @@ retry_set_plane:
    src.w = video_width;
    src.h = video_height;
  
@@ -41,7 +41,7 @@ index c54ac49..0a7e8d5 100644
    /* handle out of screen case */
    if ((result.x + result.w) > self->hdisplay)
      result.w = self->hdisplay - result.x;
-@@ -2586,6 +2600,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
+@@ -2582,6 +2596,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
      case PROP_SYNC_MODE:
        sink->sync_mode = g_value_get_enum (value);
        break;
@@ -51,7 +51,7 @@ index c54ac49..0a7e8d5 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_N, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -2651,6 +2668,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
+@@ -2647,6 +2664,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
      case PROP_SYNC_MODE:
        g_value_set_enum (value, sink->sync_mode);
        break;
@@ -61,7 +61,7 @@ index c54ac49..0a7e8d5 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -2925,6 +2945,11 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+@@ -2921,6 +2941,11 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
        GST_TYPE_KMS_SYNC_MODE, DEFAULT_SYNC_MODE,
        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  

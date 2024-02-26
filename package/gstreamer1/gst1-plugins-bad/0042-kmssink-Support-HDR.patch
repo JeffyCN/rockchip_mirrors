@@ -1,4 +1,4 @@
-From 0a199bf9699101b79f14fb55492d9b0461cbb505 Mon Sep 17 00:00:00 2001
+From c8600c607540c990ca57b6922f19cf8ebb88a2da Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Mon, 3 Jul 2023 15:26:53 +0800
 Subject: [PATCH 42/43] kmssink: Support HDR
@@ -10,7 +10,7 @@ Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
  2 files changed, 195 insertions(+), 18 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 7069781..a480f49 100644
+index 693d834..98088f1 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -58,6 +58,7 @@
@@ -303,7 +303,7 @@ index 7069781..a480f49 100644
    }
  }
  
-@@ -1541,6 +1678,10 @@ gst_kms_sink_stop (GstBaseSink * bsink)
+@@ -1537,6 +1674,10 @@ gst_kms_sink_stop (GstBaseSink * bsink)
      self->saved_zpos = -1;
    }
  
@@ -314,7 +314,7 @@ index 7069781..a480f49 100644
    gst_buffer_replace (&self->last_buffer, NULL);
    gst_caps_replace (&self->allowed_caps, NULL);
    gst_object_replace ((GstObject **) & self->pool, NULL);
-@@ -2605,6 +2746,12 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
+@@ -2601,6 +2742,12 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
      case PROP_FULLSCREEN:
        sink->fullscreen = g_value_get_boolean (value);
        break;
@@ -327,7 +327,7 @@ index 7069781..a480f49 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_N, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -2673,6 +2820,12 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
+@@ -2669,6 +2816,12 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
      case PROP_FULLSCREEN:
        g_value_set_boolean (value, sink->fullscreen);
        break;
@@ -340,7 +340,7 @@ index 7069781..a480f49 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -2715,12 +2868,19 @@ gst_kms_sink_init (GstKMSSink * sink)
+@@ -2711,12 +2864,19 @@ gst_kms_sink_init (GstKMSSink * sink)
      sink->skip_vsync = TRUE;
  
  #ifdef HAVE_DRM_HDR
@@ -360,7 +360,7 @@ index 7069781..a480f49 100644
    gst_video_mastering_display_info_init (&sink->hdr_minfo);
    gst_video_content_light_level_init (&sink->hdr_cll);
  #endif
-@@ -2952,6 +3112,16 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+@@ -2948,6 +3108,16 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
        "Force showing fullscreen", FALSE,
        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  
