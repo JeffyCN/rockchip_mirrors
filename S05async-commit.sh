@@ -10,7 +10,7 @@
 
 case "$1" in
 	start)
-		/usr/bin/async-commit& ;;
+		/usr/bin/async-commit ;;
 	stop)
 		;;
 	restart|reload)
