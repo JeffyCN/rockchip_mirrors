@@ -109,6 +109,8 @@ else ifeq ($(BR2_PACKAGE_RK3566_RK3568), y)
 CAMERA_ENGINE_RKAIQ_IQFILE = isp21/*.json
 else ifeq ($(BR2_PACKAGE_RK3562), y)
 CAMERA_ENGINE_RKAIQ_IQFILE = isp32_lite/*.json
+else ifeq ($(BR2_PACKAGE_RK3576), y)
+CAMERA_ENGINE_RKAIQ_IQFILE = isp39/*.json
 else ifeq ($(BR2_PACKAGE_RK3588), y)
 CAMERA_ENGINE_RKAIQ_IQFILE = isp3x/*.json
 endif
