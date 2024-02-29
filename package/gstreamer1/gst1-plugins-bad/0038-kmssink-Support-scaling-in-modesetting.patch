@@ -1,16 +1,16 @@
-From 4814faa7d6903d19bff435378cf908d8168aa732 Mon Sep 17 00:00:00 2001
+From 1303b373e3ddd4454c542944bbf6d8953e47d7a0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:01:12 +0800
-Subject: [PATCH 38/43] kmssink: Support scaling in modesetting
+Subject: [PATCH 38/44] kmssink: Support scaling in modesetting
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmssink.c | 113 +++++++++++++++++++++++++++++--------------
+ sys/kms/gstkmssink.c | 117 ++++++++++++++++++++++++++++++-------------
  sys/kms/gstkmssink.h |   1 +
- 2 files changed, 79 insertions(+), 35 deletions(-)
+ 2 files changed, 82 insertions(+), 36 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 4cc7057..f58429b 100644
+index 9aefbaa..4cac6fc 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -80,6 +80,7 @@ static GstFlowReturn gst_kms_sink_show_frame (GstVideoSink * vsink,
@@ -209,7 +209,7 @@ index 4cc7057..f58429b 100644
  }
  
  static gboolean
-@@ -2249,6 +2269,14 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2251,6 +2271,14 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
    GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
  
    GST_OBJECT_LOCK (self);
@@ -224,7 +224,7 @@ index 4cc7057..f58429b 100644
    if ((crop = gst_buffer_get_video_crop_meta (buffer))) {
      GstVideoInfo cropped_vinfo = *vinfo;
  
-@@ -2263,8 +2291,8 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2265,8 +2293,8 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
      src.y = crop->y;
    }
  
@@ -235,7 +235,7 @@ index 4cc7057..f58429b 100644
  
  retry_set_plane:
    gst_video_sink_center_rect (src, dst, &result, self->can_scale);
-@@ -2315,7 +2343,17 @@ retry_set_plane:
+@@ -2317,7 +2345,17 @@ retry_set_plane:
        src.x << 16, src.y << 16, src.w << 16, src.h << 16);
    if (ret) {
      if (self->can_scale) {
@@ -253,7 +253,18 @@ index 4cc7057..f58429b 100644
        goto retry_set_plane;
      }
      goto set_plane_failed;
-@@ -2353,6 +2391,11 @@ buffer_invalid:
+@@ -2337,7 +2375,9 @@ sync_frame:
+     self->last_height = GST_VIDEO_SINK_HEIGHT (self);
+     self->last_vinfo = self->vinfo;
+   }
+-  g_clear_pointer (&self->tmp_kmsmem, gst_memory_unref);
++
++  if (self->tmp_kmsmem && self->plane_id == self->primary_plane_id)
++    g_clear_pointer (&self->tmp_kmsmem, gst_memory_unref);
+ 
+   GST_OBJECT_UNLOCK (self);
+   res = GST_FLOW_OK;
+@@ -2352,6 +2392,11 @@ buffer_invalid:
      GST_ERROR_OBJECT (self, "invalid buffer: it doesn't have a fb id");
      goto bail;
    }
