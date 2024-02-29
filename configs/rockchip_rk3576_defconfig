@@ -21,4 +21,3 @@
 #include "npu2.config"
 #include "powermanager.config"
 #include "weston.config"
-# BR2_PACKAGE_CAMERA_ENGINE is not set
