@@ -50,6 +50,13 @@ config BR2_PACKAGE_FRECON_ROTATE_270
 
 endchoice
 
+config BR2_PACKAGE_FRECON_OUTPUT_CONFIG
+	string "custom output configs"
+	help
+	  <monitor name>=<fit|strech>:<0|90|180|270>
+	  For example:
+	    DSI-1=fit:90,HDMI-A-2=strech:270
+
 config BR2_PACKAGE_FRECON_SCALE
 	int "frecon scale"
 	range 1 100
