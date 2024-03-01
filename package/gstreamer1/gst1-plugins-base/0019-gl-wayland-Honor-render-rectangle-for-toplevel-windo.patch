@@ -1,7 +1,7 @@
-From 607d5e9522a3f9430f6ec4195f13f8d5d9413a12 Mon Sep 17 00:00:00 2001
+From 29ef6c8212d956d1d30e92bd2939070b08004647 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 4 May 2023 17:52:33 +0800
-Subject: [PATCH 19/21] gl: wayland: Honor render-rectangle for toplevel window
+Subject: [PATCH 19/22] gl: wayland: Honor render-rectangle for toplevel window
 
 Tested on RK3588 evb with:
 gst-launch-1.0 videotestsrc ! glimagesink render-rectangle='<100,200,300,400>'

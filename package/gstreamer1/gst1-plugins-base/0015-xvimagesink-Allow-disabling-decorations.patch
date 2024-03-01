@@ -1,7 +1,7 @@
-From e230152ed3c9dc08da33d8bff7f4f6102cb326ff Mon Sep 17 00:00:00 2001
+From 08a7e44cfa69826861f14e6c3218efe3f75224ad Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 28 Apr 2023 17:09:54 +0800
-Subject: [PATCH 15/21] xvimagesink: Allow disabling decorations
+Subject: [PATCH 15/22] xvimagesink: Allow disabling decorations
 
 Tested on RK3588 EVB with:
 gst-launch-1.0 videotestsrc ! xvimagesink decorations=0

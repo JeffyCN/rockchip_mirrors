@@ -1,7 +1,7 @@
-From e41e751f916d30c13cf989603bf0fd11429249ab Mon Sep 17 00:00:00 2001
+From 88bed83808f8bb83fee6ae408cfd39cef9b10898 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 11 Oct 2022 09:21:10 +0800
-Subject: [PATCH 14/21] riff: Fix bps caculation error for ADPCM
+Subject: [PATCH 14/22] riff: Fix bps caculation error for ADPCM
 
 The bps shall be caculated according to:
 ADPCM: rate * blockalign / ((blockalign - ch * 7) / ch * 2)

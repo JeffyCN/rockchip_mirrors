@@ -1,4 +1,4 @@
-From ee4af3b3ced380fa45e671c8a8500029bacdd779 Mon Sep 17 00:00:00 2001
+From bdc5ead6f67c9673aee635c11e1e3ac94aa50359 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 11 May 2022 15:21:44 +0800
 Subject: [PATCH 06/12] v4l2src: Support setting default device
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 5 insertions(+), 1 deletion(-)
 
 diff --git a/sys/v4l2/gstv4l2src.c b/sys/v4l2/gstv4l2src.c
-index 4cc4cdf..db33d64 100644
+index 97ef231..ddd4c9d 100644
 --- a/sys/v4l2/gstv4l2src.c
 +++ b/sys/v4l2/gstv4l2src.c
 @@ -66,7 +66,7 @@

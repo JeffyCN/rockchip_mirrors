@@ -1,7 +1,7 @@
-From 6770e3ff62e255ceabaf2833ce2644ce214fb65a Mon Sep 17 00:00:00 2001
+From 53a12eef62dc547f08d7f6f73833f56d7abbbf63 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 31 Oct 2019 18:45:19 +0800
-Subject: [PATCH 08/21] video-converter: Support rockchip RGA 2D accel
+Subject: [PATCH 08/22] video-converter: Support rockchip RGA 2D accel
 
 Disabled by default, set env GST_VIDEO_CONVERT_USE_RGA=1 to enable.
 
@@ -238,7 +238,7 @@ index 9b77eab..c49d9a0 100644
    for (i = 0; i < n_planes; i++) {
      if (convert->fconvert[i])
 diff --git a/meson.build b/meson.build
-index d17e416..5a09401 100644
+index 150d6d6..40efebd 100644
 --- a/meson.build
 +++ b/meson.build
 @@ -305,6 +305,9 @@ if get_option('default_library') == 'static'

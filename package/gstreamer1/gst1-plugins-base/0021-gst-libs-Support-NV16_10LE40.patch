@@ -1,7 +1,7 @@
-From 89ee528f47d3bcab836d7588006cefc1a6e8d49d Mon Sep 17 00:00:00 2001
+From fa7c5e0d6994a20423266eaa16ef734ce5a16b49 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Mon, 12 Jun 2023 17:07:55 +0800
-Subject: [PATCH 21/21] gst-libs: Support NV16_10LE40
+Subject: [PATCH 21/22] gst-libs: Support NV16_10LE40
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---
