@@ -10,7 +10,7 @@ choice
 	  Select the version of gcc you wish to use.
 
 config BR2_GCC_VERSION_ARC
-	bool "gcc arc (10.x)"
+	bool "gcc arc (13.1)"
 	# Only supported architecture
 	depends on BR2_arc
 	select BR2_TOOLCHAIN_GCC_AT_LEAST_10
@@ -18,8 +18,6 @@ config BR2_GCC_VERSION_ARC
 config BR2_GCC_VERSION_8_X
 	bool "gcc 8.x"
 	depends on !BR2_ARCH_NEEDS_GCC_AT_LEAST_9
-	# ARC HS48 rel 31 only supported by gcc arc fork.
-	depends on !BR2_archs4x_rel31
 	select BR2_TOOLCHAIN_GCC_AT_LEAST_8
 
 config BR2_GCC_VERSION_10_X
@@ -27,9 +25,7 @@ config BR2_GCC_VERSION_10_X
 	depends on !BR2_ARCH_NEEDS_GCC_AT_LEAST_11
 	# powerpc spe support has been deprecated since gcc 8.x.
 	# https://gcc.gnu.org/ml/gcc/2018-04/msg00102.html
-	depends on !BR2_powerpc_SPE
-	# ARC HS48 rel 31 only supported by gcc arc fork.
-	depends on !BR2_archs4x_rel31
+	depends on BR2_POWERPC_CPU_HAS_SPE
 	select BR2_TOOLCHAIN_GCC_AT_LEAST_10
 
 config BR2_GCC_VERSION_11_X
@@ -37,7 +33,7 @@ config BR2_GCC_VERSION_11_X
 	depends on !BR2_ARCH_NEEDS_GCC_AT_LEAST_12
 	# powerpc spe support has been deprecated since gcc 8.x.
 	# https://gcc.gnu.org/ml/gcc/2018-04/msg00102.html
-	depends on !BR2_powerpc_SPE
+	depends on !BR2_POWERPC_CPU_HAS_SPE
 	# ARC HS48 rel 31 only supported by gcc arc fork.
 	depends on !BR2_archs4x_rel31
 	select BR2_TOOLCHAIN_GCC_AT_LEAST_11
@@ -47,7 +43,7 @@ config BR2_GCC_VERSION_12_X
 	depends on !BR2_ARCH_NEEDS_GCC_AT_LEAST_13
 	# powerpc spe support has been deprecated since gcc 8.x.
 	# https://gcc.gnu.org/ml/gcc/2018-04/msg00102.html
-	depends on !BR2_powerpc_SPE
+	depends on !BR2_POWERPC_CPU_HAS_SPE
 	# ARC HS48 rel 31 only supported by gcc arc fork.
 	depends on !BR2_archs4x_rel31
 	select BR2_TOOLCHAIN_GCC_AT_LEAST_12
@@ -56,9 +52,7 @@ config BR2_GCC_VERSION_13_X
 	bool "gcc 13.x"
 	# powerpc spe support has been deprecated since gcc 8.x.
 	# https://gcc.gnu.org/ml/gcc/2018-04/msg00102.html
-	depends on !BR2_powerpc_SPE
-	# ARC HS48 rel 31 only supported by gcc arc fork.
-	depends on !BR2_archs4x_rel31
+	depends on !BR2_POWERPC_CPU_HAS_SPE
 	select BR2_TOOLCHAIN_GCC_AT_LEAST_13
 
 endchoice
@@ -92,7 +86,7 @@ config BR2_GCC_VERSION
 	default "11.4.0"    if BR2_GCC_VERSION_11_X
 	default "12.3.0"    if BR2_GCC_VERSION_12_X
 	default "13.2.0"    if BR2_GCC_VERSION_13_X
-	default "arc-2020.09-release" if BR2_GCC_VERSION_ARC
+	default "arc-2023.09-release" if BR2_GCC_VERSION_ARC
 
 config BR2_EXTRA_GCC_CONFIG_OPTIONS
 	string "Additional gcc options"
