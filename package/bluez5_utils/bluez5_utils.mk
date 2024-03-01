@@ -198,7 +198,6 @@ endif
 define BLUEZ5_UTILS_INSTALL_INIT_SYSV
 	$(INSTALL) -m 0755 -D package/bluez5_utils/S40bluetoothd \
 		$(TARGET_DIR)/etc/init.d/S40bluetoothd
-	$(INSTALL) -D -m 0755 $(@D)/monitor/btmon $(TARGET_DIR)/usr/bin/btmon
 endef
 
 $(eval $(autotools-package))
