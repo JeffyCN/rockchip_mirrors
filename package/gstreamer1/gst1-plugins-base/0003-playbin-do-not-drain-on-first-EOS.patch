@@ -1,7 +1,7 @@
-From 5b0fb569e6ac83d42c132839fb3c01293be46dce Mon Sep 17 00:00:00 2001
+From 49fab3cd08431a5f0f9a82e54790eda5eef6ba5a Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Cerveau?= <scerveau@collabora.com>
 Date: Mon, 9 Aug 2021 18:02:57 +0200
-Subject: [PATCH 03/21] playbin: do not drain on first EOS
+Subject: [PATCH 03/22] playbin: do not drain on first EOS
 
 In a case of audio/video media, the decodebin
 should wait for each branch to be on EOS before
@@ -22,7 +22,7 @@ of EOS is equal to active pads (active combiners).
  3 files changed, 100 insertions(+)
 
 diff --git a/gst/playback/gstdecodebin2.c b/gst/playback/gstdecodebin2.c
-index 1849714..b84a30d 100644
+index c03db3e..379470a 100644
 --- a/gst/playback/gstdecodebin2.c
 +++ b/gst/playback/gstdecodebin2.c
 @@ -163,6 +163,9 @@ struct _GstDecodeBin
@@ -107,7 +107,7 @@ index 1849714..b84a30d 100644
    if (dbin->decode_chain) {
      drain_and_switch_chains (dbin->decode_chain, pad, &last_group, &drained,
          &switched);
-@@ -5326,6 +5359,10 @@ unblock_pads (GstDecodeBin * dbin)
+@@ -5327,6 +5360,10 @@ unblock_pads (GstDecodeBin * dbin)
      GST_DEBUG_OBJECT (dpad, "unblocked");
      gst_object_unref (dpad);
    }

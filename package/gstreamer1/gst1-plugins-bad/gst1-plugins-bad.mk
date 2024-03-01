@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-GST1_PLUGINS_BAD_VERSION = 1.22.2
+GST1_PLUGINS_BAD_VERSION = 1.22.9
 GST1_PLUGINS_BAD_SOURCE = gst-plugins-bad-$(GST1_PLUGINS_BAD_VERSION).tar.xz
 GST1_PLUGINS_BAD_SITE = https://gstreamer.freedesktop.org/src/gst-plugins-bad
 GST1_PLUGINS_BAD_INSTALL_STAGING = YES
@@ -770,7 +770,7 @@ endif
 
 ifeq ($(BR2_PACKAGE_GST1_PLUGINS_BAD_PLUGIN_WEBRTC),y)
 GST1_PLUGINS_BAD_CONF_OPTS += -Dwebrtc=enabled
-GST1_PLUGINS_BAD_DEPENDENCIES += gst1-plugins-base gst1-plugins-good libnice
+GST1_PLUGINS_BAD_DEPENDENCIES += gst1-plugins-base libnice
 else
 GST1_PLUGINS_BAD_CONF_OPTS += -Dwebrtc=disabled
 endif

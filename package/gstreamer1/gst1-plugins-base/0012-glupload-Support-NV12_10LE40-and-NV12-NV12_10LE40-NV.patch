@@ -1,7 +1,7 @@
-From 89273006c3761065991665344a4c72d42d1d42ce Mon Sep 17 00:00:00 2001
+From d613640b6521956b427d4e715eb9cbe9b203fd31 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 24 May 2022 16:16:33 +0800
-Subject: [PATCH 12/21] glupload: Support NV12_10LE40 and NV12|NV12_10LE40|NV16
+Subject: [PATCH 12/22] glupload: Support NV12_10LE40 and NV12|NV12_10LE40|NV16
  (AFBC)
 
 Tested on RK356x with:
@@ -246,19 +246,19 @@ index 39be33a..a5297f2 100644
    upload->priv->method_impl = NULL;
    upload->priv->method_i = 0;
 diff --git a/gst-libs/gst/gl/meson.build b/gst-libs/gst/gl/meson.build
-index 1080b5d..ee1f646 100644
+index 55e9121..44eb7fa 100644
 --- a/gst-libs/gst/gl/meson.build
 +++ b/gst-libs/gst/gl/meson.build
-@@ -1050,6 +1050,8 @@ if build_gstgl
+@@ -1062,6 +1062,8 @@ if build_gstgl
    # case-insensitive FS would include gst-libs/gl/egl/egl.h as EGL/egl.h.
    common_args += '-I@0@'.format(meson.current_build_dir())
  
 +  libdrm_dep = dependency('libdrm')
 +
    gstgl = library('gstgl-' + api_version,
-     gl_sources, gl_egl_sources, gl_x11_sources, gl_wayland_sources, gl_priv_sources, gl_enumtypes_c, gl_enumtypes_h,
+     gl_sources, gl_egl_sources, gl_x11_sources, gl_wayland_sources, gl_viv_fb_sources, gl_priv_sources, gl_enumtypes_c, gl_enumtypes_h,
      c_args : common_args,
-@@ -1061,7 +1063,8 @@ if build_gstgl
+@@ -1073,7 +1075,8 @@ if build_gstgl
      darwin_versions : osxversion,
      install : true,
      dependencies : [gst_base_dep, video_dep, allocators_dep, gmodule_dep,

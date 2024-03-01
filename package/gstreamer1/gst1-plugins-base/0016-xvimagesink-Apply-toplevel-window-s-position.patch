@@ -1,7 +1,7 @@
-From e581f92267df77c939d64d1aa7ff48cdca0e894a Mon Sep 17 00:00:00 2001
+From bd2e0887b32933ab9ef43302fcd853c96ba11907 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 28 Apr 2023 18:34:49 +0800
-Subject: [PATCH 16/21] xvimagesink: Apply toplevel window's position
+Subject: [PATCH 16/22] xvimagesink: Apply toplevel window's position
 
 Tested on RK3588 evb with:
 gst-launch-1.0 videotestsrc ! xvimagesink render-rectangle='<100,200,300,400>'

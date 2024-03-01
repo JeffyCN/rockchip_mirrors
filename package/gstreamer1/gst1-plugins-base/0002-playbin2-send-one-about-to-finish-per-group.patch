@@ -1,7 +1,7 @@
-From bc11a2252c1fd34c21601c9709f64b7c88aa5d61 Mon Sep 17 00:00:00 2001
+From b2872dd620ba3f59f5edcad574ca0f5f0db3acfd Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?St=C3=A9phane=20Cerveau?= <scerveau@collabora.com>
 Date: Mon, 9 Aug 2021 15:38:08 +0200
-Subject: [PATCH 02/21] playbin2: send one about-to-finish per group
+Subject: [PATCH 02/22] playbin2: send one about-to-finish per group
 
 To avoid multiple about-to-finish signal,
 driving the app to drop uris, a group should

@@ -1,4 +1,4 @@
-From 05487af419a7a744f910bf02385837f877eb626e Mon Sep 17 00:00:00 2001
+From 9dbfd1e5bb49c0a8b9e42f736e5ef983814b8764 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Nov 2019 15:07:44 +0800
 Subject: [PATCH 04/12] v4l2: Support preferred formats
@@ -14,7 +14,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 54 insertions(+)
 
 diff --git a/sys/v4l2/gstv4l2object.c b/sys/v4l2/gstv4l2object.c
-index 83466a8..a382a88 100644
+index 9736cd5..5d5ae4f 100644
 --- a/sys/v4l2/gstv4l2object.c
 +++ b/sys/v4l2/gstv4l2object.c
 @@ -25,6 +25,7 @@
@@ -25,7 +25,7 @@ index 83466a8..a382a88 100644
  #include <string.h>
  #include <sys/mman.h>
  #include <sys/ioctl.h>
-@@ -1143,6 +1144,22 @@ gst_v4l2_object_format_get_rank (const struct v4l2_fmtdesc *fmt)
+@@ -1172,6 +1173,22 @@ gst_v4l2_object_format_get_rank (const struct v4l2_fmtdesc *fmt)
        break;
    }
  
@@ -49,7 +49,7 @@ index 83466a8..a382a88 100644
     * will a) make all non-emulated formats larger
     * than emulated and b) will not overflow
 diff --git a/sys/v4l2/gstv4l2src.c b/sys/v4l2/gstv4l2src.c
-index e33b71e..4cc4cdf 100644
+index 2d1537e..97ef231 100644
 --- a/sys/v4l2/gstv4l2src.c
 +++ b/sys/v4l2/gstv4l2src.c
 @@ -438,6 +438,38 @@ gst_v4l2_src_parse_fixed_struct (GstStructure * s,
@@ -88,21 +88,21 @@ index e33b71e..4cc4cdf 100644
 +  return loss;
 +}
 +
- /* TODO Consider framerate */
  static gint
  gst_v4l2src_fixed_caps_compare (GstCaps * caps_a, GstCaps * caps_b,
-@@ -490,6 +522,11 @@ gst_v4l2src_fixed_caps_compare (GstCaps * caps_a, GstCaps * caps_b,
-   if (bh == pref->height)
-     bd -= 1;
+     struct PreferredCapsInfo *pref)
+@@ -468,6 +500,11 @@ gst_v4l2src_fixed_caps_compare (GstCaps * caps_a, GstCaps * caps_b,
+   a_distance = ABS (aw * ah - pref->width * pref->height);
+   b_distance = ABS (bw * bh - pref->width * pref->height);
  
-+  if (ad == bd) {
-+    ad = gst_v4l2src_get_format_loss (a);
-+    bd = gst_v4l2src_get_format_loss (b);
++  if (a_distance == b_distance) {
++    a_distance = gst_v4l2src_get_format_loss (a);
++    b_distance = gst_v4l2src_get_format_loss (b);
 +  }
 +
-   /* If the choices are equivalent, maintain the order */
-   if (ad == bd)
-     ret = 1;
+   gint ret = a_distance - b_distance;
+ 
+   GST_TRACE ("Placing %" GST_PTR_FORMAT " %s %" GST_PTR_FORMAT,
 -- 
 2.20.1
 

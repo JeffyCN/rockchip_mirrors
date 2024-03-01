@@ -1,7 +1,7 @@
-From c6337ebb8f61f2296f109e14e3c37718b1069862 Mon Sep 17 00:00:00 2001
+From 9238ce79af5b6c9cc75a7802850dd5daf14b61f0 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Mon, 3 Jul 2023 15:26:53 +0800
-Subject: [PATCH 42/44] kmssink: Support HDR
+Subject: [PATCH 42/43] kmssink: Support HDR
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---
@@ -10,7 +10,7 @@ Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
  2 files changed, 195 insertions(+), 18 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 19d7b15..d727782 100644
+index 48cbdf0..f11849b 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -58,6 +58,7 @@

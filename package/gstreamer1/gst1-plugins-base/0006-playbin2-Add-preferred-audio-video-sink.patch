@@ -1,7 +1,7 @@
-From 2d20d6edcca47b7733c5f3f62ce5ff26668db48f Mon Sep 17 00:00:00 2001
+From 2d8f420e2e25a56763c36cb3a061c0d991eb44d0 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 14 Jun 2019 12:02:05 +0800
-Subject: [PATCH 06/21] playbin2: Add preferred audio/video sink
+Subject: [PATCH 06/22] playbin2: Add preferred audio/video sink
 
 Using env "PLAYBIN2_PREFERRED_VIDEOSINK" and
 "PLAYBIN2_PREFERRED_AUDIOSINK".

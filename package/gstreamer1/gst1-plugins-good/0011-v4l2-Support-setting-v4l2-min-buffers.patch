@@ -1,4 +1,4 @@
-From 3a5d453247bc6fc214400196d63d32d093a44713 Mon Sep 17 00:00:00 2001
+From f7c0159e012fad0176f7a3b2297ce5ee0cd3da3d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 23 Jun 2022 16:04:18 +0800
 Subject: [PATCH 11/12] v4l2: Support setting v4l2 min buffers
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 26 insertions(+), 1 deletion(-)
 
 diff --git a/sys/v4l2/gstv4l2object.c b/sys/v4l2/gstv4l2object.c
-index 9a50948..e15fab0 100644
+index abae02e..5940100 100644
 --- a/sys/v4l2/gstv4l2object.c
 +++ b/sys/v4l2/gstv4l2object.c
 @@ -58,6 +58,8 @@ GST_DEBUG_CATEGORY_EXTERN (v4l2_debug);
@@ -50,7 +50,7 @@ index 9a50948..e15fab0 100644
    gst_type_mark_as_plugin_api (GST_TYPE_V4L2_DEVICE_FLAGS, 0);
    gst_type_mark_as_plugin_api (GST_TYPE_V4L2_TV_NORM, 0);
    gst_type_mark_as_plugin_api (GST_TYPE_V4L2_IO_MODE, 0);
-@@ -548,6 +561,8 @@ gst_v4l2_object_new (GstElement * element,
+@@ -551,6 +564,8 @@ gst_v4l2_object_new (GstElement * element,
      v4l2object->munmap = munmap;
    }
  
@@ -59,7 +59,7 @@ index 9a50948..e15fab0 100644
    return v4l2object;
  }
  
-@@ -715,6 +730,9 @@ gst_v4l2_object_set_property_helper (GstV4l2Object * v4l2object,
+@@ -723,6 +738,9 @@ gst_v4l2_object_set_property_helper (GstV4l2Object * v4l2object,
      case PROP_FORCE_ASPECT_RATIO:
        v4l2object->keep_aspect = g_value_get_boolean (value);
        break;
@@ -69,7 +69,7 @@ index 9a50948..e15fab0 100644
      default:
        return FALSE;
        break;
-@@ -812,6 +830,9 @@ gst_v4l2_object_get_property_helper (GstV4l2Object * v4l2object,
+@@ -820,6 +838,9 @@ gst_v4l2_object_get_property_helper (GstV4l2Object * v4l2object,
      case PROP_FORCE_ASPECT_RATIO:
        g_value_set_boolean (value, v4l2object->keep_aspect);
        break;
@@ -79,7 +79,7 @@ index 9a50948..e15fab0 100644
      default:
        return FALSE;
        break;
-@@ -824,6 +845,9 @@ gst_v4l2_get_driver_min_buffers (GstV4l2Object * v4l2object)
+@@ -832,6 +853,9 @@ gst_v4l2_get_driver_min_buffers (GstV4l2Object * v4l2object)
  {
    struct v4l2_control control = { 0, };
  
@@ -90,10 +90,10 @@ index 9a50948..e15fab0 100644
  
    if (V4L2_TYPE_IS_OUTPUT (v4l2object->type))
 diff --git a/sys/v4l2/gstv4l2object.h b/sys/v4l2/gstv4l2object.h
-index 3a5c961..276d58f 100644
+index d95b375..b8751f6 100644
 --- a/sys/v4l2/gstv4l2object.h
 +++ b/sys/v4l2/gstv4l2object.h
-@@ -246,7 +246,8 @@ GType gst_v4l2_object_get_type (void);
+@@ -250,7 +250,8 @@ GType gst_v4l2_object_get_type (void);
      PROP_CAPTURE_IO_MODE,     \
      PROP_EXTRA_CONTROLS,      \
      PROP_PIXEL_ASPECT_RATIO,  \

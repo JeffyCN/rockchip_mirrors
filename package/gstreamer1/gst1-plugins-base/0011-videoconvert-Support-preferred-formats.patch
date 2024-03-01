@@ -1,7 +1,7 @@
-From 736f54d528591c93a0da95cb856bb53a5e454911 Mon Sep 17 00:00:00 2001
+From c8f7f5e66bf7fbb86b9ad490b505ffd8c50eed99 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 17 Sep 2021 13:20:24 +0800
-Subject: [PATCH 11/21] videoconvert: Support preferred formats
+Subject: [PATCH 11/22] videoconvert: Support preferred formats
 
 Set env "GST_VIDEO_CONVERT_PREFERRED_FORMAT" to specify preferred
 formats, for example:
