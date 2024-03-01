@@ -156,6 +156,12 @@ else
 GLIBC_CONF_OPTS += --enable-kernel=$(call qstrip,$(BR2_TOOLCHAIN_HEADERS_AT_LEAST))
 endif
 
+ifeq ($(BR2_TOOLCHAIN_GCC_AT_LEAST_10),y)
+GLIBC_CONF_OPTS += \
+	$(if $(BR2_aarch64)$(BR2_aarch64_be),--enable-mathvec) \
+	--enable-crypt
+endif
+
 # Even though we use the autotools-package infrastructure, we have to
 # override the default configure commands for several reasons:
 #
@@ -202,8 +208,6 @@ define GLIBC_CONFIGURE_CMDS
 		--disable-werror \
 		--without-gd \
 		--with-headers=$(STAGING_DIR)/usr/include \
-		$(if $(BR2_aarch64)$(BR2_aarch64_be),--enable-mathvec) \
-		--enable-crypt \
 		$(GLIBC_CONF_OPTS))
 	$(GLIBC_ADD_MISSING_STUB_H)
 endef
