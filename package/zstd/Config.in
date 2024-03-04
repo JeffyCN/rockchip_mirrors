@@ -10,3 +10,11 @@ config BR2_PACKAGE_ZSTD
 	  compression formats
 
 	  https://facebook.github.io/zstd
+
+if BR2_PACKAGE_ZSTD
+
+config BR2_PACKAGE_ZSTD_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
+endif
