@@ -82,6 +82,12 @@ endif
 
 ifeq ($(BR2_PACKAGE_LIBUNWIND),y)
 PERF_DEPENDENCIES += libunwind
+
+ifeq ($(BR2_aarch64)$(BR2_PACKAGE_LINUX_TOOLS_PERF_STATIC)$(BR2_PACKAGE_XZ),yyy)
+# libunwind-aarch64.a requires symbols from liblzma.a
+PERF_MAKE_FLAGS += LIBUNWIND_LDFLAGS="-lunwind-aarch64 -llzma"
+endif
+
 else
 PERF_MAKE_FLAGS += NO_LIBUNWIND=1
 endif
