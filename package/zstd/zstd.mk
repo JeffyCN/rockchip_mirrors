@@ -39,7 +39,7 @@ endif
 ZSTD_OPTS += MOREFLAGS="$(TARGET_OPTIMIZATION)"
 
 ZSTD_BUILD_LIBS_BASENAMES = libzstd.pc
-ifeq ($(BR2_STATIC_LIBS),y)
+ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_ZSTD_STATIC),)
 ZSTD_BUILD_LIBS_BASENAMES += libzstd.a
 ZSTD_INSTALL_LIBS = install-static
 else ifeq ($(BR2_SHARED_LIBS),y)
@@ -51,7 +51,7 @@ ZSTD_INSTALL_LIBS = install-static install-shared
 endif
 
 # prefer zstd-dll unless no library is available
-ifeq ($(BR2_STATIC_LIBS),y)
+ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_ZSTD_STATIC),)
 ZSTD_BUILD_PROG_TARGET = zstd-release
 else
 ZSTD_BUILD_PROG_TARGET = zstd-dll
