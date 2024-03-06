@@ -84,11 +84,6 @@ SED_STRING_EXP="s/^.*=\"\(.*\)\"/\1/p"
 CFG_LIST=$(diff "$ORIG_DEFCONFIG" "$BASE_DEFCONFIG" | \
 	sed -n -e "$SED_CONFIG_EXP1" -e "$SED_CONFIG_EXP2" | sort | uniq)
 
-if [ -z "$CFG_LIST" ]; then
-	echo "Already up-to-date."
-	exit 0
-fi
-
 for CFG in $CFG_LIST ; do
 	BASE_VAL=$(grep -w $CFG "$BASE_DEFCONFIG" || true)
 	ORIG_NEW_VAL=$(grep -w $CFG "$ORIG_DEFCONFIG" || true)
