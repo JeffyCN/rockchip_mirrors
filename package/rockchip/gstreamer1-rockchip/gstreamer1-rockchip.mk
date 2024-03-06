@@ -1,3 +1,9 @@
+################################################################################
+#
+# gstreamer1-rockchip
+#
+################################################################################
+
 GSTREAMER1_ROCKCHIP_SITE = $(TOPDIR)/../external/gstreamer-rockchip
 GSTREAMER1_ROCKCHIP_VERSION = master
 GSTREAMER1_ROCKCHIP_SITE_METHOD = local
