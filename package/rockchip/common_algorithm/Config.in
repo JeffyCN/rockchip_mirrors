@@ -6,8 +6,9 @@ config BR2_PACKAGE_COMMON_ALGORITHM
 if BR2_PACKAGE_COMMON_ALGORITHM
 
 choice
-	default BR2_PACKAGE_COMMON_ALGORITHM_32
 	prompt "target platform(32bit/64bit)"
+	default BR2_PACKAGE_COMMON_ALGORITHM_64 if BR2_ARCH_IS_64
+	default BR2_PACKAGE_COMMON_ALGORITHM_32 if !BR2_ARCH_IS_64
 
 config BR2_PACKAGE_COMMON_ALGORITHM_32
 	bool "32bit"
@@ -22,7 +23,7 @@ endchoice
 
 config BR2_PACKAGE_COMMON_ALGORITHM_AEC_ANR_AGC
 	bool "RKAP-3A"
-	default y
+	default n
 	help
 	  Echo cancellation algorithm, applied to voice call scenarios
 
@@ -34,7 +35,7 @@ config BR2_PACKAGE_COMMON_ALGORITHM_ANR
 
 config BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS
 	bool "RKAP-PLUS"
-	default n
+	default y
 	help
 	  Audio 3A Algorithm Plus by Rockchip, applied talking scene
 
@@ -55,4 +56,10 @@ config BR2_PACKAGE_COMMON_ALGORITHM_OCCLUSION_DETECT
 	default n
 	help
 	  Occlusion detection algorithm
+
+config BR2_PACKAGE_COMMON_ALGORITHM_ROCKAA
+	bool "RockAA"
+	default n
+	help
+	  Rockchip Audio Algorithm Utils
 endif
