@@ -144,7 +144,9 @@ endif
 GLIBC_MAKE = $(BR2_MAKE)
 GLIBC_CONF_ENV += ac_cv_prog_MAKE="$(BR2_MAKE)"
 
-ifeq ($(BR2_PACKAGE_GLIBC_KERNEL_COMPAT),)
+ifeq ($(BR2_PACKAGE_LINUX_HEADERS_AUTO_VERSION),y)
+GLIBC_CONF_OPTS += --enable-kernel=$(LINUX_HEADERS_VERSION_REAL)
+else
 GLIBC_CONF_OPTS += --enable-kernel=$(call qstrip,$(BR2_TOOLCHAIN_HEADERS_AT_LEAST))
 endif
 

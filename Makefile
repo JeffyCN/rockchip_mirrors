@@ -272,6 +272,9 @@ CONFIG_SHELL := $(SHELL)
 
 export SHELL CONFIG_SHELL Q KBUILD_VERBOSE
 
+CUSTOM_KERNEL := $(CURDIR)/../kernel
+CUSTOM_KERNEL_VERSION := $(shell if [ -f "$(CUSTOM_KERNEL)/Makefile" ]; then grep -A 1 "^VERSION = " "$(CUSTOM_KERNEL)/Makefile" | cut -d' ' -f 3 | paste -sd'.'; fi)
+
 ifndef HOSTAR
 HOSTAR := ar
 endif
@@ -562,11 +565,13 @@ endif
 ifeq ($(BR_FORCE_CHECK_DEPENDENCIES),YES)
 
 define CHECK_ONE_DEPENDENCY
+ifneq ($(2)|$(BR2_LINUX_KERNEL),LINUX|)
 ifeq ($$($(2)_TYPE),target)
 ifneq ($$($$($(2)_KCONFIG_VAR)),y)
 $$(error $$($(2)_NAME) is in the dependency chain of $$($(1)_NAME) that \
 has added it to its _DEPENDENCIES variable without selecting it or \
 depending on it from Config.in)
+endif
 endif
 endif
 endef
@@ -968,7 +973,8 @@ COMMON_CONFIG_ENV = \
 	BR2_CONFIG=$(BR2_CONFIG) \
 	HOST_GCC_VERSION="$(HOSTCC_VERSION)" \
 	BASE_DIR=$(BASE_DIR) \
-	SKIP_LEGACY=
+	SKIP_LEGACY= \
+	CUSTOM_KERNEL_VERSION="$(CUSTOM_KERNEL_VERSION)"
 
 xconfig: $(BUILD_DIR)/buildroot-config/qconf outputmakefile
 	@$(COMMON_CONFIG_ENV) $< $(CONFIG_CONFIG_IN)
