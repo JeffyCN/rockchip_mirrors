@@ -99,7 +99,7 @@ define PKG_MESON_CROSSCONFIG_SED_COMMON
         -e "s%@PKGCONF_HOST_BINARY@%$(HOST_DIR)/bin/pkgconf%g" \
         -e "s%@HOST_DIR@%$(HOST_DIR)%g" \
         -e "s%@STAGING_DIR@%$(STAGING_DIR)%g" \
-        -e "s%@STATIC@%$(if $(BR2_STATIC_LIBS),true,false)%g" \
+        -e "s%@STATIC@%$(if $($(strip $(5))),true,false)%g" \
         $(TOPDIR)/support/misc/cross-compilation.conf.in
 endef
 
@@ -116,7 +116,7 @@ define PKG_MESON_CROSSCONFIG_SED_CUSTOM
         -e "s%@TARGET_CXX@%$($(2))%g" \
         -e "s%@TARGET_AR@%$($(3))%g" \
         -e "s%@TARGET_STRIP@%$($(4))%g" \
-	$(call PKG_MESON_CROSSCONFIG_SED_COMMON,$(5),$(6),$(7),$(8))
+	$(call PKG_MESON_CROSSCONFIG_SED_COMMON,$(5),$(6),$(7),$(8),$(9))
 endef
 
 ################################################################################
@@ -170,6 +170,8 @@ $(2)_CXX ?= $$(TARGET_CXX)
 $(2)_AR ?= $$(TARGET_AR)
 $(2)_STRIP ?= $$(TARGET_STRIP)
 
+$(2)_STATIC ?= $$(BR2_STATIC_LIBS)
+
 # Configure package for target
 #
 #
@@ -178,7 +180,7 @@ define $(2)_CONFIGURE_CMDS
 	mkdir -p $$($$(PKG)_SRCDIR)/build
 	sed -e "/^\[binaries\]$$$$/s:$$$$:$$(foreach x,$$($(2)_MESON_EXTRA_BINARIES),\n$$(x)):" \
 	    -e "/^\[properties\]$$$$/s:$$$$:$$(foreach x,$$($(2)_MESON_EXTRA_PROPERTIES),\n$$(x)):" \
-	    $$(call PKG_MESON_CROSSCONFIG_SED_CUSTOM,$(2)_CC,$(2)_CXX,$(2)_AR,$(2)_STRIP,$(2)_CFLAGS,$(2)_CXXFLAGS,$(2)_LDFLAGS,$(2)_FCFLAGS) \
+	    $$(call PKG_MESON_CROSSCONFIG_SED_CUSTOM,$(2)_CC,$(2)_CXX,$(2)_AR,$(2)_STRIP,$(2)_CFLAGS,$(2)_CXXFLAGS,$(2)_LDFLAGS,$(2)_FCFLAGS,$(2)_STATIC) \
 	    > $$($$(PKG)_SRCDIR)/build/cross-compilation.conf
 	PATH=$$(BR_PATH) \
 	CC_FOR_BUILD="$$(HOSTCC)" \
@@ -187,7 +189,7 @@ define $(2)_CONFIGURE_CMDS
 	$$(MESON) setup \
 		--prefix=/usr \
 		--libdir=lib \
-		--default-library=$(if $(BR2_STATIC_LIBS),static,shared) \
+		--default-library=$(if $($(2)_STATIC),static,$(if $(BR2_SHARED_STATIC_LIBS),both,shared)) \
 		--buildtype=$(if $(BR2_ENABLE_RUNTIME_DEBUG),debug,release) \
 		--cross-file=$$($$(PKG)_SRCDIR)/build/cross-compilation.conf \
 		-Db_pie=false \
