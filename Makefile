@@ -30,11 +30,41 @@ SHELL := $(shell if [ -x "$$BASH" ]; then echo $$BASH; \
 	 else if [ -x /bin/bash ]; then echo /bin/bash; \
 	 else echo sh; fi; fi)
 
+O_LATEST := $(CURDIR)/output/latest
+DEFCONFIG = $(firstword $(filter %_defconfig,$(MAKECMDGOALS)))
+
 # Set O variable if not already done on the command line;
 # or avoid confusing packages that can use the O=<dir> syntax for out-of-tree
 # build by preventing it from being forwarded to sub-make calls.
 ifneq ("$(origin O)", "command line")
-O := $(CURDIR)/output
+ifneq ($(DEFCONFIG),)
+# Set O=output/<board> for defconfig
+O := $(patsubst %_defconfig,$(CURDIR)/output/%,$(DEFCONFIG))
+else
+# Prefer BUILDROOT_OUTPUT_DIR env and latest symlink
+O := $(BUILDROOT_OUTPUT_DIR)
+O := $(if $(O),$(O),$(realpath $(O_LATEST)))
+endif
+# Fallback to $(CURDIR)/output
+O := $(if $(O),$(O),$(CURDIR)/output)
+endif
+
+ifneq ($(BUILDROOT_OUTPUT_DIR),)
+ifneq ($(BUILDROOT_OUTPUT_DIR),$(O))
+$(warning "BUILDROOT_OUTPUT_DIR environment unmatched with output dir!")
+$(warning "BUILDROOT_OUTPUT_DIR: $(BUILDROOT_OUTPUT_DIR)")
+$(warning "Output dir: $(O)")
+$(error "Please unset it: unset BUILDROOT_OUTPUT_DIR")
+endif
+endif
+
+ifneq ($(DEFCONFIG),)
+ifeq ($(patsubst %_recovery_defconfig,,$(DEFCONFIG)),)
+O_LATEST := $(CURDIR)/output/recovery_latest
+endif
+
+$(shell rm -rf $(O_LATEST); mkdir -p $(CURDIR)/output)
+$(shell ln -rsf $(O) $(O_LATEST))
 endif
 
 # Check if the current Buildroot execution meets all the pre-requisites.
