@@ -379,13 +379,6 @@ config BR2_BINUTILS_VERSION_2_38_X
 	help
 	  binutils 2.38 has been removed, use a newer version.
 
-config BR2_GCC_VERSION_10_X
-	bool "gcc 10.x support removed"
-	select BR2_LEGACY
-	help
-	  Support for gcc version 10.x has been removed. The current
-	  default version (12.x or later) has been selected instead.
-
 config BR2_KERNEL_HEADERS_6_3
 	bool "kernel headers version 6.3.x are no longer supported"
 	select BR2_LEGACY
