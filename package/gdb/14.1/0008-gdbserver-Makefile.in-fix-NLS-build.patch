@@ -1,4 +1,4 @@
-From c098500aee945ee7a3021649eb0a2655b004103c Mon Sep 17 00:00:00 2001
+From 49cc0d8a7a930eab1eb8c848101150ca83145334 Mon Sep 17 00:00:00 2001
 From: Fabrice Fontaine <fontaine.fabrice@gmail.com>
 Date: Thu, 18 Nov 2021 22:52:08 +0100
 Subject: [PATCH] gdbserver/Makefile.in: fix NLS build
@@ -21,18 +21,18 @@ https://sourceware.org/pipermail/gdb-patches/2021-November/183580.html]
  1 file changed, 1 insertion(+), 1 deletion(-)
 
 diff --git a/gdbserver/Makefile.in b/gdbserver/Makefile.in
-index 71c3c4ad959..e69fbc4dae4 100644
+index b597515d428..54cc7ccb0f6 100644
 --- a/gdbserver/Makefile.in
 +++ b/gdbserver/Makefile.in
-@@ -383,7 +383,7 @@ $(IPA_LIB): $(sort $(IPA_OBJS)) ${CDEPS}
-	$(SILENCE) rm -f $(IPA_LIB)
+@@ -389,7 +389,7 @@ $(IPA_LIB): $(sort $(IPA_OBJS)) ${CDEPS}
  	$(ECHO_CXXLD) $(CC_LD) -shared -fPIC -Wl,--soname=$(IPA_LIB) \
  		-Wl,--no-undefined $(INTERNAL_CFLAGS) $(INTERNAL_LDFLAGS) \
--		-o $(IPA_LIB) ${IPA_OBJS} -ldl -pthread
-+		-o $(IPA_LIB) ${IPA_OBJS} -ldl -pthread $(INTL)
+ 		 $(CXXFLAGS) \
+-		-o $(IPA_LIB) ${IPA_OBJS} $(LIBIBERTY_FOR_SHLIB) -ldl -pthread
++		-o $(IPA_LIB) ${IPA_OBJS} $(LIBIBERTY_FOR_SHLIB) -ldl -pthread $(INTL)
  
  # Put the proper machine-specific files first, so M-. on a machine
  # specific routine gets the one for the correct machine.
 -- 
-2.33.0
+2.43.0
 
