@@ -4,17 +4,19 @@
 #
 ################################################################################
 
-XSERVER_XORG_SERVER_VERSION = 21.1.11
-XSERVER_XORG_SERVER_SOURCE = xorg-server-$(XSERVER_XORG_SERVER_VERSION).tar.gz
-XSERVER_XORG_SERVER_SITE = https://xorg.freedesktop.org/archive/individual/xserver
+XSERVER_XORG_SERVER_VERSION = 21.1.11_2024_01_31
+XSERVER_XORG_SERVER_SITE = $(call github,JeffyCN,xorg-xserver,$(XSERVER_XORG_SERVER_VERSION))
 XSERVER_XORG_SERVER_LICENSE = MIT
 XSERVER_XORG_SERVER_LICENSE_FILES = COPYING
 XSERVER_XORG_SERVER_CPE_ID_VENDOR = x.org
 XSERVER_XORG_SERVER_CPE_ID_PRODUCT = xorg-server
 XSERVER_XORG_SERVER_SELINUX_MODULES = xdg xserver
 XSERVER_XORG_SERVER_INSTALL_STAGING = YES
+# xfont_font-util is needed only for autoreconf
+XSERVER_XORG_SERVER_AUTORECONF = YES
 
 XSERVER_XORG_SERVER_DEPENDENCIES = \
+	xfont_font-util \
 	xutil_util-macros \
 	xlib_libX11 \
 	xlib_libXau \
@@ -40,6 +42,10 @@ XSERVER_XORG_SERVER_DEPENDENCIES = \
 	pixman \
 	mcookie \
 	host-pkgconf
+
+ifeq ($(BR2_PREFER_ROCKCHIP_RGA),y)
+XSERVER_XORG_SERVER_DEPENDENCIES += rockchip-rga
+endif
 
 # We force -O2 regardless of the optimization level chosen by the
 # user, as the X.org server is known to trigger some compiler bugs at
@@ -147,7 +153,7 @@ XSERVER_XORG_SERVER_CONF_OPTS += --enable-dri2
 ifeq ($(BR2_PACKAGE_XLIB_LIBXSHMFENCE),y)
 XSERVER_XORG_SERVER_DEPENDENCIES += xlib_libxshmfence
 XSERVER_XORG_SERVER_CONF_OPTS += --enable-dri3
-ifeq ($(BR2_PACKAGE_HAS_LIBEGL)$(BR2_PACKAGE_HAS_LIBGL)$(BR2_PACKAGE_LIBEPOXY),yyy)
+ifeq ($(BR2_PACKAGE_HAS_LIBEGL)$(BR2_PACKAGE_LIBEPOXY),yy)
 XSERVER_XORG_SERVER_DEPENDENCIES += libepoxy
 XSERVER_XORG_SERVER_CONF_OPTS += --enable-glamor
 else
@@ -195,5 +201,17 @@ define XSERVER_XORG_SERVER_INSTALL_INIT_SYSV
 		$(TARGET_DIR)/etc/init.d/S40xorg
 endef
 endif
+
+define XSERVER_XORG_SERVER_INSTALL_TARGET_ENV
+        $(INSTALL) -D -m 0644 $(XSERVER_XORG_SERVER_PKGDIR)/x11.sh \
+                $(TARGET_DIR)/etc/profile.d/x11.sh
+endef
+XSERVER_XORG_SERVER_POST_INSTALL_TARGET_HOOKS += XSERVER_XORG_SERVER_INSTALL_TARGET_ENV
+
+define XSERVER_XORG_SERVER_INSTALL_MODESETTING_CONFIG
+       $(INSTALL) -D -m 0644 $(XSERVER_XORG_SERVER_PKGDIR)/20-modesetting.conf \
+               $(TARGET_DIR)/usr/share/X11/xorg.conf.d/20-modesetting.conf
+endef
+XSERVER_XORG_SERVER_POST_INSTALL_TARGET_HOOKS += XSERVER_XORG_SERVER_INSTALL_MODESETTING_CONFIG
 
 $(eval $(autotools-package))
