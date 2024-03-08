@@ -140,6 +140,12 @@ config BR2_PACKAGE_RK3566_RK3568
 	help
 	  Use Rockchip's rk3566/rk3568 SoC.
 
+config BR2_PACKAGE_RK3576
+	bool "rk3576 chip"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP3
+	help
+	  Use Rockchip's rk3576 SoC
+
 config BR2_PACKAGE_RK3588
 	bool "rk3588"
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP3
