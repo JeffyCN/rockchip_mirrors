@@ -1,0 +1,77 @@
+From a7e5f15aa027bc35d74c47d008fac1d533244e1f Mon Sep 17 00:00:00 2001
+From: Daniel Stone <daniels@collabora.com>
+Date: Thu, 23 Nov 2023 16:44:10 +0000
+Subject: [PATCH 03/99] touch-calibrator: Regularise surface/view mapping
+
+Manually mark the surface as mapped exactly once - in the committed
+handler where we have our content, and assert that it's correct when we
+want to use the surface by instantiating a view.
+
+The view handling can be made much more simple by simply using the new
+view helpers.
+
+Signed-off-by: Daniel Stone <daniels@collabora.com>
+(cherry picked from commit a5c5702112a9ccbf6abbbaac6078982f5f84bb2e)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/touch-calibration.c | 22 ++++++++++++----------
+ 1 file changed, 12 insertions(+), 10 deletions(-)
+
+diff --git a/libweston/touch-calibration.c b/libweston/touch-calibration.c
+index 45689ddd85..f4c9366a07 100644
+--- a/libweston/touch-calibration.c
++++ b/libweston/touch-calibration.c
+@@ -189,6 +189,7 @@ map_calibrator(struct weston_touch_calibrator *calibrator)
+ 	assert(calibrator->output);
+ 	assert(calibrator->surface);
+ 	assert(calibrator->surface->resource);
++	assert(weston_surface_is_mapped(calibrator->surface));
+ 
+ 	calibrator->view = weston_view_create(calibrator->surface);
+ 	if (!calibrator->view) {
+@@ -196,17 +197,9 @@ map_calibrator(struct weston_touch_calibrator *calibrator)
+ 		return;
+ 	}
+ 
+-	weston_layer_entry_insert(&c->calibrator_layer.view_list,
+-				  &calibrator->view->layer_link);
+-
+ 	weston_view_set_position(calibrator->view, calibrator->output->pos);
+-	calibrator->view->output = calibrator->surface->output;
+-	calibrator->view->is_mapped = true;
+-
+-	calibrator->surface->output = calibrator->output;
+-	weston_surface_map(calibrator->surface);
+-
+-	weston_output_schedule_repaint(calibrator->output);
++	weston_view_move_to_layer(calibrator->view,
++				  &c->calibrator_layer.view_list);
+ 
+ 	device->ops->get_calibration(device, &device->saved_calibration);
+ 	device->ops->set_calibration(device, &identity);
+@@ -260,6 +253,13 @@ touch_calibrator_surface_committed(struct wl_listener *listener, void *data)
+ 	wl_list_remove(&calibrator->surface_commit_listener.link);
+ 	wl_list_init(&calibrator->surface_commit_listener.link);
+ 
++	if (!weston_surface_has_content(surface)) {
++		wl_resource_post_error(calibrator->resource,
++				       WESTON_TOUCH_CALIBRATOR_ERROR_BAD_SIZE,
++				       "calibrator surface size has no content");
++		return;
++	}
++
+ 	if (surface->width != calibrator->output->width ||
+ 	    surface->height != calibrator->output->height) {
+ 		wl_resource_post_error(calibrator->resource,
+@@ -268,6 +268,8 @@ touch_calibrator_surface_committed(struct wl_listener *listener, void *data)
+ 		return;
+ 	}
+ 
++	weston_surface_map(surface);
++
+ 	weston_compositor_set_touch_mode_calib(calibrator->compositor);
+ 	/* results in call to touch_calibrator_mode_changed() */
+ }
+-- 
+2.20.1
+

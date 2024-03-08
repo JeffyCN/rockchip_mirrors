@@ -18,8 +18,7 @@ config BR2_PACKAGE_WESTON
 	select BR2_PACKAGE_JPEG
 	select BR2_PACKAGE_LIBINPUT
 	select BR2_PACKAGE_LIBDRM
-	select BR2_PACKAGE_SEATD
-	select BR2_PACKAGE_SEATD_DAEMON if !BR2_PACKAGE_SYSTEMD_LOGIND
+	select BR2_PACKAGE_SEATD_DAEMON if BR2_PACKAGE_SEATD
 	# Runtime dependency
 	select BR2_PACKAGE_XKEYBOARD_CONFIG
 	select BR2_PACKAGE_WESTON_SHELL_DESKTOP if !BR2_PACKAGE_WESTON_HAS_SHELL
@@ -77,6 +76,14 @@ config BR2_PACKAGE_WESTON_DEFAULT_COMPOSITOR
 
 config BR2_PACKAGE_WESTON_DRM
 	bool "DRM compositor"
+
+config BR2_PACKAGE_WESTON_VNC
+	bool "VNC compositor"
+	select BR2_PACKAGE_NEATVNC
+
+config BR2_PACKAGE_WESTON_PIPEWIRE
+	bool "Pipewire compositor"
+	select BR2_PACKAGE_PIPEWIRE
 
 # FreeRDP needs threads and !static, already the case for weston
 config BR2_PACKAGE_WESTON_RDP
@@ -218,5 +225,9 @@ comment "demo clients needs an OpenGL ES provider, an OpenEGL-capable Wayland ba
 	depends on !BR2_INSTALL_LIBSTDCPP || !BR2_TOOLCHAIN_HAS_THREADS || \
 		!BR2_USE_WCHAR || !BR2_PACKAGE_HAS_LIBGLES || \
 		!BR2_PACKAGE_HAS_LIBEGL_WAYLAND || !BR2_TOOLCHAIN_GCC_AT_LEAST_4_9
+
+config BR2_PACKAGE_WESTON_DEFAULT_PIXMAN
+	bool "Use pixman-renderer by default"
+	default y if BR2_PACKAGE_MESA3D_OPENGL_EGL || !BR2_PACKAGE_HAS_LIBEGL
 
 endif

@@ -1,0 +1,44 @@
+From 2ac2a7d3f095033a20d93556492e5351023e4b89 Mon Sep 17 00:00:00 2001
+From: Arnaud Vrac <avrac@freebox.fr>
+Date: Wed, 22 Nov 2023 19:53:56 +0100
+Subject: [PATCH 01/99] clients/desktop-shell: fix crash on init when panel is
+ disabled
+
+The same output might be inited twice on init when the shell panel is disabled,
+depending on the order the weston_desktop_shell and wl_output globals are
+advertised. This triggers a protocol error as only one background can be created
+per output.
+
+Since initializing the output requires the weston_desktop_shell global (to
+create the background and panel on this output), the output init call is done
+conditionally in two places: in the global registry handler (to handle output
+hotplug) and after the initial wl_display_roundtrip call to handle the case
+where the weston_desktop_shell global was notified after the outputs.
+
+We now check the output has already been initialized correctly by checking if
+the background has been created, instead of the panel which is not always
+created.
+
+Signed-off-by: Arnaud Vrac <avrac@freebox.fr>
+(cherry picked from commit 59207a7c7ce9133cf4ae87399fd5ae51947aded7)
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ clients/desktop-shell.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
+index 117d1115ab..1937962638 100644
+--- a/clients/desktop-shell.c
++++ b/clients/desktop-shell.c
+@@ -1586,7 +1586,7 @@ int main(int argc, char *argv[])
+ 	if (desktop.want_panel)
+ 		weston_desktop_shell_set_panel_position(desktop.shell, desktop.panel_position);
+ 	wl_list_for_each(output, &desktop.outputs, link)
+-		if (!output->panel)
++		if (!output->background)
+ 			output_init(output, &desktop);
+ 
+ 	grab_surface_create(&desktop);
+-- 
+2.20.1
+

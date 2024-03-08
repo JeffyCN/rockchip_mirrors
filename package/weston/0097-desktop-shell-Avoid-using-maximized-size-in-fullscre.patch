@@ -1,0 +1,36 @@
+From c27340d4c14279fbe1c3541e8cf2daade6dca7fa Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 2 Feb 2024 11:24:18 +0800
+Subject: [PATCH 97/98] desktop-shell: Avoid using maximized size in fullscreen
+ state
+
+The fullscreen should take precedence if the client requests both
+window states at the same time.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ desktop-shell/shell.c | 7 +++----
+ 1 file changed, 3 insertions(+), 4 deletions(-)
+
+diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
+index 70057b37b7..b6d3b273df 100644
+--- a/desktop-shell/shell.c
++++ b/desktop-shell/shell.c
+@@ -278,11 +278,10 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,
+ 			width = shsurf->output->width;
+ 			height = shsurf->output->height;
+ 		}
+-	}
+-
+-	/* take the panels into considerations */
+-	if (max_requested)
++	} else if (max_requested) {
++		/* take the panels into considerations */
+ 		get_maximized_size(shsurf, &width, &height);
++	}
+ 
+ 	/* (0, 0) means we're back from one of the maximized/fullcreen states */
+ 	weston_desktop_surface_set_size(shsurf->desktop_surface, width, height);
+-- 
+2.20.1
+
