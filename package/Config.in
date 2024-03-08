@@ -351,6 +351,7 @@ comment "Graphic applications"
 	source "package/swaybg/Config.in"
 	source "package/tesseract-ocr/Config.in"
 	source "package/tinifier/Config.in"
+	source "package/vkmark/Config.in"
 
 comment "Graphic libraries"
 	source "package/aml/Config.in"
