@@ -12,6 +12,10 @@ LIBUNWIND_LICENSE = MIT
 LIBUNWIND_CPE_ID_VALID = YES
 LIBUNWIND_AUTORECONF = YES
 
+ifeq ($(BR2_PACKAGE_XZ),y)
+LIBUNWIND_DEPENDENCIES += xz
+endif
+
 LIBUNWIND_CONF_OPTS = \
 	--disable-tests \
 	$(if $(BR2_INSTALL_LIBSTDCPP),--enable-cxx-exceptions,--disable-cxx-exceptions)
