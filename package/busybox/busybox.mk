@@ -76,11 +76,13 @@ BUSYBOX_DEPENDENCIES = \
 # Link against libtirpc if available so that we can leverage its RPC
 # support for NFS mounting with BusyBox
 ifeq ($(BR2_PACKAGE_LIBTIRPC),y)
+ifeq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_BUSYBOX_STATIC),)
 BUSYBOX_DEPENDENCIES += libtirpc host-pkgconf
 BUSYBOX_CFLAGS += "`$(PKG_CONFIG_HOST_BINARY) --cflags libtirpc`"
 # Don't use LDFLAGS for -ltirpc, because LDFLAGS is used for
 # the non-final link of modules as well.
 BUSYBOX_CFLAGS_busybox += "`$(PKG_CONFIG_HOST_BINARY) --libs libtirpc`"
+endif
 endif
 
 # Allows the build system to tweak CFLAGS
@@ -201,7 +203,7 @@ endef
 endif
 
 # If we're using static libs do the same for busybox
-ifeq ($(BR2_STATIC_LIBS),y)
+ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_BUSYBOX_STATIC),)
 define BUSYBOX_PREFER_STATIC
 	$(call KCONFIG_ENABLE_OPT,CONFIG_STATIC)
 endef
