@@ -1,0 +1,7 @@
+config BR2_PACKAGE_RKPARTYBOX
+	bool "RKPARTYBOX demo"
+	depends on BR2_aarch64
+	depends on BR2_PACKAGE_HAS_UDEV
+	depends on BR2_PACKAGE_RKWIFIBT_APP
+	help
+	  rkpartybox demo
