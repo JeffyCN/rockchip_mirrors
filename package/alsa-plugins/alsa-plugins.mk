@@ -14,14 +14,39 @@ ALSA_PLUGINS_DEPENDENCIES = host-pkgconf alsa-lib
 ALSA_PLUGINS_CONF_OPTS = \
 	--disable-jack \
 	--disable-usbstream \
-	--disable-pulseaudio \
-	--disable-libav \
 	--disable-maemo-plugin \
-	--disable-maemo-resource-manager \
-	--with-speex=no
+	--disable-maemo-resource-manager
 
 ifeq ($(BR2_PACKAGE_ALSA_UTILS),y)
 ALSA_PLUGINS_DEPENDENCIES += alsa-utils
+endif
+
+ifeq ($(BR2_PACKAGE_FFMPEG),y)
+ALSA_PLUGINS_DEPENDENCIES += ffmpeg
+ALSA_PLUGINS_CONF_OPTS += --enable-libav
+else
+ALSA_PLUGINS_CONF_OPTS += --disable-libav
+endif
+
+ifeq ($(BR2_PACKAGE_PULSEAUDIO),y)
+ALSA_PLUGINS_DEPENDENCIES += pulseaudio
+ALSA_PLUGINS_CONF_OPTS += --enable-pulseaudio
+
+define ALSA_PLUGINS_DEFAULT_PULSEAUDIO
+	cd $(TARGET_DIR)/etc/alsa/conf.d && \
+		mv 99-pulseaudio-default.conf.example 99-pulseaudio-default.conf
+endef
+ALSA_PLUGINS_POST_INSTALL_TARGET_HOOKS += ALSA_PLUGINS_DEFAULT_PULSEAUDIO
+
+else
+ALSA_PLUGINS_CONF_OPTS += --disable-pulseaudio
+endif
+
+ifeq ($(BR2_PACKAGE_SPEEX),y)
+ALSA_PLUGINS_DEPENDENCIES += speex
+ALSA_PLUGINS_CONF_OPTS += --with-speex=lib
+else
+ALSA_PLUGINS_CONF_OPTS += --with-speex=builtin
 endif
 
 ifeq ($(BR2_PACKAGE_LIBSAMPLERATE),y)
