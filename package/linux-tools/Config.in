@@ -96,6 +96,15 @@ config BR2_PACKAGE_LINUX_TOOLS_PERF
 
 if BR2_PACKAGE_LINUX_TOOLS_PERF
 
+config BR2_PACKAGE_LINUX_TOOLS_PERF_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+	depends on BR2_PACKAGE_BZIP2
+	depends on BR2_PACKAGE_ELFUTILS
+	depends on BR2_PACKAGE_LIBUNWIND_STATIC
+	depends on BR2_PACKAGE_XZ_STATIC
+	depends on BR2_PACKAGE_ZLIB
+
 config BR2_PACKAGE_LINUX_TOOLS_PERF_SCRIPTS
 	bool "enable installation of perf scripts"
 	help
