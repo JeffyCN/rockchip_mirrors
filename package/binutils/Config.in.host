@@ -8,6 +8,9 @@ config BR2_PACKAGE_HOST_BINUTILS_SUPPORTS_CFI
 config BR2_PACKAGE_BINUTILS_HAS_NO_LIBSFRAME
 	bool
 
+config BR2_PACKAGE_BINUTILS_ENABLE_GOLD
+	bool "enable gold linker"
+
 choice
 	prompt "Binutils Version"
 	default BR2_BINUTILS_VERSION_2_40_X if !BR2_arc

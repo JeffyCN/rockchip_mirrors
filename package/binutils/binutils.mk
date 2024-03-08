@@ -57,6 +57,10 @@ BINUTILS_CONF_OPTS = \
 	$(BINUTILS_EXTRA_CONFIG_OPTIONS) \
 	--without-zstd
 
+ifeq ($(BR2_PACKAGE_BINUTILS_ENABLE_GOLD),y)
+BINUTILS_CONF_OPTS += --enable-gold
+endif
+
 ifeq ($(BR2_STATIC_LIBS),y)
 BINUTILS_CONF_OPTS += --disable-plugins
 endif
@@ -99,6 +103,10 @@ HOST_BINUTILS_DEPENDENCIES += host-bison
 HOST_BINUTILS_CONF_OPTS += --enable-gprofng
 else
 HOST_BINUTILS_CONF_OPTS += --disable-gprofng
+endif
+
+ifeq ($(BR2_PACKAGE_BINUTILS_ENABLE_GOLD),y)
+HOST_BINUTILS_CONF_OPTS += --enable-gold
 endif
 
 # binutils run configure script of subdirs at make time, so ensure
