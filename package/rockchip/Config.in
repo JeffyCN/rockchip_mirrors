@@ -22,16 +22,54 @@ choice
 	default BR2_PACKAGE_RK3588
 	prompt "Rockchip SoC"
 
+config BR2_PACKAGE_RV1126_RV1109
+	bool "rv1126/rv1109"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP2
+	help
+	  Use Rockchip's rv1126/rv1109 SoC.
+
+config BR2_PACKAGE_RK1806
+	bool "rk1806"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
+	help
+	  Use Rockchip's rk1806 SoC.
+
+config BR2_PACKAGE_RK1808
+	bool "rk1808"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
+	help
+	  Use Rockchip's rk1808 SoC.
+
+config BR2_PACKAGE_RK3032
+	bool "rk3032"
+	help
+	  Use Rockchip's rk3032 SoC.
+
 config BR2_PACKAGE_RK3036
 	bool "rk3036"
 	help
 	  Use Rockchip's rk3036 SoC.
+
+config BR2_PACKAGE_PX3SE
+	bool "px3se"
+	help
+	  Use Rockchip's px3se SoC.
 
 config BR2_PACKAGE_RK312X
 	bool "rk312X"
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
 	help
 	  Use Rockchip's rk312X SoC.
+
+config BR2_PACKAGE_RK3128H
+	bool "rk3128H"
+	help
+	  Use Rockchip's rk3128H box SoC.
+
+config BR2_PACKAGE_RK3229
+	bool "rk3229"
+	help
+	  Use Rockchip's rk3229 SoC.
 
 config BR2_PACKAGE_RK3288
 	bool "rk3288"
@@ -78,6 +116,12 @@ config BR2_PACKAGE_RK3399PRO
 	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
 	help
 	  Use Rockchip's rk3399pro SoC.
+
+config BR2_PACKAGE_RK3399PRO_NPU
+	bool "rk3399pro npu"
+	select BR2_PACKAGE_ROCKCHIP_HAS_ISP1
+	help
+	  Use Rockchip's rk3399pro npu SoC.
 
 config BR2_PACKAGE_RK3528
 	bool "rk3528"
