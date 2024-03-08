@@ -1,7 +1,7 @@
-From d5755744c3e2b70e9f04704ae9d18b928d9fa456 Mon Sep 17 00:00:00 2001
+From 87b115508630adc7f962e4b2d26699b83c128ebf Mon Sep 17 00:00:00 2001
 From: Arun Raghavan <arun@asymptotic.io>
 Date: Wed, 2 Dec 2020 18:31:44 -0500
-Subject: [PATCH] webrtcdsp: Update code for webrtc-audio-processing-1
+Subject: [PATCH 01/43] webrtcdsp: Update code for webrtc-audio-processing-1
 
 Updated API usage appropriately, and now we have a versioned package to
 track breaking vs. non-breaking updates.
@@ -20,14 +20,14 @@ Part-of: <https://gitlab.freedesktop.org/gstreamer/gstreamer/-/merge_requests/29
 Signed-off-by: James Hilliard <james.hilliard1@gmail.com>
 Upstream: https://gitlab.freedesktop.org/gstreamer/gstreamer/-/commit/d5755744c3e2b70e9f04704ae9d18b928d9fa456
 ---
- .../ext/webrtcdsp/gstwebrtcdsp.cpp            | 271 +++++++-----------
- .../ext/webrtcdsp/gstwebrtcechoprobe.cpp      |  87 +++---
- .../ext/webrtcdsp/gstwebrtcechoprobe.h        |   9 +-
- .../gst-plugins-bad/ext/webrtcdsp/meson.build |   4 +-
+ ext/webrtcdsp/gstwebrtcdsp.cpp       | 271 ++++++++++-----------------
+ ext/webrtcdsp/gstwebrtcechoprobe.cpp |  87 +++++----
+ ext/webrtcdsp/gstwebrtcechoprobe.h   |   9 +-
+ ext/webrtcdsp/meson.build            |   4 +-
  4 files changed, 164 insertions(+), 207 deletions(-)
 
 diff --git a/ext/webrtcdsp/gstwebrtcdsp.cpp b/ext/webrtcdsp/gstwebrtcdsp.cpp
-index 7ee09488fb..c9a7cdae2f 100644
+index 7ee0948..c9a7cda 100644
 --- a/ext/webrtcdsp/gstwebrtcdsp.cpp
 +++ b/ext/webrtcdsp/gstwebrtcdsp.cpp
 @@ -71,9 +71,7 @@
@@ -664,7 +664,7 @@ index 7ee09488fb..c9a7cdae2f 100644
    gst_type_mark_as_plugin_api (GST_TYPE_WEBRTC_GAIN_CONTROL_MODE, (GstPluginAPIFlags) 0);
    gst_type_mark_as_plugin_api (GST_TYPE_WEBRTC_NOISE_SUPPRESSION_LEVEL, (GstPluginAPIFlags) 0);
 diff --git a/ext/webrtcdsp/gstwebrtcechoprobe.cpp b/ext/webrtcdsp/gstwebrtcechoprobe.cpp
-index acdb3d8a7d..8e8ca064c4 100644
+index acdb3d8..8e8ca06 100644
 --- a/ext/webrtcdsp/gstwebrtcechoprobe.cpp
 +++ b/ext/webrtcdsp/gstwebrtcechoprobe.cpp
 @@ -33,7 +33,8 @@
@@ -823,7 +823,7 @@ index acdb3d8a7d..8e8ca064c4 100644
  
    return delay;
 diff --git a/ext/webrtcdsp/gstwebrtcechoprobe.h b/ext/webrtcdsp/gstwebrtcechoprobe.h
-index 36fd34f179..488c0e958f 100644
+index 36fd34f..488c0e9 100644
 --- a/ext/webrtcdsp/gstwebrtcechoprobe.h
 +++ b/ext/webrtcdsp/gstwebrtcechoprobe.h
 @@ -45,6 +45,12 @@ G_BEGIN_DECLS
@@ -857,7 +857,7 @@ index 36fd34f179..488c0e958f 100644
  G_END_DECLS
  #endif /* __GST_WEBRTC_ECHO_PROBE_H__ */
 diff --git a/ext/webrtcdsp/meson.build b/ext/webrtcdsp/meson.build
-index 5aeae69a44..09565e27c7 100644
+index 5aeae69..09565e2 100644
 --- a/ext/webrtcdsp/meson.build
 +++ b/ext/webrtcdsp/meson.build
 @@ -4,7 +4,7 @@ webrtc_sources = [
@@ -879,5 +879,5 @@ index 5aeae69a44..09565e27c7 100644
    plugins += [gstwebrtcdsp]
  endif
 -- 
-2.34.1
+2.20.1
 
