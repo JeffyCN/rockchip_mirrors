@@ -7,7 +7,6 @@ fi
 
 choose_board()
 {
-	echo
 	echo "Pick a board:"
 	echo ""
 
@@ -132,7 +131,8 @@ main()
 	SCRIPTS_DIR="$(dirname "$(realpath "$BASH_SOURCE")")"
 	BUILDROOT_DIR="$(dirname "$SCRIPTS_DIR")"
 	TOP_DIR="$(dirname "$BUILDROOT_DIR")"
-	echo "Top of tree: $TOP_DIR"
+
+	echo -e "\n############### Rockchip Buildroot SDK ###############\n"
 
 	RK_BOARD_ARRAY=(
 		$(cd "$BUILDROOT_DIR/configs/"; ls rockchip_* | \
@@ -144,12 +144,12 @@ main()
 		0)
 			# Try existing output without defconfig
 			BOARD="$(echo "$1" | \
-				sed "s#^\(output/\|\)rockchip_\([^/]*\).*#\2#")"
+				sed "s~^\(output/\|\)rockchip_\([^/]*\).*~\2~")"
 			RK_BOARD="${BOARD:+rockchip_$BOARD}"
 			CONFIG="$BUILDROOT_DIR/output/$RK_BOARD/.config"
 			if [ ! -f "$CONFIG" ]; then
 				unset RK_BOARD
-				echo "No available configs${1:+" for: $1"}"
+				echo "No available Rockchip configs${1:+" for: $1"}"
 				return
 			fi
 			;;

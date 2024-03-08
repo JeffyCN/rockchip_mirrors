@@ -1,1 +1,1 @@
-build/envsetup.sh
+scripts/envsetup.sh
