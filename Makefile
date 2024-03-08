@@ -1066,10 +1066,14 @@ defconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
 		), \
 		$(error "Can't find $@") \
 	); \
+	$(TOPDIR)/scripts/parse_defconfig.sh $${defconfig} \
+		$(BASE_DIR)/.config.in; \
 	$(COMMON_CONFIG_ENV) BR2_DEFCONFIG=$${defconfig} \
-		$< --defconfig=$${defconfig} $(CONFIG_CONFIG_IN)
+		$< --defconfig=$(BASE_DIR)/.config.in $(CONFIG_CONFIG_IN)
 
-update-defconfig: savedefconfig
+update-defconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
+	$(TOPDIR)/scripts/update_defconfig.sh \
+		$(if $(DEFCONFIG),$(DEFCONFIG),$(CONFIG_DIR)/defconfig)
 
 savedefconfig: $(BUILD_DIR)/buildroot-config/conf outputmakefile
 	@$(COMMON_CONFIG_ENV) $< \
@@ -1183,7 +1187,7 @@ help:
 	@echo '  defconfig              - New config with default answer to all options;'
 	@echo '                             BR2_DEFCONFIG, if set on the command line, is used as input'
 	@echo '  savedefconfig          - Save current config to BR2_DEFCONFIG (minimal config)'
-	@echo '  update-defconfig       - Same as savedefconfig'
+	@echo '  update-defconfig       - Same as savedefconfig, but with fragments'
 	@echo '  allyesconfig           - New config where all options are accepted with yes'
 	@echo '  allnoconfig            - New config where all options are answered with no'
 	@echo '  alldefconfig           - New config where all options are set to default'
