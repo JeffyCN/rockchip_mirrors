@@ -43,7 +43,7 @@ endif
 
 # numa support requires libdl, so explicitly disable it when
 # BR2_STATIC_LIBS=y
-ifeq ($(BR2_STATIC_LIBS),y)
+ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_PROCPS_NG_STATIC),)
 PROCPS_NG_CONF_OPTS += --disable-numa
 endif
 
@@ -52,6 +52,12 @@ ifeq ($(BR2_TOOLCHAIN_USES_MUSL),y)
 PROCPS_NG_CONF_OPTS += --disable-w
 else
 PROCPS_NG_CONF_OPTS += --enable-w
+endif
+
+ifeq ($(BR2_PACKAGE_PROCPS_NG_STATIC),y)
+PROCPS_NG_CONF_OPTS += --enable-static
+PROCPS_NG_CONF_ENV += CFLAGS="$(TARGET_CFLAGS) -static"
+PROCPS_NG_CONF_ENV += LDFLAGS="$(TARGET_LDFLAGS) -static"
 endif
 
 # Avoid installing S02sysctl, since openrc provides /etc/init.d/sysctl.
