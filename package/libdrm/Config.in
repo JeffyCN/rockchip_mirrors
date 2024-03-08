@@ -9,6 +9,10 @@ menuconfig BR2_PACKAGE_LIBDRM
 
 if BR2_PACKAGE_LIBDRM
 
+config BR2_PACKAGE_LIBDRM_STATIC
+	bool "static linking (debug only)"
+	default y if BR2_STATIC_LIBS
+
 config BR2_PACKAGE_LIBDRM_HAS_ATOMIC
 	bool
 	default y if BR2_PACKAGE_LIBATOMIC_OPS_ARCH_SUPPORTS || \

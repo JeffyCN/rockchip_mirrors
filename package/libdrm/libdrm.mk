@@ -114,4 +114,12 @@ LIBDRM_DEPENDENCIES += cunit
 endif
 endif
 
+ifeq ($(BR2_PACKAGE_LIBDRM_STATIC),y)
+LIBDRM_CONF_OPTS += --default-library=static
+LIBDRM_CFLAGS += -static
+LIBDRM_CXXFLAGS += -static
+LIBDRM_FCFLAGS += -static
+LIBDRM_LDFLAGS += -static
+endif
+
 $(eval $(meson-package))
