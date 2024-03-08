@@ -193,7 +193,7 @@ LIBCURL_CONF_OPTS += \
 endif
 
 ifeq ($(BR2_PACKAGE_LIBCURL_STATIC),y)
-LIBCURL_CONF_OPTS += --enable-static
+LIBCURL_CONF_OPTS += --enable-static --without-libidn2
 endif
 
 define LIBCURL_FIX_DOT_PC
