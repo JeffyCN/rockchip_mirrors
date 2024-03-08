@@ -50,11 +50,6 @@ config BR2_PACKAGE_RK3036
 	help
 	  Use Rockchip's rk3036 SoC.
 
-config BR2_PACKAGE_RK3036_ECHO
-	bool "rk3036G"
-	help
-	  Use Rockchip's rk3036G SoC.
-
 config BR2_PACKAGE_PX3SE
 	bool "px3se"
 	help

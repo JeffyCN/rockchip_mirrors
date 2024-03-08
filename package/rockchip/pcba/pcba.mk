@@ -4,10 +4,6 @@
 PCBA_SITE = $(TOPDIR)/../external/rk_pcba_test
 PCBA_SITE_METHOD = local
 
-ifeq ($(BR2_PACKAGE_RK3036_ECHO),y)
-PCBA_CONF_OPTS = -DPCBA_3036=ON
-endif
-
 ifeq ($(BR2_PACKAGE_PX3SE),y)
 ifeq ($(BR2_PACKAGE_PCBA_SCREEN),y)
 PCBA_CONF_OPTS = -DPCBA_WITH_UI=ON
