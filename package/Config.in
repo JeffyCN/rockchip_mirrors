@@ -305,6 +305,11 @@ menu "Games"
 	source "package/supertux/Config.in"
 	source "package/supertuxkart/Config.in"
 	source "package/xorcurses/Config.in"
+
+menu "Libretro cores and retroarch"
+	source "package/retroarch/Config.in"
+endmenu
+
 endmenu
 
 menu "Graphic libraries and applications (graphic/text)"
