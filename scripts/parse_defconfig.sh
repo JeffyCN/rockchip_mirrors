@@ -7,13 +7,17 @@ set -e
 
 parse_includes()
 {
-	sed -n "/^#include /s/.*\"\(.*\)\"/configs\/rockchip\/\1/p" $@
+	sed -n "/^#include /s/.*\"\(.*\)\"/\1/p" $@
 }
 
 extract_config()
 {
 	for config in $(parse_includes $@); do
-		extract_config $config
+		CONFIG="configs/$config"
+		if [ ! -r "$BUILDROOT_DIR/$CONFIG" ]; then
+			CONFIG="configs/rockchip/$config"
+		fi
+		extract_config $CONFIG
 	done
 	echo "$1"
 }
