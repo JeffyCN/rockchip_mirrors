@@ -1,4 +1,4 @@
-From 90ebe548922538b854de52e8b687384f44360984 Mon Sep 17 00:00:00 2001
+From e1eef0a642f7aa8aa6071b99b7c0119c436dec11 Mon Sep 17 00:00:00 2001
 From: Romain Naour <romain.naour@gmail.com>
 Date: Fri, 22 Jun 2018 22:40:26 +0200
 Subject: [PATCH] gdbserver: fix build for m68k
@@ -32,7 +32,7 @@ Signed-off-by: Romain Naour <romain.naour@gmail.com>
  1 file changed, 5 insertions(+), 4 deletions(-)
 
 diff --git a/gdbserver/linux-m68k-low.cc b/gdbserver/linux-m68k-low.cc
-index 838ba353b0b..36679682b9a 100644
+index 6094fd914f5..3613d9f642a 100644
 --- a/gdbserver/linux-m68k-low.cc
 +++ b/gdbserver/linux-m68k-low.cc
 @@ -17,6 +17,11 @@
@@ -59,5 +59,5 @@ index 838ba353b0b..36679682b9a 100644
  #define m68k_num_gregs 18
  
 -- 
-2.29.2
+2.41.0
 
