@@ -205,6 +205,14 @@ endef
 define PULSEAUDIO_INSTALL_INIT_SYSV
 	$(INSTALL) -D -m 755 package/pulseaudio/S50pulseaudio \
 		$(TARGET_DIR)/etc/init.d/S50pulseaudio
+	$(INSTALL) -D -m 755 package/pulseaudio/pulse.sh \
+		$(TARGET_DIR)/etc/profile.d/pulse.sh
+	$(INSTALL) -D -m 755 package/pulseaudio/default.pa \
+		$(TARGET_DIR)/etc/pulse/default.pa
+	$(INSTALL) -D -m 755 package/pulseaudio/daemon.conf \
+		$(TARGET_DIR)/etc/pulse/daemon.conf
+	$(INSTALL) -D -m 755 package/pulseaudio/client.conf \
+		$(TARGET_DIR)/etc/pulse/client.conf
 endef
 
 define PULSEAUDIO_INSTALL_INIT_SYSTEMD
