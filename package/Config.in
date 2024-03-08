@@ -2379,6 +2379,7 @@ endif
 	source "package/cannelloni/Config.in"
 	source "package/casync/Config.in"
 	source "package/cfm/Config.in"
+	source "package/chromium-wayland/Config.in"
 	source "package/chrony/Config.in"
 	source "package/civetweb/Config.in"
 	source "package/connman/Config.in"
