@@ -1,0 +1,51 @@
+menuconfig BR2_PACKAGE_LVGL
+	bool "LVGL"
+	select BR2_PACKAGE_FREETYPE
+	default n
+	help
+	  Light and Versatile Graphics Library
+
+if BR2_PACKAGE_LVGL
+	config BR2_PACKAGE_LVGL_COLOR_DEPTH
+		int "Color Depth (1, 8, 16, 32)"
+		default 32
+		range 1 32
+		help
+		  LVGL color depth
+		  1  => 1BPP
+		  8  => RGB332
+		  16 => RGB565
+		  32 => ARGB8888
+
+	config BR2_PACKAGE_LVGL_COLOR_16_SWAP
+		bool "Color 16 Swap"
+		default y
+		depends on BR2_PACKAGE_LVGL_COLOR_DEPTH=16
+		help
+		  Swap the 2 bytes of RGB565 color.
+		  Useful if the display has an 8-bit interface.
+		  (e.g. SPI)
+
+	config BR2_PACKAGE_LVGL_DEMOS
+		bool
+		default y
+		help
+		  Enable lvgl official demos
+
+	choice
+		prompt "LVGL backport select"
+		config BR2_PACKAGE_LVGL_USE_SDL
+			bool "sdl"
+			select BR2_PACKAGE_SDL2
+			help
+			  Use SDL to draw and render
+
+		config BR2_PACKAGE_LVGL_USE_DRM
+			bool "drm"
+			select BR2_PACKAGE_LIBDRM
+			help
+			  Use CPU to draw and DRM to render
+
+	endchoice
+
+endif

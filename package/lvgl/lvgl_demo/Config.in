@@ -1,0 +1,56 @@
+config BR2_PACKAGE_LVGL_DEMO
+	bool "LVGL DEMO"
+	default n
+	help
+	  lvgl demo
+
+choice
+	prompt "LVGL APP select"
+	depends on BR2_PACKAGE_LVGL_DEMO
+	config BR2_PACKAGE_LVGL_DEMO_WIDGETS
+		bool "lvgl demo widgets"
+		select BR2_PACKAGE_LVGL_DEMOS
+		help
+		  Enbale lvgl demo widgets
+
+	config BR2_PACKAGE_LVGL_DEMO_KEYPAD_AND_ENCODER
+		bool "lvgl demo keypad and encoder"
+		select BR2_PACKAGE_LVGL_DEMOS
+		help
+		  Enbale lvgl demo keypad and encoder
+
+	config BR2_PACKAGE_LVGL_DEMO_BENCHMARK
+		bool "lvgl demo benchmark"
+		select BR2_PACKAGE_LVGL_DEMOS
+		help
+		  Enbale lvgl demo benchmark
+
+	config BR2_PACKAGE_LVGL_DEMO_STRESS
+		bool "lvgl demo stress"
+		select BR2_PACKAGE_LVGL_DEMOS
+		help
+		  Enbale lvgl demo stress
+
+	config BR2_PACKAGE_LVGL_DEMO_MUSIC
+		bool "lvgl demo music"
+		select BR2_PACKAGE_LVGL_DEMOS
+		help
+		  Enbale lvgl demo music
+
+	config BR2_PACKAGE_LVGL_DEMO_CUSTOM
+		bool "lvgl demo custom"
+		select BR2_PACKAGE_LVGL_DEMOS
+		help
+		  Enbale lvgl demo custom
+
+	config BR2_PACKAGE_RK_DEMO
+		bool "RK demo"
+		select BR2_PACKAGE_RKWIFIBT_APP
+		select BR2_PACKAGE_RKADK
+		select BR2_PACKAGE_COMMON_ALGORITHM
+		select BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS
+		help
+		  Rockchip LVGL demo
+
+endchoice
+
