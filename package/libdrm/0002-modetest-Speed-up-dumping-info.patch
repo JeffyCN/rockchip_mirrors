@@ -1,7 +1,7 @@
-From 65b545d762100c4012c2f8176f5c296d5bfcbdc4 Mon Sep 17 00:00:00 2001
+From 2fc2cd18319726688fea86c27ad9047ce27ab7b3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 15 Dec 2018 12:20:01 +0800
-Subject: [PATCH 2/5] modetest: Speed up dumping info
+Subject: [PATCH 2/4] modetest: Speed up dumping info
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 21 insertions(+), 7 deletions(-)
 
 diff --git a/tests/modetest/modetest.c b/tests/modetest/modetest.c
-index 8ff6c80..5291ca0 100644
+index d9e761e..98cef6a 100644
 --- a/tests/modetest/modetest.c
 +++ b/tests/modetest/modetest.c
 @@ -50,6 +50,7 @@
@@ -20,9 +20,9 @@ index 8ff6c80..5291ca0 100644
  #include <sys/time.h>
  #if HAVE_SYS_SELECT_H
  #include <sys/select.h>
-@@ -71,6 +72,10 @@
- static enum util_fill_pattern primary_fill = UTIL_PATTERN_SMPTE;
+@@ -72,6 +73,10 @@ static enum util_fill_pattern primary_fill = UTIL_PATTERN_SMPTE;
  static enum util_fill_pattern secondary_fill = UTIL_PATTERN_TILES;
+ static drmModeModeInfo user_mode;
  
 +int encoders = 0, connectors = 0, crtcs = 0, planes = 0, fbs = 0;
 +int dump_only;
@@ -31,7 +31,7 @@ index 8ff6c80..5291ca0 100644
  struct crtc {
  	drmModeCrtc *crtc;
  	drmModeObjectProperties *props;
-@@ -485,7 +490,7 @@ static void dump_crtcs(struct device *dev)
+@@ -496,7 +501,7 @@ static void dump_crtcs(struct device *dev)
  	printf("\n");
  }
  
@@ -40,7 +40,7 @@ index 8ff6c80..5291ca0 100644
  {
  	drmModeFB *fb;
  	int i;
-@@ -554,6 +559,7 @@ static void free_resources(struct resources *res)
+@@ -565,6 +570,7 @@ static void free_resources(struct resources *res)
  		return;
  
  #define free_resource(_res, type, Type)					\
@@ -48,7 +48,7 @@ index 8ff6c80..5291ca0 100644
  	do {									\
  		if (!(_res)->type##s)						\
  			break;							\
-@@ -566,6 +572,7 @@ static void free_resources(struct resources *res)
+@@ -577,6 +583,7 @@ static void free_resources(struct resources *res)
  	} while (0)
  
  #define free_properties(_res, type)					\
@@ -56,7 +56,7 @@ index 8ff6c80..5291ca0 100644
  	do {									\
  		for (i = 0; i < (int)(_res)->count_##type##s; ++i) {	\
  			unsigned int j;										\
-@@ -578,10 +585,10 @@ static void free_resources(struct resources *res)
+@@ -589,10 +596,10 @@ static void free_resources(struct resources *res)
  
  	free_properties(res, plane);
  	free_resource(res, plane, Plane);
@@ -68,7 +68,7 @@ index 8ff6c80..5291ca0 100644
  	for (i = 0; i < res->count_connectors; i++)
  		free(res->connectors[i].name);
  
-@@ -630,6 +637,7 @@ static struct resources *get_resources(struct device *dev)
+@@ -641,6 +648,7 @@ static struct resources *get_resources(struct device *dev)
      }
  
  #define get_resource(_res, __res, type, Type)					\
@@ -76,7 +76,7 @@ index 8ff6c80..5291ca0 100644
  	do {									\
  		for (i = 0; i < (int)(_res)->count_##type##s; ++i) {	\
  			uint32_t type##id = (__res)->type##s[i];			\
-@@ -650,6 +658,7 @@ static struct resources *get_resources(struct device *dev)
+@@ -661,6 +669,7 @@ static struct resources *get_resources(struct device *dev)
  	drmModeFreeResources(_res);
  
  	/* Set the name of all connectors based on the type name and the per-type ID. */
@@ -84,7 +84,7 @@ index 8ff6c80..5291ca0 100644
  	for (i = 0; i < res->count_connectors; i++) {
  		struct connector *connector = &res->connectors[i];
  		drmModeConnector *conn = connector->connector;
-@@ -663,6 +672,7 @@ static struct resources *get_resources(struct device *dev)
+@@ -674,6 +683,7 @@ static struct resources *get_resources(struct device *dev)
  	}
  
  #define get_properties(_res, type, Type)					\
@@ -92,7 +92,7 @@ index 8ff6c80..5291ca0 100644
  	do {									\
  		for (i = 0; i < (int)(_res)->count_##type##s; ++i) {	\
  			struct type *obj = &res->type##s[i];			\
-@@ -690,6 +700,7 @@ static struct resources *get_resources(struct device *dev)
+@@ -701,6 +711,7 @@ static struct resources *get_resources(struct device *dev)
  	get_properties(res, crtc, CRTC);
  	get_properties(res, connector, CONNECTOR);
  
@@ -100,7 +100,7 @@ index 8ff6c80..5291ca0 100644
  	for (i = 0; i < res->count_crtcs; ++i)
  		res->crtcs[i].mode = &res->crtcs[i].crtc->mode;
  
-@@ -2026,7 +2037,6 @@ int main(int argc, char **argv)
+@@ -2186,7 +2197,6 @@ int main(int argc, char **argv)
  	struct device dev;
  
  	int c;
@@ -108,7 +108,7 @@ index 8ff6c80..5291ca0 100644
  	int drop_master = 0;
  	int test_vsync = 0;
  	int test_cursor = 0;
-@@ -2070,7 +2080,7 @@ int main(int argc, char **argv)
+@@ -2231,7 +2241,7 @@ int main(int argc, char **argv)
  			encoders = 1;
  			break;
  		case 'f':
@@ -117,16 +117,16 @@ index 8ff6c80..5291ca0 100644
  			break;
  		case 'F':
  			parse_fill_patterns(optarg);
-@@ -2143,7 +2153,7 @@ int main(int argc, char **argv)
+@@ -2307,7 +2317,7 @@ int main(int argc, char **argv)
  
  	/* Dump all the details when no* arguments are provided. */
  	if (!args)
 -		encoders = connectors = crtcs = planes = framebuffers = 1;
 +		encoders = connectors = crtcs = planes = fbs = 1;
  
- 	if (test_vsync && !count) {
- 		fprintf(stderr, "page flipping requires at least one -s option.\n");
-@@ -2159,7 +2169,11 @@ int main(int argc, char **argv)
+ 	if (test_vsync && !count && !set_preferred) {
+ 		fprintf(stderr, "page flipping requires at least one -s or -r option.\n");
+@@ -2318,7 +2328,11 @@ int main(int argc, char **argv)
  		return -1;
  	}
  
@@ -139,15 +139,15 @@ index 8ff6c80..5291ca0 100644
  	if (dev.fd < 0)
  		return -1;
  
-@@ -2186,7 +2200,7 @@ int main(int argc, char **argv)
+@@ -2346,7 +2360,7 @@ int main(int argc, char **argv)
  	dump_resource(&dev, connectors);
  	dump_resource(&dev, crtcs);
  	dump_resource(&dev, planes);
 -	dump_resource(&dev, framebuffers);
 +	dump_resource(&dev, fbs);
  
- 	for (i = 0; i < prop_count; ++i)
- 		set_property(&dev, &prop_args[i]);
+ 	if (dev.use_atomic)
+ 		dev.req = drmModeAtomicAlloc();
 -- 
 2.20.1
 
