@@ -438,12 +438,26 @@ ums_prepare()
 	fi
 }
 
-ums_stop()
+ums_to_pc()
+{
+	if [ "$(cat lun.0/ro)" != "$UMS_RO" ]; then
+		echo > lun.0/file
+		echo $UMS_RO > lun.0/ro
+	fi
+
+	if ! grep -wq "$UMS_FILE" lun.0/file; then
+		usb_umount "$UMS_MOUNTPOINT"
+		echo "$UMS_FILE" > lun.0/file
+	fi
+}
+
+ums_to_device()
 {
 	echo > lun.0/file
-	usb_umount "$UMS_MOUNTPOINT"
 
 	[ "$UMS_MOUNT" -eq 1 ] || return 0
+
+	usb_umount "$UMS_MOUNTPOINT"
 
 	# Try auto fstype firstly
 	usb_mount "$UMS_FILE" "$UMS_MOUNTPOINT" -o sync 2>/dev/null || \
@@ -453,21 +467,18 @@ ums_stop()
 ums_start()
 {
 	case "$USB_STATE" in
-		CONFIGURED)
-			if [ "$(cat lun.0/ro)" != "$UMS_RO" ]; then
-				echo > lun.0/file
-				echo $UMS_RO > lun.0/ro
-			fi
-
-			if ! grep -wq "$UMS_FILE" lun.0/file; then
-				usb_umount "$UMS_MOUNTPOINT"
-				echo "$UMS_FILE" > lun.0/file
-			fi
-			;;
-		DISCONNECTED)
-			ums_stop
-			;;
+		CONFIGURED) ums_to_pc ;;
+		DISCONNECTED) ums_to_device ;;
 	esac
+}
+
+ums_stop()
+{
+	echo > lun.0/file
+
+	if [ "$UMS_MOUNT" ]; then
+		usb_umount "$UMS_MOUNTPOINT"
+	fi
 }
 
 # ---- global
