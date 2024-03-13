@@ -1,0 +1,53 @@
+From 11925bf14598afd733865dcff6303e67761abcc2 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Wed, 13 Mar 2024 17:00:58 +0800
+Subject: [PATCH] HACK: Drop usage of filesystem
+
+Fix configure error with g++ < 8.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ cmake/StandardSettings.cmake | 2 +-
+ src/Util.hpp                 | 6 ++++--
+ 2 files changed, 5 insertions(+), 3 deletions(-)
+
+diff --git a/cmake/StandardSettings.cmake b/cmake/StandardSettings.cmake
+index b6a0643..c4c0987 100644
+--- a/cmake/StandardSettings.cmake
++++ b/cmake/StandardSettings.cmake
+@@ -58,7 +58,7 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "^GNU|(Apple)?Clang$" AND NOT MSVC)
+   endforeach()
+ 
+   include(StdAtomic)
+-  include(StdFilesystem)
++  # include(StdFilesystem)
+ elseif(MSVC AND NOT CMAKE_CXX_COMPILER_ID MATCHES "^Clang$")
+   target_compile_options(
+     standard_settings
+diff --git a/src/Util.hpp b/src/Util.hpp
+index d1a4796..6de01e5 100644
+--- a/src/Util.hpp
++++ b/src/Util.hpp
+@@ -23,7 +23,7 @@
+ #include <util/Tokenizer.hpp>
+ 
+ #include <cstdint>
+-#include <filesystem>
++#include <sstream>
+ #include <functional>
+ #include <memory>
+ #include <optional>
+@@ -241,7 +241,9 @@ template<typename... T>
+ std::string
+ make_path(const T&... args)
+ {
+-  return (std::filesystem::path{} / ... / args).lexically_normal().string();
++  std::ostringstream ss;
++  (ss << ... << (ss << args, "/"));
++  return ss.str().substr(0, ss.str().length() - (sizeof...(Args) > 0));
+ }
+ 
+ // Make a relative path from current working directory (either `actual_cwd` or
+-- 
+2.20.1
+
