@@ -45,12 +45,21 @@ choice
 
 	config BR2_PACKAGE_RK_DEMO
 		bool "RK demo"
-		select BR2_PACKAGE_RKWIFIBT_APP
-		select BR2_PACKAGE_RKADK
-		select BR2_PACKAGE_COMMON_ALGORITHM
-		select BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS
 		help
 		  Rockchip LVGL demo
+
+	if BR2_PACKAGE_RK_DEMO
+		config BR2_PACKAGE_RK_DEMO_ENABLE_MULTIMEDIA
+			bool "RK demo enable multimedia"
+			select BR2_PACKAGE_RKWIFIBT_APP
+			select BR2_PACKAGE_RKADK
+			select BR2_PACKAGE_COMMON_ALGORITHM
+			select BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS
+			help
+			  Rockchip LVGL demo enable all multimedia functions,
+			  e.g. RKADK Rockit.
+
+	endif
 
 endchoice
 
