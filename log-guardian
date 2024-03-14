@@ -17,8 +17,16 @@ RESERVED_LOG_SIZE="10M"
 MIN_AVAIL_SIZE="100M"
 LOG_DIRS="/var/log/,/tmp/"
 
-kill -9 $(cat $PID_FILE 2>/dev/null) 2>/dev/null || true
-rm -f "$PID_FILE"
+log() {
+	logger -s -t log-guardian $@
+}
+
+PID=$(cat $PID_FILE 2>/dev/null || true)
+if [ "$PID" ]; then
+	log "Stopping log-guardian ($PID)..."
+	kill -9 -$PID 2>/dev/null || true
+	rm -f "$PID_FILE"
+fi
 
 for opt in $@; do
 	case "$opt" in
@@ -30,7 +38,7 @@ for opt in $@; do
 			MIN_AVAIL_SIZE="${opt#--min-avail-size=}"
 			;;
 		--log-dirs=*) LOG_DIRS="${opt#--log-dirs=}" ;;
-		--quit) exit 0 ;;
+		*) exit 0 ;;
 	esac
 done
 
@@ -45,10 +53,6 @@ case "$MIN_AVAIL_SIZE" in
 	*M) MIN_AVAIL_SIZE=$(( ${MIN_AVAIL_SIZE%M} * 1024 * 1024)) ;;
 	*G) MIN_AVAIL_SIZE=$(( ${MIN_AVAIL_SIZE%G} * 1024 * 1024 * 1024)) ;;
 esac
-
-log() {
-	logger -s -t log-guardian $@
-}
 
 avail_size() {
 	df "$1" --output=avail -B 1 | xargs -n 1 | tail -n 1
@@ -130,23 +134,27 @@ done
 
 log "Guarding logs in: \"$LOG_DIRS\"..."
 
-trap 'rm -f "$PID_FILE"' EXIT QUIT TERM INT
-echo $$ > $PID_FILE
+{
+	trap 'rm -f "$PID_FILE"' EXIT QUIT TERM INT
+	echo $$ > $PID_FILE
 
-while true; do
-	for dir in $LOG_DIRS; do
-		is_full "$dir" || continue
-		[ "$(total_size "$dir")" -gt "$MIN_AVAIL_SIZE" ] || continue
+	while true; do
+		for dir in $LOG_DIRS; do
+			is_full "$dir" || continue
+			[ "$(total_size "$dir")" -gt "$MIN_AVAIL_SIZE" ] || \
+				continue
 
-		log "[WARN] \"$dir\" is almost full:"
-		log "$(df -h "$dir" | head -n 1)"
-		log "$(df -h "$dir" | tail -n 1)"
+			log "[WARN] \"$dir\" is almost full:"
+			log "$(df -h "$dir" | head -n 1)"
+			log "$(df -h "$dir" | tail -n 1)"
 
-		process_dir "$dir" || continue
+			process_dir "$dir" || continue
 
-		log "Now \"$dir\" is:"
-		log "$(df -h "$dir" | head -n 1)"
-		log "$(df -h "$dir" | tail -n 1)"
+			log "Now \"$dir\" is:"
+			log "$(df -h "$dir" | head -n 1)"
+			log "$(df -h "$dir" | tail -n 1)"
+		done
+		sleep $INTERVAL
 	done
-	sleep $INTERVAL
-done
+}&
+disown
