@@ -44,7 +44,7 @@ index d1a4796..6de01e5 100644
 -  return (std::filesystem::path{} / ... / args).lexically_normal().string();
 +  std::ostringstream ss;
 +  (ss << ... << (ss << args, "/"));
-+  return ss.str().substr(0, ss.str().length() - (sizeof...(Args) > 0));
++  return ss.str().substr(0, ss.str().length() - (sizeof...(T) > 0));
  }
  
  // Make a relative path from current working directory (either `actual_cwd` or
