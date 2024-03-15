@@ -4,7 +4,7 @@
 #
 ################################################################################
 
-MAKE_VERSION = 4.4.1
+MAKE_VERSION = 4.3
 MAKE_SOURCE = make-$(MAKE_VERSION).tar.lz
 MAKE_SITE = $(BR2_GNU_MIRROR)/make
 MAKE_DEPENDENCIES = $(TARGET_NLS_DEPENDENCIES) host-pkgconf
