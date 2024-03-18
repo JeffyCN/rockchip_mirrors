@@ -5,9 +5,6 @@
 ################################################################################
 
 ROOTFS_EXT2_SIZE = $(call qstrip,$(BR2_TARGET_ROOTFS_EXT2_SIZE))
-ifeq ($(BR2_TARGET_ROOTFS_EXT2)-$(ROOTFS_EXT2_SIZE),y-)
-$(error BR2_TARGET_ROOTFS_EXT2_SIZE cannot be empty)
-endif
 
 ROOTFS_EXT2_MKFS_OPTS = $(call qstrip,$(BR2_TARGET_ROOTFS_EXT2_MKFS_OPTIONS))
 
@@ -27,7 +24,11 @@ ROOTFS_EXT2_OPTS = \
 
 ROOTFS_EXT2_DEPENDENCIES = host-e2fsprogs
 
-ifneq ($(ROOTFS_EXT2_SIZE),auto)
+ifneq ($(BR2_TARGET_ROOTFS_EXT2_SIZE_AUTO),y)
+ifeq ($(ROOTFS_EXT2_SIZE),)
+$(error BR2_TARGET_ROOTFS_EXT2_SIZE cannot be empty)
+endif
+
 define ROOTFS_EXT2_CMD
 	rm -f $@
 	$(HOST_DIR)/sbin/mkfs.ext$(BR2_TARGET_ROOTFS_EXT2_GEN) $(ROOTFS_EXT2_OPTS) $@ \
