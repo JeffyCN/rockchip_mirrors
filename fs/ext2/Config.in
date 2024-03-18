@@ -63,6 +63,10 @@ config BR2_TARGET_ROOTFS_EXT2_SIZE
 	  lower-case), then it is interpreted in power-of-two kilobytes,
 	  megabytes, gigabytes, terabytes, etc.
 
+config BR2_TARGET_ROOTFS_EXT2_BLKSZ
+	int "the size of blocks in bytes (powers of two from 1024 up to 65536)"
+	default 4096
+
 config BR2_TARGET_ROOTFS_EXT2_INODES
 	int "exact number of inodes (leave at 0 for auto calculation)"
 	default 0
