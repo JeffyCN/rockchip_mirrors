@@ -83,9 +83,7 @@ config BR2_PACKAGE_GLIBC_UTILS
 	  ldconfig, ldd and locale glibc utilities for the target.
 
 config BR2_PACKAGE_GLIBC_GEN_LD_CACHE
-	bool "glibc gen ld.so.cache"
-	default y
-	depends on BR2_PACKAGE_HOST_QEMU
+	bool "glibc generate ld.so.cache"
 	depends on BR2_PACKAGE_HOST_QEMU_LINUX_USER_MODE
 
 endif # BR2_TOOLCHAIN_BUILDROOT_GLIBC
