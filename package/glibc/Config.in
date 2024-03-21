@@ -84,7 +84,6 @@ config BR2_PACKAGE_GLIBC_UTILS
 
 config BR2_PACKAGE_GLIBC_GEN_LD_CACHE
 	bool "glibc generate ld.so.cache"
-	default y
 	depends on BR2_PACKAGE_HOST_QEMU_LINUX_USER_MODE
 
 endif # BR2_TOOLCHAIN_BUILDROOT_GLIBC
