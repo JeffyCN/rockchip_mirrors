@@ -2618,6 +2618,7 @@ endif
 	source "package/tcpdump/Config.in"
 	source "package/tcping/Config.in"
 	source "package/tcpreplay/Config.in"
+	source "package/tcp-wrappers/Config.in"
 	source "package/tftpd/Config.in"
 	source "package/thttpd/Config.in"
 	source "package/tinc/Config.in"
