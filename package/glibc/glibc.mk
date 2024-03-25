@@ -196,6 +196,12 @@ define GLIBC_CONFIGURE_CMDS
 	$(GLIBC_ADD_MISSING_STUB_H)
 endef
 
+define GLIBC_POST_STAGING_INSTALL
+	$(INSTALL) -D -m 0755 $(@D)/build/nis/libnsl.so* \
+		$(STAGING_DIR)/usr/lib/
+endef
+GLIBC_POST_INSTALL_STAGING_HOOKS += GLIBC_POST_STAGING_INSTALL
+
 #
 # We also override the install to target commands since we only want
 # to install the libraries, and nothing more.
@@ -203,7 +209,7 @@ endef
 
 GLIBC_LIBS_LIB = \
 	ld*.so.* libanl.so.* libc.so.* libcrypt.so.* libdl.so.* libgcc_s.so.* \
-	libm.so.* libpthread.so.* libresolv.so.* librt.so.* \
+	libnsl.so.* libm.so.* libpthread.so.* libresolv.so.* librt.so.* \
 	libutil.so.* libnss_files.so.* libnss_dns.so.* libmvec.so.*
 
 ifeq ($(BR2_PACKAGE_GDB),y)
