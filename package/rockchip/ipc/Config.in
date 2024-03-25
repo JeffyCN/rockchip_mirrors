@@ -1,1 +1,2 @@
+source "package/rockchip/ipc/iva/Config.in"
 source "package/rockchip/ipc/rkfsmk/Config.in"
