@@ -2,6 +2,11 @@ config BR2_PACKAGE_RKPARTYBOX
 	bool "RKPARTYBOX demo"
 	depends on BR2_aarch64
 	depends on BR2_PACKAGE_HAS_UDEV
-	depends on BR2_PACKAGE_RKWIFIBT_APP
+	depends on BR2_PACKAGE_WPA_SUPPLICANT
 	help
 	  rkpartybox demo
+config BR2_PACKAGE_RK3308_CORE_BOARD
+	bool "RKPARTYBOX core board only"
+	depends on BR2_PACKAGE_RKPARTYBOX
+	help
+	  rkpartybox core board only
