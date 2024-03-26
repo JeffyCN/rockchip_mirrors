@@ -114,4 +114,12 @@ ifeq ($(BR2_PACKAGE_ROCKCHIP_MALI_OPTIMIZE_s),y)
 ROCKCHIP_MALI_CONF_OPTS += -Doptimize-level=Os
 endif
 
+# For packages that wouldn't honor flags in pkg config.
+define ROCKCHIP_MALI_POST_STAGING_INSTALL
+	cd $(@D)/build/; \
+		find . -maxdepth 1 -type f -name 'lib*.so.[0-9]' \
+		-exec ln -sf libmali.so.1 $(STAGING_DIR)/usr/lib/{} \;
+endef
+ROCKCHIP_MALI_POST_INSTALL_STAGING_HOOKS += ROCKCHIP_MALI_POST_STAGING_INSTALL
+
 $(eval $(meson-package))
