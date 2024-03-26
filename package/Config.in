@@ -315,6 +315,11 @@ menu "Games"
 	source "package/supertux/Config.in"
 	source "package/supertuxkart/Config.in"
 	source "package/xorcurses/Config.in"
+
+menu "Libretro cores and retroarch"
+	source "package/retroarch/Config.in"
+endmenu
+
 endmenu
 
 menu "Graphic libraries and applications (graphic/text)"
@@ -2725,10 +2730,6 @@ menu "Text editors and viewers"
 	source "package/nano/Config.in"
 	source "package/uemacs/Config.in"
 	source "package/vim/Config.in"
-endmenu
-
-menu "Libretro cores and retroarch"
-	source "package/retroarch/Config.in"
 endmenu
 
 endmenu
