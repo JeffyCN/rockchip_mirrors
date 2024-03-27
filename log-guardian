@@ -157,4 +157,3 @@ log "Guarding logs in: \"$LOG_DIRS\"..."
 		sleep $INTERVAL
 	done
 }&
-disown
