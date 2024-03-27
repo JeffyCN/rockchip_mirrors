@@ -670,7 +670,10 @@ fi
 
 usb_msg "Handling ${ACTION} request"
 
-usb_run_stage usb prepare
+if ! usb_run_stage usb prepare; then
+	usb_run_stage usb stop
+	exit 1
+fi
 
 case "$ACTION" in
 	start|update)
