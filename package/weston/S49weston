@@ -17,7 +17,7 @@ PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
 start_weston()
 {
-	/usr/bin/weston&
+	/usr/bin/weston 2>&1 | tee /var/log/weston.log &
 }
 
 stop_weston()
