@@ -1,7 +1,7 @@
-From bba4e7de4f10b1ac5c251d85ed32d55354f74938 Mon Sep 17 00:00:00 2001
+From ec3b9304b835f859813be972401b943070f183a9 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Wed, 21 Dec 2022 15:19:53 +0800
-Subject: [PATCH 08/11] env_support: cmake: support sdl
+Subject: [PATCH 08/19] env_support: cmake: support sdl
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---

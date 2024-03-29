@@ -1,7 +1,7 @@
-From 0e33cc99f6114eefb15a7c9e5305b351aa7d948c Mon Sep 17 00:00:00 2001
+From 348138272c206071b1742526f73557d6936ffaa4 Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 20 Dec 2022 11:34:51 +0800
-Subject: [PATCH 10/11] env_support: cmake: add freetype header file path
+Subject: [PATCH 10/19] env_support: cmake: add freetype header file path
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---
