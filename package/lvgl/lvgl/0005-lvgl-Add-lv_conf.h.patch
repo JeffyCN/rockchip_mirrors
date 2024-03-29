@@ -1,7 +1,7 @@
-From 6f311641b7bdfa8db3afd1ffb9d473abe64a2d13 Mon Sep 17 00:00:00 2001
+From 5221d77b46c1526bca74cd4cc063b8a723c4b9ae Mon Sep 17 00:00:00 2001
 From: Jiajian Wu <jair.wu@rock-chips.com>
 Date: Tue, 27 Sep 2022 16:07:10 +0800
-Subject: [PATCH 05/11] lvgl: Add lv_conf.h
+Subject: [PATCH 05/19] lvgl: Add lv_conf.h
 
 Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Jiajian Wu <jair.wu@rock-chips.com>
 
 diff --git a/lv_conf.h b/lv_conf.h
 new file mode 100644
-index 000000000..e9d494407
+index 000000000..d8627f795
 --- /dev/null
 +++ b/lv_conf.h
 @@ -0,0 +1,771 @@
@@ -228,7 +228,7 @@ index 000000000..e9d494407
 +#if LV_USE_GPU_SDL
 +    #define LV_GPU_SDL_INCLUDE_PATH <SDL2/SDL.h>
 +    /*Texture cache size, 8MB by default*/
-+    #define LV_GPU_SDL_LRU_SIZE (1024 * 1024 * 8)
++    #define LV_GPU_SDL_LRU_SIZE (2048 * 2048 * 4)
 +    /*Custom blend mode for mask drawing, disable if you need to link with older SDL2 lib*/
 +    #define LV_GPU_SDL_CUSTOM_BLEND_MODE (SDL_VERSION_ATLEAST(2, 0, 6))
 +#endif
@@ -238,7 +238,7 @@ index 000000000..e9d494407
 + *-----------*/
 +
 +/*Enable the log module*/
-+#define LV_USE_LOG 0
++#define LV_USE_LOG 1
 +#if LV_USE_LOG
 +
 +    /*How important log should be added:
@@ -255,14 +255,14 @@ index 000000000..e9d494407
 +    #define LV_LOG_PRINTF 1
 +
 +    /*Enable/disable LV_LOG_TRACE in modules that produces a huge number of logs*/
-+    #define LV_LOG_TRACE_MEM        1
-+    #define LV_LOG_TRACE_TIMER      1
-+    #define LV_LOG_TRACE_INDEV      1
-+    #define LV_LOG_TRACE_DISP_REFR  1
-+    #define LV_LOG_TRACE_EVENT      1
-+    #define LV_LOG_TRACE_OBJ_CREATE 1
-+    #define LV_LOG_TRACE_LAYOUT     1
-+    #define LV_LOG_TRACE_ANIM       1
++    #define LV_LOG_TRACE_MEM        0
++    #define LV_LOG_TRACE_TIMER      0
++    #define LV_LOG_TRACE_INDEV      0
++    #define LV_LOG_TRACE_DISP_REFR  0
++    #define LV_LOG_TRACE_EVENT      0
++    #define LV_LOG_TRACE_OBJ_CREATE 0
++    #define LV_LOG_TRACE_LAYOUT     0
++    #define LV_LOG_TRACE_ANIM       0
 +
 +#endif  /*LV_USE_LOG*/
 +
@@ -777,7 +777,7 @@ index 000000000..e9d494407
 +    #define LV_DEMO_MUSIC_SQUARE    0
 +    #define LV_DEMO_MUSIC_LANDSCAPE 0
 +    #define LV_DEMO_MUSIC_ROUND     0
-+    #define LV_DEMO_MUSIC_LARGE     0
++    #define LV_DEMO_MUSIC_LARGE     1
 +    #define LV_DEMO_MUSIC_AUTO_PLAY 0
 +#endif
 +
