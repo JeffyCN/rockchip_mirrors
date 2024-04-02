@@ -1,7 +1,7 @@
-From d6c26eaf9054c9060509ca1a2accc77903753d59 Mon Sep 17 00:00:00 2001
+From 667de8aae3d8d216d5ecea42a80b1226d69980b2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 38/97] backend-drm: Support controlling output dynamically
+Subject: [PATCH 38/98] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -44,7 +44,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  11 files changed, 409 insertions(+), 18 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 319fc30801..146bbf8f79 100644
+index 319fc30..146bbf8 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -2144,6 +2144,20 @@ drm_backend_output_configure(struct weston_output *output,
@@ -69,10 +69,10 @@ index 319fc30801..146bbf8f79 100644
  		weston_log("Cannot configure output \"%s\" using weston_drm_output_api.\n",
  			   output->name);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index a0a5c2bfed..95f248a6ff 100644
+index a4b714b..5754100 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4074,7 +4074,7 @@ weston_view_set_initial_position(struct weston_view *view,
+@@ -4079,7 +4079,7 @@ weston_view_set_initial_position(struct weston_view *view,
  	struct weston_compositor *compositor = shell->compositor;
  	int32_t range_x, range_y;
  	int32_t x, y;
@@ -81,7 +81,7 @@ index a0a5c2bfed..95f248a6ff 100644
  	struct weston_seat *seat;
  	pixman_rectangle32_t area;
  	struct weston_coord_global pos;
-@@ -4101,16 +4101,20 @@ weston_view_set_initial_position(struct weston_view *view,
+@@ -4106,16 +4106,20 @@ weston_view_set_initial_position(struct weston_view *view,
  		}
  	}
  
@@ -106,7 +106,7 @@ index a0a5c2bfed..95f248a6ff 100644
  	if (!target_output) {
  		pos.c = weston_coord(10 + random() % 400,
  				     10 + random() % 400);
-@@ -4648,6 +4652,15 @@ handle_output_resized(struct wl_listener *listener, void *data)
+@@ -4653,6 +4657,15 @@ handle_output_resized(struct wl_listener *listener, void *data)
  	struct weston_output *output = (struct weston_output *)data;
  	struct shell_output *sh_output = find_shell_output_from_weston_output(shell, output);
  
@@ -122,7 +122,7 @@ index a0a5c2bfed..95f248a6ff 100644
  	handle_output_resized_shsurfs(shell);
  
  	shell_resize_surface_to_output(shell, sh_output->background_surface, output);
-@@ -4701,7 +4714,9 @@ handle_output_move_layer(struct desktop_shell *shell,
+@@ -4706,7 +4719,9 @@ handle_output_move_layer(struct desktop_shell *shell,
  		pos = weston_coord_global_add(
  		      weston_view_get_pos_offset_global(view),
  		      output->move);
@@ -134,7 +134,7 @@ index a0a5c2bfed..95f248a6ff 100644
  }
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index e9922532b3..b5b9624dc3 100644
+index e992253..b5b9624 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -612,6 +612,11 @@ struct weston_output {
@@ -158,7 +158,7 @@ index e9922532b3..b5b9624dc3 100644
  
  struct weston_solid_buffer_values {
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 4fb68fff13..61ce8b98f1 100644
+index 4fb68ff..61ce8b9 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -120,6 +120,9 @@
@@ -209,7 +209,7 @@ index 4fb68fff13..61ce8b98f1 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 43e729dd59..2c57a3c271 100644
+index 43e729d..2c57a3c 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -547,7 +547,7 @@ index 43e729dd59..2c57a3c271 100644
  
  	return b;
 diff --git a/libweston/backend-drm/modes.c b/libweston/backend-drm/modes.c
-index 980fb83abf..808a14bfae 100644
+index 980fb83..808a14b 100644
 --- a/libweston/backend-drm/modes.c
 +++ b/libweston/backend-drm/modes.c
 @@ -468,15 +468,19 @@ drm_output_add_mode(struct drm_output *output, const drmModeModeInfo *info)
@@ -596,7 +596,7 @@ index 980fb83abf..808a14bfae 100644
  			if (!device->aspect_ratio_supported ||
  			    aspect_ratio == drm_mode->base.aspect_ratio)
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index de38c1e245..42ec033576 100644
+index de38c1e..42ec033 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -6955,7 +6955,7 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
@@ -628,7 +628,7 @@ index de38c1e245..42ec033576 100644
  	wl_list_init(&output->mode_list);
  
 diff --git a/libweston/libinput-seat.c b/libweston/libinput-seat.c
-index 7f952d328b..e426f0ca37 100644
+index 7f952d3..e426f0c 100644
 --- a/libweston/libinput-seat.c
 +++ b/libweston/libinput-seat.c
 @@ -532,3 +532,46 @@ udev_seat_get_named(struct udev_input *input, const char *seat_name)
@@ -679,7 +679,7 @@ index 7f952d328b..e426f0ca37 100644
 +	}
 +}
 diff --git a/libweston/libweston-internal.h b/libweston/libweston-internal.h
-index 0cb98dc53d..4b582871a1 100644
+index 0cb98dc..4b58287 100644
 --- a/libweston/libweston-internal.h
 +++ b/libweston/libweston-internal.h
 @@ -256,6 +256,9 @@ void
@@ -693,7 +693,7 @@ index 0cb98dc53d..4b582871a1 100644
  
  void
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 0067032099..e00536298d 100644
+index 0067032..e005362 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -354,6 +354,26 @@ repaint_region(struct weston_paint_node *pnode,
@@ -740,7 +740,7 @@ index 0067032099..e00536298d 100644
  	pixman_region32_fini(&output_region);
  
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index b2ae1c645c..a5667c9782 100644
+index b2ae1c6..a5667c9 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -1923,6 +1923,9 @@ gl_renderer_repaint_output(struct weston_output *output,

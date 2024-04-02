@@ -1,7 +1,7 @@
-From e7749c62ddfb4c37cf024db591e47346d0d9d619 Mon Sep 17 00:00:00 2001
+From 726138d261c15fcdceeef3a351d4aa9f4545239d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 23 Jun 2020 10:05:48 +0800
-Subject: [PATCH 34/97] backend-drm: Support selecting monitors
+Subject: [PATCH 34/98] backend-drm: Support selecting monitors
 
 Using these environments:
 
@@ -28,17 +28,17 @@ WESTON_DRM_HEAD_MODE:
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  compositor/main.c                    |  22 +-
- desktop-shell/shell.c                |  53 +++-
+ desktop-shell/shell.c                |  58 ++++-
  include/libweston/config-parser.h    |   1 +
  include/libweston/libweston.h        |   5 +
  libweston/backend-drm/drm-internal.h |  23 ++
  libweston/backend-drm/drm.c          | 367 +++++++++++++++++++++++----
  libweston/backend-drm/kms.c          |  22 +-
  libweston/compositor.c               |  78 +++++-
- 8 files changed, 498 insertions(+), 73 deletions(-)
+ 8 files changed, 503 insertions(+), 73 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 04908e1380..319fc30801 100644
+index 04908e1..319fc30 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -2414,7 +2414,7 @@ drm_head_prepare_enable(struct wet_compositor *wet,
@@ -95,10 +95,18 @@ index 04908e1380..319fc30801 100644
  		enabled = weston_head_is_enabled(head);
  		changed = weston_head_is_device_changed(head);
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 413542d7af..72d85962c6 100644
+index 413542d..279a093 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -267,6 +267,9 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,
+@@ -104,6 +104,7 @@ struct shell_surface {
+ 	struct weston_surface *wsurface_anim_fade;
+ 	struct weston_view *wview_anim_fade;
+ 	int32_t last_width, last_height;
++	int32_t committed_width, committed_height;
+ 
+ 	struct desktop_shell *shell;
+ 
+@@ -267,6 +268,9 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,
  {
  	int width = 0; int height = 0;
  
@@ -108,17 +116,18 @@ index 413542d7af..72d85962c6 100644
  	if (fullscreen_requested) {
  		if (shsurf->output) {
  			width = shsurf->output->width;
-@@ -280,6 +283,9 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,
+@@ -280,6 +284,10 @@ set_shsurf_size_maximized_or_fullscreen(struct shell_surface *shsurf,
  
  	/* (0, 0) means we're back from one of the maximized/fullcreen states */
  	weston_desktop_surface_set_size(shsurf->desktop_surface, width, height);
 +
-+	if (shsurf->last_width != width && shsurf->last_height != height)
++	if (shsurf->committed_width != width &&
++	    shsurf->committed_height != height)
 +		shsurf->output->resizing = true;
  }
  
  static void
-@@ -1881,7 +1887,8 @@ shell_set_view_fullscreen(struct shell_surface *shsurf)
+@@ -1881,7 +1889,8 @@ shell_set_view_fullscreen(struct shell_surface *shsurf)
  
  	weston_view_move_to_layer(shsurf->view,
  				  &shsurf->shell->fullscreen_layer.view_list);
@@ -128,7 +137,17 @@ index 413542d7af..72d85962c6 100644
  
  	if (!shsurf->fullscreen.black_view) {
  		shsurf->fullscreen.black_view =
-@@ -2785,6 +2792,8 @@ background_committed(struct weston_surface *es,
+@@ -2308,6 +2317,9 @@ desktop_surface_committed(struct weston_desktop_surface *desktop_surface,
+ 	bool was_fullscreen;
+ 	bool was_maximized;
+ 
++	shsurf->committed_width = surface->width;
++	shsurf->committed_height = surface->height;
++
+ 	if (!weston_surface_has_content(surface) &&
+ 	    weston_surface_is_unmapping(surface) &&
+ 	    shsurf->state.fullscreen) {
+@@ -2785,6 +2797,8 @@ background_committed(struct weston_surface *es,
  		weston_surface_map(es);
  		assert(wl_list_empty(&es->views));
  		sh_output->background_view = weston_view_create(es);
@@ -137,7 +156,7 @@ index 413542d7af..72d85962c6 100644
  	}
  
  	assert(sh_output->background_view);
-@@ -2894,6 +2903,7 @@ panel_committed(struct weston_surface *es,
+@@ -2894,6 +2908,7 @@ panel_committed(struct weston_surface *es,
  		weston_surface_map(es);
  		assert(wl_list_empty(&es->views));
  		sh_output->panel_view = weston_view_create(es);
@@ -145,7 +164,7 @@ index 413542d7af..72d85962c6 100644
  	}
  
  	assert(sh_output->panel_view);
-@@ -3823,6 +3833,9 @@ shell_fade_done(struct weston_view_animation *animation, void *data)
+@@ -3823,6 +3838,9 @@ shell_fade_done(struct weston_view_animation *animation, void *data)
  {
  	struct desktop_shell *shell = data;
  
@@ -155,7 +174,7 @@ index 413542d7af..72d85962c6 100644
  	shell->fade.animation = NULL;
  	switch (shell->fade.type) {
  	case FADE_IN:
-@@ -3877,6 +3890,7 @@ shell_fade_create_view(struct desktop_shell *shell)
+@@ -3877,6 +3895,7 @@ shell_fade_create_view(struct desktop_shell *shell)
  		x2 = MAX(x2, op->pos.c.x + op->width);
  		y2 = MAX(y2, op->pos.c.y + op->height);
  	}
@@ -163,7 +182,7 @@ index 413542d7af..72d85962c6 100644
  	curtain_params.pos.c.x = x1;
  	curtain_params.pos.c.y = y1;
  	curtain_params.width = x2 - x1;
-@@ -4508,6 +4522,9 @@ shell_reposition_view_on_output_change(struct weston_view *view)
+@@ -4508,6 +4527,9 @@ shell_reposition_view_on_output_change(struct weston_view *view)
  	if (!shsurf)
  		return;
  
@@ -173,7 +192,7 @@ index 413542d7af..72d85962c6 100644
  	if (!visible) {
  		struct weston_coord_global pos;
  
-@@ -4526,11 +4543,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
+@@ -4526,11 +4548,6 @@ shell_reposition_view_on_output_change(struct weston_view *view)
  		    shsurf->state.fullscreen)
  			return;
  	}
@@ -185,7 +204,7 @@ index 413542d7af..72d85962c6 100644
  }
  
  void
-@@ -4600,6 +4612,10 @@ static void
+@@ -4600,6 +4617,10 @@ static void
  handle_output_resized_shsurfs(struct desktop_shell *shell)
  {
  	struct shell_surface *shsurf;
@@ -196,7 +215,7 @@ index 413542d7af..72d85962c6 100644
  
  	wl_list_for_each(shsurf, &shell->shsurf_list, link) {
  		struct weston_desktop_surface *dsurface =
-@@ -4689,12 +4705,28 @@ handle_output_move_layer(struct desktop_shell *shell,
+@@ -4689,12 +4710,28 @@ handle_output_move_layer(struct desktop_shell *shell,
  static void
  handle_output_move(struct wl_listener *listener, void *data)
  {
@@ -226,7 +245,7 @@ index 413542d7af..72d85962c6 100644
  }
  
  static void
-@@ -4787,8 +4819,11 @@ shell_destroy(struct wl_listener *listener, void *data)
+@@ -4787,8 +4824,11 @@ shell_destroy(struct wl_listener *listener, void *data)
  		shell->fade.animation = NULL;
  	}
  
@@ -241,7 +260,7 @@ index 413542d7af..72d85962c6 100644
  	if (shell->fade.startup_timer)
  		wl_event_source_remove(shell->fade.startup_timer);
 diff --git a/include/libweston/config-parser.h b/include/libweston/config-parser.h
-index 8ed14a3b59..e05a90b5b2 100644
+index 8ed14a3..e05a90b 100644
 --- a/include/libweston/config-parser.h
 +++ b/include/libweston/config-parser.h
 @@ -32,6 +32,7 @@ extern "C" {
@@ -253,7 +272,7 @@ index 8ed14a3b59..e05a90b5b2 100644
  #define WESTON_CONFIG_FILE_ENV_VAR "WESTON_CONFIG_FILE"
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index faf8656657..bb29605235 100644
+index faf8656..bb29605 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -410,6 +410,8 @@ struct weston_head {
@@ -276,7 +295,7 @@ index faf8656657..bb29605235 100644
  
  enum weston_pointer_motion_mask {
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index e0f7b8fbb6..de3ff9fea7 100644
+index e0f7b8f..de3ff9f 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -115,6 +115,10 @@
@@ -338,7 +357,7 @@ index e0f7b8fbb6..de3ff9fea7 100644
  
  void
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 40b962a97e..401f68b155 100644
+index 40b962a..401f68b 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -48,6 +48,7 @@
@@ -886,7 +905,7 @@ index 40b962a97e..401f68b155 100644
  err_sprite:
  	destroy_sprites(b->drm);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index d232619a21..e268fbe022 100644
+index d232619..e268fbe 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -832,6 +832,8 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
@@ -965,7 +984,7 @@ index d232619a21..e268fbe022 100644
  
  	return 0;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 76d8117b89..4c93a6ed67 100644
+index 76d8117..4c93a6e 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -336,6 +336,25 @@ weston_paint_node_destroy(struct weston_paint_node *pnode)
