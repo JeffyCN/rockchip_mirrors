@@ -1,7 +1,7 @@
-From 21a0c5627f70d0743e611651384e267967a4c086 Mon Sep 17 00:00:00 2001
+From c88e6b3cc842e0e70487443554215efb8b674c67 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 2 Apr 2021 01:50:22 +0800
-Subject: [PATCH 56/97] desktop-shell: Resize views when work area changed
+Subject: [PATCH 56/98] desktop-shell: Resize views when work area changed
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -9,7 +9,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 11 insertions(+)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index af7c0bd0f5..98634ec5fe 100644
+index 2d3dd51..d67e6b9 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -48,6 +48,9 @@
@@ -22,7 +22,7 @@ index af7c0bd0f5..98634ec5fe 100644
  struct focus_state {
  	struct desktop_shell *shell;
  	struct weston_seat *seat;
-@@ -2888,6 +2891,7 @@ panel_committed(struct weston_surface *es,
+@@ -2893,6 +2896,7 @@ panel_committed(struct weston_surface *es,
  	struct weston_output *output = sh_output->output;
  	struct weston_coord_global pos = output->pos;
  	struct desktop_shell *shell = sh_output->shell;
@@ -30,7 +30,7 @@ index af7c0bd0f5..98634ec5fe 100644
  
  	if (!weston_surface_has_content(es))
  		return;
-@@ -2910,18 +2914,25 @@ panel_committed(struct weston_surface *es,
+@@ -2915,18 +2919,25 @@ panel_committed(struct weston_surface *es,
  		break;
  	}
  

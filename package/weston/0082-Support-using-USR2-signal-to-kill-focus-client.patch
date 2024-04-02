@@ -1,7 +1,7 @@
-From 6fb6ce39e2427f3e639fb46c36703293315022c1 Mon Sep 17 00:00:00 2001
+From 380a83fe863af8b91a5a1ae18c887ccbe685c581 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 10:48:36 +0800
-Subject: [PATCH 82/97] Support using USR2 signal to kill focus client
+Subject: [PATCH 82/98] Support using USR2 signal to kill focus client
 
 Tested with:
 1/ weston-terminal&
@@ -18,7 +18,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 42 insertions(+), 3 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index adfcaa6acf..83947a883d 100644
+index adfcaa6..83947a8 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -810,6 +810,19 @@ static int on_term_signal(int signal_number, void *data)
@@ -63,10 +63,10 @@ index adfcaa6acf..83947a883d 100644
  	wl_list_init(&wet.child_process_list);
  	signals[2] = wl_event_loop_add_signal(loop, SIGCHLD, sigchld_handler,
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 1a5c9cf927..fc95b0a1fa 100644
+index 8bca4d7..13a93b2 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4885,6 +4885,8 @@ shell_destroy(struct wl_listener *listener, void *data)
+@@ -4890,6 +4890,8 @@ shell_destroy(struct wl_listener *listener, void *data)
  	text_backend_destroy(shell->text_backend);
  	input_panel_destroy(shell);
  
@@ -75,7 +75,7 @@ index 1a5c9cf927..fc95b0a1fa 100644
  	if (shell->fade.animation) {
  		weston_view_animation_destroy(shell->fade.animation);
  		shell->fade.animation = NULL;
-@@ -5014,6 +5016,22 @@ handle_seat_created(struct wl_listener *listener, void *data)
+@@ -5019,6 +5021,22 @@ handle_seat_created(struct wl_listener *listener, void *data)
  	create_shell_seat(shell, seat);
  }
  
@@ -98,7 +98,7 @@ index 1a5c9cf927..fc95b0a1fa 100644
  WL_EXPORT int
  wet_shell_init(struct weston_compositor *ec,
  	       int *argc, char *argv[])
-@@ -5099,6 +5117,9 @@ wet_shell_init(struct weston_compositor *ec,
+@@ -5104,6 +5122,9 @@ wet_shell_init(struct weston_compositor *ec,
  
  	setup_output_destroy_handler(ec, shell);
  
@@ -109,7 +109,7 @@ index 1a5c9cf927..fc95b0a1fa 100644
  	wl_event_loop_add_idle(loop, launch_desktop_shell_process, shell);
  
 diff --git a/desktop-shell/shell.h b/desktop-shell/shell.h
-index 4a0f5c4333..560c216edf 100644
+index 4a0f5c4..560c216 100644
 --- a/desktop-shell/shell.h
 +++ b/desktop-shell/shell.h
 @@ -156,6 +156,8 @@ struct desktop_shell {
@@ -122,7 +122,7 @@ index 4a0f5c4333..560c216edf 100644
  
  	char *client;
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 0139668226..8eaa1f62db 100644
+index 0139668..8eaa1f6 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1410,6 +1410,7 @@ struct weston_compositor {
@@ -134,7 +134,7 @@ index 0139668226..8eaa1f62db 100644
  	struct wl_signal show_input_panel_signal;
  	struct wl_signal hide_input_panel_signal;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 2c0874c39f..d7d5e05d05 100644
+index 2c0874c..d7d5e05 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -9222,6 +9222,7 @@ weston_compositor_create(struct wl_display *display,
