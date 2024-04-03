@@ -55,15 +55,16 @@ ifeq ($(BR2_PACKAGE_WESTON_SIMPLE_CLIENTS),y)
 WESTON_SIMPLE_CLIENTS += dmabuf-egl dmabuf-feedback egl
 endif
 ifeq ($(BR2_PACKAGE_PIPEWIRE)$(BR2_PACKAGE_WESTON_DRM),yy)
-WESTON_CONF_OPTS += -Dpipewire=true
+WESTON_CONF_OPTS += -Dpipewire=true -Dbackend-pipewire=true
 WESTON_DEPENDENCIES += pipewire
 else
-WESTON_CONF_OPTS += -Dpipewire=false
+WESTON_CONF_OPTS += -Dpipewire=false -Dbackend-pipewire=false
 endif
 else
 WESTON_CONF_OPTS += \
 	-Drenderer-gl=false \
-	-Dpipewire=false
+	-Dpipewire=false \
+	-Dbackend-pipewire=false
 endif
 
 ifeq ($(BR2_PACKAGE_WESTON_VNC),y)
