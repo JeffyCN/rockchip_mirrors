@@ -14,7 +14,6 @@
 #include "multimedia/gst/rtsp.config"
 #include "multimedia/gst/video.config"
 #include "multimedia/mpp.config"
-#include "network/can.config"
 #include "wifibt/bt.config"
 #include "wifibt/wireless.config"
 #include "tools/benchmark.config"
