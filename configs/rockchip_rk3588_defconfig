@@ -1,4 +1,6 @@
 #include "base/base.config"
+#include "bus/can.config"
+#include "bus/pci.config"
 #include "chips/rk3588_aarch64.config"
 #include "font/chinese.config"
 #include "fs/exfat.config"
