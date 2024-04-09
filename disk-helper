@@ -62,6 +62,9 @@ normalize_device()
 	if find /dev/block/by-name/$DEV 2>/dev/null; then
 		return
 	fi
+	if find /dev/disk/*/$DEV 2>/dev/null | head -n 1; then
+		return
+	fi
 
 	# Check partition name
 	UEVENT=$(grep -l -m 1 "^PARTNAME=$DEV$" \
