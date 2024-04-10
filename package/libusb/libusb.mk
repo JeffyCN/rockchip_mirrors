@@ -24,6 +24,10 @@ else
 LIBUSB_CONF_OPTS += --disable-udev
 endif
 
+ifeq ($(BR2_PACKAGE_LIBUSB_STATIC),y)
+LIBUSB_CONF_OPTS += --enable-static
+endif
+
 ifeq ($(BR2_PACKAGE_LIBUSB_EXAMPLES),y)
 LIBUSB_CONF_OPTS += --enable-examples-build
 define LIBUSB_INSTALL_TARGET_EXAMPLES

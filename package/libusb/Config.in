@@ -9,6 +9,11 @@ config BR2_PACKAGE_LIBUSB
 
 if BR2_PACKAGE_LIBUSB
 
+config BR2_PACKAGE_LIBUSB_STATIC
+	bool "Enable static"
+	select BR2_PACKAGE_EUDEV_STATIC if BR2_PACKAGE_EUDEV
+	default y if BR2_STATIC_LIBS
+
 config BR2_PACKAGE_LIBUSB_EXAMPLES
 	bool "build libusb examples"
 
