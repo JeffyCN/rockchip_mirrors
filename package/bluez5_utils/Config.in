@@ -25,6 +25,7 @@ config BR2_PACKAGE_BLUEZ5_UTILS_OBEX
 	bool "build OBEX support"
 	depends on BR2_INSTALL_LIBSTDCPP
 	select BR2_PACKAGE_LIBICAL
+	default y
 	help
 	  Enable OBEX support.
 
@@ -86,6 +87,7 @@ config BR2_PACKAGE_BLUEZ5_UTILS_PLUGINS_HID
 	bool "build hid plugin"
 	depends on BR2_TOOLCHAIN_HEADERS_AT_LEAST_3_18
 	select BR2_PACKAGE_BLUEZ5_UTILS_PLUGINS_HOG
+	default y
 	help
 	  Build plugin for HID (input) profiles.
 

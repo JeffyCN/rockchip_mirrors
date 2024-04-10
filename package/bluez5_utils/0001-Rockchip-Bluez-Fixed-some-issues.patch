@@ -1,0 +1,153 @@
+From 2a18d241e7da70fdabd1523e832c8f045e7103ec Mon Sep 17 00:00:00 2001
+From: Yao Xiao <xiaoyao@rock-chips.com>
+Date: Tue, 12 Mar 2024 15:39:55 +0800
+Subject: [PATCH 1/2] Rockchip: Bluez: Fixed some issues
+
+---
+ plugins/policy.c       |  2 +-
+ profiles/audio/a2dp.c  |  2 ++
+ profiles/audio/avrcp.c | 21 +++++++++++++++++----
+ src/device.c           |  6 +++++-
+ 4 files changed, 25 insertions(+), 6 deletions(-)
+
+diff --git a/plugins/policy.c b/plugins/policy.c
+index 0bbdbfc..f54c237 100644
+--- a/plugins/policy.c
++++ b/plugins/policy.c
+@@ -74,7 +74,7 @@ static GSList *reconnects = NULL;
+ static unsigned int service_id = 0;
+ static GSList *devices = NULL;
+ 
+-static bool auto_enable = false;
++static bool auto_enable = true;
+ 
+ struct policy_data {
+ 	struct btd_device *dev;
+diff --git a/profiles/audio/a2dp.c b/profiles/audio/a2dp.c
+index b43161a..1c88dea 100644
+--- a/profiles/audio/a2dp.c
++++ b/profiles/audio/a2dp.c
+@@ -308,6 +308,8 @@ static int error_to_errno(struct avdtp_error *err)
+ 	case EHOSTDOWN:
+ 	case ECONNABORTED:
+ 	case EBADE:
++	case ECONNREFUSED:
++	case EACCES:
+ 		return -perr;
+ 	default:
+ 		/*
+diff --git a/profiles/audio/avrcp.c b/profiles/audio/avrcp.c
+index dda9a30..471ba64 100644
+--- a/profiles/audio/avrcp.c
++++ b/profiles/audio/avrcp.c
+@@ -1454,7 +1454,7 @@ static uint8_t player_get_status(struct avrcp_player *player)
+ 	const char *value;
+ 
+ 	if (player == NULL)
+-		return AVRCP_PLAY_STATUS_STOPPED;
++		return AVRCP_PLAY_STATUS_PLAYING;
+ 
+ 	value = player->cb->get_status(player->user_data);
+ 	if (value == NULL)
+@@ -1621,6 +1621,8 @@ static uint8_t avrcp_handle_register_notification(struct avrcp *session,
+ 	if (len != 5)
+ 		goto err;
+ 
++	DBG("supported_events: 0x%x, event: 0x%x(0x%x)\n", session->supported_events, 1 << pdu->params[0], pdu->params[0]);
++
+ 	/* Check if event is supported otherwise reject */
+ 	if (!(session->supported_events & (1 << pdu->params[0])))
+ 		goto err;
+@@ -1654,6 +1656,7 @@ static uint8_t avrcp_handle_register_notification(struct avrcp *session,
+ 		break;
+ 	case AVRCP_EVENT_VOLUME_CHANGED:
+ 		volume = media_transport_get_device_volume(dev);
++		DBG("volume: %d");
+ 		if (volume < 0)
+ 			goto err;
+ 
+@@ -3977,7 +3980,7 @@ static gboolean avrcp_get_capabilities_resp(struct avctp *conn, uint8_t code,
+ 		uint8_t event = pdu->params[1 + count];
+ 
+ 		events |= (1 << event);
+-
++		DBG("count: %d, event: 0x%x\n", count, event);
+ 		switch (event) {
+ 		case AVRCP_EVENT_STATUS_CHANGED:
+ 		case AVRCP_EVENT_TRACK_CHANGED:
+@@ -3990,6 +3993,9 @@ static gboolean avrcp_get_capabilities_resp(struct avctp *conn, uint8_t code,
+ 			if (!session->controller ||
+ 						!session->controller->player)
+ 				break;
++
++			if (!btd_device_get_service(session->dev, A2DP_SOURCE_UUID))
++				break;
+ 			/* fall through */
+ 		case AVRCP_EVENT_VOLUME_CHANGED:
+ 			avrcp_register_notification(session, event);
+@@ -4150,6 +4156,7 @@ static void target_init(struct avrcp *session)
+ 		media_transport_update_device_volume(session->dev, init_volume);
+ 	}
+ 
++	/* These events below requires a player */
+ 	session->supported_events |= (1 << AVRCP_EVENT_STATUS_CHANGED) |
+ 				(1 << AVRCP_EVENT_TRACK_CHANGED) |
+ 				(1 << AVRCP_EVENT_TRACK_REACHED_START) |
+@@ -4230,6 +4237,10 @@ static void session_init_control(struct avrcp *session)
+ 
+ 	if (btd_device_get_service(session->dev, AVRCP_REMOTE_UUID) != NULL)
+ 		target_init(session);
++
++	//Force supported volume change
++	session->supported_events |=
++				(1 << AVRCP_EVENT_VOLUME_CHANGED);
+ }
+ 
+ static void controller_destroy(struct avrcp *session)
+@@ -4515,6 +4526,8 @@ static int avrcp_event(struct avrcp *session, uint8_t id, const void *data)
+ 	uint16_t size;
+ 	int err;
+ 
++	DBG("registered_events = 0x%x:0x%x", session->registered_events, 1 << id);
++
+ 	/* Verify that the event is registered */
+ 	if (!(session->registered_events & (1 << id)))
+ 		return -ENOENT;
+@@ -4577,8 +4590,8 @@ int avrcp_set_volume(struct btd_device *dev, int8_t volume, bool notify)
+ 		return -ENOTCONN;
+ 
+ 	if (notify) {
+-		if (!session->target)
+-			return -ENOTSUP;
++		//if (!session->target)
++		//	return -ENOTSUP;
+ 		return avrcp_event(session, AVRCP_EVENT_VOLUME_CHANGED,
+ 								&volume);
+ 	}
+diff --git a/src/device.c b/src/device.c
+index 17bcfbc..1e92ae5 100644
+--- a/src/device.c
++++ b/src/device.c
+@@ -2106,6 +2106,10 @@ static void device_profile_connected(struct btd_device *dev,
+ 		}
+ 	}
+ 
++	if (err == -ECONNREFUSED || err == -EACCES) {
++		DBG("Due to EACCES abort connection");
++		goto done;
++	}
+ 
+ 	pending = dev->pending->data;
+ 	l = find_service_with_profile(dev->pending, profile);
+@@ -4184,7 +4188,7 @@ static struct btd_device *device_new(struct btd_adapter *adapter,
+ 		return NULL;
+ 
+ 	device->tx_power = 127;
+-	device->volume = -1;
++	device->volume = 0x7f;
+ 
+ 	device->db = gatt_db_new();
+ 	if (!device->db) {
+-- 
+2.34.1
+

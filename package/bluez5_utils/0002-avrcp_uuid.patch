@@ -1,0 +1,105 @@
+From d5594ded4ab6c25be069c193f2826059a49b2599 Mon Sep 17 00:00:00 2001
+From: Yao Xiao <xiaoyao@rock-chips.com>
+Date: Tue, 9 Apr 2024 11:23:47 +0800
+Subject: [PATCH 2/2] avrcp_uuid
+
+---
+ profiles/audio/avctp.c |  10 ++++++----
+ profiles/audio/avrcp.c |   8 ++++----
+ src/bluetoothd         | Bin 1774768 -> 1775096 bytes
+ src/device.c           |   5 +++++
+ src/device.h           |   2 ++
+ 5 files changed, 17 insertions(+), 8 deletions(-)
+
+diff --git a/profiles/audio/avctp.c b/profiles/audio/avctp.c
+index 6f64f16..98a3552 100644
+--- a/profiles/audio/avctp.c
++++ b/profiles/audio/avctp.c
+@@ -1597,11 +1597,13 @@ static void avctp_confirm_cb(GIOChannel *chan, gpointer data)
+ 	if (session == NULL)
+ 		return;
+ 
+-	if (btd_device_get_service(device, AVRCP_REMOTE_UUID) == NULL)
+-		btd_device_add_uuid(device, AVRCP_REMOTE_UUID);
++	if (!device_get_svc_refreshed(device)) {
++		if (btd_device_get_service(device, AVRCP_REMOTE_UUID) == NULL)
++			btd_device_add_uuid(device, AVRCP_REMOTE_UUID);
+ 
+-	if (btd_device_get_service(device, AVRCP_TARGET_UUID) == NULL)
+-		btd_device_add_uuid(device, AVRCP_TARGET_UUID);
++		if (btd_device_get_service(device, AVRCP_TARGET_UUID) == NULL)
++			btd_device_add_uuid(device, AVRCP_TARGET_UUID);
++	}
+ 
+ 	switch (psm) {
+ 	case AVCTP_CONTROL_PSM:
+diff --git a/profiles/audio/avrcp.c b/profiles/audio/avrcp.c
+index 471ba64..22943af 100644
+--- a/profiles/audio/avrcp.c
++++ b/profiles/audio/avrcp.c
+@@ -4706,7 +4706,7 @@ static int avrcp_target_server_probe(struct btd_profile *p,
+ 		return -EPROTONOSUPPORT;
+ 
+ done:
+-	record = avrcp_tg_record(server->browsing);
++	record = avrcp_ct_record(server->browsing);
+ 	if (!record) {
+ 		error("Unable to allocate new service record");
+ 		avrcp_target_server_remove(p, adapter);
+@@ -4719,7 +4719,7 @@ done:
+ 		sdp_record_free(record);
+ 		return -1;
+ 	}
+-	server->tg_record_id = record->handle;
++	server->ct_record_id = record->handle;
+ 
+ 	return 0;
+ }
+@@ -4789,7 +4789,7 @@ static int avrcp_controller_server_probe(struct btd_profile *p,
+ 		return -EPROTONOSUPPORT;
+ 
+ done:
+-	record = avrcp_ct_record(server->browsing);
++	record = avrcp_tg_record(server->browsing);
+ 	if (!record) {
+ 		error("Unable to allocate new service record");
+ 		avrcp_controller_server_remove(p, adapter);
+@@ -4802,7 +4802,7 @@ done:
+ 		sdp_record_free(record);
+ 		return -1;
+ 	}
+-	server->ct_record_id = record->handle;
++	server->tg_record_id = record->handle;
+ 
+ 	return 0;
+ }
+
+diff --git a/src/device.c b/src/device.c
+index 1e92ae5..d58dffe 100644
+--- a/src/device.c
++++ b/src/device.c
+@@ -2834,6 +2834,11 @@ void device_set_refresh_discovery(struct btd_device *dev, bool refresh)
+ 	dev->refresh_discovery = refresh;
+ }
+ 
++bool device_get_svc_refreshed(struct btd_device *device)
++{
++	return device->svc_refreshed;
++}
++
+ static void device_set_svc_refreshed(struct btd_device *device, bool value)
+ {
+ 	if (device->svc_refreshed == value)
+diff --git a/src/device.h b/src/device.h
+index 8bb3866..6f2838b 100644
+--- a/src/device.h
++++ b/src/device.h
+@@ -199,3 +199,5 @@ typedef void (*bt_device_ad_func_t)(void *data, void *user_data);
+ 
+ void btd_device_foreach_ad(struct btd_device *dev, bt_device_ad_func_t func,
+ 							void *data);
++
++bool device_get_svc_refreshed(struct btd_device *device);
+-- 
+2.34.1
+
