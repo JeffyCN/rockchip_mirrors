@@ -26,7 +26,7 @@ ROOTFS_EXT2_OPTS = \
 ROOTFS_EXT2_DEPENDENCIES = host-e2fsprogs
 
 ifneq ($(BR2_TARGET_ROOTFS_EXT2_SIZE_AUTO),y)
-ifeq ($(ROOTFS_EXT2_SIZE),)
+ifeq ($(BR2_TARGET_ROOTFS_EXT2)-$(ROOTFS_EXT2_SIZE),y-)
 $(error BR2_TARGET_ROOTFS_EXT2_SIZE cannot be empty)
 endif
 
