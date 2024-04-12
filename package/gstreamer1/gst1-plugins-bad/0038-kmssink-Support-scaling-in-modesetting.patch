@@ -1,7 +1,7 @@
-From fea920aec8cc5434eaa8603bf65739f135b165d4 Mon Sep 17 00:00:00 2001
+From 6fc98825f0e07f208e3ee76b8fb8b4d8b2f24889 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:01:12 +0800
-Subject: [PATCH 39/43] kmssink: Support scaling in modesetting
+Subject: [PATCH 38/46] kmssink: Support scaling in modesetting
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -10,10 +10,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 82 insertions(+), 36 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index a796a1c..d6108ec 100644
+index 88fc30d..ed36c46 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -80,6 +80,7 @@ static GstFlowReturn gst_kms_sink_show_frame (GstVideoSink * vsink,
+@@ -79,6 +79,7 @@ static GstFlowReturn gst_kms_sink_show_frame (GstVideoSink * vsink,
      GstBuffer * buf);
  static void gst_kms_sink_video_overlay_init (GstVideoOverlayInterface * iface);
  static void gst_kms_sink_drain (GstKMSSink * self);
@@ -21,7 +21,7 @@ index a796a1c..d6108ec 100644
  
  #define parent_class gst_kms_sink_parent_class
  G_DEFINE_TYPE_WITH_CODE (GstKMSSink, gst_kms_sink, GST_TYPE_VIDEO_SINK,
-@@ -582,12 +583,13 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
+@@ -581,12 +582,13 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
      plane = drmModeGetPlane (fd, pres->planes[i]);
      plane_type = drm_plane_get_type (fd, plane);
  
@@ -38,7 +38,7 @@ index a796a1c..d6108ec 100644
          /* Fallback to the first unused overlay plane */
          fallback = plane->plane_id;
        }
-@@ -595,7 +597,7 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
+@@ -594,7 +596,7 @@ find_plane_for_crtc (int fd, drmModeRes * res, drmModePlaneRes * pres,
      drmModeFreePlane (plane);
    }
  
@@ -47,7 +47,7 @@ index a796a1c..d6108ec 100644
      return drmModeGetPlane (fd, fallback);
  
    return NULL;
-@@ -833,13 +835,15 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+@@ -832,13 +834,15 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
    drmModeConnector *conn;
    int err;
    gint i;
@@ -64,7 +64,7 @@ index a796a1c..d6108ec 100644
    kmsmem = NULL;
  
    if (self->conn_id < 0)
-@@ -847,33 +851,55 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
+@@ -846,33 +850,55 @@ configure_mode_setting (GstKMSSink * self, GstVideoInfo * vinfo)
  
    GST_INFO_OBJECT (self, "configuring mode setting");
  
@@ -130,7 +130,7 @@ index a796a1c..d6108ec 100644
  
    ret = TRUE;
  
-@@ -881,6 +907,10 @@ bail:
+@@ -880,6 +906,10 @@ bail:
    if (conn)
      drmModeFreeConnector (conn);
  
@@ -141,7 +141,7 @@ index a796a1c..d6108ec 100644
    return ret;
  
    /* ERRORS */
-@@ -905,6 +935,11 @@ modesetting_failed:
+@@ -904,6 +934,11 @@ modesetting_failed:
      GST_ERROR_OBJECT (self, "Failed to set mode: %s", g_strerror (errno));
      goto bail;
    }
@@ -153,7 +153,7 @@ index a796a1c..d6108ec 100644
  }
  
  static void
-@@ -1041,7 +1076,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -1040,7 +1075,7 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
  
        format = gst_video_format_to_string (fmt);
  
@@ -162,7 +162,7 @@ index a796a1c..d6108ec 100644
          caps = gst_caps_new_simple ("video/x-raw",
              "format", G_TYPE_STRING, format,
              "width", G_TYPE_INT, mode->hdisplay,
-@@ -1342,6 +1377,8 @@ gst_kms_sink_start (GstBaseSink * bsink)
+@@ -1338,6 +1373,8 @@ gst_kms_sink_start (GstBaseSink * bsink)
      self->modesetting_enabled = TRUE;
    }
  
@@ -171,7 +171,7 @@ index a796a1c..d6108ec 100644
    if (crtc->mode_valid && self->modesetting_enabled && self->restore_crtc) {
      self->saved_crtc = (drmModeCrtc *) crtc;
    }
-@@ -1380,13 +1417,6 @@ gst_kms_sink_start (GstBaseSink * bsink)
+@@ -1376,13 +1413,6 @@ gst_kms_sink_start (GstBaseSink * bsink)
    self->hdisplay = crtc->mode.hdisplay;
    self->vdisplay = crtc->mode.vdisplay;
  
@@ -185,7 +185,7 @@ index a796a1c..d6108ec 100644
    self->pending_rect = self->render_rect;
    GST_OBJECT_UNLOCK (self);
  
-@@ -1748,9 +1778,6 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -1744,9 +1774,6 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
      self->pool = NULL;
    }
  
@@ -195,7 +195,7 @@ index a796a1c..d6108ec 100644
    GST_OBJECT_LOCK (self);
    if (self->reconfigure) {
      self->reconfigure = FALSE;
-@@ -1785,13 +1812,6 @@ no_disp_ratio:
+@@ -1781,13 +1808,6 @@ no_disp_ratio:
      return FALSE;
    }
  
@@ -209,7 +209,7 @@ index a796a1c..d6108ec 100644
  }
  
  static gboolean
-@@ -2253,6 +2273,14 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2249,6 +2269,14 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
    GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
  
    GST_OBJECT_LOCK (self);
@@ -224,7 +224,7 @@ index a796a1c..d6108ec 100644
    if ((crop = gst_buffer_get_video_crop_meta (buffer))) {
      GstVideoInfo cropped_vinfo = *vinfo;
  
-@@ -2267,8 +2295,8 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2263,8 +2291,8 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
      src.y = crop->y;
    }
  
@@ -235,7 +235,7 @@ index a796a1c..d6108ec 100644
  
  retry_set_plane:
    gst_video_sink_center_rect (src, dst, &result, self->can_scale);
-@@ -2319,7 +2347,17 @@ retry_set_plane:
+@@ -2315,7 +2343,17 @@ retry_set_plane:
        src.x << 16, src.y << 16, src.w << 16, src.h << 16);
    if (ret) {
      if (self->can_scale) {
@@ -253,7 +253,7 @@ index a796a1c..d6108ec 100644
        goto retry_set_plane;
      }
      goto set_plane_failed;
-@@ -2339,7 +2377,9 @@ sync_frame:
+@@ -2335,7 +2373,9 @@ sync_frame:
      self->last_height = GST_VIDEO_SINK_HEIGHT (self);
      self->last_vinfo = self->vinfo;
    }
@@ -264,7 +264,7 @@ index a796a1c..d6108ec 100644
  
    GST_OBJECT_UNLOCK (self);
    res = GST_FLOW_OK;
-@@ -2354,6 +2394,11 @@ buffer_invalid:
+@@ -2350,6 +2390,11 @@ buffer_invalid:
      GST_ERROR_OBJECT (self, "invalid buffer: it doesn't have a fb id");
      goto bail;
    }

@@ -1,7 +1,7 @@
-From 4c22cbe6dcba0ce250d1442701ec1fe437c540f5 Mon Sep 17 00:00:00 2001
+From 7e46c4c5eed2bdffaa896703e0c5875965142590 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 8 Nov 2021 18:45:00 +0800
-Subject: [PATCH 24/43] waylandsink: Support frame-sync mode
+Subject: [PATCH 23/46] waylandsink: Support frame-sync mode
 
 Set env "WAYLANDSINK_SYNC_FRAME" to enable frame syncing.
 

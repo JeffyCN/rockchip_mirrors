@@ -1,7 +1,7 @@
-From 591814412cc411dd65108b4a113ebbc054c23505 Mon Sep 17 00:00:00 2001
+From 2bd8e076407ed807e74ba5787c41a2d29252cf38 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Nov 2021 11:14:37 +0800
-Subject: [PATCH 26/43] waylandsink: Support NV12_10LE40 NV16_10LE40 and
+Subject: [PATCH 25/46] waylandsink: Support NV12_10LE40 NV16_10LE40 and
  NV12|NV12_10LE40|NV16 (AFBC)
 
 Tested on RK356x with:

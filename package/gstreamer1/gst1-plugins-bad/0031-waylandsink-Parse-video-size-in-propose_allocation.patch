@@ -1,7 +1,7 @@
-From ec6388ca70ad0a54971c22f3bebb1f032dd353dd Mon Sep 17 00:00:00 2001
+From bb338b859ba7a844aae39226edbb4ebf4c03e501 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 11 May 2022 18:12:39 +0800
-Subject: [PATCH 32/43] waylandsink: Parse video size in propose_allocation()
+Subject: [PATCH 31/46] waylandsink: Parse video size in propose_allocation()
 
 In some cases it would be called before set_caps().
 

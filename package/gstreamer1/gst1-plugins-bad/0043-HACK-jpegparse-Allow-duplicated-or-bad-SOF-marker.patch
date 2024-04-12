@@ -1,7 +1,7 @@
-From aeaaf26dcb49c952165d2e309c4c66cb8e46f10f Mon Sep 17 00:00:00 2001
+From 8c6bfafd562f427fcb4a9168b55195b571d8ea6b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 25 Mar 2024 12:14:30 +0800
-Subject: [PATCH 44/44] HACK: jpegparse: Allow duplicated or bad SOF marker
+Subject: [PATCH 43/46] HACK: jpegparse: Allow duplicated or bad SOF marker
 
 Warn about it instead of error out.
 

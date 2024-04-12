@@ -1,7 +1,7 @@
-From 12194a30899cce0aacde5744091d8d119e2a0d37 Mon Sep 17 00:00:00 2001
+From 063243c752d039c3c099d3f34e9da0eb75dd5b55 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 29 Mar 2024 17:29:09 +0800
-Subject: [PATCH 45/45] waylandsink: Support NV24 shm format
+Subject: [PATCH 44/46] waylandsink: Support NV24 shm format
 
 Tested with:
 gst-launch-1.0 videotestsrc ! 'video/x-raw,format=NV24' ! waylandsink
