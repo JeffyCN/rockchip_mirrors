@@ -1,7 +1,7 @@
-From 3152d8afa72982dbe319ba241ea7f1f4327a00ea Mon Sep 17 00:00:00 2001
+From 534e15e392c36153d719596d20a6fae842985c79 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 17:56:40 +0800
-Subject: [PATCH 37/43] kmssink: Improve monitor and plane selection
+Subject: [PATCH 36/46] kmssink: Improve monitor and plane selection
 
 Major changes:
 1/ Filter out disconnected monitors.
@@ -16,10 +16,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 112 insertions(+), 33 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 6faf091..aa3a8f3 100644
+index 48ef8a3..187b094 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -512,32 +512,89 @@ kms_open (gchar ** driver)
+@@ -511,32 +511,89 @@ kms_open (gchar ** driver)
    return fd;
  }
  
@@ -123,7 +123,7 @@ index 6faf091..aa3a8f3 100644
    return NULL;
  }
  
-@@ -648,6 +705,25 @@ find_first_used_connector (int fd, drmModeRes * res)
+@@ -647,6 +704,25 @@ find_first_used_connector (int fd, drmModeRes * res)
    return NULL;
  }
  
@@ -149,7 +149,7 @@ index 6faf091..aa3a8f3 100644
  static drmModeConnector *
  find_main_monitor (int fd, drmModeRes * res)
  {
-@@ -666,6 +742,10 @@ find_main_monitor (int fd, drmModeRes * res)
+@@ -665,6 +741,10 @@ find_main_monitor (int fd, drmModeRes * res)
    if (!conn)
      conn = find_first_used_connector (fd, res);
  
@@ -160,7 +160,7 @@ index 6faf091..aa3a8f3 100644
    /* if no connector is used, grab the first one */
    if (!conn)
      conn = drmModeGetConnector (fd, res->connectors[0]);
-@@ -1207,11 +1287,9 @@ gst_kms_sink_start (GstBaseSink * bsink)
+@@ -1206,11 +1286,9 @@ gst_kms_sink_start (GstBaseSink * bsink)
    drmModeCrtc *crtc;
    drmModePlaneRes *pres;
    drmModePlane *plane;
@@ -172,7 +172,7 @@ index 6faf091..aa3a8f3 100644
    ret = FALSE;
    res = NULL;
    conn = NULL;
-@@ -1248,43 +1326,48 @@ gst_kms_sink_start (GstBaseSink * bsink)
+@@ -1244,43 +1322,48 @@ gst_kms_sink_start (GstBaseSink * bsink)
    if (!conn)
      goto connector_failed;
  
@@ -230,7 +230,7 @@ index 6faf091..aa3a8f3 100644
    gst_kms_sink_configure_plane_zpos (self, FALSE);
  
    GST_INFO_OBJECT (self, "connector id = %d / crtc id = %d / plane id = %d",
-@@ -1392,14 +1475,9 @@ plane_resources_failed:
+@@ -1388,14 +1471,9 @@ plane_resources_failed:
  
  plane_failed:
    {

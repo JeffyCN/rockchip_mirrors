@@ -1,7 +1,7 @@
-From 5010c8f8ae1a37491c589b9175af0b4c3442d88c Mon Sep 17 00:00:00 2001
+From ecbed7d427d91b75d5450d248e0c20c3a10d6439 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 5 May 2022 17:56:46 +0800
-Subject: [PATCH 31/43] waylandsink: Support pointer and touch
+Subject: [PATCH 30/46] waylandsink: Support pointer and touch
 
 Based on weston's client window and simple-egl.
 

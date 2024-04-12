@@ -1,7 +1,7 @@
-From e552f6077fb6b0a0f8a690f5705af4d7884ac68f Mon Sep 17 00:00:00 2001
+From 4bea630fc4c001705cd69835b71954320d5443c3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 21 Apr 2021 04:44:38 +0800
-Subject: [PATCH 25/43] kmssink: Support NV12_10LE40 NV16_10LE40 and
+Subject: [PATCH 24/46] kmssink: Support NV12_10LE40 NV16_10LE40 and
  NV12|NV12_10LE40|NV16 (AFBC)
 
 Support using NV12_10LE40 NV16_10LE40 and ARM AFBC compressed format.
@@ -92,10 +92,10 @@ index 6687f3b..ad56a17 100644
      GST_ERROR_OBJECT (alloc, "Failed to bind to framebuffer: %s (%d)",
          g_strerror (errno), errno);
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index de29e46..56ef067 100644
+index b25e599..eb1ffb5 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
-@@ -823,6 +823,84 @@ modesetting_failed:
+@@ -822,6 +822,84 @@ modesetting_failed:
    }
  }
  
@@ -180,7 +180,7 @@ index de29e46..56ef067 100644
  static gboolean
  ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
      drmModePlane * plane, drmModeRes * res)
-@@ -856,7 +934,21 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -855,7 +933,21 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
        mode = &conn->modes[i];
  
      for (j = 0; j < plane->count_formats; j++) {
@@ -203,7 +203,7 @@ index de29e46..56ef067 100644
        if (fmt == GST_VIDEO_FORMAT_UNKNOWN) {
          GST_INFO_OBJECT (self, "ignoring format %" GST_FOURCC_FORMAT,
              GST_FOURCC_ARGS (plane->formats[j]));
-@@ -881,6 +973,16 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
+@@ -880,6 +972,16 @@ ensure_allowed_caps (GstKMSSink * self, drmModeConnector * conn,
        if (!caps)
          continue;
  
@@ -220,7 +220,7 @@ index de29e46..56ef067 100644
        tmp_caps = gst_caps_merge (tmp_caps, caps);
      }
  
-@@ -1529,11 +1631,23 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
+@@ -1525,11 +1627,23 @@ gst_kms_sink_set_caps (GstBaseSink * bsink, GstCaps * caps)
  {
    GstKMSSink *self;
    GstVideoInfo vinfo;
@@ -244,7 +244,7 @@ index de29e46..56ef067 100644
    self->vinfo = vinfo;
  
    if (!gst_kms_sink_calculate_display_ratio (self, &vinfo,
-@@ -1608,7 +1722,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1604,7 +1718,9 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    gboolean need_pool;
    GstVideoInfo vinfo;
    GstBufferPool *pool;
@@ -254,7 +254,7 @@ index de29e46..56ef067 100644
  
    self = GST_KMS_SINK (bsink);
  
-@@ -1620,6 +1736,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
+@@ -1616,6 +1732,10 @@ gst_kms_sink_propose_allocation (GstBaseSink * bsink, GstQuery * query)
    if (!gst_video_info_from_caps (&vinfo, caps))
      goto invalid_caps;
  
@@ -265,7 +265,7 @@ index de29e46..56ef067 100644
    size = GST_VIDEO_INFO_SIZE (&vinfo);
  
    pool = NULL;
-@@ -1658,6 +1778,11 @@ invalid_caps:
+@@ -1654,6 +1774,11 @@ invalid_caps:
      GST_DEBUG_OBJECT (bsink, "invalid caps specified");
      return FALSE;
    }
@@ -277,7 +277,7 @@ index de29e46..56ef067 100644
  no_pool:
    {
      /* Already warned in create_pool */
-@@ -1890,6 +2015,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
+@@ -1886,6 +2011,11 @@ gst_kms_sink_copy_to_dumb_buffer (GstKMSSink * self, GstVideoInfo * vinfo,
    gboolean success;
    GstBuffer *buf = NULL;
  
@@ -289,7 +289,7 @@ index de29e46..56ef067 100644
    if (!ensure_internal_pool (self, vinfo, inbuf))
      goto bail;
  
-@@ -2070,6 +2200,10 @@ retry_set_plane:
+@@ -2066,6 +2196,10 @@ retry_set_plane:
    gst_kms_push_hdr_infoframe (self, FALSE);
  #endif
  
@@ -300,7 +300,7 @@ index de29e46..56ef067 100644
    GST_TRACE_OBJECT (self,
        "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
        result.x, result.y, result.w, result.h, src.x, src.y, src.w, src.h);
-@@ -2159,6 +2293,9 @@ gst_kms_sink_drain (GstKMSSink * self)
+@@ -2155,6 +2289,9 @@ gst_kms_sink_drain (GstKMSSink * self)
  
      dumb_buf = gst_kms_sink_copy_to_dumb_buffer (self, &self->last_vinfo,
          parent_meta->buffer);
