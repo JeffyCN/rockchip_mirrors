@@ -5,8 +5,44 @@ config BR2_PACKAGE_RKPARTYBOX
 	depends on BR2_PACKAGE_WPA_SUPPLICANT
 	help
 	  rkpartybox demo
+
 config BR2_PACKAGE_RK3308_CORE_BOARD
 	bool "RKPARTYBOX core board only"
 	depends on BR2_PACKAGE_RKPARTYBOX
 	help
-	  rkpartybox core board only
+	  partybox core board only
+
+config BR2_PACKAGE_PBOX_LCD_DISPLAY
+	bool "RKPARTYBOX LCD display"
+	depends on !BR2_PACKAGE_RK3308_CORE_BOARD
+	default y if BR2_PACKAGE_RKPARTYBOX
+	help
+	  partybox lcd display
+
+config BR2_PACKAGE_PBOX_LED_EFFECT
+	bool "RKPARTYBOX led effect"
+	depends on BR2_PACKAGE_RKPARTYBOX
+	default y
+	help
+	  partybox led effect demo
+
+config BR2_PACKAGE_ONCHIP_MIC
+	bool "RKPARTYBOX on-chip MICs"
+	depends on BR2_PACKAGE_RKPARTYBOX
+	default y
+	help
+	  partybox rockchip on-chip MICs
+
+config BR2_PACKAGE_MIC_NUM
+	int "Mics or guitar input numbers"
+	range 1 3
+	default 1
+	depends on BR2_PACKAGE_ONCHIP_MIC
+	help
+	  number of on-chip Mics or guitar inputs
+
+config BR2_PACKAGE_RKCHIP_SARADC
+	bool "RKPARTYBOX on-chip rotary adc keys"
+	depends on BR2_PACKAGE_RKPARTYBOX
+	help
+	  partybox rockchip on-chip rotary adc keys
