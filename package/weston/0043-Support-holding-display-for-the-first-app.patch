@@ -1,7 +1,7 @@
-From 04fc5cd34919c10e89515536994f310b7aca668f Mon Sep 17 00:00:00 2001
+From 39a4d899dd6883f0ce1ec4cdfd6c0f9dc9ec96db Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 10:20:40 +0800
-Subject: [PATCH 43/97] Support holding display for the first app
+Subject: [PATCH 43/98] Support holding display for the first app
 
 Use '-w' or '--warm-up' to enable it.
 
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 40 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 146bbf8f79..c829e9d9fc 100644
+index 146bbf8..c829e9d 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -709,6 +709,7 @@ usage(int error_code)
@@ -56,20 +56,20 @@ index 146bbf8f79..c829e9d9fc 100644
  	weston_compositor_log_capabilities(wet.compositor);
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 78425aca50..a62f7c57c7 100644
+index be22768..df34524 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1540,6 +1540,8 @@ struct weston_compositor {
  
  	enum weston_output_flow output_flow;
- 	struct weston_output *prefer_output;
+ 	struct weston_output *preferred_output;
 +
 +	bool warm_up;
  };
  
  struct weston_solid_buffer_values {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index fb21a687ad..cd8fd5659e 100644
+index c80a869..2993ae8 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -355,6 +355,24 @@ weston_compositor_is_static_layer(struct weston_layer *layer)
@@ -97,7 +97,7 @@ index fb21a687ad..cd8fd5659e 100644
  /** Send wl_output events for mode and scale changes
   *
   * \param head Send on all resources bound to this head.
-@@ -3367,7 +3385,14 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
+@@ -3370,7 +3388,14 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
  	wl_list_init(&compositor->view_list);
  
  	wl_list_for_each(layer, &compositor->layer_list, link) {
@@ -112,7 +112,7 @@ index fb21a687ad..cd8fd5659e 100644
  			view_list_add(compositor, view);
  		}
  	}
-@@ -3446,6 +3471,11 @@ weston_output_repaint(struct weston_output *output)
+@@ -3449,6 +3474,11 @@ weston_output_repaint(struct weston_output *output)
  	if (ec->view_list_needs_rebuild)
  		weston_compositor_build_view_list(ec);
  

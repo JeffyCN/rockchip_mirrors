@@ -1,7 +1,7 @@
-From bb31eedc8c3fba88444dc02e7d21fde3891ad02d Mon Sep 17 00:00:00 2001
+From 78d83be49e60697556fde6aa68ced624644f36f3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 19 Sep 2023 11:05:33 +0800
-Subject: [PATCH 45/97] Support hiding cursor
+Subject: [PATCH 45/98] Support hiding cursor
 
 Add below to weston.ini:
 [shell]
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 9 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index c829e9d9fc..bb582ec1a2 100644
+index c829e9d..bb582ec 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -4400,6 +4400,10 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
@@ -30,11 +30,11 @@ index c829e9d9fc..bb582ec1a2 100644
  		weston_log("fatal: unhandled option: %s\n", argv[i]);
  	if (argc > 1)
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index a62f7c57c7..f9134859c1 100644
+index df34524..7954f5f 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1542,6 +1542,8 @@ struct weston_compositor {
- 	struct weston_output *prefer_output;
+ 	struct weston_output *preferred_output;
  
  	bool warm_up;
 +
@@ -43,10 +43,10 @@ index a62f7c57c7..f9134859c1 100644
  
  struct weston_solid_buffer_values {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index cd8fd5659e..9e177b1404 100644
+index 2993ae8..7f9a839 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -3387,6 +3387,9 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
+@@ -3390,6 +3390,9 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
  	wl_list_for_each(layer, &compositor->layer_list, link) {
  		bool system_layer = weston_compositor_is_system_layer(layer);
  

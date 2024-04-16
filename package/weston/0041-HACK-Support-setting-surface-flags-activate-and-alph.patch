@@ -1,4 +1,4 @@
-From 98247e724b2731f19a64c1935be56cf7e5a8e4eb Mon Sep 17 00:00:00 2001
+From 586563c537a5b9f6f3218e14e1a97566b4315709 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 7 May 2020 08:55:42 +0800
 Subject: [PATCH 41/98] HACK: Support setting surface flags activate and alpha
@@ -20,7 +20,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 256 insertions(+), 12 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 5754100..cd38479 100644
+index ac04690..1630720 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -1684,10 +1684,17 @@ static void
@@ -67,7 +67,7 @@ index 5754100..cd38479 100644
  }
  
  static void
-@@ -3074,6 +3081,10 @@ resume_desktop(struct desktop_shell *shell)
+@@ -3084,6 +3091,10 @@ resume_desktop(struct desktop_shell *shell)
  	weston_layer_set_position(&shell->panel_layer,
  				  WESTON_LAYER_POSITION_UI);
  	weston_layer_set_position(&ws->layer, WESTON_LAYER_POSITION_NORMAL);
@@ -78,7 +78,7 @@ index 5754100..cd38479 100644
  
  	restore_focus_state(shell, get_current_workspace(shell));
  
-@@ -3586,10 +3597,8 @@ void
+@@ -3596,10 +3607,8 @@ void
  lower_fullscreen_layer(struct desktop_shell *shell,
  		       struct weston_output *lowering_output)
  {
@@ -89,7 +89,7 @@ index 5754100..cd38479 100644
  	wl_list_for_each_reverse_safe(view, prev,
  				      &shell->fullscreen_layer.view_list.link,
  				      layer_link.link) {
-@@ -3607,10 +3616,10 @@ lower_fullscreen_layer(struct desktop_shell *shell,
+@@ -3617,10 +3626,10 @@ lower_fullscreen_layer(struct desktop_shell *shell,
  		if (shsurf->fullscreen.black_view)
  			weston_view_move_to_layer(shsurf->fullscreen.black_view->view, NULL);
  
@@ -103,7 +103,7 @@ index 5754100..cd38479 100644
  	}
  }
  
-@@ -3634,7 +3643,7 @@ activate(struct desktop_shell *shell, struct weston_view *view,
+@@ -3644,7 +3653,7 @@ activate(struct desktop_shell *shell, struct weston_view *view,
  	struct weston_surface *main_surface;
  	struct focus_state *state;
  	struct workspace *ws;
@@ -112,7 +112,7 @@ index 5754100..cd38479 100644
  	struct shell_surface *shsurf, *shsurf_child;
  	struct shell_seat *shseat = get_shell_seat(seat);
  
-@@ -3654,6 +3663,9 @@ activate(struct desktop_shell *shell, struct weston_view *view,
+@@ -3664,6 +3673,9 @@ activate(struct desktop_shell *shell, struct weston_view *view,
  	if (shsurf->output)
  		lower_fullscreen_layer(shell, shsurf->output);
  
@@ -122,7 +122,7 @@ index 5754100..cd38479 100644
  	weston_view_activate_input(view, seat, flags);
  
  	if (shseat && shseat->focused_surface &&
-@@ -3676,6 +3688,7 @@ activate(struct desktop_shell *shell, struct weston_view *view,
+@@ -3686,6 +3698,7 @@ activate(struct desktop_shell *shell, struct weston_view *view,
  	old_es = state->keyboard_focus;
  	focus_state_set_focus(state, es);
  
@@ -130,7 +130,7 @@ index 5754100..cd38479 100644
  	if (weston_desktop_surface_get_fullscreen(shsurf->desktop_surface) &&
  	    flags & WESTON_ACTIVATE_FLAG_CONFIGURE)
  		shell_set_view_fullscreen(shsurf);
-@@ -3684,7 +3697,7 @@ activate(struct desktop_shell *shell, struct weston_view *view,
+@@ -3694,7 +3707,7 @@ activate(struct desktop_shell *shell, struct weston_view *view,
  	 * order as appropriate. */
  	shell_surface_update_layer(shsurf);
  
@@ -139,7 +139,7 @@ index 5754100..cd38479 100644
  		assert(shell->focus_animation_type == ANIMATION_DIM_LAYER);
  		ws = get_current_workspace(shell);
  		animate_focus_change(shell, ws, get_default_view(old_es), get_default_view(es));
-@@ -3793,6 +3806,8 @@ lock(struct desktop_shell *shell)
+@@ -3803,6 +3816,8 @@ lock(struct desktop_shell *shell)
  	if (shell->showing_input_panels)
  		weston_layer_unset_position(&shell->input_panel_layer);
  	weston_layer_unset_position(&ws->layer);
@@ -148,7 +148,7 @@ index 5754100..cd38479 100644
  
  	weston_layer_set_position(&shell->lock_layer,
  				  WESTON_LAYER_POSITION_LOCK);
-@@ -4567,6 +4582,8 @@ shell_for_each_layer(struct desktop_shell *shell,
+@@ -4578,6 +4593,8 @@ shell_for_each_layer(struct desktop_shell *shell,
  	func(shell, &shell->lock_layer, data);
  	func(shell, &shell->input_panel_layer, data);
  	func(shell, &shell->workspace.layer, data);
@@ -157,7 +157,7 @@ index 5754100..cd38479 100644
  }
  
  static void
-@@ -4865,6 +4882,8 @@ shell_destroy(struct wl_listener *listener, void *data)
+@@ -4876,6 +4893,8 @@ shell_destroy(struct wl_listener *listener, void *data)
  
  	workspace_destroy(&shell->workspace);
  
@@ -166,7 +166,7 @@ index 5754100..cd38479 100644
  	desktop_shell_destroy_layer(&shell->panel_layer);
  	desktop_shell_destroy_layer(&shell->background_layer);
  	desktop_shell_destroy_layer(&shell->lock_layer);
-@@ -4994,6 +5013,8 @@ wet_shell_init(struct weston_compositor *ec,
+@@ -5005,6 +5024,8 @@ wet_shell_init(struct weston_compositor *ec,
  	weston_layer_init(&shell->background_layer, ec);
  	weston_layer_init(&shell->lock_layer, ec);
  	weston_layer_init(&shell->input_panel_layer, ec);
@@ -175,7 +175,7 @@ index 5754100..cd38479 100644
  
  	weston_layer_set_position(&shell->fullscreen_layer,
  				  WESTON_LAYER_POSITION_FULLSCREEN);
-@@ -5001,6 +5022,10 @@ wet_shell_init(struct weston_compositor *ec,
+@@ -5012,6 +5033,10 @@ wet_shell_init(struct weston_compositor *ec,
  				  WESTON_LAYER_POSITION_UI);
  	weston_layer_set_position(&shell->background_layer,
  				  WESTON_LAYER_POSITION_BACKGROUND);
@@ -200,7 +200,7 @@ index debb365..7ae6c65 100644
  	struct wl_listener pointer_focus_listener;
  	struct weston_surface *grab_surface;
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index b5b9624..78425ac 100644
+index ec22aa6..be22768 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1859,6 +1859,14 @@ struct weston_pointer_constraint {
@@ -231,7 +231,7 @@ index b5b9624..78425ac 100644
  
  struct weston_subsurface {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 42ec033..fb21a68 100644
+index 7a3ac2e..c80a869 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -602,7 +602,7 @@ weston_view_create_internal(struct weston_surface *surface)
@@ -252,7 +252,7 @@ index 42ec033..fb21a68 100644
  	surface->buffer_viewport.buffer.transform = WL_OUTPUT_TRANSFORM_NORMAL;
  	surface->buffer_viewport.buffer.scale = 1;
  	surface->buffer_viewport.buffer.src_width = wl_fixed_from_int(-1);
-@@ -2376,6 +2378,12 @@ weston_compositor_pick_view(struct weston_compositor *compositor,
+@@ -2379,6 +2381,12 @@ weston_compositor_pick_view(struct weston_compositor *compositor,
  		if (!weston_view_takes_input_at_point(view, surf_pos))
  			continue;
  

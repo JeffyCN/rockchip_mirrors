@@ -1,7 +1,7 @@
-From 09c68d094a1784640e2e7cfa2d3bf2b79fe55b52 Mon Sep 17 00:00:00 2001
+From 166bed34a875569f1b1bc8f5ac9d9be5dca61d6e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Sep 2022 17:24:12 +0800
-Subject: [PATCH 74/97] HACK: Honour cursor-size config
+Subject: [PATCH 74/98] HACK: Honour cursor-size config
 
 By scaling the cursor surface.
 
@@ -16,7 +16,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  6 files changed, 45 insertions(+), 3 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index ef52e171f5..adfcaa6acf 100644
+index ef52e17..adfcaa6 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -4408,6 +4408,8 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
@@ -29,7 +29,7 @@ index ef52e171f5..adfcaa6acf 100644
  	for (i = 1; i < argc; i++)
  		weston_log("fatal: unhandled option: %s\n", argv[i]);
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index f3daa7b110..0139668226 100644
+index 98643e6..0e34b15 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -809,6 +809,8 @@ struct weston_pointer {
@@ -60,7 +60,7 @@ index f3daa7b110..0139668226 100644
  		/*
  		 * If src_width != wl_fixed_from_int(-1),
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 458a386282..bba59d3074 100644
+index 0bf4d9b..c2557aa 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -4967,6 +4967,11 @@ drm_backend_create(struct weston_compositor *compositor,
@@ -76,10 +76,10 @@ index 458a386282..bba59d3074 100644
  	if (!res) {
  		weston_log("Failed to get drmModeRes\n");
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 8a1defae94..6c712c1c2a 100644
+index 97057b5..ded48bd 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -2296,7 +2296,7 @@ WESTON_EXPORT_FOR_TESTS void
+@@ -2299,7 +2299,7 @@ WESTON_EXPORT_FOR_TESTS void
  convert_size_by_transform_scale(int32_t *width_out, int32_t *height_out,
  				int32_t width, int32_t height,
  				uint32_t transform,
@@ -89,7 +89,7 @@ index 8a1defae94..6c712c1c2a 100644
  	assert(scale > 0);
  
 diff --git a/libweston/input.c b/libweston/input.c
-index 4d91f1e0c2..df0eb2e12b 100644
+index 5c28f09..8211e70 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
 @@ -2190,6 +2190,8 @@ weston_pointer_move_to(struct weston_pointer *pointer,
@@ -155,7 +155,7 @@ index 4d91f1e0c2..df0eb2e12b 100644
  }
  
 diff --git a/libweston/libweston-internal.h b/libweston/libweston-internal.h
-index 4b582871a1..34656811f4 100644
+index 4b58287..3465681 100644
 --- a/libweston/libweston-internal.h
 +++ b/libweston/libweston-internal.h
 @@ -583,7 +583,7 @@ void

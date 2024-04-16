@@ -1,4 +1,4 @@
-From dbef5cb457709c8a6e781689c6f4848cb18f9a70 Mon Sep 17 00:00:00 2001
+From be06599914a6995627299b217d0bba511a87ca8d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 3 Oct 2022 21:03:04 +0800
 Subject: [PATCH 73/98] desktop-shell: Fix crash when hotplugging screens
@@ -26,7 +26,7 @@ index 9b5d3b2..c4f9c27 100644
  		struct weston_view *view = get_default_view(shell->text_input.surface);
  		if (view == NULL)
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 5861041..8bca4d7 100644
+index 88cdbc2..9acdfe0 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -2191,6 +2191,7 @@ desktop_surface_removed(struct weston_desktop_surface *desktop_surface,
@@ -37,7 +37,7 @@ index 5861041..8bca4d7 100644
  		    shsurf->view->output->power_state == WESTON_OUTPUT_POWER_NORMAL) {
  			struct weston_coord_global pos;
  
-@@ -4195,6 +4196,8 @@ check_desktop_shell_crash_too_early(struct desktop_shell *shell)
+@@ -4206,6 +4207,8 @@ check_desktop_shell_crash_too_early(struct desktop_shell *shell)
  	if (clock_gettime(CLOCK_MONOTONIC, &now) < 0)
  		return false;
  
@@ -46,7 +46,7 @@ index 5861041..8bca4d7 100644
  	/*
  	 * If the shell helper client dies before the session has been
  	 * up for roughly 30 seconds, better just make Weston shut down,
-@@ -4210,6 +4213,7 @@ check_desktop_shell_crash_too_early(struct desktop_shell *shell)
+@@ -4221,6 +4224,7 @@ check_desktop_shell_crash_too_early(struct desktop_shell *shell)
  
  		return true;
  	}
@@ -54,7 +54,7 @@ index 5861041..8bca4d7 100644
  
  	return false;
  }
-@@ -4631,10 +4635,14 @@ shell_output_destroy(struct shell_output *shell_output)
+@@ -4642,10 +4646,14 @@ shell_output_destroy(struct shell_output *shell_output)
  
  	shell_for_each_layer(shell, shell_output_changed_move_layer, NULL);
  
@@ -71,7 +71,7 @@ index 5861041..8bca4d7 100644
  	wl_list_remove(&shell_output->destroy_listener.link);
  	wl_list_remove(&shell_output->link);
  	free(shell_output);
-@@ -4815,7 +4823,7 @@ setup_output_destroy_handler(struct weston_compositor *ec,
+@@ -4826,7 +4834,7 @@ setup_output_destroy_handler(struct weston_compositor *ec,
  static void
  desktop_shell_destroy_layer(struct weston_layer *layer)
  {
@@ -80,7 +80,7 @@ index 5861041..8bca4d7 100644
  	bool removed;
  
  	do {
-@@ -4840,9 +4848,11 @@ desktop_shell_destroy_layer(struct weston_layer *layer)
+@@ -4851,9 +4859,11 @@ desktop_shell_destroy_layer(struct weston_layer *layer)
  		 * we restart the loop as long as we keep removing views from
  		 * the list.
  		 */
@@ -94,7 +94,7 @@ index 5861041..8bca4d7 100644
  				desktop_shell_destroy_surface(shsurf);
  				removed = true;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 74a1b72..458a386 100644
+index 1e75452..0bf4d9b 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -2766,10 +2766,17 @@ drm_output_destroy(struct weston_output *base)
@@ -116,10 +116,10 @@ index 74a1b72..458a386 100644
  		if (!base->compositor->shutting_down) {
  			/* We are not shutting down, so we can wait for flip
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 80261f6..8a1defa 100644
+index 40a9670..97057b5 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -7414,6 +7414,7 @@ static void
+@@ -7417,6 +7417,7 @@ static void
  weston_compositor_remove_output(struct weston_output *output)
  {
  	struct weston_compositor *compositor = output->compositor;
@@ -127,7 +127,7 @@ index 80261f6..8a1defa 100644
  	struct weston_paint_node *pnode, *pntmp;
  	struct weston_view *view;
  	struct weston_head *head;
-@@ -7426,6 +7427,11 @@ weston_compositor_remove_output(struct weston_output *output)
+@@ -7429,6 +7430,11 @@ weston_compositor_remove_output(struct weston_output *output)
  		output->idle_repaint_source = NULL;
  	}
  
