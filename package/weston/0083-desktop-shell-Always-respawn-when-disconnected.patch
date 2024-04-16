@@ -1,4 +1,4 @@
-From ed04c5f6ce2f85ac51c0f1f6a00f69a965ef4905 Mon Sep 17 00:00:00 2001
+From fab7670022c8bd9723dd14d7f0a2b3374001f8db Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 11:25:25 +0800
 Subject: [PATCH 83/98] desktop-shell: Always respawn when disconnected
@@ -9,10 +9,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 2 insertions(+)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 13a93b2..a264066 100644
+index 49d1a74..d2f8f7c 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -4232,11 +4232,13 @@ respawn_desktop_shell_process(struct desktop_shell *shell)
+@@ -4243,11 +4243,13 @@ respawn_desktop_shell_process(struct desktop_shell *shell)
  		shell->child.deathcount = 0;
  	}
  

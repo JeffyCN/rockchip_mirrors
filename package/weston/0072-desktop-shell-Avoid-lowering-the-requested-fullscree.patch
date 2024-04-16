@@ -1,4 +1,4 @@
-From a5a2c43ef1ee3dfd96b0297a51f555803806473e Mon Sep 17 00:00:00 2001
+From bcf69d6ee03c66f21e3654d0cbc22bfb9f168345 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 24 Jun 2022 16:25:11 +0800
 Subject: [PATCH 72/98] desktop-shell: Avoid lowering the requested fullscreen
@@ -13,10 +13,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 7 insertions(+), 5 deletions(-)
 
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 1d221cb..5861041 100644
+index dbf4c3e..88cdbc2 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
-@@ -3610,7 +3610,8 @@ rotate_binding(struct weston_pointer *pointer, const struct timespec *time,
+@@ -3620,7 +3620,8 @@ rotate_binding(struct weston_pointer *pointer, const struct timespec *time,
   * the alt-tab switcher, which need to de-promote fullscreen layers. */
  void
  lower_fullscreen_layer(struct desktop_shell *shell,
@@ -26,7 +26,7 @@ index 1d221cb..5861041 100644
  {
  	struct weston_view *view, *prev;
  
-@@ -3619,7 +3620,7 @@ lower_fullscreen_layer(struct desktop_shell *shell,
+@@ -3629,7 +3630,7 @@ lower_fullscreen_layer(struct desktop_shell *shell,
  				      layer_link.link) {
  		struct shell_surface *shsurf = get_shell_surface(view->surface);
  
@@ -35,7 +35,7 @@ index 1d221cb..5861041 100644
  			continue;
  
  		/* Only lower surfaces which have lowering_output as their fullscreen
-@@ -3676,7 +3677,7 @@ activate(struct desktop_shell *shell, struct weston_view *view,
+@@ -3686,7 +3687,7 @@ activate(struct desktop_shell *shell, struct weston_view *view,
  	/* Only demote fullscreen surfaces on the output of activated shsurf.
  	 * Leave fullscreen surfaces on unrelated outputs alone. */
  	if (shsurf->output)
@@ -44,7 +44,7 @@ index 1d221cb..5861041 100644
  
  	if (view->surface->flags & SURFACE_NO_FOCUS)
  		goto no_focus;
-@@ -4478,7 +4479,7 @@ switcher_binding(struct weston_keyboard *keyboard, const struct timespec *time,
+@@ -4489,7 +4490,7 @@ switcher_binding(struct weston_keyboard *keyboard, const struct timespec *time,
  	wl_list_init(&switcher->listener.link);
  	wl_array_init(&switcher->minimized_array);
  
