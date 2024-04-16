@@ -1,7 +1,7 @@
-From c74eb7c15c74c1a91a661478f70dfa69cbe97196 Mon Sep 17 00:00:00 2001
+From c75245ed83c3f329115813cd49b09917811063ca Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 46/97] backend-drm: Support controlling compositor dynamically
+Subject: [PATCH 46/98] backend-drm: Support controlling compositor dynamically
 
 Use config file to control compositor's state.
 
@@ -29,7 +29,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 75 insertions(+), 18 deletions(-)
 
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 2c57a3c271..fe0b96bae2 100644
+index be2d8d4..db9f9bc 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -213,32 +213,28 @@ close_src:
@@ -157,10 +157,10 @@ index 2c57a3c271..fe0b96bae2 100644
  
  	fclose(conf_fp);
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 9e177b1404..45f9d305be 100644
+index 7f9a839..b776e89 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -5813,6 +5813,10 @@ weston_compositor_wake(struct weston_compositor *compositor)
+@@ -5816,6 +5816,10 @@ weston_compositor_wake(struct weston_compositor *compositor)
  {
  	uint32_t old_state = compositor->state;
  
@@ -171,7 +171,7 @@ index 9e177b1404..45f9d305be 100644
  	/* The state needs to be changed before emitting the wake
  	 * signal because that may try to schedule a repaint which
  	 * will not work if the compositor is still sleeping */
-@@ -5820,10 +5824,11 @@ weston_compositor_wake(struct weston_compositor *compositor)
+@@ -5823,10 +5827,11 @@ weston_compositor_wake(struct weston_compositor *compositor)
  
  	switch (old_state) {
  	case WESTON_COMPOSITOR_SLEEPING:

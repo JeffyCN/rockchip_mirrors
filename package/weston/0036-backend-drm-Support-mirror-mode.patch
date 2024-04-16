@@ -1,4 +1,4 @@
-From 99104f1cad9f806c152790d485a0a45d2d0c45c6 Mon Sep 17 00:00:00 2001
+From 5a74ca852a5244b79f961db8aac85be856227846 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Nov 2020 09:41:47 +0800
 Subject: [PATCH 36/98] backend-drm: Support mirror mode
@@ -43,14 +43,14 @@ index f500979..aea02d4 100644
  }
  
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 279a093..a4b714b 100644
+index 279a093..a10b639 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4107,6 +4107,9 @@ weston_view_set_initial_position(struct weston_view *view,
  	}
  
  	wl_list_for_each(output, &compositor->output_list, link) {
-+		if (output->unavailable)
++		if (!weston_output_valid(output))
 +			continue;
 +
  		if (weston_output_contains_coord(output, pos)) {
@@ -699,7 +699,7 @@ index 4c93a6e..de38c1e 100644
  	 * Use view_list, as paint nodes have not been created for this
  	 * output yet. Any existing view might touch this new output.
 diff --git a/libweston/input.c b/libweston/input.c
-index 5681cfa..2934f69 100644
+index 5681cfa..784d8eb 100644
 --- a/libweston/input.c
 +++ b/libweston/input.c
 @@ -2148,20 +2148,28 @@ WL_EXPORT struct weston_coord_global
@@ -714,7 +714,7 @@ index 5681cfa..2934f69 100644
  		if (pointer->seat->output && pointer->seat->output != output)
  			continue;
 +
-+		if (output->unavailable)
++		if (!weston_output_valid(output))
 +			continue;
 +
  		if (weston_output_contains_coord(output, pos))
@@ -736,7 +736,7 @@ index 5681cfa..2934f69 100644
  	wl_list_for_each(output, &ec->output_list, link) {
  		int ox, oy;
  
-+		if (output->unavailable)
++		if (!weston_output_valid(output))
 +			continue;
 +
  		if (weston_output_contains_coord(output, pointer->pos))
