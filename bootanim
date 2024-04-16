@@ -78,7 +78,15 @@ bootanim_start()
 
 	# Timeout killer
 	{
-		sleep $TIMEOUT
+		for t in $(seq 1 "$TIMEOUT"); do
+			# Check panel for x11 desktop
+			if pgrep panel >/dev/null; then
+				# Wait for panel painting
+				sleep 1
+				break
+			fi
+			sleep 1
+		done
 		bootanim_stop
 	}&
 }
