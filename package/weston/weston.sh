@@ -59,6 +59,9 @@ export WESTON_DRM_KEEP_RATIO=1
 # Tag file for freezing weston display
 export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 
+# Try to pin views to the assigned output
+# export WESTON_OUTPUT_PIN=1
+
 # Set dynamic config file path
 # export WESTON_DRM_CONFIG=/tmp/.weston_drm.conf
 #
@@ -74,6 +77,8 @@ export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 # echo "compositor:hotplug:force" > /tmp/.weston_drm.conf
 # echo "compositor:cursor:hide" > /tmp/.weston_drm.conf
 # echo "compositor:cursor:show" > /tmp/.weston_drm.conf
+# echo "compositor:output:pin" > /tmp/.weston_drm.conf
+# echo "compositor:output:unpin" > /tmp/.weston_drm.conf
 # echo "output:DSI-1:off" > /tmp/.weston_drm.conf
 # echo "output:eDP-1:freeze" > /tmp/.weston_drm.conf
 # echo "output:DSI-1:offscreen" > /tmp/.weston_drm.conf
