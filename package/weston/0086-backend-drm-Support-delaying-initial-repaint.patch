@@ -1,7 +1,7 @@
-From 5e79b4288397cbaa99125da64d032159676c92c0 Mon Sep 17 00:00:00 2001
+From 745a50f3341825842d37a1a3219f681b1efcdb93 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Oct 2023 11:41:06 +0800
-Subject: [PATCH 86/98] backend-drm: Support delaying initial repaint
+Subject: [PATCH 86/99] backend-drm: Support delaying initial repaint
 
 Set env "WESTON_DRM_INITIAL_FREEZE_MS" for the initial freezing.
 
@@ -26,7 +26,7 @@ index 65609306..0cfaf7ca 100644
  	bool single_head;
  	bool head_fallback;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 7e3bcb40..74ea7e11 100644
+index 5621c712..9f3359cd 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1020,12 +1020,16 @@ drm_output_repaint(struct weston_output *output_base, pixman_region32_t *damage)
@@ -76,7 +76,7 @@ index 7e3bcb40..74ea7e11 100644
  	resources = drmModeGetResources(device->drm.fd);
  	if (!resources) {
  		weston_log("drmModeGetResources failed\n");
-@@ -4934,6 +4954,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4935,6 +4955,10 @@ drm_backend_create(struct weston_compositor *compositor,
  		weston_log("Entering mirror mode.\n");
  	}
  

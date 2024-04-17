@@ -1,7 +1,7 @@
-From fa6579b3cfc1f76ca62c0d72f22ef50f8f6f30e2 Mon Sep 17 00:00:00 2001
+From af43a8c7798e867bb21be9810fceceeb85730f10 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 15:17:39 +0800
-Subject: [PATCH 69/98] backend-drm: Stop disabling unused CRTCs by default
+Subject: [PATCH 69/99] backend-drm: Stop disabling unused CRTCs by default
 
 So that we can launch multiple weston instances for different monitors.
 
@@ -27,7 +27,7 @@ index 6db46d37..8ddf641a 100644
  	bool head_fallback;
  	bool head_fallback_all;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 5aec7433..a9f7ca2d 100644
+index 4a6d8cc7..0af17df1 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -2613,6 +2613,10 @@ drm_output_detach_crtc(struct drm_output *output)
@@ -41,7 +41,7 @@ index 5aec7433..a9f7ca2d 100644
  }
  
  static bool
-@@ -4860,6 +4864,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4861,6 +4865,10 @@ drm_backend_create(struct weston_compositor *compositor,
  	if (b == NULL)
  		return NULL;
  
