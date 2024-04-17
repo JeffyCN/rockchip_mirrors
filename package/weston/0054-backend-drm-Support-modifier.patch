@@ -1,7 +1,7 @@
-From 9d719490cdd8702fbb24e69b565eb26ef1414f91 Mon Sep 17 00:00:00 2001
+From 4dc6be7630d68d2c85ee44d6650259a546dd9b94 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
-Subject: [PATCH 54/98] backend-drm: Support modifier
+Subject: [PATCH 54/99] backend-drm: Support modifier
 
 Tested on rk356x with ARM AFBC modifier.
 
@@ -26,7 +26,7 @@ index ade073e6..0d2e1214 100644
  
  struct drm_connector {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 2f552c39..a718df37 100644
+index 8cd0013a..e6c3b0ef 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1539,6 +1539,42 @@ err:
@@ -103,7 +103,7 @@ index 2f552c39..a718df37 100644
  	return NULL;
  }
  
-@@ -4880,11 +4928,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4881,11 +4929,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	wl_list_insert(&compositor->backend_list, &b->base.link);
  
@@ -115,7 +115,7 @@ index 2f552c39..a718df37 100644
  	/* Check if we run drm-backend using a compatible launcher */
  	compositor->launcher = weston_launcher_connect(compositor, seat_id, true);
  	if (compositor->launcher == NULL) {
-@@ -4917,6 +4960,33 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4918,6 +4961,33 @@ drm_backend_create(struct weston_compositor *compositor,
  		goto err_udev_dev;
  	}
  
@@ -149,7 +149,7 @@ index 2f552c39..a718df37 100644
  	if (config->additional_devices)
  		open_additional_devices(b, config->additional_devices);
  
-@@ -4932,18 +5002,18 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4933,18 +5003,18 @@ drm_backend_create(struct weston_compositor *compositor,
  	case WESTON_RENDERER_PIXMAN:
  		if (init_pixman(b) < 0) {
  			weston_log("failed to initialize pixman renderer\n");
@@ -171,7 +171,7 @@ index 2f552c39..a718df37 100644
  	}
  
  	b->base.shutdown = drm_shutdown;
-@@ -4957,21 +5027,6 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4958,21 +5028,6 @@ drm_backend_create(struct weston_compositor *compositor,
  
  	weston_setup_vt_switch_bindings(compositor);
  
