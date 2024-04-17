@@ -62,7 +62,7 @@ normalize_device()
 	if find /dev/block/by-name/$DEV 2>/dev/null; then
 		return
 	fi
-	if find /dev/disk/*/$DEV 2>/dev/null | head -n 1; then
+	if find /dev/disk/*/$DEV 2>/dev/null; then
 		return
 	fi
 
@@ -376,7 +376,7 @@ prepare_part()
 		/mnt/* | /media/*) return 1 ;;
 	esac
 
-	DEV="$(realpath "$(normalize_device)" 2>/dev/null)"
+	DEV="$(realpath "$(normalize_device | head -n 1)" 2>/dev/null)"
 	[ "$DEV" ] || return 1
 
 	# Only accept block or char device
