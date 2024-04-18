@@ -85,7 +85,6 @@ $(2)_LD ?= bin/llvm-link
 $(2)_NM ?= bin/llvm-nm
 $(2)_RANLIB ?= bin/llvm-ranlib
 $(2)_READELF ?= bin/llvm-readelf
-$(2)_STRIP ?= bin/llvm-strip
 $(2)_OBJCOPY ?= bin/llvm-objcopy
 $(2)_OBJDUMP ?= bin/llvm-objdump
 endif
@@ -99,7 +98,6 @@ $(2)_LD ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_LD)))
 $(2)_NM ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_NM)))
 $(2)_RANLIB ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_RANLIB)))
 $(2)_READELF ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_READELF)))
-$(2)_STRIP ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_STRIP)))
 $(2)_OBJCOPY ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_OBJCOPY)))
 $(2)_OBJDUMP ?= $(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_OBJDUMP)))
 
@@ -131,7 +129,6 @@ define $(2)_CONFIGURE_CMDS
 		-e 's#@@TARGET_NM@@#$$($(2)_NM)#' \
 		-e 's#@@TARGET_RANLIB@@#$$($(2)_RANLIB)#' \
 		-e 's#@@TARGET_READELF@@#$$($(2)_READELF)#' \
-		-e 's#@@TARGET_STRIP@@#$$($(2)_STRIP)#' \
 		-e 's#@@TARGET_OBJCOPY@@#$$($(2)_OBJCOPY)#' \
 		-e 's#@@TARGET_OBJDUMP@@#$$($(2)_OBJDUMP)#' \
 		-e 's#@@TARGET_FC@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_FC)))#' \
@@ -325,7 +322,6 @@ define TOOLCHAIN_CMAKE_INSTALL_FILES
 		-e 's#@@TARGET_NM@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_NM)))#' \
 		-e 's#@@TARGET_RANLIB@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_RANLIB)))#' \
 		-e 's#@@TARGET_READELF@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_READELF)))#' \
-		-e 's#@@TARGET_STRIP@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_STRIP)))#' \
 		-e 's#@@TARGET_OBJCOPY@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_OBJCOPY)))#' \
 		-e 's#@@TARGET_OBJDUMP@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_OBJDUMP)))#' \
 		-e 's#@@TARGET_FC@@#$(subst $(HOST_DIR)/,,$(call qstrip,$(TARGET_FC)))#' \
