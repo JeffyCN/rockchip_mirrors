@@ -1,7 +1,7 @@
-From 5a2566de4567404f57b70af4c6fbb09f6f617313 Mon Sep 17 00:00:00 2001
+From ab991e03cc84bb92faa72b92263f5de48c8bee79 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 29 Nov 2022 17:18:23 +0800
-Subject: [PATCH 3/3] HACK: pipeline: Support custom pipeline
+Subject: [PATCH 2/2] HACK: pipeline: Support custom pipeline
 
 Tested on RK3588 EVB with:
 export LIBCAMERA_CUSTOM_DRIVERS=has:rkisp
@@ -12,57 +12,65 @@ gst-launch-1.0 libcamerasrc ! waylandsink
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- meson_options.txt                             |   2 +-
- src/libcamera/device_enumerator.cpp           |   8 +-
- src/libcamera/pipeline/custom/custom.cpp      | 415 ++++++++++++++++++
- src/libcamera/pipeline/custom/meson.build     |   5 +
- test/pipeline/custom/custom_pipeline_test.cpp | 110 +++++
- test/pipeline/custom/meson.build              |  14 +
- test/pipeline/meson.build                     |   1 +
- 7 files changed, 552 insertions(+), 3 deletions(-)
+ meson.build                               |   1 +
+ meson_options.txt                         |   3 +-
+ src/libcamera/device_enumerator.cpp       |   7 +-
+ src/libcamera/pipeline/custom/custom.cpp  | 427 ++++++++++++++++++++++
+ src/libcamera/pipeline/custom/meson.build |   5 +
+ 5 files changed, 440 insertions(+), 3 deletions(-)
  create mode 100644 src/libcamera/pipeline/custom/custom.cpp
  create mode 100644 src/libcamera/pipeline/custom/meson.build
- create mode 100644 test/pipeline/custom/custom_pipeline_test.cpp
- create mode 100644 test/pipeline/custom/meson.build
 
+diff --git a/meson.build b/meson.build
+index cb6b666..0c23874 100644
+--- a/meson.build
++++ b/meson.build
+@@ -201,6 +201,7 @@ pipelines_support = {
+     'rkisp1':       arch_arm,
+     'rpi/vc4':      arch_arm,
+     'simple':       arch_arm,
++    'custom':       arch_arm,
+     'uvcvideo':     ['any'],
+     'vimc':         ['test'],
+ }
 diff --git a/meson_options.txt b/meson_options.txt
-index 7a9aecf..65f3ffc 100644
+index 5fdc7be..ebe926c 100644
 --- a/meson_options.txt
 +++ b/meson_options.txt
-@@ -37,7 +37,7 @@ option('lc-compliance',
+@@ -47,7 +47,8 @@ option('pipelines',
+             'rpi/vc4',
+             'simple',
+             'uvcvideo',
+-            'vimc'
++            'vimc',
++            'custom',
+         ],
+         description : 'Select which pipeline handlers to build. If this is set to "auto", all the pipelines applicable to the target architecture will be built. If this is set to "all", all the pipelines will be built. If both are selected then "all" will take precedence.')
  
- option('pipelines',
-         type : 'array',
--        choices : ['ipu3', 'raspberrypi', 'rkisp1', 'simple', 'uvcvideo', 'vimc'],
-+        choices : ['ipu3', 'raspberrypi', 'rkisp1', 'simple', 'uvcvideo', 'vimc', 'custom'],
-         description : 'Select which pipeline handlers to include')
- 
- option('qcam',
 diff --git a/src/libcamera/device_enumerator.cpp b/src/libcamera/device_enumerator.cpp
-index d125805..06d1707 100644
+index 42b5ba6..3f3401b 100644
 --- a/src/libcamera/device_enumerator.cpp
 +++ b/src/libcamera/device_enumerator.cpp
-@@ -93,8 +93,12 @@ void DeviceMatch::add(const std::string &entity)
+@@ -93,8 +93,11 @@ void DeviceMatch::add(const std::string &entity)
   */
  bool DeviceMatch::match(const MediaDevice *device) const
  {
 -	if (driver_ != device->driver())
 -		return false;
 +	const std::string driver = device->driver();
-+	if (driver_ != driver) {
-+		if (driver_.find("has:") != 0 ||
-+		    (driver.find(driver_.substr(4)) == std::string::npos))
-+			return false;
-+	}
++	if (driver_ != driver &&
++	    (driver_.find("has:") != 0 ||
++	     (driver.find(driver_.substr(4)) == std::string::npos)))
++	    return false;
  
  	for (const std::string &name : entities_) {
  		bool found = false;
 diff --git a/src/libcamera/pipeline/custom/custom.cpp b/src/libcamera/pipeline/custom/custom.cpp
 new file mode 100644
-index 0000000..bbf5259
+index 0000000..c8989c3
 --- /dev/null
 +++ b/src/libcamera/pipeline/custom/custom.cpp
-@@ -0,0 +1,415 @@
+@@ -0,0 +1,427 @@
 +/* SPDX-License-Identifier: LGPL-2.1-or-later */
 +/*
 + * Copyright (C) 2019, Google Inc.
@@ -118,6 +126,7 @@ index 0000000..bbf5259
 +
 +	std::unique_ptr<V4L2VideoDevice> video_;
 +	Stream stream_;
++	std::map<PixelFormat, std::vector<SizeRange>> formats_;
 +};
 +
 +class CustomCameraConfiguration : public CameraConfiguration
@@ -136,8 +145,8 @@ index 0000000..bbf5259
 +public:
 +	PipelineHandlerCustom(CameraManager *manager);
 +
-+	CameraConfiguration *generateConfiguration(Camera *camera,
-+		const StreamRoles &roles) override;
++	std::unique_ptr<CameraConfiguration> generateConfiguration(Camera *camera,
++								   Span<const StreamRole> roles) override;
 +	int configure(Camera *camera, CameraConfiguration *config) override;
 +
 +	int exportFrameBuffers(Camera *camera, Stream *stream,
@@ -172,8 +181,8 @@ index 0000000..bbf5259
 +	if (config_.empty())
 +		return Invalid;
 +
-+	if (transform != Transform::Identity) {
-+		transform = Transform::Identity;
++	if (orientation != Orientation::Rotate0) {
++		orientation = Orientation::Rotate0;
 +		status = Adjusted;
 +	}
 +
@@ -214,7 +223,7 @@ index 0000000..bbf5259
 +	}
 +
 +	V4L2DeviceFormat format;
-+	format.fourcc = V4L2PixelFormat::fromPixelFormat(cfg.pixelFormat);
++	format.fourcc = data_->video_->toV4L2PixelFormat(cfg.pixelFormat);
 +	format.size = cfg.size;
 +
 +	int ret = data_->video_->tryFormat(&format);
@@ -223,6 +232,11 @@ index 0000000..bbf5259
 +
 +	cfg.stride = format.planes[0].bpl;
 +	cfg.frameSize = format.planes[0].size;
++
++	if (cfg.colorSpace != format.colorSpace) {
++		cfg.colorSpace = format.colorSpace;
++		status = Adjusted;
++	}
 +
 +	return status;
 +}
@@ -248,26 +262,18 @@ index 0000000..bbf5259
 +	}
 +}
 +
-+CameraConfiguration *PipelineHandlerCustom::generateConfiguration(Camera *camera,
-+	const StreamRoles &roles)
++std::unique_ptr<CameraConfiguration>
++PipelineHandlerCustom::generateConfiguration(Camera *camera,
++					  Span<const StreamRole> roles)
 +{
 +	CustomCameraData *data = cameraData(camera);
-+	CameraConfiguration *config = new CustomCameraConfiguration(data);
++	std::unique_ptr<CameraConfiguration> config =
++		std::make_unique<CustomCameraConfiguration>(data);
 +
 +	if (roles.empty())
 +		return config;
 +
-+	V4L2VideoDevice::Formats v4l2Formats = data->video_->formats();
-+	std::map<PixelFormat, std::vector<SizeRange>> deviceFormats;
-+	for (const auto &format : v4l2Formats) {
-+		PixelFormat pixelFormat = format.first.toPixelFormat();
-+		if (pixelFormat.isValid() &&
-+		    (pixelFormat_ == CUSTOM_FORMAT_NONE ||
-+		     pixelFormat == pixelFormat_))
-+			deviceFormats[pixelFormat] = format.second;
-+	}
-+
-+	StreamFormats formats(deviceFormats);
++	StreamFormats formats(data->formats_);
 +	StreamConfiguration cfg(formats);
 +
 +	if (pixelFormat_ != CUSTOM_FORMAT_NONE)
@@ -292,7 +298,7 @@ index 0000000..bbf5259
 +	int ret;
 +
 +	V4L2DeviceFormat format;
-+	format.fourcc = V4L2PixelFormat::fromPixelFormat(cfg.pixelFormat);
++	format.fourcc = data->video_->toV4L2PixelFormat(cfg.pixelFormat);
 +	format.size = cfg.size;
 +
 +	ret = data->video_->setFormat(&format);
@@ -300,7 +306,7 @@ index 0000000..bbf5259
 +		return ret;
 +
 +	if (format.size != cfg.size ||
-+	    format.fourcc != V4L2PixelFormat::fromPixelFormat(cfg.pixelFormat))
++	    format.fourcc != data->video_->toV4L2PixelFormat(cfg.pixelFormat))
 +		return -EINVAL;
 +
 +	cfg.setStream(&data->stream_);
@@ -443,20 +449,34 @@ index 0000000..bbf5259
 +
 +	video_->bufferReady.connect(this, &CustomCameraData::bufferReady);
 +
-+	properties_.set(properties::Model, utils::toAscii(media->model()));
-+
 +	/*
-+	 * Get the current format in order to initialize the sensor array
-+	 * properties.
++	 * Populate the map of supported formats, and infer the camera sensor
++	 * resolution from the largest size it advertises.
 +	 */
 +	Size resolution;
-+	for (const auto &it : video_->formats()) {
-+		const std::vector<SizeRange> &sizeRanges = it.second;
++	for (const auto &format : video_->formats()) {
++		PixelFormat pixelFormat = format.first.toPixelFormat();
++		if (!pixelFormat.isValid())
++			continue;
++
++		formats_[pixelFormat] = format.second;
++
++		const std::vector<SizeRange> &sizeRanges = format.second;
 +		for (const SizeRange &sizeRange : sizeRanges) {
 +			if (sizeRange.max > resolution)
 +				resolution = sizeRange.max;
 +		}
 +	}
++
++	if (formats_.empty()) {
++		LOG(Custom, Error)
++			<< "Camera (" << media->model()
++			<< ") doesn't expose any supported format";
++		return -EINVAL;
++	}
++
++	/* Populate the camera properties. */
++	properties_.set(properties::Model, utils::toAscii(media->model()));
 +
 +	properties_.set(properties::PixelArraySize, resolution);
 +	properties_.set(properties::PixelArrayActiveAreas, { Rectangle(resolution) });
@@ -489,151 +509,6 @@ index 0000000..9d2ee94
 +libcamera_sources += files([
 +    'custom.cpp',
 +])
-diff --git a/test/pipeline/custom/custom_pipeline_test.cpp b/test/pipeline/custom/custom_pipeline_test.cpp
-new file mode 100644
-index 0000000..69d67d9
---- /dev/null
-+++ b/test/pipeline/custom/custom_pipeline_test.cpp
-@@ -0,0 +1,110 @@
-+/* SPDX-License-Identifier: GPL-2.0-or-later */
-+/*
-+ * Copyright (C) 2022, Rockchip Electronics Co., Ltd
-+ *
-+ * custom_pipeline_test.cpp - Custom pipeline test
-+ */
-+
-+#include <iostream>
-+
-+#include <sys/types.h>
-+#include <unistd.h>
-+
-+#include <libcamera/camera.h>
-+#include <libcamera/camera_manager.h>
-+
-+#include "libcamera/internal/device_enumerator.h"
-+#include "libcamera/internal/media_device.h"
-+
-+#include "test.h"
-+
-+#define CUSTOM_DRIVERS_ENV "LIBCAMERA_CUSTOM_DRIVERS"
-+
-+using namespace std;
-+using namespace libcamera;
-+
-+/*
-+ * Verify that the custom pipeline handler gets matched and cameras
-+ * are enumerated correctly.
-+ *
-+ * The test lists all cameras registered in the system, if any camera is
-+ * available at all.
-+ */
-+class CustomPipelineTest : public Test
-+{
-+protected:
-+	int init();
-+	int run();
-+	void cleanup();
-+
-+private:
-+	CameraManager *cameraManager_;
-+	unsigned int sensors_;
-+};
-+
-+int CustomPipelineTest::init()
-+{
-+	unique_ptr<DeviceEnumerator> enumerator = DeviceEnumerator::create();
-+	if (!enumerator) {
-+		cerr << "Failed to create device enumerator" << endl;
-+		return TestFail;
-+	}
-+
-+	if (enumerator->enumerate()) {
-+		cerr << "Failed to enumerate media devices" << endl;
-+		return TestFail;
-+	}
-+
-+	const char *drivers = utils::secure_getenv(CUSTOM_DRIVERS_ENV);
-+	if (!drivers) {
-+		cerr << "Needs env: " CUSTOM_DRIVERS_ENV << endl;
-+		return TestFail;
-+	}
-+
-+	istringstream in(drivers);
-+	string driver;
-+	bool found = false;
-+
-+	while (in >> driver) {
-+		DeviceMatch dm(driver);
-+		std::shared_ptr<MediaDevice> device = enumerator->search(dm);
-+		if (device)
-+			found = true;
-+	}
-+
-+	if (!found) {
-+		cerr << "Failed to find any camera: test skip" << endl;
-+		return TestSkip;
-+	}
-+
-+	cameraManager_ = new CameraManager();
-+	int ret = cameraManager_->start();
-+	if (ret) {
-+		cerr << "Failed to start the CameraManager" << endl;
-+		return TestFail;
-+	}
-+
-+	return 0;
-+}
-+
-+int CustomPipelineTest::run()
-+{
-+	auto cameras = cameraManager_->cameras();
-+	for (const std::shared_ptr<Camera> &cam : cameras)
-+		cout << "Found camera '" << cam->id() << "'" << endl;
-+
-+	if (!cameras.size()) {
-+		cerr << "no cameras registered" << endl;
-+		return TestFail;
-+	}
-+
-+	return TestPass;
-+}
-+
-+void CustomPipelineTest::cleanup()
-+{
-+	cameraManager_->stop();
-+	delete cameraManager_;
-+}
-+
-+TEST_REGISTER(CustomPipelineTest)
-diff --git a/test/pipeline/custom/meson.build b/test/pipeline/custom/meson.build
-new file mode 100644
-index 0000000..47305c9
---- /dev/null
-+++ b/test/pipeline/custom/meson.build
-@@ -0,0 +1,14 @@
-+# SPDX-License-Identifier: CC0-1.0
-+
-+custom_test = [
-+    ['custom_pipeline_test',            'custom_pipeline_test.cpp'],
-+]
-+
-+foreach t : custom_test
-+    exe = executable(t[0], t[1],
-+                     dependencies : libcamera_private,
-+                     link_with : test_libraries,
-+                     include_directories : test_includes_internal)
-+
-+    test(t[0], exe, suite : 'custom', is_parallel : false)
-+endforeach
-diff --git a/test/pipeline/meson.build b/test/pipeline/meson.build
-index 6e7901f..a0a3544 100644
---- a/test/pipeline/meson.build
-+++ b/test/pipeline/meson.build
-@@ -2,3 +2,4 @@
- 
- subdir('ipu3')
- subdir('rkisp1')
-+subdir('custom')
 -- 
 2.20.1
 
