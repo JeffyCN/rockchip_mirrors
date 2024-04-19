@@ -196,4 +196,8 @@ menu "Rockchip BSP packages"
 	source "package/rockchip/tee-user-app/Config.in"
 endmenu
 
+menu "Rockchip IPC"
+	source "package/rockchip/ipc/Config.in"
+endmenu
+
 endif
