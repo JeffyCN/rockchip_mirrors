@@ -8,10 +8,13 @@ RKIPC_DEPENDENCIES = camera-engine-rkaiq wpa_supplicant freetype common_algorith
 ifeq ($(BR2_PACKAGE_RKIPC_RK3588), y)
     RKIPC_DEPENDENCIES += rkfsmk rockit rockchip-rga
     RKIPC_CONF_OPTS += -DCOMPILE_FOR_RK3588=ON
+    RKIPC_CONF_OPTS += -DCOMPILE_FOR_BUILDROOT=ON
 endif
 
 ifeq ($(BR2_PACKAGE_RKIPC_RK3588_MULTI_IPC), y)
+    RKIPC_DEPENDENCIES += rkfsmk rockit rockchip-rga
     RKIPC_CONF_OPTS += -DCOMPILE_FOR_RK3588_MULTI_IPC=ON
+    RKIPC_CONF_OPTS += -DCOMPILE_FOR_BUILDROOT=ON
 endif
 
 ifeq ($(BR2_PACKAGE_RKIPC_RV1126), y)
