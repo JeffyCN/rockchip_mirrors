@@ -37,6 +37,8 @@ define IPCWEB_BACKEND_INSTALL_TARGET_CMDS
 	cp -rfp $(@D)/www $(IPCWEB_BACKEND_TARGET_INSTALL_DIR)/
 	mkdir -p $(IPCWEB_BACKEND_TARGET_INSTALL_DIR)/www/cgi-bin/
 	cp -rfp $(@D)/src/entry.cgi $(IPCWEB_BACKEND_TARGET_INSTALL_DIR)/www/cgi-bin/
+	cp -rfp $(@D)/ipcweb-env-arm64/etc/init.d/S50fcgiwrap $(TARGET_DIR)/etc/init.d/
+	cp -rfp $(@D)/ipcweb-env-arm64/etc/nginx/nginx.conf $(TARGET_DIR)/etc/nginx/nginx.conf
 endef
 else
 define IPCWEB_BACKEND_INSTALL_TARGET_CMDS
@@ -44,6 +46,8 @@ define IPCWEB_BACKEND_INSTALL_TARGET_CMDS
 	cp -rfp $(@D)/www $(TARGET_DIR)/usr
 	mkdir -p  $(TARGET_DIR)/usr/www/cgi-bin/
 	cp -rfp $(@D)/src/entry.cgi $(TARGET_DIR)/usr/www/cgi-bin/
+	cp -rfp $(@D)/ipcweb-env-arm64/etc/init.d/S50fcgiwrap $(TARGET_DIR)/etc/init.d/
+	cp -rfp $(@D)/ipcweb-env-arm64/etc/nginx/nginx.conf $(TARGET_DIR)/etc/nginx/nginx.conf
 endef
 endif
 
