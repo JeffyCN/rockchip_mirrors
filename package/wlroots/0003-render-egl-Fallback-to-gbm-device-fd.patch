@@ -1,7 +1,7 @@
-From aa2e17d5dc13886860ebb8e19b0abf5d595a97c8 Mon Sep 17 00:00:00 2001
+From bb39c9b25e3257945454099ab423bdaaab567cb7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 1 Apr 2024 16:24:09 +0800
-Subject: [PATCH 4/4] render: egl: Fallback to gbm device fd
+Subject: [PATCH 3/4] render: egl: Fallback to gbm device fd
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---

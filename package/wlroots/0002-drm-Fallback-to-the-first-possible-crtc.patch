@@ -1,7 +1,7 @@
-From 4a6d21d4496d9235f1e6b342e79503db7ec3d8b0 Mon Sep 17 00:00:00 2001
+From cc9990b4cefcd05f96d00d401e46fb9d47ecd8f3 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 1 Apr 2024 16:04:29 +0800
-Subject: [PATCH 3/4] drm: Fallback to the first possible crtc
+Subject: [PATCH 2/4] drm: Fallback to the first possible crtc
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
