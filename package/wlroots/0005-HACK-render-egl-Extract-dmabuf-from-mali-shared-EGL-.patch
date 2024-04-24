@@ -1,0 +1,112 @@
+From c2156819b20d01a931543602a91d1043f3fe7d76 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Wed, 24 Apr 2024 11:03:24 +0800
+Subject: [PATCH 5/5] HACK: render: egl: Extract dmabuf from mali shared EGL
+ wl_buffer
+
+For scanning out fullscreen view.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ include/render/egl.h |  2 ++
+ render/egl.c         | 46 ++++++++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 48 insertions(+)
+
+diff --git a/include/render/egl.h b/include/render/egl.h
+index 6555942..3d4315b 100644
+--- a/include/render/egl.h
++++ b/include/render/egl.h
+@@ -85,6 +85,8 @@ struct wlr_egl_buffer {
+ 	struct wlr_egl *egl;
+ 	bool has_alpha;
+ 
++	uint32_t format;
++
+ 	struct wl_resource *resource;
+ 	struct wl_listener resource_destroy;
+ 	struct wl_listener release;
+diff --git a/render/egl.c b/render/egl.c
+index f7e3e86..e6e59bb 100644
+--- a/render/egl.c
++++ b/render/egl.c
+@@ -6,6 +6,7 @@
+ #include <stdlib.h>
+ #include <unistd.h>
+ #include <gbm.h>
++#include <sys/stat.h>
+ #include <wlr/interfaces/wlr_buffer.h>
+ #include <wlr/render/egl.h>
+ #include <wlr/util/log.h>
+@@ -370,6 +371,48 @@ static bool egl_init_display(struct wlr_egl *egl, EGLDisplay display) {
+ 	return true;
+ }
+ 
++static bool egl_buffer_get_dmabuf(struct wlr_buffer *wlr_buffer,
++		struct wlr_dmabuf_attributes *attribs) {
++	struct wlr_egl_buffer *buffer =
++		wl_container_of(wlr_buffer, buffer, base);
++
++	/* HACK: It's a guessed struct for mali_buffer_sharing extension */
++	struct mali_buffer_sharing_info {
++		int fd;
++		int width;
++		int height;
++		int stride;
++	};
++
++	struct mali_buffer_sharing_info *info =
++		wl_resource_get_user_data(buffer->resource);
++	if (!info) {
++		return false;
++	}
++
++	/* Check it carefully! */
++	struct stat s;
++	if (fstat(info->fd, &s) < 0 ||
++		s.st_size < (wlr_buffer->width * wlr_buffer->height * 4) ||
++		info->width != wlr_buffer->width ||
++		info->height != wlr_buffer->height ||
++		info->stride < wlr_buffer->width) {
++		return false;
++	}
++
++	attribs->width = wlr_buffer->width;
++	attribs->height = wlr_buffer->height;
++	attribs->format = buffer->format;
++	attribs->modifier = DRM_FORMAT_MOD_INVALID;
++	attribs->n_planes = 1;
++	attribs->offset[0] = 0;
++
++	attribs->stride[0] = info->stride;
++	attribs->fd[0] = info->fd;
++
++	return true;
++}
++
+ static void egl_buffer_destroy(struct wlr_buffer *wlr_buffer) {
+ 	struct wlr_egl_buffer *buffer =
+ 		wl_container_of(wlr_buffer, buffer, base);
+@@ -379,6 +422,7 @@ static void egl_buffer_destroy(struct wlr_buffer *wlr_buffer) {
+ }
+ 
+ static const struct wlr_buffer_impl egl_buffer_impl = {
++	.get_dmabuf = egl_buffer_get_dmabuf,
+ 	.destroy = egl_buffer_destroy,
+ };
+ 
+@@ -467,10 +511,12 @@ static struct wlr_buffer *egl_buffer_from_resource(struct wl_resource *resource,
+ 
+ 	switch (fmt) {
+ 	case EGL_TEXTURE_RGB:
++		buffer->format = DRM_FORMAT_XRGB8888;
+ 		buffer->has_alpha = false;
+ 		break;
+ 	case EGL_TEXTURE_RGBA:
+ 	case EGL_TEXTURE_EXTERNAL_WL:
++		buffer->format = DRM_FORMAT_ARGB8888;
+ 		buffer->has_alpha = true;
+ 		break;
+ 	default:
+-- 
+2.20.1
+
