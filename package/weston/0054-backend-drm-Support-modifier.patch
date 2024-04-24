@@ -1,4 +1,4 @@
-From 4dc6be7630d68d2c85ee44d6650259a546dd9b94 Mon Sep 17 00:00:00 2001
+From 0281ac3f037cff3929f0f396e7b7d4a95f30306a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
 Subject: [PATCH 54/99] backend-drm: Support modifier
@@ -215,10 +215,10 @@ index 8d61d732..2a78b327 100644
  		if (ret == 0)
  			device->fb_modifiers = cap;
 diff --git a/libweston/pixel-formats.c b/libweston/pixel-formats.c
-index 8d351a98..1797c769 100644
+index 2592294e..9db750f5 100644
 --- a/libweston/pixel-formats.c
 +++ b/libweston/pixel-formats.c
-@@ -268,6 +268,7 @@ static const struct pixel_format_info pixel_format_table[] = {
+@@ -272,6 +272,7 @@ static const struct pixel_format_info pixel_format_table[] = {
  	{
  		DRM_FORMAT(XBGR8888),
  		BITS_RGBA_FIXED(8, 8, 8, 0),
