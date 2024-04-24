@@ -1,7 +1,7 @@
-From ce76eec3ad443ec8c0f6116dd9719f793f7360e3 Mon Sep 17 00:00:00 2001
+From edb4baee0abaf6246704aa6905f5bbc4bf99adcf Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
-Subject: [PATCH 49/98] HACK: backend-drm: Consider linear and invalid modifier
+Subject: [PATCH 49/99] HACK: backend-drm: Consider linear and invalid modifier
  are the same
 
 That is true with Rockchip BSP drivers and packages.
@@ -122,10 +122,10 @@ index ea781cdf..72acee3a 100644
  								fmt->format);
  			}
 diff --git a/libweston/pixel-formats.c b/libweston/pixel-formats.c
-index c60fb75d..8d351a98 100644
+index 72fcc3a5..2592294e 100644
 --- a/libweston/pixel-formats.c
 +++ b/libweston/pixel-formats.c
-@@ -793,7 +793,7 @@ pixel_format_get_modifier(uint64_t modifier)
+@@ -801,7 +801,7 @@ pixel_format_get_modifier(uint64_t modifier)
  		return mod_str;
  	}
  
@@ -149,10 +149,10 @@ index 073896ab..468f47ef 100644
  	}
  
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index a5667c97..6231455d 100644
+index ceb4583f..52544c71 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
-@@ -2680,7 +2680,7 @@ import_simple_dmabuf(struct gl_renderer *gr,
+@@ -2653,7 +2653,7 @@ import_simple_dmabuf(struct gl_renderer *gr,
  		attribs[atti++] = EGL_YUV_NARROW_RANGE_EXT;
  	}
  
@@ -161,7 +161,7 @@ index a5667c97..6231455d 100644
  		if (!gr->has_dmabuf_import_modifiers)
  			return NULL;
  		has_modifier = true;
-@@ -3001,7 +3001,7 @@ gl_renderer_import_dmabuf(struct weston_compositor *ec,
+@@ -2974,7 +2974,7 @@ gl_renderer_import_dmabuf(struct weston_compositor *ec,
  
  	for (i = 0; i < dmabuf->attributes.n_planes; i++) {
  		/* return if EGL doesn't support import modifiers */
@@ -170,7 +170,7 @@ index a5667c97..6231455d 100644
  			if (!gr->has_dmabuf_import_modifiers)
  				return false;
  
-@@ -3165,7 +3165,7 @@ populate_supported_formats(struct weston_compositor *ec,
+@@ -3138,7 +3138,7 @@ populate_supported_formats(struct weston_compositor *ec,
  
  		for (j = 0; j < num_modifiers; j++) {
  			/* Skip MOD_INVALID, as it has already been added. */

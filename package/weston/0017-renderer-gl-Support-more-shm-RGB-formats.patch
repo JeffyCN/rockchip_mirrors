@@ -1,0 +1,295 @@
+From 1fd10191e5f0ed91224cb896699dd6a42feae1d8 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Thu, 7 Jul 2022 11:09:23 +0800
+Subject: [PATCH 17/99] renderer-gl: Support more shm RGB formats
+
+By swapping color channels.
+
+Tested with gstreamer 1.22.8:
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=RGB' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=BGR' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=ARGB' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=xRGB' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=ABGR' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=xBGR' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=RGBA' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=RGBx' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=BGRA' ! waylandsink
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=BGRx' ! waylandsink
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/pixel-formats.c                    | 18 +++++++++++++
+ libweston/pixel-formats.h                    | 11 ++++++++
+ libweston/renderer-gl/fragment.glsl          | 27 +++++++++++++++++---
+ libweston/renderer-gl/gl-renderer-internal.h |  4 ++-
+ libweston/renderer-gl/gl-renderer.c          | 11 ++++++++
+ libweston/renderer-gl/gl-shaders.c           | 18 +++++++++++++
+ 6 files changed, 84 insertions(+), 5 deletions(-)
+
+diff --git a/libweston/pixel-formats.c b/libweston/pixel-formats.c
+index 8d8360ae..1f9dbb2c 100644
+--- a/libweston/pixel-formats.c
++++ b/libweston/pixel-formats.c
+@@ -53,11 +53,14 @@
+ #define GL_INTERNALFORMAT(fmt) .gl_internalformat = (fmt)
+ #define GL_FORMAT(fmt) .gl_format = (fmt)
+ #define GL_TYPE(type) .gl_type = (type)
++#define GL_CHANNEL_ORDER(order) \
++	.gl_channel_order = (SHADER_CHANNEL_ORDER_ ## order)
+ #define SAMPLER_TYPE(type) .sampler_type = (type)
+ #else
+ #define GL_INTERNALFORMAT(fmt) .gl_internalformat = 0
+ #define GL_FORMAT(fmt) .gl_format = 0
+ #define GL_TYPE(type) .gl_type = 0
++#define GL_CHANNEL_ORDER(order) .gl_channel_order = 0
+ #define SAMPLER_TYPE(type) .sampler_type = 0
+ #endif
+ 
+@@ -226,6 +229,9 @@ static const struct pixel_format_info pixel_format_table[] = {
+ 		DRM_FORMAT(RGB888),
+ 		BITS_RGBA_FIXED(8, 8, 8, 0),
+ 		.bpp = 24,
++		GL_FORMAT(GL_RGB),
++		GL_TYPE(GL_UNSIGNED_BYTE),
++		GL_CHANNEL_ORDER(BGRA),
+ 	},
+ 	{
+ 		DRM_FORMAT(BGR888),
+@@ -292,6 +298,9 @@ static const struct pixel_format_info pixel_format_table[] = {
+ 		DRM_FORMAT(RGBX8888),
+ 		BITS_RGBA_FIXED(8, 8, 8, 0),
+ 		.bpp = 32,
++		GL_FORMAT(GL_RGBA),
++		GL_TYPE(GL_UNSIGNED_BYTE),
++		GL_CHANNEL_ORDER(ABGR),
+ #if __BYTE_ORDER == __LITTLE_ENDIAN
+ 		PIXMAN_FMT(r8g8b8x8),
+ #else
+@@ -303,6 +312,9 @@ static const struct pixel_format_info pixel_format_table[] = {
+ 		BITS_RGBA_FIXED(8, 8, 8, 8),
+ 		.bpp = 32,
+ 		.opaque_substitute = DRM_FORMAT_RGBX8888,
++		GL_FORMAT(GL_RGBA),
++		GL_TYPE(GL_UNSIGNED_BYTE),
++		GL_CHANNEL_ORDER(ABGR),
+ #if __BYTE_ORDER == __LITTLE_ENDIAN
+ 		PIXMAN_FMT(r8g8b8a8),
+ #else
+@@ -313,6 +325,9 @@ static const struct pixel_format_info pixel_format_table[] = {
+ 		DRM_FORMAT(BGRX8888),
+ 		BITS_RGBA_FIXED(8, 8, 8, 0),
+ 		.bpp = 32,
++		GL_FORMAT(GL_RGBA),
++		GL_TYPE(GL_UNSIGNED_BYTE),
++		GL_CHANNEL_ORDER(GBAR),
+ #if __BYTE_ORDER == __LITTLE_ENDIAN
+ 		PIXMAN_FMT(b8g8r8x8),
+ #else
+@@ -324,6 +339,9 @@ static const struct pixel_format_info pixel_format_table[] = {
+ 		BITS_RGBA_FIXED(8, 8, 8, 8),
+ 		.bpp = 32,
+ 		.opaque_substitute = DRM_FORMAT_BGRX8888,
++		GL_FORMAT(GL_RGBA),
++		GL_TYPE(GL_UNSIGNED_BYTE),
++		GL_CHANNEL_ORDER(GBAR),
+ #if __BYTE_ORDER == __LITTLE_ENDIAN
+ 		PIXMAN_FMT(b8g8r8a8),
+ #else
+diff --git a/libweston/pixel-formats.h b/libweston/pixel-formats.h
+index 8df5b454..1f8ecf67 100644
+--- a/libweston/pixel-formats.h
++++ b/libweston/pixel-formats.h
+@@ -28,6 +28,14 @@
+ #include <stdbool.h>
+ #include <pixman.h>
+ 
++/* Keep the following in sync with fragment.glsl. */
++enum gl_channel_order {
++	SHADER_CHANNEL_ORDER_RGBA = 0,
++	SHADER_CHANNEL_ORDER_BGRA,
++	SHADER_CHANNEL_ORDER_GBAR,
++	SHADER_CHANNEL_ORDER_ABGR,
++};
++
+ /**
+  * Contains information about pixel formats, mapping format codes from
+  * wl_shm and drm_fourcc.h (which are deliberately identical, but for the
+@@ -78,6 +86,9 @@ struct pixel_format_info {
+ 	/** GL data type, if data can be natively/directly uploaded. */
+ 	int gl_type;
+ 
++	/** Ordering of GL shader channels. */
++	enum gl_channel_order gl_channel_order;
++
+ 	/** Pixman data type, if it agrees exactly with the wl_shm format */
+ 	pixman_format_code_t pixman_format;
+ 
+diff --git a/libweston/renderer-gl/fragment.glsl b/libweston/renderer-gl/fragment.glsl
+index 1ea95b2c..0a1c3625 100644
+--- a/libweston/renderer-gl/fragment.glsl
++++ b/libweston/renderer-gl/fragment.glsl
+@@ -52,6 +52,12 @@
+ #define SHADER_COLOR_MAPPING_3DLUT 1
+ #define SHADER_COLOR_MAPPING_MATRIX 2
+ 
++/* enum gl_channel_order */
++#define SHADER_CHANNEL_ORDER_RGBA 0
++#define SHADER_CHANNEL_ORDER_BGRA 1
++#define SHADER_CHANNEL_ORDER_GBAR 2
++#define SHADER_CHANNEL_ORDER_ABGR 3
++
+ #if DEF_VARIANT == SHADER_VARIANT_EXTERNAL
+ #extension GL_OES_EGL_image_external : require
+ #endif
+@@ -78,6 +84,7 @@ compile_const bool c_green_tint = DEF_GREEN_TINT;
+ compile_const int c_color_pre_curve = DEF_COLOR_PRE_CURVE;
+ compile_const int c_color_mapping = DEF_COLOR_MAPPING;
+ compile_const int c_color_post_curve = DEF_COLOR_POST_CURVE;
++compile_const int c_color_channel_order = DEF_COLOR_CHANNEL_ORDER;
+ 
+ compile_const bool c_need_color_pipeline =
+ 	c_color_pre_curve != SHADER_COLOR_CURVE_IDENTITY ||
+@@ -146,12 +153,24 @@ sample_input_texture()
+ 		return unicolor;
+ 
+ 	if (c_variant == SHADER_VARIANT_RGBA ||
++	    c_variant == SHADER_VARIANT_RGBX ||
+ 	    c_variant == SHADER_VARIANT_EXTERNAL) {
+-		return texture2D(tex, v_texcoord);
+-	}
++		vec4 color;
++
++		if (c_color_channel_order == SHADER_CHANNEL_ORDER_BGRA)
++			color = texture2D(tex, v_texcoord).bgra;
++		else if (c_color_channel_order == SHADER_CHANNEL_ORDER_GBAR)
++			color = texture2D(tex, v_texcoord).gbar;
++		else if (c_color_channel_order == SHADER_CHANNEL_ORDER_ABGR)
++			color = texture2D(tex, v_texcoord).abgr;
++		else
++			color = texture2D(tex, v_texcoord);
+ 
+-	if (c_variant == SHADER_VARIANT_RGBX)
+-		return vec4(texture2D(tex, v_texcoord).rgb, 1.0);
++		if (c_variant == SHADER_VARIANT_RGBX)
++			color.a = 1.0;
++
++		return color;
++	}
+ 
+ 	/* Requires conversion to RGBA */
+ 
+diff --git a/libweston/renderer-gl/gl-renderer-internal.h b/libweston/renderer-gl/gl-renderer-internal.h
+index 85616c94..103e7cc6 100644
+--- a/libweston/renderer-gl/gl-renderer-internal.h
++++ b/libweston/renderer-gl/gl-renderer-internal.h
+@@ -90,11 +90,13 @@ struct gl_shader_requirements
+ 	unsigned color_pre_curve:1; /* enum gl_shader_color_curve */
+ 	unsigned color_mapping:2; /* enum gl_shader_color_mapping */
+ 	unsigned color_post_curve:1; /* enum gl_shader_color_curve */
++	unsigned color_channel_order:2; /* enum gl_channel_order */
++
+ 	/*
+ 	 * The total size of all bitfields plus pad_bits_ must fill up exactly
+ 	 * how many bytes the compiler allocates for them together.
+ 	 */
+-	unsigned pad_bits_:21;
++	unsigned pad_bits_:19;
+ };
+ static_assert(sizeof(struct gl_shader_requirements) ==
+ 	      4 /* total bitfield size in bytes */,
+diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
+index 8b1081d6..9836ae50 100644
+--- a/libweston/renderer-gl/gl-renderer.c
++++ b/libweston/renderer-gl/gl-renderer.c
+@@ -167,6 +167,7 @@ struct gl_buffer_state {
+ 	int pitch; /* plane 0 pitch in pixels */
+ 	GLenum gl_pixel_type;
+ 	GLenum gl_format[3];
++	enum gl_channel_order gl_channel_order;
+ 	int offset[3]; /* per-plane pitch in bytes */
+ 
+ 	EGLImageKHR images[3];
+@@ -1230,6 +1231,7 @@ gl_shader_config_set_input_textures(struct gl_shader_config *sconf,
+ 	int i;
+ 
+ 	sconf->req.variant = gb->shader_variant;
++	sconf->req.color_channel_order = gb->gl_channel_order;
+ 	sconf->req.input_is_premult =
+ 		gl_shader_texture_variant_can_be_premult(gb->shader_variant);
+ 
+@@ -2451,6 +2453,7 @@ gl_renderer_attach_shm(struct weston_surface *es, struct weston_buffer *buffer)
+ 	gb->shader_variant = shader_variant;
+ 	ARRAY_COPY(gb->offset, offset);
+ 	ARRAY_COPY(gb->gl_format, gl_format);
++	gb->gl_channel_order = buffer->pixel_format->gl_channel_order;
+ 	gb->gl_pixel_type = gl_pixel_type;
+ 	gb->needs_full_upload = true;
+ 
+@@ -4023,6 +4026,14 @@ gl_renderer_display_create(struct weston_compositor *ec,
+ 	if (gl_renderer_setup(ec) < 0)
+ 		goto fail_with_error;
+ 
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_XBGR8888);
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_ABGR8888);
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_RGBX8888);
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_RGBA8888);
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_BGRX8888);
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_BGRA8888);
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_RGB888);
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_BGR888);
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_RGB565);
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_YUV420);
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_YUV444);
+diff --git a/libweston/renderer-gl/gl-shaders.c b/libweston/renderer-gl/gl-shaders.c
+index a9f38c63..604c9c7a 100644
+--- a/libweston/renderer-gl/gl-shaders.c
++++ b/libweston/renderer-gl/gl-shaders.c
+@@ -42,6 +42,7 @@
+ 
+ #include "gl-renderer.h"
+ #include "gl-renderer-internal.h"
++#include "pixel-formats.h"
+ #include "shared/helpers.h"
+ #include "shared/timespec-util.h"
+ 
+@@ -135,6 +136,21 @@ gl_shader_color_mapping_to_string(enum gl_shader_color_mapping kind)
+ 	return "!?!?"; /* never reached */
+ }
+ 
++static const char *
++gl_shader_color_order_to_string(enum gl_channel_order kind)
++{
++	switch (kind) {
++#define CASERET(x) case x: return #x;
++	CASERET(SHADER_CHANNEL_ORDER_RGBA)
++	CASERET(SHADER_CHANNEL_ORDER_BGRA)
++	CASERET(SHADER_CHANNEL_ORDER_GBAR)
++	CASERET(SHADER_CHANNEL_ORDER_ABGR)
++#undef CASERET
++	}
++
++	return "!?!?"; /* never reached */
++}
++
+ static void
+ dump_program_with_line_numbers(int count, const char **sources)
+ {
+@@ -239,12 +255,14 @@ create_fragment_shader_config_string(const struct gl_shader_requirements *req)
+ 			"#define DEF_COLOR_PRE_CURVE %s\n"
+ 			"#define DEF_COLOR_MAPPING %s\n"
+ 			"#define DEF_COLOR_POST_CURVE %s\n"
++			"#define DEF_COLOR_CHANNEL_ORDER %s\n"
+ 			"#define DEF_VARIANT %s\n",
+ 			req->green_tint ? "true" : "false",
+ 			req->input_is_premult ? "true" : "false",
+ 			gl_shader_color_curve_to_string(req->color_pre_curve),
+ 			gl_shader_color_mapping_to_string(req->color_mapping),
+ 			gl_shader_color_curve_to_string(req->color_post_curve),
++			gl_shader_color_order_to_string(req->color_channel_order),
+ 			gl_shader_texture_variant_to_string(req->variant));
+ 	if (size < 0)
+ 		return NULL;
+-- 
+2.20.1
+

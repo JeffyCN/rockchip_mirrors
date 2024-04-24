@@ -1,7 +1,7 @@
-From f59ac048e59fec1997a4db8d7d4e162b662415c9 Mon Sep 17 00:00:00 2001
+From b35efc6cb4be5b5abc9d8ae496e9481dc9536914 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 25 Dec 2023 16:58:31 +0800
-Subject: [PATCH 89/98] vnc: Improve performance with gl-renderer
+Subject: [PATCH 89/99] vnc: Improve performance with gl-renderer
 
 Major changes:
 1/ Use GBM instead of FBO
@@ -538,10 +538,10 @@ index d7d11ffc..e7c44b8a 100644
  	free(backend);
  	return NULL;
 diff --git a/libweston/renderer-gl/gl-renderer-internal.h b/libweston/renderer-gl/gl-renderer-internal.h
-index b6f8f51c..a807348e 100644
+index fd45a853..0c1d9fd5 100644
 --- a/libweston/renderer-gl/gl-renderer-internal.h
 +++ b/libweston/renderer-gl/gl-renderer-internal.h
-@@ -244,6 +244,8 @@ struct gl_renderer {
+@@ -237,6 +237,8 @@ struct gl_renderer {
  
  	int drm_fd;
  	struct gbm_device *gbm;
@@ -551,7 +551,7 @@ index b6f8f51c..a807348e 100644
  
  static inline struct gl_renderer *
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 3199006e..ec571909 100644
+index a4838dd4..83d3f05c 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -812,6 +812,13 @@ gl_renderer_create_fbo(struct weston_output *output,
@@ -568,7 +568,7 @@ index 3199006e..ec571909 100644
  static bool
  gl_renderer_do_read_pixels(struct gl_renderer *gr,
  			   const struct pixel_format_info *fmt,
-@@ -3960,8 +3967,6 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -3933,8 +3940,6 @@ gl_renderer_display_create(struct weston_compositor *ec,
  			   const struct gl_renderer_display_options *options)
  {
  	struct gl_renderer *gr;
@@ -577,7 +577,7 @@ index 3199006e..ec571909 100644
  	int ret;
  
  	gr = zalloc(sizeof *gr);
-@@ -3972,6 +3977,9 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -3945,6 +3950,9 @@ gl_renderer_display_create(struct weston_compositor *ec,
  	wl_list_init(&gr->shader_list);
  	gr->platform = options->egl_platform;
  
@@ -587,7 +587,7 @@ index 3199006e..ec571909 100644
  	gr->renderer_scope = weston_compositor_add_log_scope(ec, "gl-renderer",
  		"GL-renderer verbose messages\n", NULL, NULL, gr);
  	if (!gr->renderer_scope)
-@@ -3986,10 +3994,10 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -3959,10 +3967,10 @@ gl_renderer_display_create(struct weston_compositor *ec,
  
  	/* HACK: Fixup options for GBM platform */
  	if (gr->platform == EGL_PLATFORM_GBM_KHR) {
@@ -601,7 +601,7 @@ index 3199006e..ec571909 100644
  			gr->drm_fd = drmOpen("rockchip", NULL);
  			if (gr->drm_fd < 0)
  				gr->drm_fd = open("/dev/dri/card0",
-@@ -4003,7 +4011,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -3976,7 +3984,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
  				goto fail;
  			}
  
@@ -610,7 +610,7 @@ index 3199006e..ec571909 100644
  		}
  	}
  
-@@ -4017,7 +4025,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -3990,7 +3998,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
  	gr->base.fill_buffer_info = gl_renderer_fill_buffer_info;
  	gr->base.type = WESTON_RENDERER_GL;
  
@@ -619,7 +619,7 @@ index 3199006e..ec571909 100644
  		goto fail;
  
  	weston_drm_format_array_init(&gr->supported_formats);
-@@ -4034,11 +4042,11 @@ gl_renderer_display_create(struct weston_compositor *ec,
+@@ -4007,11 +4015,11 @@ gl_renderer_display_create(struct weston_compositor *ec,
  
  	if (!gr->has_configless_context) {
  		if (!gr->has_surfaceless_context)
@@ -633,7 +633,7 @@ index 3199006e..ec571909 100644
  						   options->formats,
  						   options->formats_count);
  		if (gr->egl_config == EGL_NO_CONFIG_KHR) {
-@@ -4402,4 +4410,5 @@ WL_EXPORT struct gl_renderer_interface gl_renderer_interface = {
+@@ -4375,4 +4383,5 @@ WL_EXPORT struct gl_renderer_interface gl_renderer_interface = {
  	.output_set_border = gl_renderer_output_set_border,
  	.create_fence_fd = gl_renderer_create_fence_fd,
  	.create_fbo = gl_renderer_create_fbo,

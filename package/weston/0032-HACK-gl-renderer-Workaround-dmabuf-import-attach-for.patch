@@ -1,7 +1,7 @@
-From 5d6896b127e91ef9fd3dbfbbc51a1d48f2533b0c Mon Sep 17 00:00:00 2001
+From e22fbe67f88800d33d1b322776e2b335838596b8 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 6 Dec 2018 18:53:05 +0800
-Subject: [PATCH 32/98] HACK: gl-renderer: Workaround dmabuf import/attach for
+Subject: [PATCH 32/99] HACK: gl-renderer: Workaround dmabuf import/attach for
  old mali
 
 Tested on px3se with libmali-utgard-400-r7p0-r3p0-wayland.so, the
@@ -14,10 +14,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 14 insertions(+), 1 deletion(-)
 
 diff --git a/libweston/renderer-gl/gl-renderer-internal.h b/libweston/renderer-gl/gl-renderer-internal.h
-index 9557d994..bb149464 100644
+index 103e7cc6..aef307f1 100644
 --- a/libweston/renderer-gl/gl-renderer-internal.h
 +++ b/libweston/renderer-gl/gl-renderer-internal.h
-@@ -238,6 +238,8 @@ struct gl_renderer {
+@@ -231,6 +231,8 @@ struct gl_renderer {
  	 */
  	struct wl_list shader_list;
  	struct weston_log_scope *shader_scope;
@@ -27,10 +27,10 @@ index 9557d994..bb149464 100644
  
  static inline struct gl_renderer *
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index c5f81d21..b2ae1c64 100644
+index 4c07e876..7cda06b3 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
-@@ -2669,6 +2669,14 @@ import_simple_dmabuf(struct gl_renderer *gr,
+@@ -2642,6 +2642,14 @@ import_simple_dmabuf(struct gl_renderer *gr,
  	attribs[atti++] = EGL_IMAGE_PRESERVED_KHR;
  	attribs[atti++] = EGL_TRUE;
  
@@ -45,7 +45,7 @@ index c5f81d21..b2ae1c64 100644
  	if (attributes->modifier[0] != DRM_FORMAT_MOD_INVALID) {
  		if (!gr->has_dmabuf_import_modifiers)
  			return NULL;
-@@ -2898,7 +2906,7 @@ gl_renderer_query_dmabuf_formats(struct weston_compositor *wc,
+@@ -2871,7 +2879,7 @@ gl_renderer_query_dmabuf_formats(struct weston_compositor *wc,
  
  	if (!gr->has_dmabuf_import_modifiers ||
  	    !gr->query_dmabuf_formats(gr->egl_display, 0, NULL, &num)) {
@@ -54,7 +54,7 @@ index c5f81d21..b2ae1c64 100644
  		fallback = true;
  	}
  
-@@ -3516,6 +3524,9 @@ log_egl_info(struct gl_renderer *gr, EGLDisplay egldpy)
+@@ -3489,6 +3497,9 @@ log_egl_info(struct gl_renderer *gr, EGLDisplay egldpy)
  	str = eglQueryString(egldpy, EGL_VENDOR);
  	weston_log("EGL vendor: %s\n", str ? str : "(null)");
  

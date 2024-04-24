@@ -1,7 +1,7 @@
-From ce6d464ce668a4f4b6b01e47cd0f35e04bbe1c93 Mon Sep 17 00:00:00 2001
+From cf8193fadf496acc6fefb4b2213de2b127c963b1 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 14:23:45 +0800
-Subject: [PATCH 40/98] pixman-renderer: Support yuv formats
+Subject: [PATCH 40/99] pixman-renderer: Support yuv formats
 
 Support yuy2/yv12/i420/nv12/nv16.
 
@@ -12,10 +12,10 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 21 insertions(+)
 
 diff --git a/libweston/pixel-formats.c b/libweston/pixel-formats.c
-index 6acef07f..c60fb75d 100644
+index 1f9dbb2c..72fcc3a5 100644
 --- a/libweston/pixel-formats.c
 +++ b/libweston/pixel-formats.c
-@@ -457,6 +457,7 @@ static const struct pixel_format_info pixel_format_table[] = {
+@@ -465,6 +465,7 @@ static const struct pixel_format_info pixel_format_table[] = {
  		SAMPLER_TYPE(EGL_TEXTURE_Y_XUXV_WL),
  		.num_planes = 1,
  		.hsub = 2,
@@ -23,7 +23,7 @@ index 6acef07f..c60fb75d 100644
  	},
  	{
  		DRM_FORMAT(YVYU),
-@@ -486,6 +487,9 @@ static const struct pixel_format_info pixel_format_table[] = {
+@@ -494,6 +495,9 @@ static const struct pixel_format_info pixel_format_table[] = {
  		.num_planes = 2,
  		.hsub = 2,
  		.vsub = 2,
@@ -33,7 +33,7 @@ index 6acef07f..c60fb75d 100644
  	},
  	{
  		DRM_FORMAT(NV21),
-@@ -501,6 +505,9 @@ static const struct pixel_format_info pixel_format_table[] = {
+@@ -509,6 +513,9 @@ static const struct pixel_format_info pixel_format_table[] = {
  		.num_planes = 2,
  		.hsub = 2,
  		.vsub = 1,
@@ -43,7 +43,7 @@ index 6acef07f..c60fb75d 100644
  	},
  	{
  		DRM_FORMAT(NV61),
-@@ -578,6 +585,9 @@ static const struct pixel_format_info pixel_format_table[] = {
+@@ -586,6 +593,9 @@ static const struct pixel_format_info pixel_format_table[] = {
  		.num_planes = 3,
  		.hsub = 2,
  		.vsub = 2,
@@ -53,7 +53,7 @@ index 6acef07f..c60fb75d 100644
  	},
  	{
  		DRM_FORMAT(YVU420),
-@@ -586,6 +596,7 @@ static const struct pixel_format_info pixel_format_table[] = {
+@@ -594,6 +604,7 @@ static const struct pixel_format_info pixel_format_table[] = {
  		.chroma_order = ORDER_VU,
  		.hsub = 2,
  		.vsub = 2,
