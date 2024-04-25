@@ -1,50 +1,48 @@
-From 3e5a0cdf3bea40440f5940db6b7d62d74847f258 Mon Sep 17 00:00:00 2001
+From 451b1f7a732e24252cfce73ec1b81b1cc5cb34d6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 1 Nov 2019 17:55:06 +0800
-Subject: [PATCH 5/6] pixman_image_composite32: Support rockchip RGA 2D accel
+Subject: [PATCH 4/5] pixman_image_composite32: Support rockchip RGA 2D accel
 
 Disabled by default, set env PIXMAN_USE_RGA=1 to enable.
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- configure.ac       |   7 ++
- pixman/Makefile.am |   2 +-
+ meson.build        |   5 +
+ pixman/meson.build |   2 +-
  pixman/pixman.c    | 278 +++++++++++++++++++++++++++++++++++++++++++++
- 3 files changed, 286 insertions(+), 1 deletion(-)
+ 3 files changed, 284 insertions(+), 1 deletion(-)
 
-diff --git a/configure.ac b/configure.ac
-index 43e9b20..5db5f9b 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -187,6 +187,13 @@ PIXMAN_CHECK_CFLAG([-Wdeclaration-after-statement])
- PIXMAN_CHECK_CFLAG([-Wno-unused-local-typedefs])
- PIXMAN_CHECK_CFLAG([-fno-strict-aliasing])
+diff --git a/meson.build b/meson.build
+index e297840..dd67cc8 100644
+--- a/meson.build
++++ b/meson.build
+@@ -501,6 +501,11 @@ if pthreads_found
+   config.set('HAVE_PTHREADS', 1)
+ endif
  
-+dnl check for rockchip RGA
-+PKG_CHECK_MODULES(RGA, [librga],
-+                  AC_DEFINE(HAVE_RGA, 1, [Have rockchip RGA])],
-+                  AC_MSG_NOTICE([Without rockchip RGA]))
-+AC_SUBST(RGA_CFLAGS)
-+AC_SUBST(RGA_LIBS)
++dep_rga = dependency('librga', required: false)
++if dep_rga.found()
++  config.set('HAVE_RGA', '1')
++endif
 +
- dnl =========================================================================
- dnl OpenMP for the test suite?
- dnl
-diff --git a/pixman/Makefile.am b/pixman/Makefile.am
-index 8f780a1..a9669ab 100644
---- a/pixman/Makefile.am
-+++ b/pixman/Makefile.am
-@@ -3,7 +3,7 @@ include $(top_srcdir)/pixman/Makefile.sources
- lib_LTLIBRARIES = libpixman-1.la
- 
- libpixman_1_la_LDFLAGS = -version-info $(LT_VERSION_INFO) -no-undefined @PTHREAD_LDFLAGS@ 
--libpixman_1_la_LIBADD = @PTHREAD_LIBS@ -lm
-+libpixman_1_la_LIBADD = @PTHREAD_LIBS@ -lm $(RGA_LIBS)
- libpixman_1_la_SOURCES = $(libpixman_sources) $(libpixman_headers)
- 
- libpixmanincludedir = $(includedir)/pixman-1
+ funcs = ['sigaction', 'alarm', 'mprotect', 'getpagesize', 'mmap', 'getisax', 'gettimeofday']
+ # mingw claimes to have posix_memalign, but it doesn't
+ if host_machine.system() != 'windows'
+diff --git a/pixman/meson.build b/pixman/meson.build
+index 62ec66b..e58f42f 100644
+--- a/pixman/meson.build
++++ b/pixman/meson.build
+@@ -123,7 +123,7 @@ libpixman = library(
+   [pixman_files, config_h, version_h, cpu_features_sources],
+   link_with: pixman_simd_libs,
+   c_args : libpixman_extra_cargs,
+-  dependencies : [dep_m, dep_threads],
++  dependencies : [dep_m, dep_threads, dep_rga],
+   include_directories : cpu_features_inc,
+   version : meson.project_version(),
+   install : true,
 diff --git a/pixman/pixman.c b/pixman/pixman.c
-index cd7479a..371e421 100644
+index 422d4c2..ece358a 100644
 --- a/pixman/pixman.c
 +++ b/pixman/pixman.c
 @@ -28,8 +28,19 @@

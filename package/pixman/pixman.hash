@@ -1,6 +1,3 @@
-# From https://lists.x.org/archives/xorg-announce/2022-October/003228.html
-sha256  5747d2ec498ad0f1594878cc897ef5eb6c29e91c53b899f7f71b506785fc1376  pixman-0.42.2.tar.xz
-sha512  3476e2676e66756b1af61b1e532cd80c985c191fb7956eb01702b419726cce99e79163b7f287f74f66414680e7396d13c3fee525cd663f12b6ac4877070ff4e8  pixman-0.42.2.tar.xz
-
-# Locally computed
+# Locally calculated
+sha256  48d8539f35488d694a2fef3ce17394d1153ed4e71c05d1e621904d574be5df19  pixman-0.43.4.tar.xz
 sha256  fac9270f0987b96ff4533fca3548c633e02083cbba4a0172a3b149b2e4019793  COPYING
