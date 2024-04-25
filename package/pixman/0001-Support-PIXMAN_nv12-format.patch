@@ -1,7 +1,7 @@
-From b276d982a27c421495582b120b0215ad578b7367 Mon Sep 17 00:00:00 2001
+From 70c3fa67bbe4665578b153e31763a575aa9bcee5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Mon, 4 Nov 2019 11:11:59 +0800
-Subject: [PATCH 2/6] Support PIXMAN_nv12 format
+Subject: [PATCH 1/5] Support PIXMAN_nv12 format
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 93 insertions(+), 2 deletions(-)
 
 diff --git a/pixman/pixman-access.c b/pixman/pixman-access.c
-index 7c5ce78..1e5c0ba 100644
+index 7bd7a5a..794263e 100644
 --- a/pixman/pixman-access.c
 +++ b/pixman/pixman-access.c
 @@ -192,6 +192,25 @@
@@ -40,7 +40,7 @@ index 7c5ce78..1e5c0ba 100644
  /* Misc. helpers */
  
  static force_inline void
-@@ -845,6 +864,42 @@ fetch_scanline_yv12 (bits_image_t   *image,
+@@ -871,6 +890,42 @@ fetch_scanline_yv12 (bits_image_t   *image,
      }
  }
  
@@ -83,7 +83,7 @@ index 7c5ce78..1e5c0ba 100644
  /**************************** Pixel wise fetching *****************************/
  
  #ifndef PIXMAN_FB_ACCESSORS
-@@ -1036,6 +1091,32 @@ fetch_pixel_yv12 (bits_image_t *image,
+@@ -1080,6 +1135,32 @@ fetch_pixel_yv12 (bits_image_t *image,
  	(b >= 0 ? b < 0x1000000 ? (b >> 16) & 0x0000ff : 0x0000ff : 0);
  }
  
@@ -116,7 +116,7 @@ index 7c5ce78..1e5c0ba 100644
  /*********************************** Store ************************************/
  
  #ifndef PIXMAN_FB_ACCESSORS
-@@ -1509,6 +1590,11 @@ static const format_info_t accessors[] =
+@@ -1665,6 +1746,11 @@ static const format_info_t accessors[] =
        fetch_pixel_yv12, fetch_pixel_generic_float,
        NULL, NULL },
      
@@ -129,10 +129,10 @@ index 7c5ce78..1e5c0ba 100644
  };
  
 diff --git a/pixman/pixman.c b/pixman/pixman.c
-index c09b528..d8a2d24 100644
+index 82ec236..3e0f3a8 100644
 --- a/pixman/pixman.c
 +++ b/pixman/pixman.c
-@@ -1070,6 +1070,7 @@ pixman_format_supported_source (pixman_format_code_t format)
+@@ -1071,6 +1071,7 @@ pixman_format_supported_source (pixman_format_code_t format)
      /* YUV formats */
      case PIXMAN_yuy2:
      case PIXMAN_yv12:
@@ -140,7 +140,7 @@ index c09b528..d8a2d24 100644
  	return TRUE;
  
      default:
-@@ -1092,7 +1093,7 @@ PIXMAN_EXPORT pixman_bool_t
+@@ -1093,7 +1094,7 @@ PIXMAN_EXPORT pixman_bool_t
  pixman_format_supported_destination (pixman_format_code_t format)
  {
      /* YUV formats cannot be written to at the moment */
@@ -150,10 +150,10 @@ index c09b528..d8a2d24 100644
  
      return pixman_format_supported_source (format);
 diff --git a/pixman/pixman.h b/pixman/pixman.h
-index 08303b5..3bb2fa5 100644
+index d697b53..6c3281e 100644
 --- a/pixman/pixman.h
 +++ b/pixman/pixman.h
-@@ -861,6 +861,9 @@ struct pixman_indexed
+@@ -867,6 +867,9 @@ struct pixman_indexed
  #define PIXMAN_TYPE_ARGB_SRGB	10
  #define PIXMAN_TYPE_RGBA_FLOAT	11
  
@@ -163,7 +163,7 @@ index 08303b5..3bb2fa5 100644
  #define PIXMAN_FORMAT_COLOR(f)				\
  	(PIXMAN_FORMAT_TYPE(f) == PIXMAN_TYPE_ARGB ||	\
  	 PIXMAN_FORMAT_TYPE(f) == PIXMAN_TYPE_ABGR ||	\
-@@ -941,7 +944,8 @@ typedef enum {
+@@ -948,7 +951,8 @@ typedef enum {
  
  /* YUV formats */
      PIXMAN_yuy2 =	 PIXMAN_FORMAT(16,PIXMAN_TYPE_YUY2,0,0,0,0),
