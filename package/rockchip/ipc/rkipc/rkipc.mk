@@ -5,6 +5,18 @@ RKIPC_LICENSE_FILES = LICENSE
 
 RKIPC_DEPENDENCIES = camera-engine-rkaiq wpa_supplicant freetype common_algorithm
 
+ifeq ($(BR2_PACKAGE_RKIPC_RK3576), y)
+    RKIPC_DEPENDENCIES += rkfsmk rockit rockchip-rga
+    RKIPC_CONF_OPTS += -DCOMPILE_FOR_RK3576=ON
+    RKIPC_CONF_OPTS += -DCOMPILE_FOR_BUILDROOT=ON
+endif
+
+ifeq ($(BR2_PACKAGE_RKIPC_RK3576_MULTI_IPC), y)
+    RKIPC_DEPENDENCIES += rkfsmk rockit rockchip-rga
+    RKIPC_CONF_OPTS += -DCOMPILE_FOR_RK3576_MULTI_IPC=ON
+    RKIPC_CONF_OPTS += -DCOMPILE_FOR_BUILDROOT=ON
+endif
+
 ifeq ($(BR2_PACKAGE_RKIPC_RK3588), y)
     RKIPC_DEPENDENCIES += rkfsmk rockit rockchip-rga
     RKIPC_CONF_OPTS += -DCOMPILE_FOR_RK3588=ON
