@@ -25,5 +25,9 @@ LIBTIRPC_CONF_OPTS += --disable-gssapi
 endif
 HOST_LIBTIRPC_CONF_OPTS = --disable-gssapi
 
+ifeq ($(BR2_PACKAGE_LIBTIRPC_STATIC),y)
+LIBTIRPC_CONF_OPTS += --enable-static
+endif
+
 $(eval $(autotools-package))
 $(eval $(host-autotools-package))
