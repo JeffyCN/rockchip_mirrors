@@ -14,6 +14,7 @@ if BR2_PACKAGE_BUSYBOX
 config BR2_PACKAGE_BUSYBOX_STATIC
 	bool "Enable static"
 	default y if BR2_STATIC_LIBS
+	select BR2_PACKAGE_LIBTIRPC_STATIC if BR2_PACKAGE_LIBTIRPC
 
 config BR2_PACKAGE_BUSYBOX_CONFIG
 	string "BusyBox configuration file to use?"
