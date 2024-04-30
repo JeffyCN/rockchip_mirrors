@@ -1,7 +1,7 @@
-From 76dd36dc5d85270f07996a4d29ddde0ee2edeb07 Mon Sep 17 00:00:00 2001
+From d21a35e715c52d4fe6c7bc90494ade7df3788308 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 23 Mar 2023 10:55:59 +0800
-Subject: [PATCH 8/8] rtc: Use UTC by default when parsing adjtime file
+Subject: [PATCH 12/12] rtc: Use UTC by default when parsing adjtime file
 
 Same as util-linux:
 sys-utils/hwclock.c: "get info from adjtime file - default is UTC"
