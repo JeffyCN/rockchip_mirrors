@@ -1,4 +1,4 @@
-From edb4baee0abaf6246704aa6905f5bbc4bf99adcf Mon Sep 17 00:00:00 2001
+From 88090232ca350890e08fe7bb6a10d6a131be673e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 1 Sep 2020 08:51:17 +0800
 Subject: [PATCH 49/99] HACK: backend-drm: Consider linear and invalid modifier
@@ -135,10 +135,10 @@ index 72fcc3a5..2592294e 100644
  			   (unsigned long long) modifier);
  		free(modifier_name);
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 073896ab..468f47ef 100644
+index ac511528..4c960d30 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -841,8 +841,7 @@ pixman_renderer_prepare_dmabuf(struct linux_dmabuf_buffer *dmabuf)
+@@ -852,8 +852,7 @@ pixman_renderer_prepare_dmabuf(struct linux_dmabuf_buffer *dmabuf)
  	total_size = lseek(attributes->fd[0], 0, SEEK_END);
  
  	for (i = 0; i < attributes->n_planes; i++) {

@@ -1,7 +1,7 @@
-From 26632e6178b9d4cb593e4bb015d3e1a66503264b Mon Sep 17 00:00:00 2001
+From 012abdc9afb67a486fe14662b61a87a93ce3f2d5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 23 Oct 2020 17:37:04 +0800
-Subject: [PATCH 52/98] backend-drm: Support using ARGB8888 gbm_format
+Subject: [PATCH 52/99] backend-drm: Support using ARGB8888 gbm_format
 
 Tested with:
 /etc/xdg/weston/weston.ini:
@@ -39,10 +39,10 @@ index 8fd2529e..f41708f2 100644
  		weston_log("failed to get drm_fb for bo\n");
  		gbm_surface_release_buffer(output->gbm_surface, bo);
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 468f47ef..27410e24 100644
+index 4c960d30..6b9aad47 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -1655,7 +1655,7 @@ pixman_renderer_output_create(struct weston_output *output,
+@@ -1674,7 +1674,7 @@ pixman_renderer_output_create(struct weston_output *output,
  	output->renderer_state = po;
  
  	if (options->use_shadow)

@@ -1,7 +1,7 @@
-From a8ef413e694d4f4ee64c4383651fc41a73620504 Mon Sep 17 00:00:00 2001
+From ba79ede6c0e8dd1544c133e8ee3d7ce2a25e54ea Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 9 Oct 2021 12:33:33 +0800
-Subject: [PATCH 62/98] HACK: pixman-renderer: Support passing dma fd to pixman
+Subject: [PATCH 62/99] HACK: pixman-renderer: Support passing dma fd to pixman
 
 Usage:
 pixman_image_set_destroy_function(image, NULL, (void *)(ptrdiff_t)dma_fd)
@@ -28,7 +28,7 @@ index 0d2e1214..0046b540 100644
  	uint32_t plane_mask;
  
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 2af7fe75..7d1c8455 100644
+index 21cd64af..14303fc0 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1973,9 +1973,10 @@ drm_output_init_pixman(struct drm_output *output, struct drm_backend *b)
@@ -86,10 +86,10 @@ index 7df1198f..b0d8f55b 100644
  	drmModeRmFB(device->drm.fd, fb->fb_id);
  err_bo:
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 27410e24..eded4cd7 100644
+index 6b9aad47..255c648f 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
-@@ -985,6 +985,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
+@@ -1002,6 +1002,8 @@ pixman_renderer_attach_dmabuf(struct weston_surface *es,
  					     data->ptr + attributes->offset[0],
  					     attributes->stride[0]);
  
@@ -98,7 +98,7 @@ index 27410e24..eded4cd7 100644
  	ps->buffer_destroy_listener.notify =
  		buffer_state_handle_buffer_destroy;
  	wl_signal_add(&buffer->destroy_signal,
-@@ -1728,6 +1730,23 @@ pixman_renderer_create_image_from_ptr(struct weston_output *output,
+@@ -1747,6 +1749,23 @@ pixman_renderer_create_image_from_ptr(struct weston_output *output,
  	return &renderbuffer->base;
  }
  
@@ -122,7 +122,7 @@ index 27410e24..eded4cd7 100644
  static struct weston_renderbuffer *
  pixman_renderer_create_image(struct weston_output *output,
  			     const struct pixel_format_info *format, int width,
-@@ -1770,6 +1789,7 @@ static struct pixman_renderer_interface pixman_renderer_interface = {
+@@ -1789,6 +1808,7 @@ static struct pixman_renderer_interface pixman_renderer_interface = {
  	.output_create = pixman_renderer_output_create,
  	.output_destroy = pixman_renderer_output_destroy,
  	.create_image_from_ptr = pixman_renderer_create_image_from_ptr,
