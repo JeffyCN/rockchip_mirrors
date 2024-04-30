@@ -23,3 +23,11 @@ comment "libtirpc gss support needs a toolchain w/ dynamic library"
 	depends on BR2_USE_MMU
 	depends on BR2_STATIC_LIBS
 	depends on BR2_PACKAGE_LIBTIRPC
+
+if BR2_PACKAGE_LIBTIRPC
+
+config BR2_PACKAGE_LIBTIRPC_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
+endif
