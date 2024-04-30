@@ -1,4 +1,4 @@
-From dccab998f209908fbf4540899dc1c357027ecc4a Mon Sep 17 00:00:00 2001
+From f7f8ed30daf8d5210cc1920e3cad361d8410557e Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 27 Sep 2022 02:06:55 +0000
 Subject: [PATCH 3/4] HACK: Open rockchip drm device by default
