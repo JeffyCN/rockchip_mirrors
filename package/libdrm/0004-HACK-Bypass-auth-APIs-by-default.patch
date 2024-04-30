@@ -1,4 +1,4 @@
-From c70ac38823fb18d4b1e180f4b73ee59738f7d048 Mon Sep 17 00:00:00 2001
+From fc2b834365060574825c1ef6a153d9afb3c0c084 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 12 Jan 2022 11:42:19 +0800
 Subject: [PATCH 4/4] HACK: Bypass auth APIs by default
