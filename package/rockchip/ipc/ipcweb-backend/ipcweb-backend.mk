@@ -34,20 +34,16 @@ IPCWEB_BACKEND_CONF_OPTS += -DIPCWEBBACKEND_INSTALL_ON_OEM_PARTITION=ON
 IPCWEB_BACKEND_TARGET_INSTALL_DIR = $(BR2_PACKAGE_RK_OEM_INSTALL_TARGET_DIR)
 define IPCWEB_BACKEND_INSTALL_TARGET_CMDS
 	rm -rf $(IPCWEB_BACKEND_TARGET_INSTALL_DIR)/www
-	cp -rfp $(@D)/www $(IPCWEB_BACKEND_TARGET_INSTALL_DIR)/
+	cp -rfp $(@D)/www-rkipc $(IPCWEB_BACKEND_TARGET_INSTALL_DIR)/www
 	mkdir -p $(IPCWEB_BACKEND_TARGET_INSTALL_DIR)/www/cgi-bin/
 	cp -rfp $(@D)/src/entry.cgi $(IPCWEB_BACKEND_TARGET_INSTALL_DIR)/www/cgi-bin/
-	cp -rfp $(@D)/ipcweb-env-arm64/etc/init.d/S50fcgiwrap $(TARGET_DIR)/etc/init.d/
-	cp -rfp $(@D)/ipcweb-env-arm64/etc/nginx/nginx.conf $(TARGET_DIR)/etc/nginx/nginx.conf
 endef
 else
 define IPCWEB_BACKEND_INSTALL_TARGET_CMDS
 	rm -rf $(TARGET_DIR)/usr/www
-	cp -rfp $(@D)/www $(TARGET_DIR)/usr
+	cp -rfp $(@D)/www-rkipc $(TARGET_DIR)/usr/www
 	mkdir -p  $(TARGET_DIR)/usr/www/cgi-bin/
 	cp -rfp $(@D)/src/entry.cgi $(TARGET_DIR)/usr/www/cgi-bin/
-	cp -rfp $(@D)/ipcweb-env-arm64/etc/init.d/S50fcgiwrap $(TARGET_DIR)/etc/init.d/
-	cp -rfp $(@D)/ipcweb-env-arm64/etc/nginx/nginx.conf $(TARGET_DIR)/etc/nginx/nginx.conf
 endef
 endif
 
