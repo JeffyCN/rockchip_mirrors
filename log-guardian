@@ -54,16 +54,15 @@ case "$MIN_AVAIL_SIZE" in
 	*G) MIN_AVAIL_SIZE=$(( ${MIN_AVAIL_SIZE%G} * 1024 * 1024 * 1024)) ;;
 esac
 
-avail_size() {
-	df "$1" --output=avail -B 1 | xargs -n 1 | tail -n 1
+total_size() {
+	df "$1" -k | tail -n 1 | awk '{printf $2 * 1024}'
 }
 
-total_size() {
-	df "$1" --output=size -B 1 | xargs -n 1 | tail -n 1
+avail_size() {
+	df "$1" -k | tail -n 1 | awk '{printf $4 * 1024}'
 }
 
 is_full() {
-	stat "$1" >/dev/null 2>&1 || return 0
 	[ "$(avail_size "$1")" -lt "$MIN_AVAIL_SIZE" ]
 }
 
@@ -120,13 +119,12 @@ process_dir() {
 	return 1
 }
 
-DIRS="$(echo "$LOG_DIRS" | tr ',' ' ')"
-unset LOG_DIRS
-for dir in $DIRS; do
-	if [ "$(total_size "$dir")" -le "$MIN_AVAIL_SIZE" ]; then
-		log "ERROR: No enough space for \"$dir\", ignored..."
-	else
-		LOG_DIRS="${LOG_DIRS:+$LOG_DIRS }$dir"
+LOG_DIRS="$(echo "$LOG_DIRS" | tr ',' ' ')"
+for dir in $LOG_DIRS; do
+	if [ ! -d "$dir" ]; then
+		log "[WARN] Not a dir: \"$dir\""
+	elif [ "$(total_size "$dir")" -le "$MIN_AVAIL_SIZE" ]; then
+		log "[WARN] No enough space for \"$dir\"!"
 	fi
 done
 
@@ -140,6 +138,7 @@ log "Guarding logs in: \"$LOG_DIRS\"..."
 
 	while true; do
 		for dir in $LOG_DIRS; do
+			[ -d "$dir" ] || continue
 			is_full "$dir" || continue
 			[ "$(total_size "$dir")" -gt "$MIN_AVAIL_SIZE" ] || \
 				continue
