@@ -221,6 +221,8 @@ usb_load_config()
 	USB_CONFIG_FILE=$(find /tmp/ /etc/ -name .usb_config | head -n 1)
 	[ -n "$USB_CONFIG_FILE" -a -r "$USB_CONFIG_FILE" ] || return 0
 
+	echo "Loading configs from $USB_CONFIG_FILE ..."
+
 	ums_parse()
 	{
 		grep "\<$1=" "$USB_CONFIG_FILE" | cut -d'=' -f2
@@ -272,24 +274,17 @@ uac2_prepare()
 }
 
 # ---- mtp
+MTP_INSTANCES=${MTP_INSTANCES:-ffs.mtp}
 mtp_prepare()
 {
-	echo "MTP" > os_desc/interface.MTP/compatible_id
-	echo 1 > $USB_GADGET_DIR/os_desc/use
-}
-
-mtp_start()
-{
-	usb_start_daemon /usr/bin/mtp-server
-	usb_wait_files /dev/mtp_usb
+	usb_mount mtp /dev/usb-ffs/mtp -o uid=2000,gid=2000 -t functionfs
+	usb_start_daemon /usr/bin/umtprd
+	usb_wait_files -m /dev/usb-ffs/mtp
 }
 
 mtp_stop()
 {
-	usb_stop_daemon /usr/bin/mtp-server
-	usb_release_files /dev/mtp_usb
-
-	echo 0 > $USB_GADGET_DIR/os_desc/use
+	usb_stop_daemon /usr/bin/umtprd
 }
 
 # ---- acm
@@ -539,6 +534,7 @@ usb_prepare()
 	UMS_MOUNTPOINT="${UMS_MOUNTPOINT:-/mnt/ums}"
 	UMS_RO=${UMS_RO:-0}
 	USB_FUNCS=${USB_FUNCS:-adb}
+	USB_FUNCS="$(echo "$USB_FUNCS" | tr ',' ' ')"
 
 	# Orders required by kernel
 	USB_FUNCS="$(usb_funcs_sort rndis uac uvc adb ntb ums mtp acm)"
@@ -555,7 +551,7 @@ usb_prepare()
 		usb_run_stage usb init
 	fi
 
-	USB_STATE=$(cat /sys/class/android_usb/android0/state)
+	USB_STATE=$(cat /sys/class/android_usb/android*/state)
 	usb_msg "USB state: $USB_STATE"
 
 	USB_UDC=$(ls /sys/class/udc/ | head -n 1)
