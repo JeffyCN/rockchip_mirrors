@@ -55,7 +55,7 @@ ALSA_PLUGINS_CONF_OPTS += --disable-samplerate
 endif
 
 ifeq ($(BR2_PACKAGE_COMMON_ALGORITHM_ROCKAA),y)
-ALSA_PLUGINS_DEPENDENCIES += rockaa
+ALSA_PLUGINS_DEPENDENCIES += common_algorithm
 ALSA_PLUGINS_CONF_OPTS += --enable-rockaa
 else
 ALSA_PLUGINS_CONF_OPTS += --disable-rockaa
