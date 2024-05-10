@@ -481,15 +481,15 @@ usb_init()
 {
 	usb_msg "Initializing"
 
-	echo 0x2207 > idVendor
-	echo 0x0310 > bcdDevice
-	echo 0x0200 > bcdUSB
+	echo ${USB_VENDOR_ID:-0x2207} > idVendor
+	echo ${USB_FW_VERSION:-0x0310} > bcdDevice
+	echo ${USB_VERSION:-0x0200} > bcdUSB
 
 	mkdir -p $USB_GADGET_STRINGS_DIR
 	SERIAL=$(grep Serial /proc/cpuinfo | cut -d':' -f2)
 	echo ${SERIAL:-0123456789ABCDEF} > $USB_GADGET_STRINGS_DIR/serialnumber
-	echo $USB_GROUP  > $USB_GADGET_STRINGS_DIR/manufacturer
-	echo "rk3xxx"  > $USB_GADGET_STRINGS_DIR/product
+	echo ${USB_MANUFACTUER:-$USB_GROUP}  > $USB_GADGET_STRINGS_DIR/manufacturer
+	echo ${USB_PRODUCT:-rk3xxx}  > $USB_GADGET_STRINGS_DIR/product
 
 	mkdir -p $USB_CONFIGS_DIR
 	echo 500 > $USB_CONFIGS_DIR/MaxPower
