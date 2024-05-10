@@ -39,6 +39,12 @@ config BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS
 	help
 	  Audio 3A Algorithm Plus by Rockchip, applied talking scene
 
+config BR2_PACKAGE_COMMON_ALGORITHM_RKAPPLUS_EFFECT_EQDRC
+	bool "RKAP-PLUS-EFFECT-EQDRC"
+	default n
+	help
+	  Audio Effect EQ/DRC Algorithm Plus by Rockchip, applied playback scene
+
 config BR2_PACKAGE_COMMON_ALGORITHM_TWO_MIC_BEAMFORM
 	bool "beamforming of two mic"
 	default n
