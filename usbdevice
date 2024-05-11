@@ -481,14 +481,15 @@ usb_init()
 {
 	usb_msg "Initializing"
 
-	echo ${USB_VENDOR_ID:-0x2207} > idVendor
-	echo ${USB_FW_VERSION:-0x0310} > bcdDevice
-	echo ${USB_VERSION:-0x0200} > bcdUSB
+	cd $USB_GADGET_DIR
+
+	printf "0x%x" ${USB_VENDOR_ID:-0x2207} > idVendor
+	printf "0x%x" ${USB_FW_VERSION:-0x0310} > bcdDevice
 
 	mkdir -p $USB_GADGET_STRINGS_DIR
 	SERIAL=$(grep Serial /proc/cpuinfo | cut -d':' -f2)
 	echo ${SERIAL:-0123456789ABCDEF} > $USB_GADGET_STRINGS_DIR/serialnumber
-	echo ${USB_MANUFACTUER:-$USB_GROUP}  > $USB_GADGET_STRINGS_DIR/manufacturer
+	echo ${USB_MANUFACTUER:-Rockchip}  > $USB_GADGET_STRINGS_DIR/manufacturer
 	echo ${USB_PRODUCT:-rk3xxx}  > $USB_GADGET_STRINGS_DIR/product
 
 	mkdir -p $USB_CONFIGS_DIR
