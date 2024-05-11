@@ -17,7 +17,7 @@
 #
 # root@RK3588:/# more /etc/usbdevice.d/uvc.sh
 # #!/bin/sh
-# UVC_INSTANCES="uvc.gs1 uvc.gs2"
+# UVC_INSTANCES="uvc.0 uvc.1"
 
 [ -z "$DEBUG" ] || set -x
 
@@ -99,7 +99,7 @@ usb_instances()
 {
 	for func in $@; do
 		VAR=$(echo $func | tr 'a-z' 'A-Z')_INSTANCES
-		eval echo "\${$VAR:-$func.gs0}"
+		eval echo "\${$VAR:-$func.0}"
 	done
 }
 
@@ -257,6 +257,13 @@ NTB_INSTANCES=${NTB_INSTANCES:-ffs.ntb}
 ntb_prepare()
 {
 	usb_mount ntb /dev/usb-ffs/ntb -o uid=2000,gid=2000 -t functionfs
+	usb_start_daemon /usr/bin/ntbd
+	usb_wait_files -m /dev/usb-ffs/ntb
+}
+
+ntb_stop()
+{
+	usb_stop_daemon /usr/bin/ntbd
 }
 
 # ---- uac1
@@ -287,15 +294,7 @@ mtp_stop()
 	usb_stop_daemon /usr/bin/umtprd
 }
 
-# ---- acm
-ACM_INSTANCES=${ACM_INSTANCES:-acm.gs6}
-
-# ---- rndis
-# Nothing special
-
 # ---- uvc
-UVC_INSTANCES=${UVC_INSTANCES:-uvc.gs6}
-
 uvc_add_yuyv()
 {
 	WIDTH=$(echo $1 | cut -d'x' -f1)
@@ -405,12 +404,17 @@ uvc_prepare()
 	fi
 }
 
-# TODO: Start UVC daemon in uvc_start
-# TODO: Stop UVC daemon in uvc_stop
+uvc_prepare()
+{
+	usb_start_daemon /usr/bin/uvcd
+}
+
+uvc_stop()
+{
+	usb_stop_daemon /usr/bin/uvcd
+}
 
 # ---- hid
-HID_INSTANCES=${HID_INSTANCES:-hid.usb0}
-
 hid_prepare()
 {
 	echo 1 > protocol
@@ -638,6 +642,10 @@ usb_stop()
 	done
 
 	rm -f $USB_CONFIGS_DIR/f-*
+
+	# Keep ffs instances registered and mounted, to avoid random crashes
+	find $USB_FUNCTIONS_DIR -mindepth 1 -maxdepth 1 ! -name 'ffs.*' | \
+		xargs rmdir
 
 	# Clear functions to avoid stopping them again
 	unset OLD_FUNCS
