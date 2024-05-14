@@ -1,4 +1,4 @@
-From 04788f4f02d486569eaa2d78e919df1e15f4d254 Mon Sep 17 00:00:00 2001
+From 7f3ad3680af856676f8bede0a1aa6bcf68f252c8 Mon Sep 17 00:00:00 2001
 From: Xing Zheng <zhengxing@rock-chips.com>
 Date: Sun, 21 Apr 2024 09:27:31 +0800
 Subject: [PATCH] alsa-plugin: add plugin rockaa on init version v1.0.0
@@ -9,12 +9,12 @@ Signed-off-by: Xing Zheng <zhengxing@rock-chips.com>
  configure.ac                      |  12 +
  rockaa/66-rockaa.conf             |  62 +++
  rockaa/Makefile.am                |  21 +
- rockaa/asound_example_rockaa.conf |  67 ++++
- rockaa/pcm_rockaa.c               | 632 ++++++++++++++++++++++++++++++
- rockaa/rockaa_capt.h              |  66 ++++
+ rockaa/asound_example_rockaa.conf |  67 +++
+ rockaa/pcm_rockaa.c               | 659 ++++++++++++++++++++++++++++++
+ rockaa/rockaa_capt.h              |  66 +++
  rockaa/rockaa_common.h            | 124 ++++++
  rockaa/rockaa_play.h              |  47 +++
- 9 files changed, 1034 insertions(+)
+ 9 files changed, 1061 insertions(+)
  create mode 100644 rockaa/66-rockaa.conf
  create mode 100644 rockaa/Makefile.am
  create mode 100644 rockaa/asound_example_rockaa.conf
@@ -73,7 +73,7 @@ index 3215b96..a6fb152 100644
 +echo "RockAA plugin:      $HAVE_ROCKAA"
 diff --git a/rockaa/66-rockaa.conf b/rockaa/66-rockaa.conf
 new file mode 100644
-index 0000000..3cc7e00
+index 0000000..66ead26
 --- /dev/null
 +++ b/rockaa/66-rockaa.conf
 @@ -0,0 +1,62 @@
@@ -94,27 +94,27 @@ index 0000000..3cc7e00
 +	}
 +	@args.CONF_PLAY_NAME {
 +		type string
-+		default on
++		default null
 +	}
 +	@args.CONF_CAPT_NAME {
 +		type string
-+		default on
++		default null
 +	}
 +	@args.PLAY_IN {
 +		type string
-+		default off
++		default null
 +	}
 +	@args.PLAY_OUT {
 +		type string
-+		default off
++		default null
 +	}
 +	@args.CAPT_IN {
 +		type string
-+		default off
++		default null
 +	}
 +	@args.CAPT_OUT {
 +		type string
-+		default off
++		default null
 +	}
 +	@args.DEBUG_MODE {
 +		type integer
@@ -241,10 +241,10 @@ index 0000000..297f2bf
 +
 diff --git a/rockaa/pcm_rockaa.c b/rockaa/pcm_rockaa.c
 new file mode 100644
-index 0000000..6378cc4
+index 0000000..7c32157
 --- /dev/null
 +++ b/rockaa/pcm_rockaa.c
-@@ -0,0 +1,632 @@
+@@ -0,0 +1,659 @@
 +/*
 + * Automatic alsa rockaa plugin
 + *
@@ -270,9 +270,6 @@ index 0000000..6378cc4
 +
 +#include "rockaa_capt.h"
 +#include "rockaa_play.h"
-+
-+#define DEFAULT_ROCKAA_CONF_PLAYBACK    "/userdata/cfg/rockaa_conf/rkaudio_effect_eqdrc_48000hz_2ch.bin"
-+#define DEFAULT_ROCKAA_CONF_CAPTURE     "/userdata/cfg/rockaa_conf/config_aivqe.json"
 +
 +/** Force align frame size, the same with local version of alsa-lib/include/pcm.h */
 +#define SND_PCM_FORCE_ALIGN_FRAME   0x00100000
@@ -604,8 +601,8 @@ index 0000000..6378cc4
 +    snd_config_iterator_t i, next;
 +    snd_pcm_rockaa_t *rockaa;
 +    snd_config_t *sconf = NULL;
-+    const char *conf_play_name = DEFAULT_ROCKAA_CONF_PLAYBACK;
-+    const char *conf_capt_name = DEFAULT_ROCKAA_CONF_CAPTURE;
++    const char *conf_play_name = NULL;
++    const char *conf_capt_name = NULL;
 +    const char *play_in_name = NULL, *play_out_name = NULL;
 +    const char *capt_in_name = NULL, *capt_out_name = NULL;
 +    long channels = 2, rate = 48000, debug_mode = 0;
@@ -679,6 +676,11 @@ index 0000000..6378cc4
 +                SNDERR("field %s is not a string", id);
 +                return err;
 +            }
++
++            if (conf_play_name && (strcasecmp(conf_play_name, "null") == 0))
++            {
++                conf_play_name = NULL;
++            }
 +            continue;
 +        }
 +        if (strcmp(id, "conf_capt_name") == 0)
@@ -687,6 +689,11 @@ index 0000000..6378cc4
 +            {
 +                SNDERR("field %s is not a string", id);
 +                return err;
++            }
++
++            if (conf_capt_name && (strcasecmp(conf_capt_name, "null") == 0))
++            {
++                conf_capt_name = NULL;
 +            }
 +            continue;
 +        }
@@ -697,6 +704,11 @@ index 0000000..6378cc4
 +                SNDERR("field %s is not a string", id);
 +                return err;
 +            }
++
++            if (play_in_name && (strcasecmp(play_in_name, "null") == 0))
++            {
++                play_in_name = NULL;
++            }
 +            continue;
 +        }
 +        if (strcmp(id, "play_out") == 0)
@@ -705,6 +717,11 @@ index 0000000..6378cc4
 +            {
 +                SNDERR("field %s is not a string", id);
 +                return err;
++            }
++
++            if (play_out_name && (strcasecmp(play_out_name, "null") == 0))
++            {
++                play_out_name = NULL;
 +            }
 +            continue;
 +        }
@@ -715,6 +732,11 @@ index 0000000..6378cc4
 +                SNDERR("field %s is not a string", id);
 +                return err;
 +            }
++
++            if (capt_in_name && (strcasecmp(capt_in_name, "null") == 0))
++            {
++                capt_in_name = NULL;
++            }
 +            continue;
 +        }
 +        if (strcmp(id, "capt_out") == 0)
@@ -723,6 +745,11 @@ index 0000000..6378cc4
 +            {
 +                SNDERR("field %s is not a string", id);
 +                return err;
++            }
++
++            if (capt_out_name && (strcasecmp(capt_out_name, "null") == 0))
++            {
++                capt_out_name = NULL;
 +            }
 +            continue;
 +        }
@@ -787,7 +814,7 @@ index 0000000..6378cc4
 +
 +        hdl_p->bits = bit_format | ROCKAA_ALSA_BIT_FORMAT;
 +        hdl_p->debug_mode = debug_mode;
-+        hdl_p->conf_path = (char *)strdup(conf_play_name);
++        hdl_p->conf_path = conf_play_name ? (char *)strdup(conf_play_name) : NULL;
 +
 +        LOGI("rockaa play: rate=%d, channels=%d nb_samples=%d debug_mode=%d conf_path: %s\n",
 +             hdl_p->rate,
@@ -835,7 +862,7 @@ index 0000000..6378cc4
 +        hdl_c->ch_near = channels - ch_far;
 +        hdl_c->debug_mode = debug_mode;
 +        hdl_c->enable_doa = enable_doa;
-+        hdl_c->conf_path = (char *)strdup(conf_capt_name);
++        hdl_c->conf_path = conf_capt_name ? (char *)strdup(conf_capt_name) : NULL;
 +
 +        LOGI("rockaa capt: rate=%d, channels=%d nb_samples=%d debug_mode=%d conf_path: %s\n",
 +             hdl_c->rate,
@@ -1133,5 +1160,5 @@ index 0000000..607deda
 +
 +#endif /* __ROCKAA_PLAY_H__ */
 -- 
-2.17.1
+2.34.1
 
