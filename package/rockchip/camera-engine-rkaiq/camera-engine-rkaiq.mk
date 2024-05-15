@@ -164,5 +164,27 @@ ifneq ($(call qstrip,$(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_FAKE_CAMERA_IQFILE)),)
 CAMERA_ENGINE_RKAIQ_POST_INSTALL_TARGET_HOOKS += INSTALL_FAKE_CAMERA_IQFILE_CMD
 endif
 
+ifeq ($(BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_INSTALL_AIISP), y)
+ifeq ($(BR2_arm), y)
+CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += INSTALL_AIISP_FILES_M32_CMD
+else
+CAMERA_ENGINE_RKAIQ_PRE_BUILD_HOOKS += INSTALL_AIISP_FILES_M64_CMD
+endif
+endif
+
+define INSTALL_AIISP_FILES_M32_CMD
+	$(INSTALL) -D -m  644 $(@D)/rkaiq/algos/aiisp/aiisp_relate/imx415/libRkAIISP_32bit.so $(TARGET_DIR)/usr/lib/libRkAIISP.so
+	$(INSTALL) -D -m  644 $(@D)/rkaiq/algos/aiisp/aiisp_relate/*.aiisp $(TARGET_DIR)/etc/iqfiles/
+	$(INSTALL) -D -m  644 $(@D)/rkaiq/algos/aiisp/aiisp_relate/*.csv $(TARGET_DIR)/etc/iqfiles/
+	$(INSTALL) -D -m  644 $(@D)/rkaiq/algos/aiisp/aiisp_relate/*.txt $(TARGET_DIR)/etc/iqfiles/
+endef
+
+define INSTALL_AIISP_FILES_M64_CMD
+	$(INSTALL) -D -m  644 $(@D)/rkaiq/algos/aiisp/aiisp_relate/imx415/libRkAIISP_64bit.so $(TARGET_DIR)/usr/lib/libRkAIISP.so
+	$(INSTALL) -D -m  644 $(@D)/rkaiq/algos/aiisp/aiisp_relate/*.aiisp $(TARGET_DIR)/etc/iqfiles/
+	$(INSTALL) -D -m  644 $(@D)/rkaiq/algos/aiisp/aiisp_relate/*.csv $(TARGET_DIR)/etc/iqfiles/
+	$(INSTALL) -D -m  644 $(@D)/rkaiq/algos/aiisp/aiisp_relate/*.txt $(TARGET_DIR)/etc/iqfiles/
+endef
+
 $(eval $(cmake-package))
 $(eval $(host-generic-package))

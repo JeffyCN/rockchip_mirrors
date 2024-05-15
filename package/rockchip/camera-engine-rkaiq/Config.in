@@ -32,4 +32,11 @@ config BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_RKISP_DEMO
 	help
 	  Build rkisp_demo
 
+config BR2_PACKAGE_CAMERA_ENGINE_RKAIQ_INSTALL_AIISP
+	depends on BR2_PACKAGE_ROCKCHIP_RGA
+	bool "Rockchip Camera Engine install aiisp"
+	default n
+	help
+	  Rockchip Camera Engine install aiisp
+
 endif
