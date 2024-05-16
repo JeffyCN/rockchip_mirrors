@@ -1,4 +1,4 @@
-From b60ac11998f337da2b3d00622a7c0f94d5b850c7 Mon Sep 17 00:00:00 2001
+From 9f5e033dd10f36a19a3e33c72d3a001a26157d0d Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sat, 15 Dec 2018 12:20:01 +0800
 Subject: [PATCH 2/4] modetest: Speed up dumping info
@@ -10,7 +10,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 18 insertions(+), 6 deletions(-)
 
 diff --git a/tests/modetest/modetest.c b/tests/modetest/modetest.c
-index d9e761e..030b497 100644
+index d9e761e..4ec5631 100644
 --- a/tests/modetest/modetest.c
 +++ b/tests/modetest/modetest.c
 @@ -72,6 +72,10 @@ static enum util_fill_pattern primary_fill = UTIL_PATTERN_SMPTE;
@@ -119,7 +119,7 @@ index d9e761e..030b497 100644
  		return -1;
  	}
  
-+	needs_all = set_preferred || count;
++	needs_all = set_preferred || count || prop_count || plane_count;
 +
  	dev.fd = util_open(device, module);
  	if (dev.fd < 0)
