@@ -1,0 +1,46 @@
+From b5654c364afedaaf764489c39d87cbe34b0f8bd3 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Fri, 29 Mar 2024 16:27:01 +0800
+Subject: [PATCH 94/95] gl-renderer: Support NV24 shm format
+
+Tested with:
+gst-launch-1.0 videotestsrc ! 'video/x-raw,format=NV24' ! waylandsink
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/renderer-gl/gl-renderer.c | 12 ++++++++++++
+ 1 file changed, 12 insertions(+)
+
+diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
+index 6adcbc908..6e34c1fe3 100644
+--- a/libweston/renderer-gl/gl-renderer.c
++++ b/libweston/renderer-gl/gl-renderer.c
+@@ -301,6 +301,17 @@ struct yuv_format_descriptor yuv_formats[] = {
+ 			.format = DRM_FORMAT_GR88,
+ 			.plane_index = 1
+ 		}}
++	}, {
++		.format = DRM_FORMAT_NV24,
++		.output_planes = 2,
++		.shader_variant = SHADER_VARIANT_Y_UV,
++		{{
++			.format = DRM_FORMAT_R8,
++			.plane_index = 0
++		}, {
++			.format = DRM_FORMAT_GR88,
++			.plane_index = 1
++		}}
+ 	}, {
+ 		.format = DRM_FORMAT_P010,
+ 		.output_planes = 2,
+@@ -4077,6 +4088,7 @@ gl_renderer_display_create(struct weston_compositor *ec,
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_YUV444);
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_NV12);
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_NV16);
++	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_NV24);
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_YUYV);
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_XYUV8888);
+ 	wl_display_add_shm_format(ec->wl_display, WL_SHM_FORMAT_ABGR8888);
+-- 
+2.20.1
+

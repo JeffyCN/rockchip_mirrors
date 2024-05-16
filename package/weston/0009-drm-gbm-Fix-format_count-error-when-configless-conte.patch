@@ -1,0 +1,30 @@
+From c25b3236dc8572d3eaab63622d8c6b27b2713f09 Mon Sep 17 00:00:00 2001
+From: Jeffy Chen <jeffy.chen@rock-chips.com>
+Date: Tue, 25 Jul 2023 11:15:16 +0800
+Subject: [PATCH 09/95] drm-gbm: Fix format_count error when configless context
+ not supported
+
+Tested on RK3288 EVB, no more:
+gl_renderer_get_egl_config: Assertion `formats[i]' failed.
+
+Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
+---
+ libweston/backend-drm/drm-gbm.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/libweston/backend-drm/drm-gbm.c b/libweston/backend-drm/drm-gbm.c
+index 5b02b38dd..32d1b1523 100644
+--- a/libweston/backend-drm/drm-gbm.c
++++ b/libweston/backend-drm/drm-gbm.c
+@@ -79,7 +79,7 @@ fallback_format_for(const struct pixel_format_info *format)
+ static int
+ drm_backend_create_gl_renderer(struct drm_backend *b)
+ {
+-	const struct pixel_format_info *format[3] = {
++	const struct pixel_format_info *format[2] = {
+ 		b->format,
+ 		fallback_format_for(b->format),
+ 	};
+-- 
+2.20.1
+
