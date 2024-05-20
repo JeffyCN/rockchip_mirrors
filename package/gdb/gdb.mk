@@ -160,6 +160,10 @@ ifeq ($(BR2_PACKAGE_GDB_DEBUGGER),y)
 GDB_CONF_OPTS += \
 	--with-libgmp-prefix=$(STAGING_DIR)/usr
 GDB_DEPENDENCIES += gmp
+
+ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_GDB_STATIC),)
+GDB_CONF_OPTS += --with-libgmp-type=static
+endif
 endif
 
 # Starting from GDB 14.x, mpfr is needed as a dependency to build full
@@ -219,6 +223,11 @@ ifeq ($(BR2_PACKAGE_XZ),y)
 GDB_CONF_OPTS += --with-lzma
 GDB_CONF_OPTS += --with-liblzma-prefix=$(STAGING_DIR)/usr
 GDB_DEPENDENCIES += xz
+
+ifneq ($(BR2_STATIC_LIBS)$(BR2_PACKAGE_GDB_STATIC),)
+GDB_CONF_OPTS += --with-liblzma-type=static
+endif
+
 else
 GDB_CONF_OPTS += --without-lzma
 endif
