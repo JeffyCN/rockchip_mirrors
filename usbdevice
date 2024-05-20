@@ -556,8 +556,8 @@ usb_prepare()
 		usb_run_stage usb init
 	fi
 
-	USB_STATE=$(cat /sys/class/android_usb/android*/state)
-	usb_msg "USB state: $USB_STATE"
+	USB_STATE=$(cat /sys/class/android_usb/android*/state 2>/dev/null)
+	usb_msg "USB state: ${USB_STATE:-unknown}"
 
 	USB_UDC=$(ls /sys/class/udc/ | head -n 1)
 	if [ -z "$USB_UDC" ]; then
