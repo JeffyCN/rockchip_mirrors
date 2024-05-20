@@ -55,11 +55,11 @@ case "$MIN_AVAIL_SIZE" in
 esac
 
 total_size() {
-	df "$1" -k | tail -n 1 | awk '{printf $2 * 1024}'
+	echo $(($(df "$1" -k | tail -n 1 | awk '{print $2}') * 1024))
 }
 
 avail_size() {
-	df "$1" -k | tail -n 1 | awk '{printf $4 * 1024}'
+	echo $(($(df "$1" -k | tail -n 1 | awk '{print $4}') * 1024))
 }
 
 is_full() {
@@ -119,7 +119,7 @@ process_dir() {
 	return 1
 }
 
-LOG_DIRS="$(echo "$LOG_DIRS" | tr ',' ' ')"
+LOG_DIRS="$(echo "$LOG_DIRS" | xargs -d ',')"
 for dir in $LOG_DIRS; do
 	if [ ! -d "$dir" ]; then
 		log "[WARN] Not a dir: \"$dir\""
