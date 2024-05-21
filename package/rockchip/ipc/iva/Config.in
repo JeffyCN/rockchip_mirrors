@@ -9,6 +9,11 @@ choice
 	default BR2_PACKAGE_IVA_RK3588
 	prompt "target platform(32bit/64bit)"
 
+config BR2_PACKAGE_IVA_RK3576
+	bool "rockiva rk3576"
+	help
+	  Use rockiva for rk3576.
+
 config BR2_PACKAGE_IVA_RK3588
 	bool "rockiva rk3588"
 	help
