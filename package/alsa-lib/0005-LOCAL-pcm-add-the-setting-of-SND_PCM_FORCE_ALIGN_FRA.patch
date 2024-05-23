@@ -1,4 +1,4 @@
-From c19ff09a5a2a407de7c49553977d18ce95ce4e97 Mon Sep 17 00:00:00 2001
+From 6047814d2bdda181c34f33a44befca46ee9f1b0f Mon Sep 17 00:00:00 2001
 From: Xing Zheng <zhengxing@rock-chips.com>
 Date: Wed, 10 Apr 2024 22:34:47 +0800
 Subject: [PATCH] LOCAL: pcm: add the setting of SND_PCM_FORCE_ALIGN_FRAME via
@@ -9,12 +9,19 @@ period size and require PCM to obtain the avail phase for
 forced synchronization, so that the plugin passed to
 post-processing has a fixed size.
 
+Note: If the algorithm in the plug-in needs to specify a fixed
+frame size, the uncertain length in the recording 'ACCESS_MMAP'
+mode will make the situation very troublesome, so here the frame
+size is forced to be aligned and fixed according to the flag
+'SND_PCM_FORCE_ALIGN_FRAME' specified by the plug-in.
+
 Signed-off-by: Xing Zheng <zhengxing@rock-chips.com>
 ---
  include/pcm.h         |  2 ++
- src/pcm/pcm.c         | 47 +++++++++++++++++++++++++++++++++----------
+ src/pcm/pcm.c         | 46 ++++++++++++++++++++++++++++++++-----------
  src/pcm/pcm_extplug.c |  4 ++++
- 3 files changed, 42 insertions(+), 11 deletions(-)
+ src/pcm/pcm_plugin.c  | 15 ++++++++++++++
+ 4 files changed, 56 insertions(+), 11 deletions(-)
 
 diff --git a/include/pcm.h b/include/pcm.h
 index 102ff81..0c78ff4 100644
@@ -30,10 +37,10 @@ index 102ff81..0c78ff4 100644
  /** PCM handle */
  typedef struct _snd_pcm snd_pcm_t;
 diff --git a/src/pcm/pcm.c b/src/pcm/pcm.c
-index 0a8cd0d..783b1ab 100644
+index 0a8cd0d..cedb3e5 100644
 --- a/src/pcm/pcm.c
 +++ b/src/pcm/pcm.c
-@@ -7805,20 +7805,45 @@ snd_pcm_sframes_t snd_pcm_read_areas(snd_pcm_t *pcm, const snd_pcm_channel_area_
+@@ -7805,19 +7805,43 @@ snd_pcm_sframes_t snd_pcm_read_areas(snd_pcm_t *pcm, const snd_pcm_channel_area_
  			err = avail;
  			goto _end;
  		}
@@ -86,10 +93,8 @@ index 0a8cd0d..783b1ab 100644
 +				goto _again;
 +			}
  		}
-+
  		frames = size;
  		if (frames > (snd_pcm_uframes_t) avail)
- 			frames = avail;
 diff --git a/src/pcm/pcm_extplug.c b/src/pcm/pcm_extplug.c
 index feb32b9..919e660 100644
 --- a/src/pcm/pcm_extplug.c
@@ -112,6 +117,32 @@ index feb32b9..919e660 100644
  	err = snd_pcm_new(&pcm, SND_PCM_TYPE_EXTPLUG, name, stream, mode);
  	if (err < 0) {
  		free(ext);
+diff --git a/src/pcm/pcm_plugin.c b/src/pcm/pcm_plugin.c
+index 9d7e233..8580284 100644
+--- a/src/pcm/pcm_plugin.c
++++ b/src/pcm/pcm_plugin.c
+@@ -485,6 +485,21 @@ snd_pcm_plugin_sync_hw_ptr_capture(snd_pcm_t *pcm,
+ 		 * there is more data available.
+ 		 */
+ 		slave_size = snd_pcm_avail_update(slave);
++
++		/**
++		 * NOTE: If the algorithm in the plug-in needs to specify a fixed
++		 * frame size, the uncertain length in the recording 'ACCESS_MMAP'
++		 * mode will make the situation very troublesome, so here the frame
++		 * size is forced to be aligned and fixed according to the flag
++		 * 'SND_PCM_FORCE_ALIGN_FRAME' specified by the plug-in.
++		 */
++		if (pcm->mode & SND_PCM_FORCE_ALIGN_FRAME) {
++			if (slave_size < pcm->period_size)
++				continue;
++			if (slave_size > pcm->period_size)
++				slave_size = pcm->period_size;
++		}
++
+ 		result = snd_pcm_mmap_begin(slave, &slave_areas, &slave_offset, &slave_frames);
+ 		if (result < 0) {
+ 			err = result;
 -- 
 2.34.1
 
