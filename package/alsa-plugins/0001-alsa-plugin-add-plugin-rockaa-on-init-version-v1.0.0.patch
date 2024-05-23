@@ -1,4 +1,4 @@
-From 7f3ad3680af856676f8bede0a1aa6bcf68f252c8 Mon Sep 17 00:00:00 2001
+From c644603414da7b274239cc9a0cffc76f63dfbcd4 Mon Sep 17 00:00:00 2001
 From: Xing Zheng <zhengxing@rock-chips.com>
 Date: Sun, 21 Apr 2024 09:27:31 +0800
 Subject: [PATCH] alsa-plugin: add plugin rockaa on init version v1.0.0
@@ -9,12 +9,12 @@ Signed-off-by: Xing Zheng <zhengxing@rock-chips.com>
  configure.ac                      |  12 +
  rockaa/66-rockaa.conf             |  62 +++
  rockaa/Makefile.am                |  21 +
- rockaa/asound_example_rockaa.conf |  67 +++
- rockaa/pcm_rockaa.c               | 659 ++++++++++++++++++++++++++++++
+ rockaa/asound_example_rockaa.conf | 144 ++++++
+ rockaa/pcm_rockaa.c               | 763 ++++++++++++++++++++++++++++++
  rockaa/rockaa_capt.h              |  66 +++
- rockaa/rockaa_common.h            | 124 ++++++
- rockaa/rockaa_play.h              |  47 +++
- 9 files changed, 1061 insertions(+)
+ rockaa/rockaa_common.h            | 124 +++++
+ rockaa/rockaa_play.h              |  47 ++
+ 9 files changed, 1242 insertions(+)
  create mode 100644 rockaa/66-rockaa.conf
  create mode 100644 rockaa/Makefile.am
  create mode 100644 rockaa/asound_example_rockaa.conf
@@ -168,10 +168,10 @@ index 0000000..aa497f4
 +uninstall-local: uninstall-conf-hook
 diff --git a/rockaa/asound_example_rockaa.conf b/rockaa/asound_example_rockaa.conf
 new file mode 100644
-index 0000000..297f2bf
+index 0000000..de1ad60
 --- /dev/null
 +++ b/rockaa/asound_example_rockaa.conf
-@@ -0,0 +1,67 @@
+@@ -0,0 +1,144 @@
 +# Copyright (c) 2024 Rockchip Electronics Co. Ltd.
 +# Author: Xing Zheng <zhengxing@rock-chips.com>
 +
@@ -180,28 +180,99 @@ index 0000000..297f2bf
 +pcm.!default
 +{
 +    type asym
-+    playback.pcm "plug_rockaa_play"
-+    capture.pcm "plug_rockaa_capt"
++    playback.pcm "rockaa_play_0"
++    capture.pcm "rockaa_capt_0"
 +}
 +
-+pcm.rockaa {
-+    type rockaa
-+    slave.pcm {
-+        type hw
++# To user
++pcm.rockaa_play_0 {
++    type plug
++    slave {
++        pcm "rockaa_play_effect_0"
++        channels 2
++        format S16_LE
++        rate 48000
++    }
++}
++
++pcm.rockaa_play_1 {
++    type plug
++    slave {
++        pcm "rockaa_play_effect_1"
++        channels 2
++        format S16_LE
++        rate 48000
++    }
++}
++
++pcm.rockaa_capt_0 {
++    type softvol
++    slave.pcm "rockaa_capt_effect_0"
++    control {
++        name "Master RockAA Capture 0"
 +        card 0
 +        device 0
 +    }
-+    capt_ch_far 1
++    min_dB -50.0
++    max_dB 0.0
++    resolution 101
++}
++
++pcm.rockaa_capt_1 {
++    type softvol
++    slave.pcm "rockaa_capt_effect_1"
++    control {
++        name "Master RockAA Capture 1"
++        card 0
++        device 0
++    }
++    min_dB -50.0
++    max_dB 0.0
++    resolution 101
++}
++
++# To Rockaa and other plugins
++pcm.rockaa_play_effect_0 {
++    type rockaa
++    slave.pcm "softvol_rockaa_play"
 +    conf_play_name /userdata/cfg/rockaa_conf/rkaudio_effect_eqdrc_48000hz_2ch_n48db.bin
++    debug_mode 0
++    # play_in /tmp/dbg_dump_playin.pcm
++    # play_out /tmp/dbg_dump_playout.pcm
++}
++
++pcm.rockaa_play_effect_1 {
++    type rockaa
++    slave.pcm "softvol_rockaa_play"
++    conf_play_name /userdata/cfg/rockaa_conf/rkaudio_effect_eqdrc_48000hz_2ch.bin
++    debug_mode 0
++    # play_in /tmp/dbg_dump_playin.pcm
++    # play_out /tmp/dbg_dump_playout.pcm
++}
++
++pcm.rockaa_capt_effect_0 {
++    type rockaa
++    slave.pcm "dsnooper"
 +    conf_capt_name /userdata/cfg/rockaa_conf/config_aivqe.json
-+    debug_mode 1
-+    play_in /tmp/dump_playin.pcm
-+    play_out /tmp/dump_playout.pcm
++    capt_ch_far 1
++    debug_mode 0
++    # capt_in /tmp/dbg_dump_capin.pcm
++    # capt_out /tmp/dbg_dump_capout.pcm
++}
++
++pcm.rockaa_capt_effect_1 {
++    type rockaa
++    slave.pcm "dsnooper"
++    conf_capt_name /userdata/cfg/rockaa_conf/config_aivqe_effect_1.json
++    capt_ch_far 1
++    debug_mode 0
++    # capt_in /tmp/dbg_dump_capin.pcm
++    # capt_out /tmp/dbg_dump_capout.pcm
 +}
 +
 +pcm.softvol_rockaa_play {
 +    type softvol
-+    slave.pcm "rockaa"
++    slave.pcm "dmixer"
 +    control {
 +        name "Master RockAA Playback"
 +        card 0
@@ -212,39 +283,45 @@ index 0000000..297f2bf
 +    resolution 101
 +}
 +
-+pcm.softvol_rockaa_capt {
-+    type softvol
-+    slave.pcm "rockaa"
-+    control {
-+        name "Master RockAA Capture"
-+        card 0
-+        device 0
-+    }
-+    min_dB -50.0
-+    max_dB 0.0
-+    resolution 101
-+}
-+
-+pcm.plug_rockaa_play {
-+    type plug
++# To Hardware
++pcm.dmixer {
++    type dmix
++    ipc_key 5978293 # must be unique for all dmix plugins!!!!
++    ipc_key_add_uid yes
 +    slave {
-+        pcm "softvol_rockaa_play"
++        pcm "hw:0,0,0"
++        channels 2
++        period_size 768
++        buffer_size 3072
++    }
++    bindings {
++        0 0
++        1 1
 +    }
 +}
 +
-+pcm.plug_rockaa_capt {
-+    type plug
++pcm.dsnooper {
++    type dsnoop
++    ipc_key 5978291 # must be unique for all dmix plugins!!!!
++    ipc_key_add_uid yes
 +    slave {
-+        pcm "softvol_rockaa_capt"
++        pcm "hw:0,0,0"
++        channels 2
++        period_size 768
++        buffer_size 3072
++    }
++    bindings {
++        0 0
++        1 1
 +    }
 +}
 +
 diff --git a/rockaa/pcm_rockaa.c b/rockaa/pcm_rockaa.c
 new file mode 100644
-index 0000000..7c32157
+index 0000000..0cc83d5
 --- /dev/null
 +++ b/rockaa/pcm_rockaa.c
-@@ -0,0 +1,659 @@
+@@ -0,0 +1,763 @@
 +/*
 + * Automatic alsa rockaa plugin
 + *
@@ -279,6 +356,7 @@ index 0000000..7c32157
 +    snd_pcm_extplug_t ext;      /* For pointer must be first member */
 +    rockaa_p *hdl_p;
 +    rockaa_c *hdl_c;
++    char setup_time[32];
 +};
 +
 +typedef struct snd_pcm_rockaa snd_pcm_rockaa_t;
@@ -288,6 +366,57 @@ index 0000000..7c32157
 +{
 +    unsigned int bitofs = area->first + area->step * offset;
 +    return (char *) area->addr + bitofs / 8;
++}
++
++static int rockaa_setup_time(struct snd_pcm_rockaa *rockaa)
++{
++    time_t now;
++    struct tm *local;
++
++    time(&now);
++    local = localtime(&now);
++
++    strftime(rockaa->setup_time, sizeof(rockaa->setup_time), "%Y%m%d%H%M%S", local);
++    LOGI("This RockAA setup time is: %s\n", rockaa->setup_time);
++    return 0;
++}
++
++/* NOTE: needs free realloc dump name outside */
++static int rockaa_realloc_dump(struct snd_pcm_rockaa *rockaa, char **dump_name)
++{
++    char *strbak = NULL, *strpre = NULL, *ptr = NULL;
++    int buflen = 0;
++
++    if (!dump_name || !(*dump_name))
++    {
++        LOGE("Invalid dump_name\n");
++        return -1;
++    }
++
++    strbak = strdup(*dump_name);
++    buflen = strlen(strbak) + strlen("_") + strlen(rockaa->setup_time);
++    LOGE("buflen=%d\n", buflen);
++    /**
++     * FIXME: Using calloc or memset will be crashed:
++     *   free(): invalid next size (fast)
++     * or:
++     *   malloc(): invalid size (unsorted)
++     */
++    // *dump_name = calloc(1, buflen);
++    *dump_name = malloc(buflen);
++    // memset((char *)(*dump_name), 0, buflen);
++    if (!(*dump_name))
++    {
++        LOGE("dump_name alloc faileld: errno=%d\n", errno);
++    }
++
++    strpre = strtok_r(strbak, ".", &ptr);
++    strcpy(*dump_name, strpre);
++    strcat(*dump_name, "_");
++    strcat(*dump_name, rockaa->setup_time);
++    strcat(*dump_name, ".pcm");
++    free(strbak);
++    return 0;
 +}
 +
 +static snd_pcm_sframes_t
@@ -521,6 +650,13 @@ index 0000000..7c32157
 +        rockaa->hdl_p->rate = rate;
 +        rockaa->hdl_p->channels = channels;
 +        rockaa->hdl_p->nb_samples = period_size;
++        LOGI("rockaa play: rate=%d channels=%d nb_samples=%d debug_mode=%d conf_path: %s\n",
++             rockaa->hdl_p->rate,
++             rockaa->hdl_p->channels,
++             rockaa->hdl_p->nb_samples,
++             rockaa->hdl_p->debug_mode,
++             rockaa->hdl_p->conf_path);
++
 +        err = rockaa_play_effect_create(rockaa->hdl_p);
 +        if (err < 0)
 +        {
@@ -539,7 +675,15 @@ index 0000000..7c32157
 +
 +        rockaa->hdl_c->rate = rate;
 +        rockaa->hdl_c->channels = channels;
++        rockaa->hdl_c->ch_near = channels - rockaa->hdl_c->ch_far;
 +        rockaa->hdl_c->nb_samples = period_size;
++
++        LOGI("rockaa capt: rate=%d channels=%d(%d+%d) nb_samples=%d debug_mode=%d conf_path: %s\n",
++             rockaa->hdl_c->rate,
++             rockaa->hdl_c->channels, rockaa->hdl_c->ch_near, rockaa->hdl_c->ch_far,
++             rockaa->hdl_c->nb_samples,
++             rockaa->hdl_c->debug_mode,
++             rockaa->hdl_c->conf_path);
 +        err = rockaa_capt_effect_create(rockaa->hdl_c);
 +        if (err < 0)
 +        {
@@ -779,6 +923,7 @@ index 0000000..7c32157
 +    rockaa->ext.slave_channels = channels;
 +    rockaa->ext.format = bit_format;
 +    rockaa->ext.slave_format = bit_format;
++    rockaa_setup_time(rockaa);
 +
 +    /* force sync and align frame size during capture */
 +    mode |= SND_PCM_FORCE_ALIGN_FRAME;
@@ -816,32 +961,51 @@ index 0000000..7c32157
 +        hdl_p->debug_mode = debug_mode;
 +        hdl_p->conf_path = conf_play_name ? (char *)strdup(conf_play_name) : NULL;
 +
-+        LOGI("rockaa play: rate=%d, channels=%d nb_samples=%d debug_mode=%d conf_path: %s\n",
-+             hdl_p->rate,
-+             hdl_p->channels,
-+             hdl_p->nb_samples,
-+             hdl_p->debug_mode,
-+             hdl_p->conf_path);
-+
 +        if (play_in_name)
 +        {
-+            hdl_p->in_fp = fopen(play_in_name, "wb");
++            const char *play_in_dump = play_in_name;
++
++            if (access(play_in_dump, F_OK) == 0)
++            {
++                rockaa_realloc_dump(rockaa, &play_in_dump);
++            }
++
++            hdl_p->in_fp = fopen(play_in_dump, "wb");
 +            if (hdl_p->in_fp == NULL)
 +            {
-+                LOGE("%s play_in_name fopen failed\n", play_in_name);
++                LOGE("%s play_in_name fopen failed\n", play_in_dump);
 +                return -1;
 +            }
-+            LOGI("open play_in: %s success\n", play_in_name);
++            LOGI("open play_in: %s success\n", play_in_dump);
++
++            if (play_in_dump && (play_in_dump != play_in_name))
++            {
++                free(play_in_dump);
++                play_in_dump = NULL;
++            }
 +        }
 +        if (play_out_name)
 +        {
-+            hdl_p->out_fp = fopen(play_out_name, "wb");
++            const char *play_out_dump = play_out_name;
++
++            if (access(play_out_dump, F_OK) == 0)
++            {
++                rockaa_realloc_dump(rockaa, &play_out_dump);
++            }
++
++            hdl_p->out_fp = fopen(play_out_dump, "wb");
 +            if (hdl_p->out_fp == NULL)
 +            {
-+                LOGE("%s play_out_name fopen failed\n", play_out_name);
++                LOGE("%s play_out_name fopen failed\n", play_out_dump);
 +                return -1;
 +            }
-+            LOGI("open play_out: %s success\n", play_out_name);
++            LOGI("open play_out: %s success\n", play_out_dump);
++
++            if (play_out_dump && (play_out_dump != play_out_name))
++            {
++                free(play_out_dump);
++                play_out_dump = NULL;
++            }
 +        }
 +
 +        rockaa->hdl_p = hdl_p;
@@ -859,37 +1023,54 @@ index 0000000..7c32157
 +
 +        hdl_c->bits = bit_format | ROCKAA_ALSA_BIT_FORMAT;
 +        hdl_c->ch_far = ch_far;
-+        hdl_c->ch_near = channels - ch_far;
 +        hdl_c->debug_mode = debug_mode;
 +        hdl_c->enable_doa = enable_doa;
 +        hdl_c->conf_path = conf_capt_name ? (char *)strdup(conf_capt_name) : NULL;
 +
-+        LOGI("rockaa capt: rate=%d, channels=%d nb_samples=%d debug_mode=%d conf_path: %s\n",
-+             hdl_c->rate,
-+             hdl_c->channels,
-+             hdl_c->nb_samples,
-+             hdl_c->debug_mode,
-+             hdl_c->conf_path);
-+
 +        if (capt_in_name)
 +        {
-+            hdl_c->in_fp = fopen(capt_in_name, "wb");
++            const char *capt_in_dump = capt_in_name;
++
++            if (access(capt_in_dump, F_OK) == 0)
++            {
++                rockaa_realloc_dump(rockaa, &capt_in_dump);
++            }
++
++            hdl_c->in_fp = fopen(capt_in_dump, "wb");
 +            if (hdl_c->in_fp == NULL)
 +            {
-+                LOGE("%s capt_in_name fopen failed\n", capt_in_name);
++                LOGE("%s capt_in_name fopen failed\n", capt_in_dump);
 +                return -1;
 +            }
-+            LOGI("open capt_in: %s success\n", capt_in_name);
++            LOGI("open capt_in: %s success\n", capt_in_dump);
++
++            if (capt_in_dump && (capt_in_dump != capt_in_name))
++            {
++                free(capt_in_dump);
++                capt_in_dump = NULL;
++            }
 +        }
 +        if (capt_out_name)
 +        {
-+            hdl_c->out_fp = fopen(capt_out_name, "wb");
++            const char *capt_out_dump = capt_out_name;
++
++            if (access(capt_out_dump, F_OK) == 0)
++            {
++                rockaa_realloc_dump(rockaa, &capt_out_dump);
++            }
++            hdl_c->out_fp = fopen(capt_out_dump, "wb");
 +            if (hdl_c->out_fp == NULL)
 +            {
-+                LOGE("%s capt_out_name fopen failed\n", capt_out_name);
++                LOGE("%s capt_out_name fopen failed\n", capt_out_dump);
 +                return -1;
 +            }
-+            LOGI("open capt_out: %s success\n", capt_out_name);
++            LOGI("open capt_out: %s success\n", capt_out_dump);
++
++            if (capt_out_dump && (capt_out_dump != capt_out_name))
++            {
++                free(capt_out_dump);
++                capt_out_dump = NULL;
++            }
 +        }
 +
 +        rockaa->hdl_c = hdl_c;
