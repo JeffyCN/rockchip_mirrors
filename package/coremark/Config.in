@@ -6,3 +6,11 @@ config BR2_PACKAGE_COREMARK
 	  used in embedded systems
 
 	  https://www.eembc.org/coremark/
+
+if BR2_PACKAGE_COREMARK
+
+config BR2_PACKAGE_COREMARK_STATIC
+	bool "Enable static"
+	default y if BR2_STATIC_LIBS
+
+endif
