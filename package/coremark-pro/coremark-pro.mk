@@ -57,6 +57,7 @@ define COREMARK_PRO_INSTALL_TARGET_CMDS
 		$(INSTALL) -D $(@D)/util/perl/$(s) $(TARGET_DIR)/usr/share/coremark-pro/util/perl/$(s)$(sep))
 	$(Q)sed "s/@COREMARK_PRO_MARKS@/$(COREMARK_PRO_MARKS)/" \
 		package/coremark-pro/coremark-pro.sh.in >$(TARGET_DIR)/usr/bin/coremark-pro.sh
+	chmod 0755 $(TARGET_DIR)/usr/bin/coremark-pro.sh
 endef
 
 $(eval $(generic-package))
