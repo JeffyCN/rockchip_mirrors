@@ -1,20 +1,60 @@
-From 6ff133d9788ec4901900f04fa43fd58dcbf2e996 Mon Sep 17 00:00:00 2001
+From 7a3b247f5ae00a85574992549a8435528b38d88a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 6 Jan 2021 04:11:48 +0800
 Subject: [PATCH 50/95] backend-drm: Support modifier
 
-Tested on rk356x with ARM AFBC modifier.
+Tested on rk3588 with:
+unset WESTON_DISABLE_ATOMIC
+export WESTON_ALLOW_GBM_MODIFIERS=1
+export DRM_PLANE_TYPE_152=primary
+export DRM_PLANE_TYPE_128=overlay
+weston&
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
+ libweston/backend-drm/drm-gbm.c      |  15 +++-
  libweston/backend-drm/drm-internal.h |   1 +
  libweston/backend-drm/drm.c          | 101 +++++++++++++++++++++------
- libweston/backend-drm/kms.c          |   3 +-
+ libweston/backend-drm/kms.c          |   5 +-
  libweston/pixel-formats.c            |   1 +
- 4 files changed, 82 insertions(+), 24 deletions(-)
+ 5 files changed, 97 insertions(+), 26 deletions(-)
 
+diff --git a/libweston/backend-drm/drm-gbm.c b/libweston/backend-drm/drm-gbm.c
+index f41708f..8c34f19 100644
+--- a/libweston/backend-drm/drm-gbm.c
++++ b/libweston/backend-drm/drm-gbm.c
+@@ -184,6 +184,7 @@ create_gbm_surface(struct gbm_device *gbm, struct drm_output *output)
+ {
+ 	struct weston_mode *mode = output->base.current_mode;
+ 	struct drm_plane *plane = output->scanout_plane;
++	struct drm_device *device = output->device;
+ 	struct weston_drm_format *fmt;
+ 	const uint64_t *modifiers;
+ 	unsigned int num_modifiers;
+@@ -197,9 +198,19 @@ create_gbm_surface(struct gbm_device *gbm, struct drm_output *output)
+ 		return;
+ 	}
+ 
+-	if (!weston_drm_format_has_modifier(fmt, DRM_FORMAT_MOD_INVALID) &&
+-	    !weston_drm_format_has_modifier(fmt, DRM_FORMAT_MOD_LINEAR)) {
++	/* HACK: Prefer valid modifilers */
++	if (device->fb_modifiers) {
++#define MAX_MODIFIERS 128
++		uint64_t _modifiers[MAX_MODIFIERS];
++		int i, j;
+ 		modifiers = weston_drm_format_get_modifiers(fmt, &num_modifiers);
++		for (i = 0, j = 0; i < (int)num_modifiers; i++) {
++			if (DRM_MOD_VALID(modifiers[i]) && j < MAX_MODIFIERS)
++				_modifiers[j++] = modifiers[i];
++		}
++		modifiers = _modifiers;
++		num_modifiers = j;
++
+ 		output->gbm_surface =
+ 			gbm_surface_create_with_modifiers(gbm,
+ 							  mode->width, mode->height,
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 23be51cfa..a32b7ceb5 100644
+index 23be51c..a32b7ce 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -585,6 +585,7 @@ struct drm_plane {
@@ -26,7 +66,7 @@ index 23be51cfa..a32b7ceb5 100644
  
  struct drm_connector {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 19c1b867f..7425f35c4 100644
+index 19c1b86..7425f35 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1567,6 +1567,42 @@ err:
@@ -194,7 +234,7 @@ index 19c1b867f..7425f35c4 100644
  			    compositor, b->udev, seat_id,
  			    config->configure_device) < 0) {
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 8d61d7323..2a78b327d 100644
+index 8d61d73..b1c5580 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
 @@ -38,6 +38,7 @@
@@ -205,7 +245,16 @@ index 8d61d7323..2a78b327d 100644
  #include "shared/helpers.h"
  #include "shared/weston-drm-fourcc.h"
  #include "drm-internal.h"
-@@ -1909,7 +1910,7 @@ init_kms_caps(struct drm_device *device)
+@@ -621,6 +622,8 @@ drm_plane_populate_formats(struct drm_plane *plane, const drmModePlane *kplane,
+ 		if (ret < 0)
+ 			goto out;
+ 
++		if (DRM_MOD_VALID(drm_iter.mod))
++			plane->has_modifiers = true;
+ 	}
+ 
+ out:
+@@ -1909,7 +1912,7 @@ init_kms_caps(struct drm_device *device)
  	weston_log("DRM: %s atomic modesetting\n",
  		   device->atomic_modeset ? "supports" : "does not support");
  
@@ -215,7 +264,7 @@ index 8d61d7323..2a78b327d 100644
  		if (ret == 0)
  			device->fb_modifiers = cap;
 diff --git a/libweston/pixel-formats.c b/libweston/pixel-formats.c
-index 2592294e3..9db750f5f 100644
+index 2592294..9db750f 100644
 --- a/libweston/pixel-formats.c
 +++ b/libweston/pixel-formats.c
 @@ -272,6 +272,7 @@ static const struct pixel_format_info pixel_format_table[] = {

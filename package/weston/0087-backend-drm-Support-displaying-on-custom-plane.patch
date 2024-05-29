@@ -1,4 +1,4 @@
-From bb39de25fefcf04d9c049e42d696f9391a5fdd82 Mon Sep 17 00:00:00 2001
+From f3d75020b1bf6698e7d1e180ce7f8114ff2fdb95 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 4 Jan 2024 10:50:02 +0800
 Subject: [PATCH 87/95] backend-drm: Support displaying on custom plane
@@ -20,7 +20,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 102 insertions(+), 9 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 78ef80dcf..439864919 100644
+index 78ef80d..4398649 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -721,6 +721,7 @@ struct drm_output {
@@ -32,7 +32,7 @@ index 78ef80dcf..439864919 100644
  	/* The last state submitted to the kernel for this CRTC. */
  	struct drm_output_state *state_cur;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index bc0523281..05f185700 100644
+index bc05232..05f1857 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -476,6 +476,9 @@ drm_output_get_disable_state(struct drm_pending_state *pending_state,
@@ -172,10 +172,10 @@ index bc0523281..05f185700 100644
  	drmModeSetCrtc(crtc->device->drm.fd,
  		       crtc->crtc_id, 0, 0, 0, NULL, 0, NULL);
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index ae96e9b68..758950d57 100644
+index 658974d..16c07b0 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
-@@ -860,6 +860,12 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+@@ -862,6 +862,12 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
  	struct timespec now;
  	int ret = 0;
  	bool scaling;
@@ -188,7 +188,7 @@ index ae96e9b68..758950d57 100644
  
  	wl_list_for_each(head, &output->base.head_list, base.output_link) {
  		assert(n_conn < MAX_CLONED_CONNECTORS);
-@@ -887,11 +893,20 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+@@ -889,11 +895,20 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
  					   strerror(errno));
  		}
  
@@ -214,7 +214,7 @@ index ae96e9b68..758950d57 100644
  
  		drm_output_assign_state(state, DRM_STATE_APPLY_SYNC);
  		weston_compositor_read_presentation_clock(output->base.compositor, &now);
-@@ -912,8 +927,8 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+@@ -914,8 +929,8 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
  
  	mode = to_drm_mode(output->base.current_mode);
  
@@ -225,7 +225,7 @@ index ae96e9b68..758950d57 100644
  		int fb_id = scanout_state->fb->fb_id;
  
  		if (scanout_state->dest_x || scanout_state->dest_y ||
-@@ -980,6 +995,13 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+@@ -982,6 +997,13 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
  			   crtc->crtc_id, scanout_state->plane->plane_id,
  			   pinfo ? pinfo->drm_format_name : "UNKNOWN");
  

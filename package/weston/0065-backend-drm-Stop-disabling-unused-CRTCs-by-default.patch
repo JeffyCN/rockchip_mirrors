@@ -1,4 +1,4 @@
-From 57e541a9572113183bda1d6ede1b2ac4c5fd5e7e Mon Sep 17 00:00:00 2001
+From 8b38b41e95ef674e923c13391c9fb945a9dcd988 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 27 Apr 2022 15:17:39 +0800
 Subject: [PATCH 65/95] backend-drm: Stop disabling unused CRTCs by default
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 13 insertions(+), 3 deletions(-)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index cbe884671..5f113ce38 100644
+index cbe8846..5f113ce 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -400,6 +400,7 @@ struct drm_backend {
@@ -27,7 +27,7 @@ index cbe884671..5f113ce38 100644
  	bool head_fallback;
  	bool head_fallback_all;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 14e9a01c8..4d5ef029b 100644
+index 14e9a01..4d5ef02 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -2641,6 +2641,10 @@ drm_output_detach_crtc(struct drm_output *output)
@@ -53,10 +53,10 @@ index 14e9a01c8..4d5ef029b 100644
  	if (buf && buf[0] == '1')
  		b->single_head = true;
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index d36a3bd61..ae96e9b68 100644
+index 9d93e21..658974d 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
-@@ -1483,7 +1483,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
+@@ -1485,7 +1485,7 @@ drm_pending_state_apply_atomic(struct drm_pending_state *pending_state,
  		break;
  	}
  
@@ -65,7 +65,7 @@ index d36a3bd61..ae96e9b68 100644
  		struct weston_head *head_base;
  		struct drm_head *head;
  		struct drm_crtc *crtc;
-@@ -1687,7 +1687,7 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
+@@ -1689,7 +1689,7 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
  		return drm_pending_state_apply_atomic(pending_state,
  						      DRM_STATE_APPLY_ASYNC);
  
@@ -74,7 +74,7 @@ index d36a3bd61..ae96e9b68 100644
  		/* If we need to reset all our state (e.g. because we've
  		 * just started, or just been VT-switched in), explicitly
  		 * disable all the CRTCs we aren't using. This also disables
-@@ -1745,6 +1745,7 @@ int
+@@ -1747,6 +1747,7 @@ int
  drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
  {
  	struct drm_device *device = pending_state->device;
@@ -82,7 +82,7 @@ index d36a3bd61..ae96e9b68 100644
  	struct drm_output_state *output_state, *tmp;
  	struct drm_crtc *crtc;
  
-@@ -1752,7 +1753,7 @@ drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
+@@ -1754,7 +1755,7 @@ drm_pending_state_apply_sync(struct drm_pending_state *pending_state)
  		return drm_pending_state_apply_atomic(pending_state,
  						      DRM_STATE_APPLY_SYNC);
  
