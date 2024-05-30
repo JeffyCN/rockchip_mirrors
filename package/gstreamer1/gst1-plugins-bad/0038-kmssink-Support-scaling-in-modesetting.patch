@@ -1,16 +1,16 @@
-From 6fc98825f0e07f208e3ee76b8fb8b4d8b2f24889 Mon Sep 17 00:00:00 2001
+From a244a8f4ab162a8c24ea8cf71c74484e88b459a7 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:01:12 +0800
-Subject: [PATCH 38/46] kmssink: Support scaling in modesetting
+Subject: [PATCH 38/48] kmssink: Support scaling in modesetting
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
- sys/kms/gstkmssink.c | 117 ++++++++++++++++++++++++++++++-------------
+ sys/kms/gstkmssink.c | 131 +++++++++++++++++++++++++++++--------------
  sys/kms/gstkmssink.h |   1 +
- 2 files changed, 82 insertions(+), 36 deletions(-)
+ 2 files changed, 90 insertions(+), 42 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 88fc30d..ed36c46 100644
+index 88fc30d..c2a889d 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -79,6 +79,7 @@ static GstFlowReturn gst_kms_sink_show_frame (GstVideoSink * vsink,
@@ -209,10 +209,12 @@ index 88fc30d..ed36c46 100644
  }
  
  static gboolean
-@@ -2249,6 +2269,14 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2249,6 +2269,16 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
    GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
  
    GST_OBJECT_LOCK (self);
++
++retry_set_plane:
 +  if (self->modesetting_enabled && !self->mode_valid) {
 +    if (!configure_mode_setting (self, vinfo))
 +      goto modesetting_failed;
@@ -224,7 +226,7 @@ index 88fc30d..ed36c46 100644
    if ((crop = gst_buffer_get_video_crop_meta (buffer))) {
      GstVideoInfo cropped_vinfo = *vinfo;
  
-@@ -2263,8 +2291,8 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2263,10 +2293,9 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
      src.y = crop->y;
    }
  
@@ -233,9 +235,36 @@ index 88fc30d..ed36c46 100644
 +  dst.w = self->render_rect.w ?: self->hdisplay;
 +  dst.h = self->render_rect.h ?: self->vdisplay;
  
- retry_set_plane:
+-retry_set_plane:
    gst_video_sink_center_rect (src, dst, &result, self->can_scale);
-@@ -2315,7 +2343,17 @@ retry_set_plane:
+ 
+   result.x += self->render_rect.x;
+@@ -2291,11 +2320,6 @@ retry_set_plane:
+     goto sync_frame;
+   }
+ 
+-  /* to make sure it can be show when driver don't support scale */
+-  if (!self->can_scale) {
+-    src.w = result.w;
+-    src.h = result.h;
+-  }
+ #ifdef HAVE_DRM_HDR
+   /* Send the HDR infoframes if appropriate */
+   gst_kms_push_hdr_infoframe (self, FALSE);
+@@ -2305,6 +2329,12 @@ retry_set_plane:
+     /* The AFBC's width should align to 4 */
+     src.w &= ~3;
+ 
++  /* to make sure it can be show when driver don't support scale */
++  if (!self->can_scale) {
++    src.w = result.w = MIN (src.w, result.w);
++    src.h = result.h = MIN (src.h, result.h);
++  }
++
+   GST_TRACE_OBJECT (self,
+       "drmModeSetPlane at (%i,%i) %ix%i sourcing at (%i,%i) %ix%i",
+       result.x, result.y, result.w, result.h, src.x, src.y, src.w, src.h);
+@@ -2315,7 +2345,17 @@ retry_set_plane:
        src.x << 16, src.y << 16, src.w << 16, src.h << 16);
    if (ret) {
      if (self->can_scale) {
@@ -253,7 +282,7 @@ index 88fc30d..ed36c46 100644
        goto retry_set_plane;
      }
      goto set_plane_failed;
-@@ -2335,7 +2373,9 @@ sync_frame:
+@@ -2335,7 +2375,9 @@ sync_frame:
      self->last_height = GST_VIDEO_SINK_HEIGHT (self);
      self->last_vinfo = self->vinfo;
    }
@@ -264,7 +293,7 @@ index 88fc30d..ed36c46 100644
  
    GST_OBJECT_UNLOCK (self);
    res = GST_FLOW_OK;
-@@ -2350,6 +2390,11 @@ buffer_invalid:
+@@ -2350,6 +2392,11 @@ buffer_invalid:
      GST_ERROR_OBJECT (self, "invalid buffer: it doesn't have a fb id");
      goto bail;
    }
