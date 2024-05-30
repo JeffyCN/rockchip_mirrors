@@ -1,7 +1,7 @@
-From 0eb001e2b085b60c1f1799e38c918e5a606536be Mon Sep 17 00:00:00 2001
+From 32918099d3f57453bce481e16b0e2cc948320258 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Sep 2022 18:18:07 +0800
-Subject: [PATCH 39/46] kmssink: Support fullscreen prop
+Subject: [PATCH 39/48] kmssink: Support fullscreen prop
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
@@ -10,7 +10,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 26 insertions(+)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index ed36c46..16e5f39 100644
+index c2a889d..5b2ae38 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -108,6 +108,7 @@ enum
@@ -21,7 +21,7 @@ index ed36c46..16e5f39 100644
    PROP_N,
  };
  
-@@ -2307,6 +2308,19 @@ retry_set_plane:
+@@ -2308,6 +2309,19 @@ retry_set_plane:
    src.w = video_width;
    src.h = video_height;
  
@@ -41,7 +41,7 @@ index ed36c46..16e5f39 100644
    /* handle out of screen case */
    if ((result.x + result.w) > self->hdisplay)
      result.w = self->hdisplay - result.x;
-@@ -2581,6 +2595,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
+@@ -2583,6 +2597,9 @@ gst_kms_sink_set_property (GObject * object, guint prop_id,
      case PROP_SYNC_MODE:
        sink->sync_mode = g_value_get_enum (value);
        break;
@@ -51,7 +51,7 @@ index ed36c46..16e5f39 100644
      default:
        if (!gst_video_overlay_set_property (object, PROP_N, prop_id, value))
          G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
-@@ -2646,6 +2663,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
+@@ -2648,6 +2665,9 @@ gst_kms_sink_get_property (GObject * object, guint prop_id,
      case PROP_SYNC_MODE:
        g_value_set_enum (value, sink->sync_mode);
        break;
@@ -61,7 +61,7 @@ index ed36c46..16e5f39 100644
      default:
        G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
        break;
-@@ -2920,6 +2940,11 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
+@@ -2922,6 +2942,11 @@ gst_kms_sink_class_init (GstKMSSinkClass * klass)
        GST_TYPE_KMS_SYNC_MODE, DEFAULT_SYNC_MODE,
        G_PARAM_READWRITE | G_PARAM_STATIC_STRINGS);
  

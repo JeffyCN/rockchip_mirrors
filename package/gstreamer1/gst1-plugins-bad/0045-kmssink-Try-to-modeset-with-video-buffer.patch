@@ -1,7 +1,7 @@
-From 0d282d49420cb2dbcdd4e3f2cdc804da61fb701d Mon Sep 17 00:00:00 2001
+From 523675e1a31e349e6d60d95a7aa55d7bbc387544 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 12 Apr 2024 16:44:09 +0800
-Subject: [PATCH 45/46] kmssink: Try to modeset with video buffer
+Subject: [PATCH 45/48] kmssink: Try to modeset with video buffer
 
 To avoid the initial black screen.
 
@@ -11,7 +11,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  1 file changed, 18 insertions(+), 6 deletions(-)
 
 diff --git a/sys/kms/gstkmssink.c b/sys/kms/gstkmssink.c
-index 7554e0d..6e1f0a3 100644
+index 9c62629..3c22292 100644
 --- a/sys/kms/gstkmssink.c
 +++ b/sys/kms/gstkmssink.c
 @@ -969,14 +969,13 @@ ensure_kms_allocator (GstKMSSink * self)
@@ -58,11 +58,13 @@ index 7554e0d..6e1f0a3 100644
  
    self->hdisplay = mode->hdisplay;
    self->vdisplay = mode->vdisplay;
-@@ -2414,15 +2422,18 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
+@@ -2414,17 +2422,20 @@ gst_kms_sink_show_frame (GstVideoSink * vsink, GstBuffer * buf)
    GST_TRACE_OBJECT (self, "displaying fb %d", fb_id);
  
    GST_OBJECT_LOCK (self);
 +  crop = gst_buffer_get_video_crop_meta (buffer);
+ 
+ retry_set_plane:
 +
    if (self->modesetting_enabled && !self->mode_valid) {
 -    if (!configure_mode_setting (self, vinfo))
@@ -79,7 +81,7 @@ index 7554e0d..6e1f0a3 100644
      GstVideoInfo cropped_vinfo = *vinfo;
  
      video_width = src.w = cropped_vinfo.width = crop->width;
-@@ -2505,7 +2516,8 @@ retry_set_plane:
+@@ -2507,7 +2518,8 @@ retry_set_plane:
        self->can_scale = FALSE;
  
        if (self->modesetting_enabled) {
