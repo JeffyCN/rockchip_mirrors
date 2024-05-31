@@ -1,4 +1,4 @@
-From 4dd7d1782ca9b810080cd440419caa8d717000d3 Mon Sep 17 00:00:00 2001
+From 0afb9f46aa69dee4c0ead7a2af640e8fc86813c6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 19 Sep 2023 11:05:33 +0800
 Subject: [PATCH 42/95] Support hiding cursor
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 9 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index b52c6237d..b65271f82 100644
+index b52c623..b65271f 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -4404,6 +4404,10 @@ wet_main(int argc, char *argv[], const struct weston_testsuite_data *test_data)
@@ -30,7 +30,7 @@ index b52c6237d..b65271f82 100644
  		weston_log("fatal: unhandled option: %s\n", argv[i]);
  	if (argc > 1)
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 0f2e3cd46..4c022aa43 100644
+index 0f2e3cd..4c022aa 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1544,6 +1544,8 @@ struct weston_compositor {
@@ -43,10 +43,10 @@ index 0f2e3cd46..4c022aa43 100644
  
  struct weston_solid_buffer_values {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 3b6aa0b5c..ea2cdb348 100644
+index 481f47f..afc71ad 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -3413,6 +3413,9 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
+@@ -3419,6 +3419,9 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
  	wl_list_for_each(layer, &compositor->layer_list, link) {
  		bool system_layer = weston_compositor_is_system_layer(layer);
  

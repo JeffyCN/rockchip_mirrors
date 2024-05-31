@@ -1,4 +1,4 @@
-From 5ba3f4dc6b44599a8b9d9266d6122a5c3b4d7c63 Mon Sep 17 00:00:00 2001
+From efd2f7629d5acbab2716425e6a114916d49e845a Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 10:20:40 +0800
 Subject: [PATCH 40/95] Support holding display for the first app
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 22 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index c62b1c41c..b52c6237d 100644
+index c62b1c4..b52c623 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -709,6 +709,7 @@ usage(int error_code)
@@ -56,7 +56,7 @@ index c62b1c41c..b52c6237d 100644
  	weston_compositor_log_capabilities(wet.compositor);
  
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 78a6575bd..0f2e3cd46 100644
+index 78a6575..0f2e3cd 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1542,6 +1542,8 @@ struct weston_compositor {
@@ -69,10 +69,10 @@ index 78a6575bd..0f2e3cd46 100644
  
  struct weston_solid_buffer_values {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 8efd3d8ff..3b6aa0b5c 100644
+index c52d833..481f47f 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -3411,7 +3411,14 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
+@@ -3417,7 +3417,14 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
  	wl_list_init(&compositor->view_list);
  
  	wl_list_for_each(layer, &compositor->layer_list, link) {
@@ -87,7 +87,7 @@ index 8efd3d8ff..3b6aa0b5c 100644
  			view_list_add(compositor, view);
  		}
  	}
-@@ -3509,6 +3516,11 @@ weston_output_repaint(struct weston_output *output)
+@@ -3515,6 +3522,11 @@ weston_output_repaint(struct weston_output *output)
  	if (ec->view_list_needs_rebuild)
  		weston_compositor_build_view_list(ec);
  

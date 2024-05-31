@@ -1,4 +1,4 @@
-From edbd088dad06f29fc3aeb68c5c9e0718f940b2d1 Mon Sep 17 00:00:00 2001
+From 264404b19458de750fe57b63f6466e6c07fa4905 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 28 Oct 2021 12:47:09 +0800
 Subject: [PATCH 59/95] HACK: Use negative value for dynamic repaint window
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 9 insertions(+), 2 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 22cdf7d14..8ab84d36e 100644
+index 22cdf7d..8ab84d3 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -1162,7 +1162,7 @@ weston_compositor_init_config(struct weston_compositor *ec,
@@ -26,10 +26,10 @@ index 22cdf7d14..8ab84d36e 100644
  			   repaint_msec);
  	} else {
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index cc65ac634..700b3d1f8 100644
+index 1a8bbf5..27c7843 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -3906,10 +3906,17 @@ weston_output_finish_frame(struct weston_output *output,
+@@ -3912,10 +3912,17 @@ weston_output_finish_frame(struct weston_output *output,
  		goto out;
  	}
  

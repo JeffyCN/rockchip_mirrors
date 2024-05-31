@@ -1,4 +1,4 @@
-From 92b4804dddf2de2943a7ce2a84b55ab601459426 Mon Sep 17 00:00:00 2001
+From 155679a90ed389d20c2de21797fe9b5f56a51520 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
 Subject: [PATCH 35/95] backend-drm: Support controlling output dynamically
@@ -36,16 +36,16 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  libweston/backend-drm/drm-internal.h |  19 +-
  libweston/backend-drm/drm.c          | 264 ++++++++++++++++++++++++++-
  libweston/backend-drm/modes.c        |  20 +-
- libweston/compositor.c               |  81 ++++++--
+ libweston/compositor.c               |  87 +++++++--
  libweston/libinput-seat.c            |  43 +++++
  libweston/libweston-internal.h       |   3 +
  libweston/pixman-renderer.c          |  29 +++
  libweston/renderer-gl/gl-renderer.c  |   3 +
  libweston/shell-utils/shell-utils.c  |  17 +-
- 12 files changed, 552 insertions(+), 39 deletions(-)
+ 12 files changed, 558 insertions(+), 39 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 319fc3080..c62b1c41c 100644
+index 319fc30..c62b1c4 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -2144,6 +2144,20 @@ drm_backend_output_configure(struct weston_output *output,
@@ -81,7 +81,7 @@ index 319fc3080..c62b1c41c 100644
  		weston_log_ctx_add_log_scope(log_ctx, "proto",
  					     "Wayland protocol dump for all clients.\n",
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index f7b73e31d..dec4d35f3 100644
+index f7b73e3..dec4d35 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -48,6 +48,9 @@
@@ -261,7 +261,7 @@ index f7b73e31d..dec4d35f3 100644
  
  static void
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 2d466557e..f1176ba56 100644
+index 2d46655..f1176ba 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -34,6 +34,7 @@ extern "C" {
@@ -321,7 +321,7 @@ index 2d466557e..f1176ba56 100644
  }
  #endif
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index c0ce4cd3b..23be51cfa 100644
+index c0ce4cd..23be51c 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -118,6 +118,9 @@
@@ -380,7 +380,7 @@ index c0ce4cd3b..23be51cfa 100644
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 3b191f086..9ff0654ad 100644
+index 3b191f0..9ff0654 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -725,7 +725,7 @@ index 3b191f086..9ff0654ad 100644
  
  	return b;
 diff --git a/libweston/backend-drm/modes.c b/libweston/backend-drm/modes.c
-index 980fb83ab..808a14bfa 100644
+index 980fb83..808a14b 100644
 --- a/libweston/backend-drm/modes.c
 +++ b/libweston/backend-drm/modes.c
 @@ -468,15 +468,19 @@ drm_output_add_mode(struct drm_output *output, const drmModeModeInfo *info)
@@ -774,7 +774,7 @@ index 980fb83ab..808a14bfa 100644
  			if (!device->aspect_ratio_supported ||
  			    aspect_ratio == drm_mode->base.aspect_ratio)
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index c59fae030..6fd504f91 100644
+index c59fae0..550591a 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -355,6 +355,24 @@ weston_compositor_is_static_layer(struct weston_layer *layer)
@@ -858,19 +858,25 @@ index c59fae030..6fd504f91 100644
  	}
  
  	new_output = NULL;
-@@ -1449,6 +1472,11 @@ weston_view_assign_output(struct weston_view *ev)
+@@ -1449,6 +1472,17 @@ weston_view_assign_output(struct weston_view *ev)
  
  		mask |= 1u << output->id;
  
 +		/* Pinned to a specific output */
-+		if (ec->pin_output && ev->pinned_output &&
-+		    strcmp(output->name, ev->pinned_output))
++		if (ec->pin_output && ev->pinned_output) {
++			if (!strcmp(output->name, ev->pinned_output)) {
++				new_output = output;
++				break;
++			}
++
++			/* Ignore other outputs */
 +			continue;
++		}
 +
  		/* Regardless of what we have now, even if it's off, a turned
  		 * off output is not better.
  		 */
-@@ -1464,14 +1492,27 @@ weston_view_assign_output(struct weston_view *ev)
+@@ -1464,14 +1498,27 @@ weston_view_assign_output(struct weston_view *ev)
  			continue;
  		}
  
@@ -902,7 +908,7 @@ index c59fae030..6fd504f91 100644
  	weston_view_set_output(ev, new_output);
  	ev->output_mask = mask;
  
-@@ -2499,6 +2540,9 @@ weston_view_destroy(struct weston_view *view)
+@@ -2499,6 +2546,9 @@ weston_view_destroy(struct weston_view *view)
  
  	wl_list_remove(&view->surface_link);
  
@@ -912,7 +918,7 @@ index c59fae030..6fd504f91 100644
  	free(view);
  }
  
-@@ -6967,7 +7011,7 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
+@@ -6967,7 +7017,7 @@ weston_compositor_reflow_outputs(struct weston_compositor *compositor)
  		wl_list_for_each(head, &output->head_list, output_link)
  			weston_head_update_global(head);
  
@@ -921,7 +927,7 @@ index c59fae030..6fd504f91 100644
  			continue;
  
  		pos.c = weston_coord(next_x, next_y);
-@@ -7461,6 +7505,9 @@ weston_output_set_transform(struct weston_output *output,
+@@ -7461,6 +7511,9 @@ weston_output_set_transform(struct weston_output *output,
  
  	weston_compositor_reflow_outputs(output->compositor);
  
@@ -931,7 +937,7 @@ index c59fae030..6fd504f91 100644
  	/* Notify clients of the change for output transform. */
  	wl_list_for_each(head, &output->head_list, output_link) {
  		wl_resource_for_each(resource, &head->resource_list) {
-@@ -7746,6 +7793,8 @@ weston_output_init(struct weston_output *output,
+@@ -7746,6 +7799,8 @@ weston_output_init(struct weston_output *output,
  	/* Can't use -1 on uint32_t and 0 is valid enum value */
  	output->transform = UINT32_MAX;
  
@@ -941,7 +947,7 @@ index c59fae030..6fd504f91 100644
  	wl_list_init(&output->mode_list);
  
 diff --git a/libweston/libinput-seat.c b/libweston/libinput-seat.c
-index 7f952d328..e426f0ca3 100644
+index 7f952d3..e426f0c 100644
 --- a/libweston/libinput-seat.c
 +++ b/libweston/libinput-seat.c
 @@ -532,3 +532,46 @@ udev_seat_get_named(struct udev_input *input, const char *seat_name)
@@ -992,7 +998,7 @@ index 7f952d328..e426f0ca3 100644
 +	}
 +}
 diff --git a/libweston/libweston-internal.h b/libweston/libweston-internal.h
-index 0cb98dc53..4b582871a 100644
+index 0cb98dc..4b58287 100644
 --- a/libweston/libweston-internal.h
 +++ b/libweston/libweston-internal.h
 @@ -256,6 +256,9 @@ void
@@ -1006,7 +1012,7 @@ index 0cb98dc53..4b582871a 100644
  
  void
 diff --git a/libweston/pixman-renderer.c b/libweston/pixman-renderer.c
-index 006703209..e00536298 100644
+index 0067032..e005362 100644
 --- a/libweston/pixman-renderer.c
 +++ b/libweston/pixman-renderer.c
 @@ -354,6 +354,26 @@ repaint_region(struct weston_paint_node *pnode,
@@ -1053,7 +1059,7 @@ index 006703209..e00536298 100644
  	pixman_region32_fini(&output_region);
  
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index fd39ad6c3..d4958f7ec 100644
+index fd39ad6..d4958f7 100644
 --- a/libweston/renderer-gl/gl-renderer.c
 +++ b/libweston/renderer-gl/gl-renderer.c
 @@ -1923,6 +1923,9 @@ gl_renderer_repaint_output(struct weston_output *output,
@@ -1067,7 +1073,7 @@ index fd39ad6c3..d4958f7ec 100644
  				-(go->area.width / 2.0),
  				-(go->area.height / 2.0), 0);
 diff --git a/libweston/shell-utils/shell-utils.c b/libweston/shell-utils/shell-utils.c
-index 5587d44e9..c120ee743 100644
+index 5587d44..c120ee7 100644
 --- a/libweston/shell-utils/shell-utils.c
 +++ b/libweston/shell-utils/shell-utils.c
 @@ -43,9 +43,17 @@
