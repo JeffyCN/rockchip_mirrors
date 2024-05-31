@@ -1,4 +1,4 @@
-From c1457ee9f67e98ffd4c44c1748b37d80b7df6005 Mon Sep 17 00:00:00 2001
+From ff8eeb933a0e910da7d2505f7feacdfc48d9e5a2 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Sun, 13 Aug 2023 10:48:36 +0800
 Subject: [PATCH 79/95] Support using USR2 signal to kill focus client
@@ -18,7 +18,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  5 files changed, 42 insertions(+), 3 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index b353e2a1f..2d959feb6 100644
+index b353e2a..2d959fe 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -810,6 +810,19 @@ static int on_term_signal(int signal_number, void *data)
@@ -63,7 +63,7 @@ index b353e2a1f..2d959feb6 100644
  	wl_list_init(&wet.child_process_list);
  	signals[2] = wl_event_loop_add_signal(loop, SIGCHLD, sigchld_handler,
 diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
-index 6a1a91399..0629ae333 100644
+index 6a1a913..0629ae3 100644
 --- a/desktop-shell/shell.c
 +++ b/desktop-shell/shell.c
 @@ -4917,6 +4917,8 @@ shell_destroy(struct wl_listener *listener, void *data)
@@ -109,7 +109,7 @@ index 6a1a91399..0629ae333 100644
  	wl_event_loop_add_idle(loop, launch_desktop_shell_process, shell);
  
 diff --git a/desktop-shell/shell.h b/desktop-shell/shell.h
-index 4a0f5c433..560c216ed 100644
+index 4a0f5c4..560c216 100644
 --- a/desktop-shell/shell.h
 +++ b/desktop-shell/shell.h
 @@ -156,6 +156,8 @@ struct desktop_shell {
@@ -122,7 +122,7 @@ index 4a0f5c433..560c216ed 100644
  
  	char *client;
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index a4bc46aeb..27a847d72 100644
+index a4bc46a..27a847d 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1411,6 +1411,7 @@ struct weston_compositor {
@@ -134,10 +134,10 @@ index a4bc46aeb..27a847d72 100644
  	struct wl_signal show_input_panel_signal;
  	struct wl_signal hide_input_panel_signal;
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 8e6fa9809..3a3fab5a6 100644
+index 84da5da..97837be 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -9260,6 +9260,7 @@ weston_compositor_create(struct wl_display *display,
+@@ -9266,6 +9266,7 @@ weston_compositor_create(struct wl_display *display,
  	wl_signal_init(&ec->kill_signal);
  	wl_signal_init(&ec->idle_signal);
  	wl_signal_init(&ec->wake_signal);
