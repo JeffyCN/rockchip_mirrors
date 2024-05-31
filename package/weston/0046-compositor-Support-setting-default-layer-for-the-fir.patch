@@ -1,4 +1,4 @@
-From 5a2c7dde517d5d492b612e2bf833927d53112404 Mon Sep 17 00:00:00 2001
+From 2e21609353a5e61faaf49353e29d01c7d462d016 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 15 Oct 2020 12:43:00 +0800
 Subject: [PATCH 46/95] compositor: Support setting default layer for the first
@@ -13,7 +13,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 20 insertions(+), 1 deletion(-)
 
 diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 4eec90634..75aeebc35 100644
+index 4eec906..75aeebc 100644
 --- a/include/libweston/libweston.h
 +++ b/include/libweston/libweston.h
 @@ -1877,6 +1877,9 @@ enum weston_surface_flags {
@@ -27,10 +27,10 @@ index 4eec90634..75aeebc35 100644
  	struct wl_resource *resource;
  	struct wl_signal destroy_signal; /* callback argument: this surface */
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 6e03f9020..cc65ac634 100644
+index 26dda1a..1a8bbf5 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -3412,14 +3412,30 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
+@@ -3418,14 +3418,30 @@ weston_compositor_build_view_list(struct weston_compositor *compositor)
  
  	wl_list_for_each(layer, &compositor->layer_list, link) {
  		bool system_layer = weston_compositor_is_system_layer(layer);
