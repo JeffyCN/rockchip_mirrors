@@ -43,6 +43,7 @@ if BR2_PACKAGE_LVGL
 		config BR2_PACKAGE_LVGL_USE_DRM
 			bool "drm"
 			select BR2_PACKAGE_LIBDRM
+			select BR2_PACKAGE_LIBEVDEV
 			help
 			  Use CPU to draw and DRM to render
 

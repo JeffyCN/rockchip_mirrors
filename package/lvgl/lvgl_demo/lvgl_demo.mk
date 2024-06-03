@@ -49,7 +49,7 @@ endif
 
 ifeq ($(BR2_PACKAGE_LVGL_USE_SDL), y)
 LVGL_DEMO_CONF_OPTS += -DLV_DRV_USE_SDL_GPU=1
-LV_DRIVERS_DEPENDENCIES += sdl2
+LVGL_DEMO_DEPENDENCIES += sdl2
 endif
 
 ifeq ($(BR2_PACKAGE_LV_DRIVERS_USE_OPENGL), y)
@@ -58,7 +58,7 @@ endif
 
 ifeq ($(BR2_PACKAGE_LVGL_USE_DRM), y)
 LVGL_DEMO_CONF_OPTS += -DLV_DRV_USE_DRM=1
-LV_DRIVERS_DEPENDENCIES += libdrm
+LVGL_DEMO_DEPENDENCIES += libdrm libevdev
 endif
 
 $(eval $(cmake-package))
