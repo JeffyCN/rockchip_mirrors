@@ -1,7 +1,7 @@
-From def44015288c59767a731a58184aebfe6cf9bcc0 Mon Sep 17 00:00:00 2001
+From e67e057b2cfb9376d61bec7810ff5ca1128d66f5 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Wed, 23 Aug 2023 18:18:58 +0800
-Subject: [PATCH 81/95] backend-drm: Support increasing buffers
+Subject: [PATCH 81/97] backend-drm: Support increasing buffers
 
 Default is 2 buffers, set env "WESTON_DRM_MIN_BUFFERS" to increase it.
 
@@ -267,7 +267,7 @@ index 8c34f19..a657dce 100644
  	bo = gbm_surface_lock_front_buffer(output->gbm_surface);
  	if (!bo) {
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 5f113ce..47dfb13 100644
+index 2bc6357..d459594 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -121,6 +121,8 @@
@@ -279,7 +279,7 @@ index 5f113ce..47dfb13 100644
  /**
   * Represents the values of an enum-type KMS property
   */
-@@ -703,7 +705,6 @@ struct drm_output {
+@@ -711,7 +713,6 @@ struct drm_output {
  	struct wl_listener cursor_view_destroy_listener;
  	int current_cursor;
  
@@ -287,7 +287,7 @@ index 5f113ce..47dfb13 100644
  	const struct pixel_format_info *format;
  	uint32_t gbm_bo_flags;
  
-@@ -727,12 +728,17 @@ struct drm_output {
+@@ -735,12 +736,17 @@ struct drm_output {
  	/* only set when a writeback screenshot is ongoing */
  	struct drm_writeback_state *wb_state;
  
@@ -310,7 +310,7 @@ index 5f113ce..47dfb13 100644
  
  	struct vaapi_recorder *recorder;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index dce5a03..ce1fd20 100644
+index d5c2739..6827acb 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -561,13 +561,14 @@ drm_output_render_pixman(struct drm_output_state *state,

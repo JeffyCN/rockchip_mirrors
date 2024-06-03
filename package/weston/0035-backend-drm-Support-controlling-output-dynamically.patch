@@ -1,7 +1,7 @@
-From 155679a90ed389d20c2de21797fe9b5f56a51520 Mon Sep 17 00:00:00 2001
+From a3bf569d22743e11c7634ced74a95dd6fb5c296b Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 3 Jul 2020 12:37:37 +0800
-Subject: [PATCH 35/95] backend-drm: Support controlling output dynamically
+Subject: [PATCH 35/97] backend-drm: Support controlling output dynamically
 
 Use config file to set output's rotate/down-scale/size/pos/mode/off/
 freeze/input/display-rectangle and prefer/primary output.
@@ -11,6 +11,9 @@ Default config file is "/tmp/.weston_drm.conf", can override with
 
 Supported configs format is "output:<output name>:<config>", for
 example:
+echo "output:DSI-1:state=off" >> /tmp/.weston_drm.conf
+echo "output:DSI-1:state=on" >> /tmp/.weston_drm.conf
+echo "output:DSI-1:state=detect" >> /tmp/.weston_drm.conf
 echo "output:DSI-1:off" >> /tmp/.weston_drm.conf
 echo "output:eDP-1:freeze" >> /tmp/.weston_drm.conf
 echo "output:DSI-1:offscreen" >> /tmp/.weston_drm.conf
@@ -27,22 +30,24 @@ echo "output:HDMI-A-1:input=" >> /tmp/.weston_drm.conf
 echo "output:HDMI-A-1:input=event6" >> /tmp/.weston_drm.conf
 echo "output:HDMI-A-1:input=goodix*" >> /tmp/.weston_drm.conf
 echo "output:HDMI-A-1:input=goodix-ts" >> /tmp/.weston_drm.conf
+echo "output:HDMI-A-1:refresh" >> /tmp/.weston_drm.conf
 
 Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
 ---
  compositor/main.c                    |  18 ++
- desktop-shell/shell.c                |  73 +++++++-
- include/libweston/libweston.h        |  21 +++
- libweston/backend-drm/drm-internal.h |  19 +-
- libweston/backend-drm/drm.c          | 264 ++++++++++++++++++++++++++-
+ desktop-shell/shell.c                |  73 ++++++-
+ include/libweston/libweston.h        |  21 ++
+ libweston/backend-drm/drm-internal.h |  36 +++-
+ libweston/backend-drm/drm.c          | 301 ++++++++++++++++++++++++++-
+ libweston/backend-drm/kms.c          |  12 +-
  libweston/backend-drm/modes.c        |  20 +-
- libweston/compositor.c               |  87 +++++++--
- libweston/libinput-seat.c            |  43 +++++
+ libweston/compositor.c               |  87 ++++++--
+ libweston/libinput-seat.c            |  43 ++++
  libweston/libweston-internal.h       |   3 +
  libweston/pixman-renderer.c          |  29 +++
  libweston/renderer-gl/gl-renderer.c  |   3 +
  libweston/shell-utils/shell-utils.c  |  17 +-
- 12 files changed, 558 insertions(+), 39 deletions(-)
+ 13 files changed, 618 insertions(+), 45 deletions(-)
 
 diff --git a/compositor/main.c b/compositor/main.c
 index 319fc30..c62b1c4 100644
@@ -321,7 +326,7 @@ index 2d46655..f1176ba 100644
  }
  #endif
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index c0ce4cd..23be51c 100644
+index c0ce4cd..4ac158b 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -118,6 +118,9 @@
@@ -352,7 +357,29 @@ index c0ce4cd..23be51c 100644
  };
  
  struct drm_mode {
-@@ -746,7 +751,12 @@ struct drm_output {
+@@ -640,6 +645,12 @@ struct drm_writeback {
+ 	struct weston_drm_format_array formats;
+ };
+ 
++enum drm_head_state {
++	DRM_HEAD_DETECT,
++	DRM_HEAD_OFF,
++	DRM_HEAD_ON,
++};
++
+ struct drm_head {
+ 	struct weston_head base;
+ 	struct drm_connector connector;
+@@ -652,6 +663,8 @@ struct drm_head {
+ 
+ 	/* drm_output::disable_head */
+ 	struct wl_list disable_head_link;
++
++	enum drm_head_state state;
+ };
+ 
+ struct drm_crtc {
+@@ -746,7 +759,12 @@ struct drm_output {
  
  	bool is_mirror;
  
@@ -365,7 +392,7 @@ index c0ce4cd..23be51c 100644
  };
  
  void
-@@ -862,6 +872,13 @@ drm_mode_list_destroy(struct drm_device *device, struct wl_list *mode_list);
+@@ -862,6 +880,13 @@ drm_mode_list_destroy(struct drm_device *device, struct wl_list *mode_list);
  void
  drm_output_print_modes(struct drm_output *output);
  
@@ -379,8 +406,21 @@ index c0ce4cd..23be51c 100644
  int
  drm_output_set_mode(struct weston_output *base,
  		    enum weston_drm_backend_output_mode mode,
+@@ -1076,3 +1101,12 @@ drm_output_render_gl(struct drm_output_state *state, pixman_region32_t *damage)
+ 	return NULL;
+ }
+ #endif
++
++inline static bool
++drm_head_is_connected(struct drm_head *head)
++{
++	if (!head || !head->connector.conn)
++		return false;
++
++	return head->connector.conn->connection == DRM_MODE_CONNECTED;
++}
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 3b191f0..9ff0654 100644
+index 3b191f0..c6542f7 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -40,6 +40,7 @@
@@ -444,7 +484,31 @@ index 3b191f0..9ff0654 100644
  	output->state_invalid = true;
  
  	if (device->atomic_modeset)
-@@ -3819,6 +3832,7 @@ drm_shutdown(struct weston_backend *backend)
+@@ -3602,17 +3615,18 @@ drm_backend_update_connectors(struct drm_device *device,
+ 		wl_list_for_each_safe(base, base_next,
+ 				      &b->compositor->head_list,
+ 				      compositor_link) {
+-			drmModeConnector *conn;
+-
+ 			if (base->backend != &b->base ||
+ 			    !drm_head_is_available(base))
+ 				continue;
+ 
+ 			head = to_drm_head(base);
+-			conn = head->connector.conn;
+ 
+-			if (conn->connection != DRM_MODE_CONNECTED ||
+-			    !(*match)(b, head))
++			if (head->state == DRM_HEAD_OFF ||
++			    (head->state != DRM_HEAD_ON &&
++				!drm_head_is_connected(head)))
++				continue;
++
++			if (!(*match)(b, head))
+ 				continue;
+ 
+ 			weston_head_set_connection_status(base, true);
+@@ -3819,6 +3833,7 @@ drm_shutdown(struct weston_backend *backend)
  
  	udev_input_destroy(&b->input);
  
@@ -452,7 +516,7 @@ index 3b191f0..9ff0654 100644
  	wl_event_source_remove(b->hotplug_timer);
  	wl_event_source_remove(b->udev_drm_source);
  	wl_event_source_remove(b->drm_source);
-@@ -4367,6 +4381,10 @@ output_create_notify(struct wl_listener *listener, void *data)
+@@ -4367,6 +4382,10 @@ output_create_notify(struct wl_listener *listener, void *data)
  					     output_create_listener);
  
  	drm_backend_update_outputs(b);
@@ -463,7 +527,7 @@ index 3b191f0..9ff0654 100644
  }
  
  static const struct weston_drm_output_api api = {
-@@ -4377,6 +4395,242 @@ static const struct weston_drm_output_api api = {
+@@ -4377,6 +4396,268 @@ static const struct weston_drm_output_api api = {
  	drm_output_set_content_type,
  };
  
@@ -558,6 +622,9 @@ index 3b191f0..9ff0654 100644
 +		     const char *config)
 +{
 +	struct weston_output *base_output;
++	struct weston_head *base_head;
++	struct drm_output *output;
++	struct drm_head *head;
 +	bool is_all = !strcmp(name, "all");
 +
 +	if (!is_all) {
@@ -571,12 +638,32 @@ index 3b191f0..9ff0654 100644
 +		}
 +	}
 +
-+	wl_list_for_each(base_output, &b->compositor->output_list, link) {
-+		struct drm_output *output = to_drm_output(base_output);
-+
-+		if (!output || (!is_all && strcmp(name, base_output->name)))
++	wl_list_for_each(base_head, &b->compositor->head_list, compositor_link) {
++		head = to_drm_head(base_head);
++		if (!head || (!is_all && strcmp(name, base_head->name)))
 +			continue;
 +
++		/* Handle forcing state */
++		if (!strncmp(config, "state=", strlen("state="))) {
++			const char *state = config + strlen("state=");
++			if (!strcmp(state, "on")) {
++				head->state = DRM_HEAD_ON;
++				hotplug_timer_handler(b->drm);
++			} else if (!strcmp(state, "off")) {
++				head->state = DRM_HEAD_OFF;
++				hotplug_timer_handler(b->drm);
++			} else if (!strcmp(state, "detect")) {
++				head->state = DRM_HEAD_DETECT;
++				hotplug_timer_handler(b->drm);
++			}
++			continue;
++		}
++
++		base_output = base_head->output;
++		if (!base_output)
++			continue;
++
++		output = to_drm_output(base_output);
 +		if (!strncmp(config, "rotate", strlen("rotate"))) {
 +			int rotate = atoi(config + strlen("rotate")) / 90;
 +			drm_output_rotate(output, rotate);
@@ -644,6 +731,9 @@ index 3b191f0..9ff0654 100644
 +		} else if (!strncmp(config, "input=", strlen("input="))) {
 +			weston_output_bind_input(base_output,
 +						 config + strlen("input="));
++		} else if (!strcmp(config, "refresh")) {
++			output->state_invalid = true;
++			weston_output_damage(base_output);
 +		}
 +	}
 +}
@@ -706,7 +796,7 @@ index 3b191f0..9ff0654 100644
  enum drm_head_mode {
  	DRM_HEAD_MODE_DEFAULT,
  	DRM_HEAD_MODE_PRIMARY,
-@@ -4440,6 +4694,7 @@ drm_backend_late_init(void *data)
+@@ -4440,6 +4721,7 @@ drm_backend_late_init(void *data)
  	struct drm_backend *b = data;
  
  	hotplug_timer_handler(b->drm);
@@ -714,7 +804,7 @@ index 3b191f0..9ff0654 100644
  }
  
  static struct drm_backend *
-@@ -4739,6 +4994,9 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4739,6 +5021,9 @@ drm_backend_create(struct weston_compositor *compositor,
  	b->hotplug_timer =
  		wl_event_loop_add_timer(loop, hotplug_timer_handler, b->drm);
  
@@ -724,6 +814,43 @@ index 3b191f0..9ff0654 100644
  	wl_event_loop_add_idle(loop, drm_backend_late_init, b);
  
  	return b;
+diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
+index 8d61d73..7421f35 100644
+--- a/libweston/backend-drm/kms.c
++++ b/libweston/backend-drm/kms.c
+@@ -832,6 +832,11 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+ 	bool scaling;
+ 
+ 	wl_list_for_each(head, &output->base.head_list, base.output_link) {
++		if (!drm_head_is_connected(head)) {
++			output->state_invalid = true;
++			continue;
++		}
++
+ 		assert(n_conn < MAX_CLONED_CONNECTORS);
+ 		connectors[n_conn++] = head->connector.connector_id;
+ 	}
+@@ -848,7 +853,7 @@ drm_output_apply_state_legacy(struct drm_output_state *state)
+ 		}
+ 	}
+ 
+-	if (state->dpms != WESTON_DPMS_ON) {
++	if (!n_conn || state->dpms != WESTON_DPMS_ON) {
+ 		if (output->cursor_plane) {
+ 			ret = drmModeSetCursor(device->drm.fd, crtc->crtc_id,
+ 					       0, 0, 0);
+@@ -1279,6 +1284,11 @@ drm_output_apply_state_atomic(struct drm_output_state *state,
+ 		/* No need for the DPMS property, since it is implicit in
+ 		 * routing and CRTC activity. */
+ 		wl_list_for_each(head, &output->base.head_list, base.output_link) {
++			if (!drm_head_is_connected(head)) {
++				output->state_invalid = true;
++				continue;
++			}
++
+ 			ret |= connector_add_prop(req, &head->connector,
+ 						  WDRM_CONNECTOR_CRTC_ID,
+ 						  crtc->crtc_id);
 diff --git a/libweston/backend-drm/modes.c b/libweston/backend-drm/modes.c
 index 980fb83..808a14b 100644
 --- a/libweston/backend-drm/modes.c

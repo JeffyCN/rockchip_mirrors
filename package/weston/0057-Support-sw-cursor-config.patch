@@ -1,7 +1,7 @@
-From 24e192343624f0ab258dcf043c86572d64dbeda7 Mon Sep 17 00:00:00 2001
+From 79c90d8574f7bf69004dc1ad138cc37f65d3e7fd Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Tue, 13 Jul 2021 10:56:56 +0800
-Subject: [PATCH 57/95] Support sw-cursor config
+Subject: [PATCH 57/97] Support sw-cursor config
 
 Tested with:
 [core]
@@ -15,7 +15,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  3 files changed, 6 insertions(+)
 
 diff --git a/compositor/main.c b/compositor/main.c
-index 367463ad2..22cdf7d14 100644
+index 367463a..22cdf7d 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
 @@ -3090,6 +3090,8 @@ load_drm_backend(struct weston_compositor *c, int *argc, char **argv,
@@ -28,7 +28,7 @@ index 367463ad2..22cdf7d14 100644
  		c->require_input = !without_input;
  
 diff --git a/include/libweston/backend-drm.h b/include/libweston/backend-drm.h
-index d47955c7a..cd7174792 100644
+index d47955c..cd71747 100644
 --- a/include/libweston/backend-drm.h
 +++ b/include/libweston/backend-drm.h
 @@ -258,6 +258,8 @@ struct weston_drm_backend_config {
@@ -41,10 +41,10 @@ index d47955c7a..cd7174792 100644
  
  #ifdef  __cplusplus
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index 7425f35c4..46fcf99e8 100644
+index 20d0b60..9208e2a 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
-@@ -5070,6 +5070,8 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -5097,6 +5097,8 @@ drm_backend_create(struct weston_compositor *compositor,
  	/* 'compute' faked zpos values in case HW doesn't expose any */
  	drm_backend_create_faked_zpos(b->drm);
  
