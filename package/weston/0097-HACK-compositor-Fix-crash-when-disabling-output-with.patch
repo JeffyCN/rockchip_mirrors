@@ -1,4 +1,4 @@
-From 9fd626a853e8d3d39ecf17cc9108b52a091ca2ae Mon Sep 17 00:00:00 2001
+From c3ca71c9bca5aba5126e3b5513874c40b42702a6 Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Fri, 31 May 2024 18:49:02 +0800
 Subject: [PATCH 97/97] HACK: compositor: Fix crash when disabling output with

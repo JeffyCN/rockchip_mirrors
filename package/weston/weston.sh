@@ -79,6 +79,9 @@ export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 # echo "compositor:cursor:show" > /tmp/.weston_drm.conf
 # echo "compositor:output:pin" > /tmp/.weston_drm.conf
 # echo "compositor:output:unpin" > /tmp/.weston_drm.conf
+# echo "output:DSI-1:state=off" >> /tmp/.weston_drm.conf
+# echo "output:DSI-1:state=on" >> /tmp/.weston_drm.conf
+# echo "output:DSI-1:state=detect" >> /tmp/.weston_drm.conf
 # echo "output:DSI-1:off" > /tmp/.weston_drm.conf
 # echo "output:eDP-1:freeze" > /tmp/.weston_drm.conf
 # echo "output:DSI-1:offscreen" > /tmp/.weston_drm.conf
@@ -95,3 +98,4 @@ export WESTON_FREEZE_DISPLAY=/tmp/.freeze_weston
 # echo "output:HDMI-A-1:input=event6" > /tmp/.weston_drm.conf
 # echo "output:HDMI-A-1:input=goodix*" > /tmp/.weston_drm.conf
 # echo "output:HDMI-A-1:input=goodix-ts" > /tmp/.weston_drm.conf
+# echo "output:HDMI-A-1:refresh" >> /tmp/.weston_drm.conf
