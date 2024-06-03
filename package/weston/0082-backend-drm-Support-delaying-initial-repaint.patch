@@ -1,7 +1,7 @@
-From 420df15fd5fa7048f5fec70068588ea296aa4ea0 Mon Sep 17 00:00:00 2001
+From 511cd628c2adebf00a43d2d44bb7e43603c9c5ba Mon Sep 17 00:00:00 2001
 From: Jeffy Chen <jeffy.chen@rock-chips.com>
 Date: Thu, 19 Oct 2023 11:41:06 +0800
-Subject: [PATCH 82/95] backend-drm: Support delaying initial repaint
+Subject: [PATCH 82/97] backend-drm: Support delaying initial repaint
 
 Set env "WESTON_DRM_INITIAL_FREEZE_MS" for the initial freezing.
 
@@ -12,7 +12,7 @@ Signed-off-by: Jeffy Chen <jeffy.chen@rock-chips.com>
  2 files changed, 27 insertions(+)
 
 diff --git a/libweston/backend-drm/drm-internal.h b/libweston/backend-drm/drm-internal.h
-index 47dfb13e7..78ef80dcf 100644
+index d459594..cde46de 100644
 --- a/libweston/backend-drm/drm-internal.h
 +++ b/libweston/backend-drm/drm-internal.h
 @@ -402,6 +402,9 @@ struct drm_backend {
@@ -26,7 +26,7 @@ index 47dfb13e7..78ef80dcf 100644
  	bool single_head;
  	bool head_fallback;
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index ce1fd2020..bc0523281 100644
+index 6827acb..df52509 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -1048,12 +1048,16 @@ drm_output_repaint(struct weston_output *output_base)
@@ -76,7 +76,7 @@ index ce1fd2020..bc0523281 100644
  	resources = drmModeGetResources(device->drm.fd);
  	if (!resources) {
  		weston_log("drmModeGetResources failed\n");
-@@ -4963,6 +4983,10 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4990,6 +5010,10 @@ drm_backend_create(struct weston_compositor *compositor,
  		weston_log("Entering mirror mode.\n");
  	}
  
