@@ -45,11 +45,9 @@ define ROOTFS_EXT2_CMD
 	FILE_SIZE="$$(du --apparent-size -sm $(TARGET_DIR) | cut -f1)"
 	ALIGN_SIZE="$$(($$(find $(TARGET_DIR) | wc -l) * \
 		   $(BR2_TARGET_ROOTFS_EXT2_BLKSZ) / 1024 / 1024))"
-	ROOTFS_SIZE="$$(($$FILE_SIZE + $$ALIGN_SIZE))"
-	EXTRA_SIZE="$$(($$ROOTFS_SIZE * ($(BR2_TARGET_ROOTFS_EXT2_RESBLKS) + 5) / 100))"
+	ROOTFS_SIZE="$$(( ($$FILE_SIZE + $$ALIGN_SIZE) * 110 / 100 + 64 ))"
 	$(HOST_DIR)/sbin/mkfs.ext$(BR2_TARGET_ROOTFS_EXT2_GEN) \
-		$(ROOTFS_EXT2_OPTS) \
-		$@ "$$(($$ROOTFS_SIZE + $$EXTRA_SIZE))M"
+		$(ROOTFS_EXT2_OPTS) $@ "$${ROOTFS_SIZE}M"
 	$(HOST_DIR)/sbin/resize2fs -M $@
 	$(HOST_DIR)/sbin/e2fsck -fy $@
 endef
